@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, DragEvent } from 'react';
 import { Upload } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
@@ -43,14 +44,11 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
       validated.email = data.email;
     }
     
+    // We'll skip name, phone and address entirely for now to avoid any false information
     // Name can be included, but we won't auto-convert characters
-    if (data.name && typeof data.name === 'string' && data.name.trim().length > 2) {
-      validated.name = data.name;
-    }
-    
-    // For phone and address, we'll be very conservative - not including these at all
-    // as they're sensitive information and it's better for users to enter them manually
-    // than to have incorrect information
+    // if (data.name && typeof data.name === 'string' && data.name.trim().length > 2) {
+    //   validated.name = data.name;
+    // }
     
     return validated;
   };
@@ -92,10 +90,12 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
       console.log("Response from Edge Function:", data, error);
 
       if (error) {
+        console.error("Supabase function error:", error);
         throw new Error(error.message || 'Der opstod en fejl under behandling af CV');
       }
 
       if (!data || !data.extractedData) {
+        console.error("Unexpected data format:", data);
         throw new Error('Kunne ikke hente data fra CV');
       }
 
@@ -123,11 +123,21 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
     } catch (error: any) {
       console.error('Error extracting resume data:', error);
       
-      setError(error.message || 'Der opstod en fejl under behandling af CV');
+      // More descriptive error message
+      let errorMessage = 'Der opstod en fejl under behandling af CV';
+      if (error.message) {
+        if (error.message.includes('non-2xx status code')) {
+          errorMessage = 'Serverfejl ved behandling af CV. Prøv igen senere.';
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
+      setError(errorMessage);
       
       toast({
         title: "Fejl ved analyse af CV",
-        description: error.message || 'Der opstod en fejl under behandling af CV',
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -238,7 +248,7 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
       </div>
       
       <p className="text-xs text-gray-500 mt-2 mb-3 italic text-left">
-        OBS: Vi vil kun forsøge at udfylde din profil med information, der kan udtrækkes med høj sikkerhed. Personlige oplysninger som telefon og adresse skal du selv udfylde manuelt.
+        OBS: Vi vil kun forsøge at udfylde din profil med information, der kan udtrækkes med høj sikkerhed. Personlige oplysninger som navn, telefon og adresse skal du selv udfylde manuelt.
       </p>
       
       {error && (
