@@ -6,13 +6,12 @@ import { useAuth } from "@/components/AuthProvider";
 import { useToast } from "@/hooks/use-toast";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import TabNav from "@/components/dashboard/TabNav";
-import JobListComponent from "@/components/dashboard/JobListComponent";
 import LetterListComponent from "@/components/dashboard/LetterListComponent";
 
 const Dashboard = () => {
   const [jobPostings, setJobPostings] = useState<JobPosting[]>([]);
   const [coverLetters, setCoverLetters] = useState<CoverLetter[]>([]);
-  const [activeTab, setActiveTab] = useState<"jobs" | "letters">("jobs");
+  const [activeTab] = useState<"letters">("letters");
   const [isLoading, setIsLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
   const { user } = useAuth();
@@ -160,27 +159,16 @@ const Dashboard = () => {
         <DashboardHeader />
 
         <div className="bg-white shadow-sm rounded-lg overflow-hidden border border-gray-100">
-          <TabNav activeTab={activeTab} onTabChange={setActiveTab} />
+          <TabNav activeTab={activeTab} onTabChange={() => {}} />
 
           <div className="p-4 sm:p-6">
-            {activeTab === "jobs" && (
-              <JobListComponent 
-                jobPostings={jobPostings}
-                coverLetters={coverLetters}
-                isDeleting={isDeleting}
-                onJobDelete={deleteJobPosting}
-              />
-            )}
-
-            {activeTab === "letters" && (
-              <LetterListComponent 
-                coverLetters={coverLetters}
-                jobPostings={jobPostings}
-                isDeleting={isDeleting}
-                onLetterDelete={deleteCoverLetter}
-                findJobForLetter={findJobForLetter}
-              />
-            )}
+            <LetterListComponent 
+              coverLetters={coverLetters}
+              jobPostings={jobPostings}
+              isDeleting={isDeleting}
+              onLetterDelete={deleteCoverLetter}
+              findJobForLetter={findJobForLetter}
+            />
           </div>
         </div>
       </div>
