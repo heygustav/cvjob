@@ -19,17 +19,20 @@ export const generateCoverLetter = async (
     hasSkills: !!userInfo.skills,
   });
   
-  // Create an AbortController for timeout management
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => {
-    controller.abort('timeout');
-    console.log("Generation timed out after 45 seconds");
-  }, 45000);
+  // Create a timeout promise
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    const timeoutId = setTimeout(() => {
+      clearTimeout(timeoutId);
+      reject(new Error('Generering af ansøgningen tog for lang tid. Prøv igen senere.'));
+      console.log("Generation timed out after 45 seconds");
+    }, 45000);
+  });
   
   try {
     console.log("Calling edge function for letter generation");
     
-    const { data, error } = await supabase.functions.invoke(
+    // Create the main generation promise
+    const generationPromise = supabase.functions.invoke(
       'generate-cover-letter',
       {
         body: {
@@ -51,13 +54,17 @@ export const generateCoverLetter = async (
           },
           locale: navigator.language, // Send user's locale for better date formatting
           model: "gpt-4" // Always use gpt-4 for cover letter generation
-        },
-        signal: controller.signal
+        }
       }
     );
 
-    // Clear the timeout as we got a response
-    clearTimeout(timeoutId);
+    // Race between the generation and the timeout
+    const { data, error } = await Promise.race([
+      generationPromise,
+      timeoutPromise.then(() => {
+        throw new Error('Generering af ansøgningen tog for lang tid. Prøv igen senere.');
+      })
+    ]);
 
     if (error) {
       console.error("Edge function error:", error);
@@ -80,11 +87,8 @@ export const generateCoverLetter = async (
   } catch (error) {
     console.error("Error in generateCoverLetter:", error);
     
-    // Clear the timeout to prevent memory leaks
-    clearTimeout(timeoutId);
-    
-    // Handle AbortController errors specifically
-    if (error.name === 'AbortError' || (error instanceof Error && error.message.includes('timeout'))) {
+    // Handle timeout errors
+    if (error instanceof Error && error.message.includes('tog for lang tid')) {
       throw new Error('Generering af ansøgningen tog for lang tid. Prøv igen senere.');
     }
     
