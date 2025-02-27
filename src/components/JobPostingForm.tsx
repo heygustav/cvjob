@@ -7,9 +7,7 @@ import UrlField from "./job-form/UrlField";
 import JobDescriptionField from "./job-form/JobDescriptionField";
 import JobInfoFields from "./job-form/JobInfoFields";
 import SubmitButton from "./job-form/SubmitButton";
-import { useTimer } from "./job-form/useTimer";
 import { useJobExtraction } from "./job-form/useJobExtraction";
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/components/AuthProvider";
 import { Save } from "lucide-react";
 
@@ -35,12 +33,10 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
   });
   
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const { toast } = useToast();
-  const navigate = useNavigate();
-  const { user } = useAuth();
-  const { elapsed, formattedTime, resetTimer } = useTimer(isLoading);
-  const { isExtracting, extractInfoFromDescription } = useJobExtraction(formData, setFormData);
   const [isSaving, setIsSaving] = useState(false);
+  const { toast } = useToast();
+  const { user } = useAuth();
+  const { isExtracting, extractInfoFromDescription } = useJobExtraction(formData, setFormData);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -51,7 +47,6 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
       [name]: value,
     }));
     
-    // Clear error for this field when user starts typing
     if (errors[name]) {
       setErrors(prev => {
         const newErrors = { ...prev };
@@ -82,12 +77,10 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form submit triggered", formData);
-
+    
     if (!validateForm()) {
-      console.log("Form validation failed", errors);
       toast({
         title: "Fejl i formular",
         description: "Udfyld venligst alle påkrævede felter korrekt.",
@@ -96,11 +89,7 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
       return;
     }
 
-    console.log("Form validation passed, proceeding with submission");
-    resetTimer(0, true);
-    
     try {
-      console.log("Calling onSubmit with form data", formData);
       onSubmit(formData);
     } catch (error) {
       console.error("Error in form submission:", error);
@@ -134,23 +123,7 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
     setIsSaving(true);
     try {
       if (onSave) {
-        resetTimer(0, false);
         await onSave(formData);
-      } else {
-        resetTimer(0, false);
-        // Remove direct import and use from this component
-        // The function was previously imported at the top
-        const jobData = {
-          ...formData,
-          id: initialData?.id,
-          user_id: user.id,
-          created_at: initialData?.created_at || new Date().toISOString(),
-        };
-        
-        // Import this function from external services
-        const { saveOrUpdateJob } = await import('@/services/coverLetter/database');
-        await saveOrUpdateJob(jobData);
-        
         toast({
           title: "Jobopslag gemt",
           description: "Jobopslaget er blevet gemt i din profil.",
@@ -199,7 +172,7 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
       <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t border-gray-200">
         <SubmitButton 
           isLoading={isLoading} 
-          elapsedTime={formattedTime}
+          elapsedTime="0.00"
           className="w-full sm:flex-1"
         />
         
