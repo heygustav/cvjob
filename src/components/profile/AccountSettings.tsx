@@ -10,7 +10,7 @@ const AccountSettings: React.FC = () => {
           <KeyRound className="h-5 w-5 text-gray-400 mr-3" />
           <div>
             <h3 className="text-sm font-medium text-gray-900">Adgangskode</h3>
-            <p className="text-sm text-gray-500">Opdater din adgangskode</p>
+            <p className="text-sm text-gray-500 italic">Opdater din adgangskode</p>
           </div>
         </div>
         <button className="text-sm font-medium text-primary hover:text-blue-600 transition-colors">
@@ -23,7 +23,7 @@ const AccountSettings: React.FC = () => {
           <Mail className="h-5 w-5 text-gray-400 mr-3" />
           <div>
             <h3 className="text-sm font-medium text-gray-900">E-mailnotifikationer</h3>
-            <p className="text-sm text-gray-500">Administrer dine e-mailpræferencer</p>
+            <p className="text-sm text-gray-500 italic">Administrer dine e-mailpræferencer</p>
           </div>
         </div>
         <button className="text-sm font-medium text-primary hover:text-blue-600 transition-colors">
@@ -36,7 +36,7 @@ const AccountSettings: React.FC = () => {
           <Trash2 className="h-5 w-5 text-red-500 mr-3" />
           <div>
             <h3 className="text-sm font-medium text-gray-900">Slet konto</h3>
-            <p className="text-sm text-gray-500">Slet permanent din konto og alle data</p>
+            <p className="text-sm text-gray-500 italic">Slet permanent din konto og alle data</p>
           </div>
         </div>
         <button className="text-sm font-medium text-red-600 hover:text-red-700 transition-colors">
