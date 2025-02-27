@@ -36,7 +36,7 @@ const Navbar: React.FC = () => {
             className="text-xl font-medium tracking-tight text-gray-900 flex items-center"
             onClick={closeMenu}
           >
-            <CavalierDog className="h-6 w-6 mr-2 text-black" />
+            <CavalierDog className="h-6 w-6 mr-2 text-black" style={{ height: "26px", width: "26px" }} />
             <span className="text-2xl font-semibold">Winston Assistant</span>
           </Link>
 
