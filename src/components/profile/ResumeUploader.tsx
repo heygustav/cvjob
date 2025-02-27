@@ -50,32 +50,34 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
       const formData = new FormData();
       formData.append('file', file);
 
-      // Get the access token for authorization
-      const { data: { session } } = await supabase.auth.getSession();
-      const accessToken = session?.access_token;
-
-      if (!accessToken) {
-        throw new Error('Du skal være logget ind for at uploade dit CV');
-      }
+      // Get the Supabase anon key instead of user's auth token
+      const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpmeXpraXNleWt3dnBja2F2YnhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA2NTkwNzUsImV4cCI6MjA1NjIzNTA3NX0.0rRP9DivmbBLv9f0ZM90BUy7j_LQ5dTvxY1dJ5FGWXM";
+      
+      console.log("About to call edge function with key:", supabaseKey.substring(0, 10) + "...");
 
       let response;
       try {
-        // Try to use the Edge Function
+        // Call the Edge Function
+        // Note: We're not setting Content-Type here to let the browser handle it with boundaries
         response = await fetchWithTimeout(
           fetch('https://zfyzkiseykwvpckavbxd.functions.supabase.co/extract-resume-data', {
             method: 'POST',
-            body: formData,
             headers: {
-              'Authorization': `Bearer ${accessToken}`
-            }
+              'Authorization': `Bearer ${supabaseKey}`
+              // Removed 'Content-Type': 'multipart/form-data' - browser will set this with boundary
+            },
+            body: formData
           }),
           30000 // 30 second timeout for PDF processing
         );
+        
+        console.log("Response status:", response.status);
+
       } catch (fetchError) {
-        console.error("Edge function error:", fetchError);
+        console.error("Edge function error details:", fetchError);
         
         // If the Edge Function fails, use the mock data instead
-        console.log("Using mock data instead");
+        console.log("Using mock data instead due to fetch error");
         await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate processing
         onExtractedData(MOCK_RESUME_DATA);
         
@@ -90,6 +92,7 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
       if (!response.ok) {
         const errorText = await response.text();
         console.error("Edge function response error:", errorText);
+        console.error("Response status:", response.status, "Response headers:", Object.fromEntries([...response.headers]));
         
         // If the Edge Function returns an error, use the mock data instead
         console.log("Using mock data due to response error");
@@ -105,8 +108,9 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
       }
 
       const responseText = await response.text();
-      let result;
+      console.log("Got response from edge function:", responseText.substring(0, 100) + "...");
       
+      let result;
       try {
         result = JSON.parse(responseText);
       } catch (e) {
@@ -158,7 +162,7 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
         });
       }
     } catch (error) {
-      console.error('Error extracting resume data:', error);
+      console.error('Error extracting resume data - complete details:', error);
       
       // Fallback to mock data on any error
       console.log("Using mock data due to general error");
