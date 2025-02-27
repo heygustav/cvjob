@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Search, Clock } from "lucide-react";
 import { JobPosting } from "../lib/types";
@@ -31,24 +31,35 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
   });
   const [isExtracting, setIsExtracting] = useState(false);
   const [timer, setTimer] = useState(0);
+  const timerRef = useRef<number>(0);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
 
-  // Timer effect for loading state
+  // Timer effect for loading state with cleanup
   useEffect(() => {
-    let interval: NodeJS.Timeout;
-    
     if (isLoading) {
-      // Reset timer when loading starts
+      // Clear existing timer if any
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+      
+      // Reset timer
+      timerRef.current = 0;
       setTimer(0);
       
       // Start timer
-      interval = setInterval(() => {
-        setTimer(prevTimer => prevTimer + 10); // Increment by 10ms
+      intervalRef.current = setInterval(() => {
+        timerRef.current += 10;
+        setTimer(timerRef.current);
       }, 10);
+    } else if (intervalRef.current) {
+      clearInterval(intervalRef.current);
     }
     
     return () => {
-      if (interval) clearInterval(interval);
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
     };
   }, [isLoading]);
 
@@ -263,6 +274,7 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
               onChange={handleChange}
               className="block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
               placeholder="Indsæt jobbeskrivelsen her..."
+              disabled={isLoading}
             />
             <div className="absolute inset-y-0 right-0 flex items-center pr-3">
               <button
@@ -302,6 +314,7 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
               required
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
               placeholder="f.eks. Marketingansvarlig"
+              disabled={isLoading}
             />
           </div>
 
@@ -321,6 +334,7 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
               required
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
               placeholder="f.eks. Acme A/S"
+              disabled={isLoading}
             />
           </div>
         </div>
@@ -341,6 +355,7 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
               onChange={handleChange}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
               placeholder="f.eks. Jane Jensen"
+              disabled={isLoading}
             />
           </div>
 
@@ -359,6 +374,7 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
               onChange={handleChange}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
               placeholder="f.eks. https://eksempel.dk/jobs/marketingansvarlig"
+              disabled={isLoading}
             />
           </div>
         </div>

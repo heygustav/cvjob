@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Clock } from "lucide-react";
 
 interface LoadingSpinnerProps {
@@ -10,15 +10,21 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   message = "Indlæser..." 
 }) => {
   const [timer, setTimer] = useState(0);
+  const timerRef = useRef<number>(0);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Timer effect
   useEffect(() => {
-    const interval = setInterval(() => {
-      setTimer(prevTimer => prevTimer + 10); // Increment by 10ms
+    // Start timer
+    intervalRef.current = setInterval(() => {
+      timerRef.current += 10;
+      setTimer(timerRef.current);
     }, 10);
     
     return () => {
-      clearInterval(interval);
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
     };
   }, []);
 

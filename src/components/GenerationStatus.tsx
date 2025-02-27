@@ -1,10 +1,14 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Clock } from "lucide-react";
 
 export const GenerationStatus: React.FC = () => {
   const [timer, setTimer] = useState(0);
   const [currentStep, setCurrentStep] = useState(1);
+  const timerRef = useRef<number>(0);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const stepIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  
   const steps = [
     "Analyserer jobopslag...",
     "Tjekker din profil...",
@@ -12,20 +16,22 @@ export const GenerationStatus: React.FC = () => {
     "Finpudser indholdet..."
   ];
 
-  // Timer effect
+  // Timer effect with cleanup
   useEffect(() => {
-    const interval = setInterval(() => {
-      setTimer(prevTimer => prevTimer + 10); // Increment by 10ms
+    // Start the timer
+    intervalRef.current = setInterval(() => {
+      timerRef.current += 10;
+      setTimer(timerRef.current);
     }, 10);
     
     // Move through steps
-    const stepInterval = setInterval(() => {
+    stepIntervalRef.current = setInterval(() => {
       setCurrentStep(prev => (prev < steps.length ? prev + 1 : 1));
     }, 3000);
     
     return () => {
-      clearInterval(interval);
-      clearInterval(stepInterval);
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      if (stepIntervalRef.current) clearInterval(stepIntervalRef.current);
     };
   }, []);
 
