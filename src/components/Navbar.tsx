@@ -68,7 +68,7 @@ const Navbar: React.FC = () => {
                   }`}
                   aria-current={isActive("/generator") ? "page" : undefined}
                 >
-                  Opret Ansøgning
+                  Opret ansøgning
                 </Link>
                 <Link 
                   to="/dashboard" 
@@ -77,7 +77,7 @@ const Navbar: React.FC = () => {
                   }`}
                   aria-current={isActive("/dashboard") ? "page" : undefined}
                 >
-                  Sendte ansøgninger
+                  Gemte ansøgninger
                 </Link>
                 <Link 
                   to="/profile" 
@@ -158,7 +158,7 @@ const Navbar: React.FC = () => {
                 aria-current={isActive("/generator") ? "page" : undefined}
               >
                 <PlusCircle className="h-5 w-5 mr-3" aria-hidden="true" />
-                Opret Ansøgning
+                Opret ansøgning
               </Link>
               <Link
                 to="/dashboard"
@@ -168,7 +168,7 @@ const Navbar: React.FC = () => {
                 aria-current={isActive("/dashboard") ? "page" : undefined}
               >
                 <FileText className="h-5 w-5 mr-3" aria-hidden="true" />
-                Sendte ansøgninger
+                Gemte ansøgninger
               </Link>
               <Link
                 to="/profile"
