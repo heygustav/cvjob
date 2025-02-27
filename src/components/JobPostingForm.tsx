@@ -4,15 +4,10 @@ import { useToast } from "@/hooks/use-toast";
 import { Search, Clock } from "lucide-react";
 import { JobPosting } from "../lib/types";
 import { supabase } from "@/integrations/supabase/client";
+import { JobFormData } from "@/services/coverLetter/types";
 
 interface JobPostingFormProps {
-  onSubmit: (jobData: {
-    title: string;
-    company: string;
-    description: string;
-    contact_person?: string;
-    url?: string;
-  }) => void;
+  onSubmit: (jobData: JobFormData) => void;
   initialData?: JobPosting;
   isLoading?: boolean;
 }
@@ -22,7 +17,7 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
   initialData,
   isLoading = false,
 }) => {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<JobFormData>({
     title: initialData?.title || "",
     company: initialData?.company || "",
     description: initialData?.description || "",
