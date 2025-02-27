@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Search } from "lucide-react";
@@ -56,8 +55,6 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
   };
 
   const extractInfoFromDescription = () => {
-    // This is a simplified implementation of the extraction function
-    // In a real application, we might use AI or more sophisticated algorithms
     const description = formData.description;
     
     if (!description) {
@@ -71,36 +68,111 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
 
     let newFormData = { ...formData };
 
-    // Try to extract title if not already present
+    // Try to extract title using more Danish patterns
     if (!formData.title) {
-      const titleMatches = description.match(/(?:stilling|job|rolle|titel)(?::\s*|\s+er\s+|\s+som\s+|\s+)["']?([^"'\n,]+)["']?/i);
-      if (titleMatches && titleMatches[1]) {
-        newFormData.title = titleMatches[1].trim();
+      const titlePatterns = [
+        /(?:stilling(?:en)?|job(?:bet)?|rolle[nr]?|titel)(?::\s*|\s+er\s+|\s+som\s+|\s+)["']?([^"'\n,\.]+)["']?/i,
+        /søger\s+(?:en\s+)?["']?([^"'\n,\.]+)["']?/i,
+        /til\s+(?:en\s+)?["']?([^"'\n,\.]+)["']?\s+stilling/i,
+        /(?:^|\n)\s*["']?([^"'\n,\.]+)["']?\s+-\s+(?:stilling|job)/i
+      ];
+
+      for (const pattern of titlePatterns) {
+        const match = description.match(pattern);
+        if (match && match[1]) {
+          newFormData.title = match[1].trim();
+          break;
+        }
       }
     }
 
-    // Try to extract company if not already present
+    // Try to extract company using more Danish patterns
     if (!formData.company) {
-      const companyMatches = description.match(/(?:hos|ved|for|i)\s+["']?([^"'\n,]+)["']?/i);
-      if (companyMatches && companyMatches[1]) {
-        newFormData.company = companyMatches[1].trim();
+      const companyPatterns = [
+        /(?:hos|ved|for|i|til)\s+["']?([^"'\n,\.]+)(?:\s+(?:A\/S|ApS|I\/S|A\/B|K\/S|P\/S|IVS|SMBA|AMBA|FMBA))?["']?/i,
+        /(?:virksomhed(?:en)?|firma(?:et)?|arbejdsplads(?:en)?)\s+["']?([^"'\n,\.]+)["']?/i,
+        /([^"'\n,\.]+)(?:\s+(?:A\/S|ApS|I\/S|A\/B|K\/S|P\/S|IVS|SMBA|AMBA|FMBA))\s+søger/i
+      ];
+
+      for (const pattern of companyPatterns) {
+        const match = description.match(pattern);
+        if (match && match[1]) {
+          // Clean up common company suffixes
+          let company = match[1].trim();
+          if (!company.match(/(?:A\/S|ApS|I\/S|A\/B|K\/S|P\/S|IVS|SMBA|AMBA|FMBA)$/i)) {
+            const suffixMatch = description.match(new RegExp(`${company}\\s+(A\\/S|ApS|I\\/S|A\\/B|K\\/S|P\\/S|IVS|SMBA|AMBA|FMBA)`, 'i'));
+            if (suffixMatch) {
+              company += ' ' + suffixMatch[1];
+            }
+          }
+          newFormData.company = company;
+          break;
+        }
       }
     }
 
-    // Try to extract contact person
+    // Try to extract contact person using more Danish patterns
     if (!formData.contact_person) {
-      const contactMatches = description.match(/(?:kontakt|kontaktperson|send .+ til)\s+["']?([^"'\n,]+)["']?/i);
-      if (contactMatches && contactMatches[1]) {
-        newFormData.contact_person = contactMatches[1].trim();
+      const contactPatterns = [
+        /(?:kontakt(?:person)?|henvendelse til|kontakt venligst|send .+ til)\s+["']?([^"'\n,\.]+)["']?/i,
+        /(?:spørgsmål|yderligere information)(?:\s+kan\s+rettes)?\s+til\s+["']?([^"'\n,\.]+)["']?/i,
+        /ansøgning(?:en)?\s+sendes\s+til\s+["']?([^"'\n,\.]+)["']?/i
+      ];
+
+      for (const pattern of contactPatterns) {
+        const match = description.match(pattern);
+        if (match && match[1]) {
+          // Clean up titles and positions from contact person
+          let contact = match[1].trim();
+          contact = contact.replace(/^(?:hr\.|hr|fru\.|frk\.|dr\.|prof\.)\s+/i, '');
+          newFormData.contact_person = contact;
+          break;
+        }
+      }
+    }
+
+    // Try to extract URL using more patterns
+    if (!formData.url) {
+      const urlPattern = /(?:(?:https?:)?\/\/)?(?:www\.)?[a-zA-Z0-9-]+(?:\.[a-zA-Z]{2,})+(?:\/[^\s]*)?/g;
+      const urls = description.match(urlPattern);
+      if (urls && urls.length > 0) {
+        // Try to find a URL that looks like a job posting
+        const jobUrl = urls.find(url => 
+          url.toLowerCase().includes('job') || 
+          url.toLowerCase().includes('career') || 
+          url.toLowerCase().includes('stilling')
+        ) || urls[0];
+        
+        // Ensure URL has proper protocol
+        if (!jobUrl.startsWith('http')) {
+          newFormData.url = 'https://' + jobUrl;
+        } else {
+          newFormData.url = jobUrl;
+        }
       }
     }
 
     setFormData(newFormData);
 
-    toast({
-      title: "Jobopslag analyseret",
-      description: "Vi har udtrukket information fra jobbeskrivelsen",
-    });
+    // Show appropriate toast message based on what was extracted
+    const extractedFields = [];
+    if (newFormData.title !== formData.title) extractedFields.push('jobtitel');
+    if (newFormData.company !== formData.company) extractedFields.push('virksomhed');
+    if (newFormData.contact_person !== formData.contact_person) extractedFields.push('kontaktperson');
+    if (newFormData.url !== formData.url) extractedFields.push('URL');
+
+    if (extractedFields.length > 0) {
+      toast({
+        title: "Information fundet",
+        description: `Vi har udtrukket følgende: ${extractedFields.join(', ')}`,
+      });
+    } else {
+      toast({
+        title: "Ingen ny information fundet",
+        description: "Vi kunne ikke finde yderligere information i teksten. Prøv at udfylde felterne manuelt.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
