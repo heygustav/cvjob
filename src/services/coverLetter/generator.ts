@@ -27,18 +27,21 @@ export const generateCoverLetter = async (
           experience: userInfo.experience,
           education: userInfo.education,
           skills: userInfo.skills,
-        }
+        },
+        locale: navigator.language // Send user's locale for better date formatting
       }
     }
   );
 
   if (error) {
     console.error("Edge function error:", error);
-    throw new Error(`Edge function fejl: ${error.message}`);
+    // Extract and use the original error message if possible
+    const message = error.message || "Unknown error";
+    throw new Error(`Cover letter generation failed: ${message}`);
   }
 
   if (!data || !data.content) {
-    console.error("No content received from edge function");
+    console.error("No content received from edge function", data);
     throw new Error("Intet indhold modtaget fra serveren");
   }
 

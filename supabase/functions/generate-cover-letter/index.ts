@@ -1,6 +1,6 @@
 
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
+import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
+import "https://deno.land/x/xhr@0.2.1/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -16,7 +16,18 @@ serve(async (req) => {
   try {
     console.log("Edge function received request");
     const requestData = await req.json();
-    console.log("Request payload:", JSON.stringify(requestData));
+    
+    // Log the request payload without large description fields
+    const logPayload = requestData ? {
+      ...requestData,
+      jobInfo: requestData.jobInfo ? {
+        ...requestData.jobInfo,
+        description: requestData.jobInfo.description ? 
+          `${requestData.jobInfo.description.substring(0, 50)}... (truncated)` : undefined
+      } : undefined
+    } : null;
+    
+    console.log("Request payload (truncated):", JSON.stringify(logPayload));
     
     // Handle different action types
     if (requestData.action === "extract_job_info") {
@@ -26,16 +37,34 @@ serve(async (req) => {
     // Default action: generate cover letter
     const { jobInfo, userInfo } = requestData;
 
-    // Basic validation
-    if (!jobInfo || !jobInfo.title || !jobInfo.company) {
-      console.error("Missing required job information");
-      throw new Error('Missing required job information');
+    // Enhanced validation
+    if (!jobInfo) {
+      console.error("Missing job information");
+      throw new Error('Missing job information');
+    }
+    
+    if (!userInfo) {
+      console.error("Missing user information");
+      throw new Error('Missing user information');
+    }
+    
+    if (!jobInfo.title) {
+      console.error("Missing job title");
+      throw new Error('Missing job title');
+    }
+    
+    if (!jobInfo.company) {
+      console.error("Missing company name");
+      throw new Error('Missing company name');
     }
 
     console.log(`Generating cover letter for ${jobInfo.title} at ${jobInfo.company}`);
 
+    // Get user's locale or default to Danish
+    const locale = requestData.locale || "da-DK";
+    
     // Generate a simple cover letter template
-    const today = new Date().toLocaleDateString("da-DK", {
+    const today = new Date().toLocaleDateString(locale, {
       day: "numeric",
       month: "long",
       year: "numeric",
