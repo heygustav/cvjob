@@ -47,6 +47,7 @@ export const useCoverLetterGeneration = (user: User | null) => {
         const letters = await fetchLettersForJob(id);
         
         if (letters && letters.length > 0) {
+          console.log("Found existing letters for job:", letters[0]);
           setGeneratedLetter(letters[0]);
           setStep(2);
         } else {
@@ -96,12 +97,16 @@ export const useCoverLetterGeneration = (user: User | null) => {
         return null;
       }
 
+      console.log("Fetched letter:", letter);
       setGeneratedLetter(letter);
 
       try {
         const job = await fetchJobById(letter.job_posting_id);
         if (job) {
+          console.log("Fetched job for letter:", job);
           setSelectedJob(job);
+        } else {
+          console.error("Job not found for letter:", letter.job_posting_id);
         }
       } catch (jobError) {
         console.error("Error fetching job for letter:", jobError);
@@ -173,7 +178,14 @@ export const useCoverLetterGeneration = (user: User | null) => {
       const letter = await saveCoverLetter(user.id, jobId, content);
       console.log(`Letter saved with ID: ${letter.id}`);
       
+      // Update the job object first to ensure it has all necessary fields
+      const updatedJob = await fetchJobById(jobId);
+      setSelectedJob(updatedJob);
+      
+      // Then set the generated letter
       setGeneratedLetter(letter);
+      
+      // Finally change the step after everything is ready
       setStep(2);
 
       toast({

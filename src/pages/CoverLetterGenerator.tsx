@@ -71,9 +71,11 @@ const CoverLetterGenerator: React.FC = () => {
   }
   
   // Show loading state when generating
-  if (generationLoading) {
-    return <LoadingSpinner message="Behandler..." />;
+  if (generationLoading || isGenerating) {
+    return <LoadingSpinner message="Genererer ansøgning..." />;
   }
+
+  console.log("Rendering state:", { step, generatedLetter, selectedJob });
 
   return (
     <div className="min-h-screen bg-gray-50 pt-16 md:pt-20">
@@ -111,7 +113,7 @@ const CoverLetterGenerator: React.FC = () => {
             </div>
           ) : (
             <div className="p-4 sm:p-6">
-              {generatedLetter && selectedJob && (
+              {generatedLetter && selectedJob ? (
                 <CoverLetterPreview
                   content={generatedLetter.content}
                   jobTitle={selectedJob.title}
@@ -119,6 +121,18 @@ const CoverLetterGenerator: React.FC = () => {
                   onEdit={handleEditLetter}
                   onSave={handleSaveLetter}
                 />
+              ) : (
+                <div className="text-center py-10">
+                  <p className="text-gray-500">
+                    Der opstod en fejl ved indlæsning af ansøgningen. Prøv igen.
+                  </p>
+                  <button
+                    onClick={() => setStep(1)}
+                    className="mt-4 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
+                  >
+                    Gå tilbage
+                  </button>
+                </div>
               )}
             </div>
           )}
