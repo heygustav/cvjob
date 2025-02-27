@@ -1,4 +1,5 @@
-import { useState, useCallback } from "react";
+
+import { useState, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { JobPosting, CoverLetter } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
@@ -13,6 +14,8 @@ export const useCoverLetterGeneration = (user: User | null) => {
   const [generatedLetter, setGeneratedLetter] = useState<CoverLetter | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
+  // Add a ref to track generation attempts
+  const generationAttemptRef = useRef(0);
 
   const fetchJob = useCallback(async (id: string) => {
     try {
@@ -165,6 +168,11 @@ const handleJobFormSubmit = useCallback(async (jobData: Partial<JobPosting>) => 
       return;
     }
 
+    // Increment generation attempt counter
+    generationAttemptRef.current += 1;
+    const currentAttempt = generationAttemptRef.current;
+    console.log(`Starting generation attempt #${currentAttempt}`);
+
     try {
       setIsGenerating(true);
       console.log("Submitting job data:", jobData);
@@ -173,7 +181,7 @@ const handleJobFormSubmit = useCallback(async (jobData: Partial<JobPosting>) => 
 
       // Step 1: Save or update the job posting
       if (selectedJob?.id) {
-        console.log("Updating existing job:", selectedJob.id);
+        console.log(`Attempt #${currentAttempt}: Updating existing job:`, selectedJob.id);
         const { error } = await supabase
           .from("job_postings")
           .update({
@@ -187,12 +195,13 @@ const handleJobFormSubmit = useCallback(async (jobData: Partial<JobPosting>) => 
           .eq("id", selectedJob.id);
 
         if (error) {
-          console.error("Error updating job:", error);
+          console.error(`Attempt #${currentAttempt}: Error updating job:`, error);
           throw new Error(`Fejl ved opdatering af job: ${error.message}`);
         }
         jobId = selectedJob.id;
+        console.log(`Attempt #${currentAttempt}: Successfully updated job ${jobId}`);
       } else {
-        console.log("Creating new job for user:", user.id);
+        console.log(`Attempt #${currentAttempt}: Creating new job for user:`, user.id);
         const { data, error } = await supabase
           .from("job_postings")
           .insert({
@@ -207,25 +216,27 @@ const handleJobFormSubmit = useCallback(async (jobData: Partial<JobPosting>) => 
           .single();
 
         if (error) {
-          console.error("Error creating job:", error);
+          console.error(`Attempt #${currentAttempt}: Error creating job:`, error);
           throw new Error(`Fejl ved oprettelse af job: ${error.message}`);
         }
         if (!data) {
+          console.error(`Attempt #${currentAttempt}: No job data returned`);
           throw new Error("Intet job-id returneret fra serveren");
         }
         jobId = data.id;
+        console.log(`Attempt #${currentAttempt}: Successfully created job ${jobId}`);
       }
 
       // Step 2: Fetch user profile if available
-      console.log("Fetching user profile data");
+      console.log(`Attempt #${currentAttempt}: Fetching user profile data`);
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", user.id)
-        .single();
+        .maybeSingle();
 
       if (profileError && profileError.code !== "PGRST116") {
-        console.error("Error fetching profile:", profileError);
+        console.error(`Attempt #${currentAttempt}: Error fetching profile:`, profileError);
       }
 
       const userInfo = profile || {
@@ -238,7 +249,7 @@ const handleJobFormSubmit = useCallback(async (jobData: Partial<JobPosting>) => 
         skills: ""
       };
 
-      console.log("Calling edge function for letter generation");
+      console.log(`Attempt #${currentAttempt}: Calling edge function for letter generation`);
 
       // Step 3: Call the edge function
       const { data: functionData, error: functionError } = await supabase.functions.invoke(
@@ -266,15 +277,19 @@ const handleJobFormSubmit = useCallback(async (jobData: Partial<JobPosting>) => 
       );
 
       if (functionError) {
-        console.error("Edge function error:", functionError);
+        console.error(`Attempt #${currentAttempt}: Edge function error:`, functionError);
         throw new Error(`Edge function fejl: ${functionError.message}`);
       }
 
       if (!functionData || !functionData.content) {
+        console.error(`Attempt #${currentAttempt}: No content received from edge function`);
         throw new Error("Intet indhold modtaget fra serveren");
       }
 
+      console.log(`Attempt #${currentAttempt}: Successfully received content from edge function`);
+
       // Step 4: Save the generated letter
+      console.log(`Attempt #${currentAttempt}: Saving letter to database`);
       const { data: letter, error: letterError } = await supabase
         .from("cover_letters")
         .insert({
@@ -286,11 +301,11 @@ const handleJobFormSubmit = useCallback(async (jobData: Partial<JobPosting>) => 
         .single();
 
       if (letterError) {
-        console.error("Error saving letter:", letterError);
+        console.error(`Attempt #${currentAttempt}: Error saving letter:`, letterError);
         throw new Error(`Fejl ved gem af ansøgning: ${letterError.message}`);
       }
 
-      console.log("Letter saved successfully:", letter);
+      console.log(`Attempt #${currentAttempt}: Letter saved successfully:`, letter);
       setGeneratedLetter(letter);
       setStep(2);
 
@@ -300,15 +315,26 @@ const handleJobFormSubmit = useCallback(async (jobData: Partial<JobPosting>) => 
       });
 
     } catch (error) {
-      console.error('Error in job submission process:', error);
-      toast({
-        title: "Fejl ved generering",
-        description: error instanceof Error 
-          ? `Der opstod en fejl: ${error.message}` 
-          : "Der opstod en ukendt fejl. Prøv venligst igen.",
-        variant: "destructive",
-      });
+      console.error(`Attempt #${currentAttempt}: Error in job submission process:`, error);
+      
+      // Check if we still have a connection
+      if (!navigator.onLine) {
+        toast({
+          title: "Ingen internetforbindelse",
+          description: "Kontroller din internetforbindelse og prøv igen.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Fejl ved generering",
+          description: error instanceof Error 
+            ? `Der opstod en fejl: ${error.message}` 
+            : "Der opstod en ukendt fejl. Prøv venligst igen.",
+          variant: "destructive",
+        });
+      }
     } finally {
+      console.log(`Attempt #${currentAttempt}: Generation process completed`);
       setIsGenerating(false);
     }
   }, [selectedJob, toast, user, setStep]);

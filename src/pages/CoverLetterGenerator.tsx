@@ -65,7 +65,12 @@ const CoverLetterGenerator: React.FC = () => {
     initializeGenerator();
   }, [user, jobId, letterId, fetchJob, fetchLetter, toast]);
 
-  if (generationLoading || isLoading) {
+  // Show loading state when initializing or generating
+  if (isLoading) {
+    return <LoadingSpinner message="Indlæser jobinformation..." />;
+  }
+  
+  if (generationLoading) {
     return <LoadingSpinner message="Behandler..." />;
   }
 
