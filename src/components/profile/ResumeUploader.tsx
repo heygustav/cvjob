@@ -10,6 +10,7 @@ interface ResumeUploaderProps {
   onExtractedData: (data: Partial<PersonalInfoFormState>) => void;
 }
 
+// Fallback data in case the Edge Function isn't working
 const MOCK_RESUME_DATA: Partial<PersonalInfoFormState> = {
   name: "John Doe",
   email: "john.doe@example.com",
@@ -45,25 +46,6 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
     });
 
     try {
-      // FALLBACK SOLUTION: Since the Edge Function is having issues,
-      // we'll use a temporary local solution that provides sample data
-      // This ensures the feature is functional while backend issues are resolved
-      
-      // Simulate processing time to feel realistic
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Return mock data for now
-      onExtractedData(MOCK_RESUME_DATA);
-      
-      toast({
-        title: "CV analyseret",
-        description: "Dine profiloplysninger er blevet udfyldt baseret på dit CV",
-      });
-      
-      // If you want to attempt the real extraction (which is failing),
-      // you can uncomment the code below and comment out the mock data section
-      
-      /*
       // Create form data for the file upload
       const formData = new FormData();
       formData.append('file', file);
@@ -76,28 +58,50 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
         throw new Error('Du skal være logget ind for at uploade dit CV');
       }
 
-      // Upload the file and extract text with timeout protection
-      const response = await fetchWithTimeout(
-        fetch('https://zfyzkiseykwvpckavbxd.functions.supabase.co/extract-resume-data', {
-          method: 'POST',
-          body: formData,
-          headers: {
-            'Authorization': `Bearer ${accessToken}`
-          }
-        }),
-        30000 // 30 second timeout for PDF processing
-      );
+      let response;
+      try {
+        // Try to use the Edge Function
+        response = await fetchWithTimeout(
+          fetch('https://zfyzkiseykwvpckavbxd.functions.supabase.co/extract-resume-data', {
+            method: 'POST',
+            body: formData,
+            headers: {
+              'Authorization': `Bearer ${accessToken}`
+            }
+          }),
+          30000 // 30 second timeout for PDF processing
+        );
+      } catch (fetchError) {
+        console.error("Edge function error:", fetchError);
+        
+        // If the Edge Function fails, use the mock data instead
+        console.log("Using mock data instead");
+        await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate processing
+        onExtractedData(MOCK_RESUME_DATA);
+        
+        toast({
+          title: "CV analyseret (demo)",
+          description: "Dine profiloplysninger er blevet udfyldt med eksempeldata, da vores tjeneste er midlertidigt nede.",
+        });
+        
+        return; // Exit early
+      }
 
       if (!response.ok) {
         const errorText = await response.text();
-        let errorData;
-        try {
-          errorData = JSON.parse(errorText);
-        } catch (e) {
-          console.error("Failed to parse error response:", errorText);
-          throw new Error('Der opstod en fejl ved behandling af dit CV. Prøv igen senere.');
-        }
-        throw new Error(errorData.error || 'Fejl ved upload af CV');
+        console.error("Edge function response error:", errorText);
+        
+        // If the Edge Function returns an error, use the mock data instead
+        console.log("Using mock data due to response error");
+        await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate processing
+        onExtractedData(MOCK_RESUME_DATA);
+        
+        toast({
+          title: "CV analyseret (demo)",
+          description: "Dine profiloplysninger er blevet udfyldt med eksempeldata, da vores tjeneste er midlertidigt nede.",
+        });
+        
+        return; // Exit early
       }
 
       const responseText = await response.text();
@@ -107,14 +111,35 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
         result = JSON.parse(responseText);
       } catch (e) {
         console.error("Failed to parse response:", responseText);
-        throw new Error('Der opstod en fejl ved fortolkning af data fra dit CV');
+        
+        // If parsing fails, use the mock data
+        console.log("Using mock data due to parsing error");
+        onExtractedData(MOCK_RESUME_DATA);
+        
+        toast({
+          title: "CV analyseret (demo)",
+          description: "Dine profiloplysninger er blevet udfyldt med eksempeldata, da der var et problem med fortolkningen.",
+        });
+        
+        return; // Exit early
       }
       
       if (result.error) {
-        throw new Error(result.error);
+        console.error("Result contains error:", result.error);
+        
+        // If result contains an error, use the mock data
+        console.log("Using mock data due to result error");
+        onExtractedData(MOCK_RESUME_DATA);
+        
+        toast({
+          title: "CV analyseret (demo)",
+          description: "Dine profiloplysninger er blevet udfyldt med eksempeldata grundet en fejl.",
+        });
+        
+        return; // Exit early
       }
 
-      // Update the form with extracted data
+      // If all went well, update the form with the extracted data
       if (result.extractedData) {
         onExtractedData(result.extractedData);
         
@@ -123,18 +148,25 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
           description: "Dine profiloplysninger er blevet udfyldt baseret på dit CV",
         });
       } else {
+        // If no extracted data, fall back to mock data
+        console.log("No extracted data, using mock data");
+        onExtractedData(MOCK_RESUME_DATA);
+        
         toast({
-          title: "Ingen data fundet",
-          description: "Vi kunne ikke udtrække information fra PDF'en. Prøv at udfylde felterne manuelt.",
+          title: "CV analyseret (demo)",
+          description: "Vi kunne ikke udtrække information fra PDF'en, så vi har brugt eksempeldata.",
         });
       }
-      */
     } catch (error) {
       console.error('Error extracting resume data:', error);
+      
+      // Fallback to mock data on any error
+      console.log("Using mock data due to general error");
+      onExtractedData(MOCK_RESUME_DATA);
+      
       toast({
-        title: "Fejl ved behandling",
-        description: error instanceof Error ? error.message : "Der opstod en fejl under behandling af din PDF",
-        variant: "destructive",
+        title: "CV analyseret (demo)",
+        description: "Der opstod en fejl, så vi har brugt eksempeldata til din profil.",
       });
     } finally {
       setIsExtracting(false);
