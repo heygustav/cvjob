@@ -1,7 +1,7 @@
 
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { Download, FileText, Trash2, MoreHorizontal, ExternalLink } from "lucide-react";
+import { Download, FileText, Trash2, MoreHorizontal, ExternalLink, File, FileIcon } from "lucide-react";
 import { CoverLetter, JobPosting } from "@/lib/types";
 import { 
   DropdownMenu, 
@@ -23,9 +23,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { formatDistanceToNow, format } from "date-fns";
 import { da } from "date-fns/locale";
-import { supabase } from "@/integrations/supabase/client";
 import { saveAs } from "file-saver";
 import { jsPDF } from "jspdf";
+import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } from "docx";
 
 interface LetterListComponentProps {
   coverLetters: CoverLetter[];
@@ -80,7 +80,8 @@ const LetterListComponent: React.FC<LetterListComponentProps> = ({
     }
   };
 
-  const handleDownload = async (letter: CoverLetter) => {
+  // Function to download as PDF
+  const handleDownloadPdf = async (letter: CoverLetter) => {
     try {
       setIsDownloading(true);
       const job = findJobForLetter(letter.job_posting_id);
@@ -133,6 +134,115 @@ const LetterListComponent: React.FC<LetterListComponentProps> = ({
       doc.save(fileName);
     } catch (error) {
       console.error("Error downloading letter as PDF:", error);
+      alert("Der opstod en fejl under download af ansøgning.");
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  // Function to download as text file
+  const handleDownloadTxt = async (letter: CoverLetter) => {
+    try {
+      setIsDownloading(true);
+      const job = findJobForLetter(letter.job_posting_id);
+      
+      // Create a filename based on company and job title
+      const companyName = job?.company || "ukendt-virksomhed";
+      const jobTitle = job?.title || "ukendt-stilling";
+      const fileName = `ansøgning-${companyName.toLowerCase().replace(/\s+/g, '-')}-${jobTitle.toLowerCase().replace(/\s+/g, '-')}.txt`;
+      
+      // Format the current date in Danish
+      const currentDate = new Date();
+      const formattedDate = format(currentDate, "d. MMMM yyyy", { locale: da });
+      
+      // Create the letter content
+      const letterHeader = `${companyName}\nAtt.: Ansøgning til ${jobTitle}\n\n${formattedDate}\n\n`;
+      const letterContent = letterHeader + letter.content;
+      
+      // Create and download the text file
+      const element = document.createElement("a");
+      const file = new Blob([letterContent], { type: "text/plain" });
+      element.href = URL.createObjectURL(file);
+      element.download = fileName;
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+    } catch (error) {
+      console.error("Error downloading letter as text:", error);
+      alert("Der opstod en fejl under download af ansøgning.");
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  // Function to download as Word document
+  const handleDownloadDocx = async (letter: CoverLetter) => {
+    try {
+      setIsDownloading(true);
+      const job = findJobForLetter(letter.job_posting_id);
+      
+      // Create a filename based on company and job title
+      const companyName = job?.company || "ukendt-virksomhed";
+      const jobTitle = job?.title || "ukendt-stilling";
+      const fileName = `ansøgning-${companyName.toLowerCase().replace(/\s+/g, '-')}-${jobTitle.toLowerCase().replace(/\s+/g, '-')}.docx`;
+      
+      // Format the current date in Danish
+      const currentDate = new Date();
+      const formattedDate = format(currentDate, "d. MMMM yyyy", { locale: da });
+      
+      // Create a new document
+      const doc = new Document({
+        sections: [
+          {
+            properties: {},
+            children: [
+              // Company name
+              new Paragraph({
+                text: companyName,
+                heading: HeadingLevel.HEADING_3,
+              }),
+              
+              // Job title
+              new Paragraph({
+                text: `Att.: Ansøgning til ${jobTitle}`,
+                spacing: {
+                  after: 200,
+                },
+              }),
+              
+              // Date - right-aligned
+              new Paragraph({
+                alignment: AlignmentType.RIGHT,
+                children: [
+                  new TextRun({
+                    text: formattedDate,
+                  }),
+                ],
+                spacing: {
+                  after: 400,
+                },
+              }),
+              
+              // Content - split by paragraphs
+              ...letter.content.split("\n\n").map(paragraph => 
+                new Paragraph({
+                  text: paragraph,
+                  spacing: {
+                    after: 200,
+                  },
+                })
+              ),
+            ],
+          },
+        ],
+      });
+      
+      // Generate and download the document
+      Packer.toBlob(doc).then(blob => {
+        saveAs(blob, fileName);
+      });
+    } catch (error) {
+      console.error("Error downloading letter as Word document:", error);
       alert("Der opstod en fejl under download af ansøgning.");
     } finally {
       setIsDownloading(false);
@@ -220,41 +330,39 @@ const LetterListComponent: React.FC<LetterListComponentProps> = ({
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-left text-sm font-medium">
                     <div className="flex items-center space-x-3">
-                      <Link
-                        to={`/generator?letterId=${letter.id}`}
-                        className="text-primary hover:text-primary-700 transition-colors"
-                        aria-label={`Rediger ansøgning til ${job?.title || "Ukendt stilling"}`}
-                      >
-                        <span className="hidden sm:inline">Rediger</span>
-                        <ExternalLink className="h-4 w-4 inline sm:hidden" />
-                      </Link>
-
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <button 
                             className="p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary" 
-                            aria-label="Flere handlinger"
+                            aria-label="Handlinger"
                           >
                             <MoreHorizontal className="h-5 w-5" />
                           </button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-48">
-                          <DropdownMenuItem asChild>
-                            <Link 
-                              to={`/generator?letterId=${letter.id}`}
-                              className="flex items-center cursor-pointer"
-                            >
-                              <FileText className="mr-2 h-4 w-4" />
-                              <span>Rediger</span>
-                            </Link>
-                          </DropdownMenuItem>
                           <DropdownMenuItem 
-                            onClick={() => handleDownload(letter)}
+                            onClick={() => handleDownloadPdf(letter)}
                             disabled={isDownloading}
                             className="flex items-center cursor-pointer"
                           >
-                            <Download className="mr-2 h-4 w-4" />
+                            <FileIcon className="mr-2 h-4 w-4" />
                             <span>{isDownloading ? "Downloader..." : "Download PDF"}</span>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => handleDownloadDocx(letter)}
+                            disabled={isDownloading}
+                            className="flex items-center cursor-pointer"
+                          >
+                            <File className="mr-2 h-4 w-4" />
+                            <span>{isDownloading ? "Downloader..." : "Download Word"}</span>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => handleDownloadTxt(letter)}
+                            disabled={isDownloading}
+                            className="flex items-center cursor-pointer"
+                          >
+                            <FileText className="mr-2 h-4 w-4" />
+                            <span>{isDownloading ? "Downloader..." : "Download Text"}</span>
                           </DropdownMenuItem>
                           {job?.url && (
                             <DropdownMenuItem asChild>
