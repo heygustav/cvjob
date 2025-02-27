@@ -29,12 +29,6 @@ serve(async (req) => {
     
     console.log("Request payload (truncated):", JSON.stringify(logPayload));
     
-    // Handle different action types
-    if (requestData.action === "extract_job_info") {
-      return handleExtractJobInfo(requestData.text);
-    }
-    
-    // Default action: generate cover letter - always use gpt-4 regardless of what's passed
     const { jobInfo, userInfo } = requestData;
     const model = "gpt-4"; // Always use gpt-4, ignoring any model parameter from client
 
@@ -64,7 +58,14 @@ serve(async (req) => {
     // Ensure we use OpenAI for generation
     const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
     if (!openAIApiKey) {
-      throw new Error('OpenAI API key not configured');
+      console.error('OpenAI API key not configured');
+      return new Response(
+        JSON.stringify({ error: 'OpenAI API key not configured' }), 
+        { 
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
     }
 
     // Get user's locale or default to Danish
@@ -132,14 +133,32 @@ Generer nu en komplet ansøgning på dansk til denne stilling baseret på ovenst
     if (!response.ok) {
       const errorText = await response.text();
       console.error('OpenAI API error:', response.status, errorText);
-      throw new Error(`OpenAI API error: ${response.status}`);
+      return new Response(
+        JSON.stringify({ 
+          error: `OpenAI API error: ${response.status}`,
+          details: errorText
+        }), 
+        { 
+          status: response.status,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
     }
 
     const data = await response.json();
     
     if (!data.choices || !data.choices[0] || !data.choices[0].message) {
       console.error('Invalid response from OpenAI:', JSON.stringify(data));
-      throw new Error('Invalid response from OpenAI');
+      return new Response(
+        JSON.stringify({ 
+          error: 'Invalid response from OpenAI',
+          details: 'The API response did not contain the expected data structure'
+        }), 
+        { 
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
     }
 
     const content = data.choices[0].message.content;
@@ -170,10 +189,11 @@ Generer nu en komplet ansøgning på dansk til denne stilling baseret på ovenst
     console.error('Error in generate-cover-letter function:', error);
     return new Response(
       JSON.stringify({
-        error: error.message
+        error: error.message,
+        details: 'An unexpected error occurred while generating the cover letter'
       }),
       { 
-        status: 400,
+        status: 500,
         headers: {
           ...corsHeaders,
           'Content-Type': 'application/json'
@@ -182,85 +202,3 @@ Generer nu en komplet ansøgning på dansk til denne stilling baseret på ovenst
     );
   }
 });
-
-// Helper function to extract job information from text
-function handleExtractJobInfo(text) {
-  console.log("Extracting job info from text");
-  
-  if (!text) {
-    return new Response(
-      JSON.stringify({ error: "No text provided" }),
-      { 
-        status: 400,
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'application/json'
-        }
-      }
-    );
-  }
-
-  // Extract job title
-  let title = "";
-  const titlePatterns = [
-    /(?:stilling|job|rolle)(?:\s+som|\:)\s+["']?([^"'\n,\.]{3,50})["']?/i,
-    /søger\s+(?:en\s+)?["']?([^"'\n,\.]{3,50})["']?/i,
-    /(?:position|vacancy|job opening|job title)\:?\s+["']?([^"'\n,\.]{3,50})["']?/i,
-  ];
-  
-  for (const pattern of titlePatterns) {
-    const match = text.match(pattern);
-    if (match && match[1]) {
-      title = match[1].trim();
-      break;
-    }
-  }
-
-  // Extract company name
-  let company = "";
-  const companyPatterns = [
-    /(?:hos|ved|for|i)\s+["']?([^"'\n,\.]{2,40})(?:\s+(?:A\/S|ApS|I\/S))?["']?/i,
-    /(?:virksomhed|firma)\s+["']?([^"'\n,\.]{2,40})["']?/i,
-    /(?:company|organization|employer)\:?\s+["']?([^"'\n,\.]{2,40})["']?/i,
-  ];
-  
-  for (const pattern of companyPatterns) {
-    const match = text.match(pattern);
-    if (match && match[1]) {
-      company = match[1].trim();
-      break;
-    }
-  }
-
-  // Extract contact person
-  let contact_person = "";
-  const contactPatterns = [
-    /(?:kontakt|henvendelse til)\s+["']?([^"'\n,\.]{2,40})["']?/i,
-    /(?:spørgsmål|information)(?:\s+til)?\s+["']?([^"'\n,\.]{2,40})["']?/i,
-    /(?:contact person|contact|questions to|apply to)\:?\s+["']?([^"'\n,\.]{2,40})["']?/i,
-  ];
-  
-  for (const pattern of contactPatterns) {
-    const match = text.match(pattern);
-    if (match && match[1]) {
-      contact_person = match[1].trim();
-      break;
-    }
-  }
-
-  console.log("Extraction results:", { title, company, contact_person });
-
-  return new Response(
-    JSON.stringify({
-      title,
-      company,
-      contact_person
-    }),
-    { 
-      headers: { 
-        ...corsHeaders,
-        'Content-Type': 'application/json'
-      } 
-    }
-  );
-}
