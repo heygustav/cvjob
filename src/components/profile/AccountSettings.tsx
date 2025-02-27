@@ -118,11 +118,18 @@ const AccountSettings: React.FC = () => {
 
   const handleEmailPreferencesUpdate = async () => {
     try {
-      // Direct update using the update method with jsonb field
+      // Convert EmailPreferences to a plain object that can be stored as JSON
+      const jsonPreferences = {
+        jobAlerts: emailNotifications.jobAlerts,
+        newsletters: emailNotifications.newsletters,
+        accountUpdates: emailNotifications.accountUpdates
+      };
+
+      // Update using the converted object
       const { error } = await supabase
         .from("profiles")
         .update({
-          email_preferences: emailNotifications
+          email_preferences: jsonPreferences
         })
         .eq("id", user?.id);
 
