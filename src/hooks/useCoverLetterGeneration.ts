@@ -15,6 +15,15 @@ import {
 import { generateCoverLetter } from "@/services/coverLetter/generator";
 import { JobFormData } from "@/services/coverLetter/types";
 
+// Add more specific error types
+interface GenerationError extends Error {
+  phase: 'job-save' | 'user-fetch' | 'generation' | 'letter-save';
+  recoverable: boolean;
+}
+
+// Define loading state type
+type LoadingState = "idle" | "initializing" | "generating" | "saving";
+
 // Timeout utility for network requests
 const fetchWithTimeout = async (promise: Promise<any>, timeoutMs: number = 15000) => {
   let timeoutId: NodeJS.Timeout;
@@ -34,14 +43,20 @@ const fetchWithTimeout = async (promise: Promise<any>, timeoutMs: number = 15000
 
 export const useCoverLetterGeneration = (user: User | null) => {
   const [step, setStep] = useState<1 | 2>(1);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [loadingState, setLoadingState] = useState<LoadingState>("idle");
   const [selectedJob, setSelectedJob] = useState<JobPosting | null>(null);
   const [generatedLetter, setGeneratedLetter] = useState<CoverLetter | null>(null);
   const [generationError, setGenerationError] = useState<string | null>(null);
+  const [generationPhase, setGenerationPhase] = useState<string | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
   const generationAttemptRef = useRef(0);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  // Derived state
+  const isLoading = loadingState !== "idle";
+  const isGenerating = loadingState === "generating";
+  const isInitializing = loadingState === "initializing";
 
   // Memoize toast configurations
   const toastMessages = useMemo(() => ({
@@ -89,14 +104,25 @@ export const useCoverLetterGeneration = (user: User | null) => {
     incompleteProfile: {
       title: "Bemærk",
       description: "Udfyld venligst din profil for at få en bedre ansøgning.",
-      variant: "default" as const, // Changed from "warning" to "default"
+      variant: "default" as const,
     },
   }), []);
 
+  // Helper for creating typed errors
+  const createError = useCallback((phase: 'job-save' | 'user-fetch' | 'generation' | 'letter-save', message: string, recoverable: boolean = true): GenerationError => {
+    const error = new Error(message) as GenerationError;
+    error.phase = phase;
+    error.recoverable = recoverable;
+    return error;
+  }, []);
+
   const fetchJob = useCallback(async (id: string) => {
     try {
-      setIsLoading(true);
+      setLoadingState("initializing");
       setGenerationError(null);
+      setGenerationPhase(null);
+      
+      console.log("Fetching job with ID:", id);
       
       // Try without timeout first to avoid unnecessary delays
       let job;
@@ -114,6 +140,7 @@ export const useCoverLetterGeneration = (user: User | null) => {
         return null;
       }
 
+      console.log("Successfully fetched job:", job);
       setSelectedJob(job);
 
       try {
@@ -131,6 +158,7 @@ export const useCoverLetterGeneration = (user: User | null) => {
           setGeneratedLetter(letters[0]);
           setStep(2);
         } else {
+          console.log("No existing letters found, starting at step 1");
           setStep(1);
         }
       } catch (letterError) {
@@ -157,14 +185,17 @@ export const useCoverLetterGeneration = (user: User | null) => {
       navigate("/dashboard");
       return null;
     } finally {
-      setIsLoading(false);
+      setLoadingState("idle");
     }
   }, [navigate, toast, toastMessages]);
 
   const fetchLetter = useCallback(async (id: string) => {
     try {
-      setIsLoading(true);
+      setLoadingState("initializing");
       setGenerationError(null);
+      setGenerationPhase(null);
+      
+      console.log("Fetching letter with ID:", id);
       
       // Try without timeout first
       let letter;
@@ -225,7 +256,7 @@ export const useCoverLetterGeneration = (user: User | null) => {
       navigate("/dashboard");
       return null;
     } finally {
-      setIsLoading(false);
+      setLoadingState("idle");
     }
   }, [navigate, toast, toastMessages]);
 
@@ -237,7 +268,7 @@ export const useCoverLetterGeneration = (user: User | null) => {
     }
 
     // Guard against multiple submissions
-    if (isGenerating || isLoading) {
+    if (loadingState !== "idle") {
       toast(toastMessages.generationInProgress);
       return;
     }
@@ -248,21 +279,37 @@ export const useCoverLetterGeneration = (user: User | null) => {
       return;
     }
 
+    // Cancel any in-progress generation
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    abortControllerRef.current = new AbortController();
+
     // Clear any previous errors
     setGenerationError(null);
+    setGenerationPhase(null);
 
     // Increment generation attempt counter
     generationAttemptRef.current += 1;
     const currentAttempt = generationAttemptRef.current;
     console.log(`Starting generation attempt #${currentAttempt}`);
 
+    // Set initial loading state
+    setLoadingState("generating");
+
     try {
-      setIsGenerating(true);
-      setIsLoading(true); // Also set general loading state
-      
       // Step 1: Fetch user profile first to check completeness
-      const userInfo = await fetchWithTimeout(fetchUserProfile(user.id));
-      userInfo.email = user.email; // Ensure email is set from authenticated user
+      setGenerationPhase('user-fetch');
+      console.log("Step 1: Fetching user profile");
+      
+      let userInfo;
+      try {
+        userInfo = await fetchWithTimeout(fetchUserProfile(user.id));
+        userInfo.email = user.email; // Ensure email is set from authenticated user
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+        throw createError('user-fetch', 'Kunne ikke hente din profil. Prøv at opdatere siden.');
+      }
       
       console.log(`User profile fetched for ID: ${user.id}`, {
         hasName: !!userInfo.name,
@@ -277,27 +324,64 @@ export const useCoverLetterGeneration = (user: User | null) => {
       }
 
       // Step 2: Save or update the job posting
-      const jobId = await fetchWithTimeout(
-        saveOrUpdateJob(jobData, user.id, selectedJob?.id)
-      );
+      setGenerationPhase('job-save');
+      console.log("Step 2: Saving job posting");
+      
+      let jobId;
+      try {
+        jobId = await fetchWithTimeout(
+          saveOrUpdateJob(jobData, user.id, selectedJob?.id)
+        );
+      } catch (error) {
+        console.error("Error saving job:", error);
+        throw createError('job-save', 'Kunne ikke gemme jobdetaljer. Tjek din forbindelse og prøv igen.');
+      }
+      
       console.log(`Job saved with ID: ${jobId}`);
 
       // Step 3: Generate letter content
-      console.log("Starting letter generation");
-      const content = await fetchWithTimeout(
-        generateCoverLetter(jobData, userInfo),
-        60000 // Longer timeout for generation (60 seconds)
-      );
-      console.log("Letter generated successfully");
+      setGenerationPhase('generation');
+      console.log("Step 3: Generating letter content");
+      
+      let content;
+      try {
+        content = await fetchWithTimeout(
+          generateCoverLetter(jobData, userInfo),
+          60000 // Longer timeout for generation (60 seconds)
+        );
+      } catch (error) {
+        console.error("Error generating letter:", error);
+        throw createError('generation', 'AI-tjenesten kunne ikke generere din ansøgning. Prøv igen om lidt.', false);
+      }
+      
+      console.log("Letter generated successfully, content length:", content?.length);
 
       // Step 4: Save the generated letter
-      const letter = await fetchWithTimeout(
-        saveCoverLetter(user.id, jobId, content)
-      );
+      setGenerationPhase('letter-save');
+      console.log("Step 4: Saving letter");
+      
+      let letter;
+      try {
+        letter = await fetchWithTimeout(
+          saveCoverLetter(user.id, jobId, content)
+        );
+      } catch (error) {
+        console.error("Error saving letter:", error);
+        throw createError('letter-save', 'Din ansøgning blev genereret, men kunne ikke gemmes. Prøv igen.');
+      }
+      
       console.log(`Letter saved with ID: ${letter.id}`);
       
       // Update the job object first to ensure it has all necessary fields
-      const updatedJob = await fetchWithTimeout(fetchJobById(jobId));
+      let updatedJob;
+      try {
+        updatedJob = await fetchWithTimeout(fetchJobById(jobId));
+      } catch (error) {
+        console.error("Error fetching updated job:", error);
+        // Non-critical, use the existing job info
+        updatedJob = { ...jobData, id: jobId, user_id: user.id };
+      }
+      
       setSelectedJob(updatedJob);
       
       // Then set the generated letter
@@ -311,52 +395,73 @@ export const useCoverLetterGeneration = (user: User | null) => {
     } catch (error) {
       console.error(`Attempt #${currentAttempt}: Error in job submission process:`, error);
       
-      let errorMessage = "Der opstod en ukendt fejl. Prøv venligst igen.";
+      let title = "Fejl ved generering";
+      let description = "Der opstod en ukendt fejl. Prøv venligst igen.";
+      let recoverable = true;
       
-      if (error instanceof Error) {
-        errorMessage = `Der opstod en fejl: ${error.message}`;
-        console.error(`Error details: ${error.stack}`);
-      }
-      
-      const isNetworkError = !navigator.onLine || 
-        (error instanceof Error && (
+      // Handle typed errors with phases
+      if ((error as GenerationError).phase) {
+        const typedError = error as GenerationError;
+        recoverable = typedError.recoverable;
+        
+        switch (typedError.phase) {
+          case 'job-save':
+            description = "Kunne ikke gemme jobinformation. Tjek venligst din forbindelse.";
+            break;
+          case 'user-fetch':
+            description = "Kunne ikke hente din profilinformation. Prøv at opdatere din profil.";
+            break;
+          case 'generation':
+            title = "Generering mislykkedes";
+            description = "AI-tjenesten kunne ikke generere din ansøgning. Prøv igen om lidt.";
+            break;
+          case 'letter-save':
+            description = "Din ansøgning blev genereret, men kunne ikke gemmes. Prøv igen.";
+            break;
+        }
+      } else if (error instanceof Error) {
+        // Handle regular errors
+        description = error.message;
+        
+        // Check for network-related errors
+        const isNetworkError = !navigator.onLine || 
           error.message.includes('forbindelse') || 
           error.message.includes('timeout') ||
-          error.message.includes('network')
-        ));
-      
-      if (isNetworkError) {
-        errorMessage = "Kontroller din internetforbindelse og prøv igen.";
+          error.message.includes('network');
+        
+        if (isNetworkError) {
+          title = "Forbindelsesfejl";
+          description = "Kontroller din internetforbindelse og prøv igen.";
+        }
       }
       
+      // Display toast with error details
       toast({
-        title: "Fejl ved generering",
-        description: errorMessage,
+        title,
+        description,
         variant: "destructive",
       });
       
       // Set error state for UI to show
-      setGenerationError(errorMessage);
+      setGenerationError(description);
       
-      // Stay on the current page instead of navigating away
-      // Only reset the states
-      setIsGenerating(false);
-      setIsLoading(false);
-      
-      // Don't navigate away on error
-      return;
+      // If not recoverable, navigate away
+      if (!recoverable) {
+        navigate("/dashboard");
+      }
       
     } finally {
       console.log(`Attempt #${currentAttempt}: Generation process completed`);
-      setIsGenerating(false);
-      setIsLoading(false);
+      setLoadingState("idle");
+      abortControllerRef.current = null;
     }
-  }, [isGenerating, isLoading, selectedJob, toast, toastMessages, user]);
+  }, [createError, loadingState, navigate, selectedJob, toast, toastMessages, user]);
 
   const handleEditLetter = useCallback(async (updatedContent: string) => {
     if (!generatedLetter || !user) return;
 
     try {
+      setLoadingState("saving");
       await fetchWithTimeout(updateLetterContent(generatedLetter.id, updatedContent));
 
       setGeneratedLetter({
@@ -377,6 +482,8 @@ export const useCoverLetterGeneration = (user: User | null) => {
           : "Der opstod en fejl under opdatering af ansøgningen.",
         variant: "destructive",
       });
+    } finally {
+      setLoadingState("idle");
     }
   }, [generatedLetter, toast, toastMessages, user]);
 
@@ -387,12 +494,15 @@ export const useCoverLetterGeneration = (user: User | null) => {
 
   const resetError = useCallback(() => {
     setGenerationError(null);
+    setGenerationPhase(null);
   }, []);
 
   return {
     step,
     isGenerating,
     isLoading,
+    loadingState,
+    generationPhase,
     selectedJob,
     generatedLetter,
     generationError,

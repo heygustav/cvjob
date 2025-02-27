@@ -16,7 +16,7 @@ const CoverLetterGenerator: React.FC = () => {
   const jobId = searchParams.get("jobId");
   const letterId = searchParams.get("letterId");
   const { session } = useAuth();
-  const [isLoading, setIsLoading] = useState(true);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const { toast } = useToast();
   
   // Convert Supabase user to our app's User type
@@ -30,7 +30,9 @@ const CoverLetterGenerator: React.FC = () => {
   const {
     step,
     isGenerating,
-    isLoading: generationLoading,
+    isLoading,
+    loadingState,
+    generationPhase,
     selectedJob,
     generatedLetter,
     generationError,
@@ -48,8 +50,10 @@ const CoverLetterGenerator: React.FC = () => {
       try {
         if (user) {
           if (jobId) {
+            console.log("Initializing generator with jobId:", jobId);
             await fetchJob(jobId);
           } else if (letterId) {
+            console.log("Initializing generator with letterId:", letterId);
             await fetchLetter(letterId);
           }
         }
@@ -61,7 +65,7 @@ const CoverLetterGenerator: React.FC = () => {
           variant: "destructive",
         });
       } finally {
-        setIsLoading(false);
+        setIsInitialLoading(false);
       }
     };
 
@@ -69,12 +73,19 @@ const CoverLetterGenerator: React.FC = () => {
   }, [user, jobId, letterId, fetchJob, fetchLetter, toast]);
 
   // Determine loading state - either initial loading or generation in progress
-  const showLoadingSpinner = isLoading || generationLoading || isGenerating;
+  const showLoadingSpinner = isInitialLoading || isLoading;
 
   // Get appropriate loading message
   const getLoadingMessage = () => {
-    if (isGenerating) return "Genererer ansøgning...";
-    if (generationLoading) return "Behandler data...";
+    if (isGenerating) {
+      if (generationPhase === 'user-fetch') return "Henter brugerdata...";
+      if (generationPhase === 'job-save') return "Gemmer jobdetaljer...";
+      if (generationPhase === 'generation') return "Genererer ansøgning...";
+      if (generationPhase === 'letter-save') return "Gemmer ansøgning...";
+      return "Genererer ansøgning...";
+    }
+    if (loadingState === "saving") return "Gemmer ændringer...";
+    if (loadingState === "initializing") return "Indlæser data...";
     return "Indlæser jobinformation...";
   };
 
@@ -83,7 +94,13 @@ const CoverLetterGenerator: React.FC = () => {
     return <LoadingSpinner message={getLoadingMessage()} />;
   }
 
-  console.log("Rendering state:", { step, generatedLetter, selectedJob, generationError });
+  console.log("Rendering state:", { 
+    step, 
+    generatedLetter: generatedLetter?.id, 
+    selectedJob: selectedJob?.id, 
+    generationError,
+    phase: generationPhase
+  });
 
   return (
     <div className="min-h-screen bg-gray-50 pt-16 md:pt-20">
@@ -146,7 +163,7 @@ const CoverLetterGenerator: React.FC = () => {
                 initialData={selectedJob || undefined}
                 isLoading={isGenerating}
               />
-              {isGenerating && <GenerationStatus />}
+              {isGenerating && <GenerationStatus phase={generationPhase || 'generation'} />}
             </div>
           ) : (
             <div className="p-4 sm:p-6">

@@ -2,13 +2,37 @@
 import React, { useState, useEffect } from "react";
 import { Clock } from "lucide-react";
 
-export const GenerationStatus: React.FC = () => {
+interface GenerationStatusProps {
+  phase?: string;
+  onRetry?: () => void;
+}
+
+export const GenerationStatus: React.FC<GenerationStatusProps> = ({ 
+  phase = 'generation',
+  onRetry
+}) => {
   const [elapsed, setElapsed] = useState(0);
   const [stepIndex, setStepIndex] = useState(0);
   
+  // Define steps based on the current phase
+  const getPhaseSpecificStep = () => {
+    switch (phase) {
+      case 'user-fetch':
+        return "Henter din profil...";
+      case 'job-save':
+        return "Gemmer jobinformation...";
+      case 'generation':
+        return "Skaber din ansøgning...";
+      case 'letter-save':
+        return "Gemmer din ansøgning...";
+      default:
+        return "Behandler...";
+    }
+  };
+  
   const steps = [
+    getPhaseSpecificStep(),
     "Analyserer jobopslag...",
-    "Tjekker din profil...",
     "Skaber din ansøgning...",
     "Finpudser indholdet..."
   ];
@@ -23,9 +47,11 @@ export const GenerationStatus: React.FC = () => {
       setElapsed(currentElapsed);
     }, 100);
     
-    // Start step rotation
+    // Start step rotation (only rotate generic steps if we're in generation phase)
     const stepIntervalId = setInterval(() => {
-      setStepIndex(prev => (prev + 1) % steps.length);
+      if (phase === 'generation') {
+        setStepIndex(prev => (prev + 1) % steps.length);
+      }
     }, 3000);
     
     // Cleanup on unmount
@@ -33,13 +59,16 @@ export const GenerationStatus: React.FC = () => {
       clearInterval(intervalId);
       clearInterval(stepIntervalId);
     };
-  }, [steps.length]);
+  }, [steps.length, phase]);
 
   const formatTime = (ms: number) => {
     const seconds = Math.floor(ms / 100);
     const hundredths = ms % 100;
     return `${seconds}.${hundredths.toString().padStart(2, '0')}`;
   };
+
+  // Determine if generation is taking too long (more than 30 seconds)
+  const isTakingTooLong = elapsed > 3000 && onRetry;
 
   return (
     <div className="mt-6 p-4 bg-gray-50 rounded-md">
@@ -49,6 +78,18 @@ export const GenerationStatus: React.FC = () => {
           {steps[stepIndex]} {formatTime(elapsed)}s
         </div>
       </div>
+      
+      {isTakingTooLong && (
+        <div className="mt-3 text-center">
+          <button
+            onClick={onRetry}
+            className="text-xs text-gray-600 underline hover:text-gray-800"
+          >
+            Tager det for lang tid? Klik for at prøve igen
+          </button>
+        </div>
+      )}
+      
       <div className="mt-2 text-center text-xs text-gray-500">
         Tålmodighed er det bedste mod...
       </div>
