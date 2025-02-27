@@ -3,8 +3,8 @@ import React, { useState, useEffect } from "react";
 import { Clock } from "lucide-react";
 
 export const GenerationStatus: React.FC = () => {
-  const [timer, setTimer] = useState(0);
-  const [currentStep, setCurrentStep] = useState(1);
+  const [elapsed, setElapsed] = useState(0);
+  const [currentStep, setCurrentStep] = useState(0);
   
   const steps = [
     "Analyserer jobopslag...",
@@ -13,32 +13,29 @@ export const GenerationStatus: React.FC = () => {
     "Finpudser indholdet..."
   ];
 
-  // Timer effect with cleanup
   useEffect(() => {
-    let timerInterval: NodeJS.Timeout | null = null;
-    let stepInterval: NodeJS.Timeout | null = null;
+    const startTime = Date.now();
     
-    // Start the timer
-    timerInterval = setInterval(() => {
-      setTimer(prev => prev + 10);
-    }, 10);
+    // Timer for elapsed time
+    const timerInterval = setInterval(() => {
+      setElapsed(Math.floor((Date.now() - startTime) / 10));
+    }, 100);
     
-    // Move through steps
-    stepInterval = setInterval(() => {
-      setCurrentStep(prev => (prev < steps.length ? prev + 1 : 1));
+    // Step rotation
+    const stepInterval = setInterval(() => {
+      setCurrentStep(prev => (prev + 1) % steps.length);
     }, 3000);
     
-    // Cleanup function
     return () => {
-      if (timerInterval) clearInterval(timerInterval);
-      if (stepInterval) clearInterval(stepInterval);
+      clearInterval(timerInterval);
+      clearInterval(stepInterval);
     };
-  }, []); // Empty dependency array means this effect runs once on mount
+  }, [steps.length]);
 
-  const formatTime = (time: number) => {
-    const seconds = Math.floor(time / 1000);
-    const milliseconds = Math.floor((time % 1000) / 10);
-    return `${seconds}.${milliseconds.toString().padStart(2, '0')}`;
+  const formatTime = (ms: number) => {
+    const seconds = Math.floor(ms / 100);
+    const hundredths = ms % 100;
+    return `${seconds}.${hundredths.toString().padStart(2, '0')}`;
   };
 
   return (
@@ -46,7 +43,7 @@ export const GenerationStatus: React.FC = () => {
       <div className="flex items-center justify-center space-x-4">
         <Clock className="animate-pulse h-5 w-5 text-gray-600" />
         <div className="text-sm text-gray-600">
-          {steps[currentStep - 1]} {formatTime(timer)}s
+          {steps[currentStep]} {formatTime(elapsed)}s
         </div>
       </div>
       <div className="mt-2 text-center text-xs text-gray-500">

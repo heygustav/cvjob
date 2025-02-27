@@ -9,22 +9,22 @@ interface LoadingSpinnerProps {
 export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ 
   message = "Indlæser..." 
 }) => {
-  const [timer, setTimer] = useState(0);
+  const [elapsed, setElapsed] = useState(0);
 
   useEffect(() => {
-    // Start timer
-    const interval = setInterval(() => {
-      setTimer(prev => prev + 10);
-    }, 10);
+    const startTime = Date.now();
     
-    // Cleanup on unmount
+    const interval = setInterval(() => {
+      setElapsed(Math.floor((Date.now() - startTime) / 10));
+    }, 100);
+    
     return () => clearInterval(interval);
-  }, []); // Empty dependency array means this effect runs once on mount
+  }, []);
 
-  const formatTime = (time: number) => {
-    const seconds = Math.floor(time / 1000);
-    const milliseconds = Math.floor((time % 1000) / 10);
-    return `${seconds}.${milliseconds.toString().padStart(2, '0')}`;
+  const formatTime = (ms: number) => {
+    const seconds = Math.floor(ms / 100);
+    const hundredths = ms % 100;
+    return `${seconds}.${hundredths.toString().padStart(2, '0')}`;
   };
 
   return (
@@ -32,7 +32,7 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
       <div className="text-center">
         <Clock className="h-10 w-10 md:h-12 md:w-12 animate-pulse text-black mx-auto" />
         <p className="mt-4 text-sm md:text-base text-gray-600">
-          {message} {formatTime(timer)}s
+          {message} {formatTime(elapsed)}s
         </p>
         <p className="mt-2 text-xs text-gray-500">
           Tålmodighed er det bedste mod...

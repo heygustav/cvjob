@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Search, Clock } from "lucide-react";
@@ -25,7 +24,8 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
     url: initialData?.url || "",
   });
   const [isExtracting, setIsExtracting] = useState(false);
-  const [timer, setTimer] = useState(0);
+  const [elapsed, setElapsed] = useState(0);
+  const [startTime, setStartTime] = useState<number | null>(null);
   const { toast } = useToast();
 
   // Timer effect for loading state
@@ -33,27 +33,29 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
     let interval: NodeJS.Timeout | null = null;
     
     if (isLoading) {
-      // Reset timer
-      setTimer(0);
+      // Start or reset timer when loading starts
+      setStartTime(Date.now());
       
-      // Start timer
       interval = setInterval(() => {
-        setTimer(prev => prev + 10);
-      }, 10);
+        if (startTime) {
+          setElapsed(Math.floor((Date.now() - startTime) / 10));
+        }
+      }, 100);
+    } else {
+      // Reset when loading stops
+      setStartTime(null);
+      setElapsed(0);
     }
     
-    // Cleanup function
     return () => {
-      if (interval) {
-        clearInterval(interval);
-      }
+      if (interval) clearInterval(interval);
     };
-  }, [isLoading]);
+  }, [isLoading, startTime]);
 
-  const formatTime = (time: number) => {
-    const seconds = Math.floor(time / 1000);
-    const milliseconds = Math.floor((time % 1000) / 10);
-    return `${seconds}.${milliseconds.toString().padStart(2, '0')}`;
+  const formatTime = (ms: number) => {
+    const seconds = Math.floor(ms / 100);
+    const hundredths = ms % 100;
+    return `${seconds}.${hundredths.toString().padStart(2, '0')}`;
   };
 
   const handleChange = (
@@ -377,7 +379,7 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
             <>
               <Clock className="animate-pulse -ml-1 mr-2 h-4 w-4" />
               <span className="mr-2">
-                Behandler... {formatTime(timer)}s
+                Behandler... {formatTime(elapsed)}s
               </span>
               <span className="text-xs text-gray-200">Tålmodighed er det bedste mod...</span>
             </>
