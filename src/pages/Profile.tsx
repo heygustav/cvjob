@@ -4,7 +4,7 @@ import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
-// Import the new components
+// Import the components
 import ProfileHeader from "@/components/profile/ProfileHeader";
 import PersonalInfoForm from "@/components/profile/PersonalInfoForm";
 import AccountSettings from "@/components/profile/AccountSettings";
@@ -140,6 +140,7 @@ const Profile: React.FC = () => {
               formData={formData}
               handleChange={handleChange}
               handleSubmit={handleSubmit}
+              setFormData={setFormData}
               isLoading={isLoading}
             />
           </div>
