@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useRef, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { JobPosting, CoverLetter, User } from "@/lib/types";
@@ -171,6 +170,7 @@ export const useCoverLetterGeneration = (user: User | null) => {
     if (!isMountedRef.current) return null;
     
     try {
+      console.log("fetchJob: Starting fetch for job with ID:", id);
       safeSetState(setLoadingState, "initializing");
       safeSetState(setGenerationError, null);
       safeSetState(setGenerationPhase, null);
@@ -179,8 +179,6 @@ export const useCoverLetterGeneration = (user: User | null) => {
         progress: 0,
         message: 'Henter jobinformation...'
       });
-      
-      console.log("Fetching job with ID:", id);
       
       // Try without timeout first to avoid unnecessary delays
       let job;
@@ -192,15 +190,19 @@ export const useCoverLetterGeneration = (user: User | null) => {
         job = await fetchWithTimeout(fetchJobById(id));
       }
       
-      if (!job || !isMountedRef.current) {
-        if (!job) {
-          toast(toastMessages.jobNotFound);
-          navigate("/dashboard");
-        }
+      if (!isMountedRef.current) {
+        console.log("fetchJob: Component unmounted during job fetch");
+        return null;
+      }
+      
+      if (!job) {
+        console.log("fetchJob: Job not found");
+        toast(toastMessages.jobNotFound);
+        navigate("/dashboard");
         return null;
       }
 
-      console.log("Successfully fetched job:", job);
+      console.log("fetchJob: Successfully fetched job:", job);
       safeSetState(setSelectedJob, job);
 
       safeSetState(setGenerationProgress, {
@@ -219,16 +221,21 @@ export const useCoverLetterGeneration = (user: User | null) => {
           letters = await fetchWithTimeout(fetchLettersForJob(id));
         }
         
-        if (letters && letters.length > 0 && isMountedRef.current) {
-          console.log("Found existing letters for job:", letters[0]);
+        if (!isMountedRef.current) {
+          console.log("fetchJob: Component unmounted during letters fetch");
+          return null;
+        }
+        
+        if (letters && letters.length > 0) {
+          console.log("fetchJob: Found existing letters for job:", letters[0]);
           safeSetState(setGeneratedLetter, letters[0]);
           safeSetState(setStep, 2);
-        } else if (isMountedRef.current) {
-          console.log("No existing letters found, staying on step 1");
+        } else {
+          console.log("fetchJob: No existing letters found, staying on step 1");
           safeSetState(setStep, 1);
         }
       } catch (letterError) {
-        console.error("Error fetching letters:", letterError);
+        console.error("fetchJob: Error fetching letters:", letterError);
         // Non-critical error, continue on step 1
         if (isMountedRef.current) {
           safeSetState(setStep, 1);
@@ -241,13 +248,20 @@ export const useCoverLetterGeneration = (user: User | null) => {
           progress: 100,
           message: 'Indlæsning fuldført'
         });
+        
+        // Ensure we always exit initializing state
+        console.log("fetchJob: Setting loadingState to idle");
+        safeSetState(setLoadingState, "idle");
       }
       
       return job;
     } catch (error) {
-      console.error("Error in fetchJob:", error);
+      console.error("fetchJob: Error in fetchJob:", error);
       
-      if (!isMountedRef.current) return null;
+      if (!isMountedRef.current) {
+        console.log("fetchJob: Component unmounted during error handling");
+        return null;
+      }
       
       const isNetworkError = !navigator.onLine || 
         (error instanceof Error && (
@@ -266,6 +280,7 @@ export const useCoverLetterGeneration = (user: User | null) => {
       return null;
     } finally {
       if (isMountedRef.current) {
+        console.log("fetchJob: Finalizing, setting loadingState to idle");
         safeSetState(setLoadingState, "idle");
       }
     }
@@ -275,6 +290,7 @@ export const useCoverLetterGeneration = (user: User | null) => {
     if (!isMountedRef.current) return null;
     
     try {
+      console.log("fetchLetter: Starting fetch for letter with ID:", id);
       safeSetState(setLoadingState, "initializing");
       safeSetState(setGenerationError, null);
       safeSetState(setGenerationPhase, null);
@@ -283,8 +299,6 @@ export const useCoverLetterGeneration = (user: User | null) => {
         progress: 0,
         message: 'Henter ansøgning...'
       });
-      
-      console.log("Fetching letter with ID:", id);
       
       // Try without timeout first
       let letter;
@@ -295,15 +309,19 @@ export const useCoverLetterGeneration = (user: User | null) => {
         letter = await fetchWithTimeout(fetchLetterById(id));
       }
       
-      if (!letter || !isMountedRef.current) {
-        if (!letter) {
-          toast(toastMessages.letterNotFound);
-          navigate("/dashboard");
-        }
+      if (!isMountedRef.current) {
+        console.log("fetchLetter: Component unmounted during letter fetch");
+        return null;
+      }
+      
+      if (!letter) {
+        console.log("fetchLetter: Letter not found");
+        toast(toastMessages.letterNotFound);
+        navigate("/dashboard");
         return null;
       }
 
-      console.log("Fetched letter:", letter);
+      console.log("fetchLetter: Fetched letter:", letter);
       safeSetState(setGeneratedLetter, letter);
 
       safeSetState(setGenerationProgress, {
@@ -322,14 +340,19 @@ export const useCoverLetterGeneration = (user: User | null) => {
           job = await fetchWithTimeout(fetchJobById(letter.job_posting_id));
         }
         
-        if (job && isMountedRef.current) {
-          console.log("Fetched job for letter:", job);
+        if (!isMountedRef.current) {
+          console.log("fetchLetter: Component unmounted during job fetch");
+          return null;
+        }
+        
+        if (job) {
+          console.log("fetchLetter: Fetched job for letter:", job);
           safeSetState(setSelectedJob, job);
         } else {
-          console.error("Job not found for letter:", letter.job_posting_id);
+          console.error("fetchLetter: Job not found for letter:", letter.job_posting_id);
         }
       } catch (jobError) {
-        console.error("Error fetching job for letter:", jobError);
+        console.error("fetchLetter: Error fetching job for letter:", jobError);
         // Non-critical error, continue
       }
       
@@ -341,13 +364,20 @@ export const useCoverLetterGeneration = (user: User | null) => {
         });
         
         safeSetState(setStep, 2);
+        
+        // Ensure we always exit initializing state
+        console.log("fetchLetter: Setting loadingState to idle");
+        safeSetState(setLoadingState, "idle");
       }
       
       return letter;
     } catch (error) {
-      console.error("Error in fetchLetter:", error);
+      console.error("fetchLetter: Error in fetchLetter:", error);
       
-      if (!isMountedRef.current) return null;
+      if (!isMountedRef.current) {
+        console.log("fetchLetter: Component unmounted during error handling");
+        return null;
+      }
       
       const isNetworkError = !navigator.onLine || 
         (error instanceof Error && (
@@ -366,6 +396,7 @@ export const useCoverLetterGeneration = (user: User | null) => {
       return null;
     } finally {
       if (isMountedRef.current) {
+        console.log("fetchLetter: Finalizing, setting loadingState to idle");
         safeSetState(setLoadingState, "idle");
       }
     }
