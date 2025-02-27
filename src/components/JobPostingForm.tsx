@@ -124,7 +124,7 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
         description: "Vent venligst mens vi analyserer jobopslaget...",
       });
 
-      // Call our new Edge Function that uses OpenAI
+      // Call our Edge Function that uses OpenAI
       const { data, error } = await supabase.functions.invoke('extract-job-info', {
         body: { jobDescription: description }
       });

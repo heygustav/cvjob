@@ -16,62 +16,111 @@ serve(async (req) => {
   }
 
   try {
-    const { jobDescription } = await req.json();
+    console.log("Function called: extract-job-info");
+    const requestBody = await req.json();
+    const { jobDescription } = requestBody;
 
     if (!openAIApiKey) {
-      throw new Error('OPENAI_API_KEY is not set');
+      console.error("OpenAI API key is not set");
+      return new Response(JSON.stringify({ error: 'OpenAI API key is not set' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     if (!jobDescription) {
-      throw new Error('Missing job description');
+      console.error("Missing job description in request");
+      return new Response(JSON.stringify({ error: 'Missing job description' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
-    // Call OpenAI API to extract job information
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4', // Changed from gpt-4o to gpt-4
-        messages: [
-          { 
-            role: 'system', 
-            content: 'Du er en hjælpsom assistent, der er specialiseret i at analysere jobopslag. Din opgave er at uddrage følgende information fra et jobopslag: virksomhed, jobtitel, kontaktperson og URL (hvis tilgængelig). Svar kun med et JSON objekt med felterne: company, title, contact_person, og url.'
-          },
-          { 
-            role: 'user', 
-            content: `Ekstraher virksomhed, jobtitel og kontaktperson samt, hvis tilgængeligt, link ud fra dette jobopslag:\n\n${jobDescription}`
-          }
-        ],
-        response_format: { type: "json_object" }
-      }),
-    });
-
-    const data = await response.json();
-    
-    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-      throw new Error('Invalid response from OpenAI');
-    }
-    
-    const content = data.choices[0].message.content;
-    let extractedData;
+    console.log(`Calling OpenAI with job description (${jobDescription.length} chars)`);
     
     try {
-      extractedData = JSON.parse(content);
-      console.log("Successfully extracted job information:", extractedData);
-    } catch (e) {
-      console.error("Failed to parse OpenAI response:", content);
-      throw new Error('Failed to parse response from OpenAI');
-    }
+      // Call OpenAI API to extract job information
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${openAIApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-4',
+          messages: [
+            { 
+              role: 'system', 
+              content: 'Du er en hjælpsom assistent, der er specialiseret i at analysere jobopslag. Din opgave er at uddrage følgende information fra et jobopslag: virksomhed, jobtitel, kontaktperson og URL (hvis tilgængelig). Svar kun med et JSON objekt med felterne: company, title, contact_person, og url.'
+            },
+            { 
+              role: 'user', 
+              content: `Ekstraher virksomhed, jobtitel og kontaktperson samt, hvis tilgængeligt, link ud fra dette jobopslag:\n\n${jobDescription}`
+            }
+          ],
+          response_format: { type: "json_object" }
+        }),
+      });
 
-    return new Response(JSON.stringify(extractedData), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`OpenAI API error: ${response.status} ${errorText}`);
+        return new Response(JSON.stringify({ 
+          error: `OpenAI API returned status ${response.status}`,
+          details: errorText
+        }), {
+          status: 502,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      const data = await response.json();
+      console.log("Received response from OpenAI");
+      
+      if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+        console.error("Invalid response format from OpenAI:", JSON.stringify(data));
+        return new Response(JSON.stringify({ 
+          error: 'Invalid response format from OpenAI',
+          data: data
+        }), {
+          status: 502,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      
+      const content = data.choices[0].message.content;
+      let extractedData;
+      
+      try {
+        extractedData = JSON.parse(content);
+        console.log("Successfully extracted job information");
+      } catch (e) {
+        console.error("Failed to parse OpenAI response:", content);
+        return new Response(JSON.stringify({ 
+          error: 'Failed to parse JSON in OpenAI response',
+          content: content
+        }), {
+          status: 502,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      console.log("Returning extracted data to client");
+      return new Response(JSON.stringify(extractedData), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    } catch (openAiError) {
+      console.error("Error in OpenAI API call:", openAiError);
+      return new Response(JSON.stringify({ 
+        error: `Error in OpenAI API call: ${openAiError.message}`,
+      }), {
+        status: 502,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
   } catch (error) {
-    console.error('Error in extract-job-info function:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    console.error('General error in extract-job-info function:', error);
+    return new Response(JSON.stringify({ error: `General error: ${error.message}` }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
