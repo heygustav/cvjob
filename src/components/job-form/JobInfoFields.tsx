@@ -36,7 +36,7 @@ const JobInfoFields: React.FC<JobInfoFieldsProps> = ({
           value={title}
           onChange={onChange}
           disabled={disabled}
-          className={`block w-full rounded-md shadow-sm sm:text-sm ${
+          className={`block w-full rounded-md shadow-sm sm:text-sm placeholder:text-gray-400 ${
             errors.title
               ? "border-red-300 text-red-900 placeholder-red-300 focus:border-red-500 focus:ring-red-500"
               : "border-gray-300 focus:border-black focus:ring-black"
@@ -68,7 +68,7 @@ const JobInfoFields: React.FC<JobInfoFieldsProps> = ({
           value={company}
           onChange={onChange}
           disabled={disabled}
-          className={`block w-full rounded-md shadow-sm sm:text-sm ${
+          className={`block w-full rounded-md shadow-sm sm:text-sm placeholder:text-gray-400 ${
             errors.company
               ? "border-red-300 text-red-900 placeholder-red-300 focus:border-red-500 focus:ring-red-500"
               : "border-gray-300 focus:border-black focus:ring-black"
@@ -100,10 +100,10 @@ const JobInfoFields: React.FC<JobInfoFieldsProps> = ({
           value={contactPerson}
           onChange={onChange}
           disabled={disabled}
-          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
+          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm placeholder:text-gray-400"
           placeholder="F.eks. Jane Doe, HR Manager"
         />
-        <p className="mt-1 text-xs text-gray-500">
+        <p className="mt-1 text-xs text-gray-400 italic">
           Navn på personen ansøgningen skal rettes til
         </p>
       </div>

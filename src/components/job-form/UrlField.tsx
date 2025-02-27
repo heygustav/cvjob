@@ -25,13 +25,13 @@ const UrlField: React.FC<UrlFieldProps> = ({ value, onChange, disabled }) => {
           name="url"
           value={value}
           onChange={onChange}
-          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
+          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm placeholder:text-gray-400"
           placeholder="F.eks. https://eksempel.dk/jobs/marketingansvarlig"
           disabled={disabled}
           aria-describedby="url-description"
         />
       </div>
-      <p id="url-description" className="mt-1 text-xs text-gray-500">
+      <p id="url-description" className="mt-1 text-xs text-gray-400 italic">
         Indsæt linket til jobopslaget, hvis du har det
       </p>
     </div>

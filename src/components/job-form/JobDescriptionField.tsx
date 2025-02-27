@@ -68,7 +68,7 @@ const JobDescriptionField: React.FC<JobDescriptionFieldProps> = ({
           value={value}
           onChange={onChange}
           disabled={disabled}
-          className={`block w-full rounded-md shadow-sm sm:text-sm ${
+          className={`block w-full rounded-md shadow-sm sm:text-sm placeholder:text-gray-400 ${
             error
               ? "border-red-300 text-red-900 placeholder-red-300 focus:border-red-500 focus:ring-red-500"
               : "border-gray-300 focus:border-black focus:ring-black"
@@ -84,7 +84,7 @@ const JobDescriptionField: React.FC<JobDescriptionFieldProps> = ({
         )}
         <p 
           id="description-description" 
-          className={`mt-1 text-xs ${error ? "text-red-500" : "text-gray-500"}`}
+          className={`mt-1 text-xs ${error ? "text-red-500" : "text-gray-400 italic"}`}
         >
           Kopier og indsæt hele jobopslaget. Systemet vil forsøge at udtrække nøgleinformation automatisk.
         </p>
