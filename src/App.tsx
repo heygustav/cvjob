@@ -8,6 +8,10 @@ import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Index from "./pages/Index";
+import AboutUs from "./pages/AboutUs";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsAndConditions from "./pages/TermsAndConditions";
+import Contact from "./pages/Contact";
 import { Toaster } from "./components/ui/toaster";
 import "./App.css";
 import { AuthProvider, useAuth } from "./components/AuthProvider";
@@ -35,6 +39,10 @@ const AppRoutes = () => (
     <Route path="/auth" element={<Auth />} />
     <Route path="/login" element={<Navigate to="/auth" replace />} />
     <Route path="/signup" element={<Navigate to="/auth?signup=true" replace />} />
+    <Route path="/about" element={<AboutUs />} />
+    <Route path="/privacy" element={<PrivacyPolicy />} />
+    <Route path="/terms" element={<TermsAndConditions />} />
+    <Route path="/contact" element={<Contact />} />
     <Route
       path="/dashboard"
       element={
