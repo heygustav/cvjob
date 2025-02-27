@@ -6,7 +6,18 @@ export const generateCoverLetter = async (
   jobInfo: JobFormData,
   userInfo: UserProfile
 ): Promise<string> => {
-  console.log("Starting cover letter generation");
+  console.log("Starting cover letter generation with job info:", {
+    title: jobInfo.title,
+    company: jobInfo.company,
+    contactPerson: jobInfo.contact_person,
+  });
+  console.log("User profile for generation:", {
+    hasName: !!userInfo.name,
+    hasEmail: !!userInfo.email,
+    hasExperience: !!userInfo.experience,
+    hasEducation: !!userInfo.education,
+    hasSkills: !!userInfo.skills,
+  });
   
   try {
     console.log("Calling edge function for letter generation");
@@ -32,7 +43,7 @@ export const generateCoverLetter = async (
             skills: userInfo.skills || '',
           },
           locale: navigator.language, // Send user's locale for better date formatting
-          model: "gpt-4" // Explicitly specify gpt-4 model for cover letter generation
+          model: "gpt-4o" // Use gpt-4o for cover letter generation
         }
       }
     );
@@ -44,12 +55,15 @@ export const generateCoverLetter = async (
       throw new Error(`Cover letter generation failed: ${message}`);
     }
 
+    // Log the response to see what's coming back
+    console.log("Response from edge function:", data);
+
     if (!data || !data.content) {
-      console.error("No content received from edge function", data);
+      console.error("No content received from edge function:", data);
       throw new Error("Intet indhold modtaget fra serveren");
     }
 
-    console.log("Successfully received content from edge function");
+    console.log("Successfully received content from edge function, length:", data.content.length);
     return data.content;
   } catch (error) {
     console.error("Error in generateCoverLetter:", error);

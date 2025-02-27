@@ -35,7 +35,7 @@ serve(async (req) => {
     }
     
     // Default action: generate cover letter
-    const { jobInfo, userInfo, model = "gpt-4" } = requestData;
+    const { jobInfo, userInfo, model = "gpt-4o" } = requestData;
 
     // Enhanced validation
     if (!jobInfo) {
@@ -60,7 +60,7 @@ serve(async (req) => {
 
     console.log(`Generating cover letter for ${jobInfo.title} at ${jobInfo.company} using model: ${model}`);
 
-    // Ensure we use gpt-4 for generation
+    // Ensure we use OpenAI for generation
     const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
     if (!openAIApiKey) {
       throw new Error('OpenAI API key not configured');
@@ -109,6 +109,8 @@ KONTAKTPERSON: ${jobInfo.contactPerson || 'Rekrutteringsansvarlig'}
 
 Generer nu en komplet ansøgning på dansk til denne stilling baseret på ovenstående information.`;
 
+    console.log("Calling OpenAI API...");
+
     // Call OpenAI for cover letter generation
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -117,7 +119,7 @@ Generer nu en komplet ansøgning på dansk til denne stilling baseret på ovenst
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: model, // Using the explicitly requested model (defaults to gpt-4)
+        model: model, // Using the explicitly requested model (defaults to gpt-4o)
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
@@ -140,6 +142,7 @@ Generer nu en komplet ansøgning på dansk til denne stilling baseret på ovenst
     }
 
     const content = data.choices[0].message.content;
+    console.log(`Generated content length: ${content.length} characters`);
 
     // Format today's date according to locale
     const today = new Date().toLocaleDateString(locale, {
@@ -244,25 +247,13 @@ function handleExtractJobInfo(text) {
     }
   }
 
-  // Extract URL
-  let url = "";
-  const urlPattern = /(?:https?:\/\/)?(?:www\.)?[a-zA-Z0-9-]+(?:\.[a-zA-Z]{2,})+(?:\/[^\s]*)?/g;
-  const urls = text.match(urlPattern);
-  if (urls && urls.length > 0) {
-    url = urls[0];
-    if (!url.startsWith('http')) {
-      url = 'https://' + url;
-    }
-  }
-
-  console.log("Extraction results:", { title, company, contact_person, url });
+  console.log("Extraction results:", { title, company, contact_person });
 
   return new Response(
     JSON.stringify({
       title,
       company,
-      contact_person,
-      url
+      contact_person
     }),
     { 
       headers: { 
