@@ -182,9 +182,9 @@ const CoverLetterPreview: React.FC<CoverLetterPreviewProps> = ({
             aria-label="Rediger ansøgningstekst"
           />
         ) : (
-          <div className="flex flex-col h-96">
-            <div className="flex justify-between mb-6">
-              <div className="font-serif">
+          <div className="flex flex-col h-96 border border-gray-200 rounded-md p-6">
+            <div className="flex justify-between mb-8">
+              <div className="font-serif text-left">
                 <p className="font-semibold">{company || "Virksomhed"}</p>
                 <p>Att.: Ansøgning til {jobTitle || "stillingen"}</p>
               </div>
@@ -193,7 +193,7 @@ const CoverLetterPreview: React.FC<CoverLetterPreviewProps> = ({
               </div>
             </div>
             <div 
-              className="prose max-w-none font-serif whitespace-pre-line text-base leading-relaxed overflow-auto flex-grow p-4 bg-gray-50 rounded-md" 
+              className="prose max-w-none font-serif whitespace-pre-line text-base leading-relaxed overflow-auto flex-grow" 
               tabIndex={0} 
               aria-label="Ansøgningstekst"
             >
