@@ -21,7 +21,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow, format } from "date-fns";
 import { da } from "date-fns/locale";
 import { supabase } from "@/integrations/supabase/client";
 import { saveAs } from "file-saver";
@@ -90,6 +90,10 @@ const LetterListComponent: React.FC<LetterListComponentProps> = ({
       const jobTitle = job?.title || "ukendt-stilling";
       const fileName = `ansøgning-${companyName.toLowerCase().replace(/\s+/g, '-')}-${jobTitle.toLowerCase().replace(/\s+/g, '-')}.pdf`;
       
+      // Format the current date in Danish
+      const currentDate = new Date();
+      const formattedDate = format(currentDate, "d. MMMM yyyy", { locale: da });
+      
       // Create a new PDF document
       const doc = new jsPDF({
         orientation: "portrait",
@@ -99,14 +103,31 @@ const LetterListComponent: React.FC<LetterListComponentProps> = ({
       
       // Set font
       doc.setFont("helvetica");
+      
+      // Add company name (bold)
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "bold");
+      doc.text(companyName, 20, 20);
+      
+      // Add attention line
+      doc.setFont("helvetica", "normal");
+      doc.text(`Att.: Ansøgning til ${jobTitle}`, 20, 30);
+      
+      // Add date (right-aligned)
+      const dateWidth = doc.getStringUnitWidth(formattedDate) * doc.getFontSize() / doc.internal.scaleFactor;
+      doc.text(formattedDate, doc.internal.pageSize.width - 20 - dateWidth, 30);
+      
+      // Add a spacing before content
+      const contentStartY = 50;
+      
+      // Add the main content
       doc.setFontSize(11);
       
-      // Add content with line wrapping 
       // Split content into lines that fit within the page width
-      const textLines = doc.splitTextToSize(letter.content, 180);
+      const textLines = doc.splitTextToSize(letter.content, 170);
       
-      // Add the text to the PDF with proper positioning (20mm margins)
-      doc.text(textLines, 20, 20);
+      // Add the text to the PDF
+      doc.text(textLines, 20, contentStartY);
       
       // Save the PDF
       doc.save(fileName);
