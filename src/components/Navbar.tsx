@@ -1,9 +1,7 @@
-
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X, User, FileText, PlusCircle, LogOut } from "lucide-react";
 import { useAuth } from "./AuthProvider";
-import CavalierDog from "./CavalierDog";
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -36,7 +34,6 @@ const Navbar: React.FC = () => {
             className="text-xl font-medium tracking-tight text-gray-900 flex items-center"
             onClick={closeMenu}
           >
-            <CavalierDog className="h-2.5 w-2.5 mr-2 text-black" />
             <span className="text-2xl font-semibold">Winston Assistant</span>
           </Link>
 
