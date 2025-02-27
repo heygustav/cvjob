@@ -6,6 +6,5 @@ enabled = true
 port = 54321
 schemas = ["public", "storage"]
 
-[[functions]]
-name = "generate-cover-letter"
+[functions.generate-cover-letter]
 verify_jwt = false

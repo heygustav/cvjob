@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Search } from "lucide-react";
 import { JobPosting } from "../lib/types";
+import { supabase } from "@/integrations/supabase/client";
 
 interface JobPostingFormProps {
   onSubmit: (jobData: {
