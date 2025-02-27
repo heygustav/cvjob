@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { KeyRound, Mail, Trash2 } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
@@ -39,6 +39,31 @@ const AccountSettings: React.FC = () => {
     accountUpdates: true
   });
 
+  // Fetch email preferences when component mounts
+  useEffect(() => {
+    if (user) {
+      fetchEmailPreferences();
+    }
+  }, [user]);
+
+  const fetchEmailPreferences = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("email_preferences")
+        .eq("id", user?.id)
+        .single();
+
+      if (error) throw error;
+
+      if (data && data.email_preferences) {
+        setEmailNotifications(data.email_preferences);
+      }
+    } catch (error) {
+      console.error("Error fetching email preferences:", error);
+    }
+  };
+
   const handlePasswordChange = async () => {
     if (!newPassword) {
       toast({
@@ -76,12 +101,13 @@ const AccountSettings: React.FC = () => {
 
   const handleEmailPreferencesUpdate = async () => {
     try {
-      // We need to handle this differently as email_preferences isn't in the type
-      // We'll use a raw update query with JSON
-      const { error } = await supabase.rpc('update_email_preferences', {
-        user_id: user?.id,
-        preferences: emailNotifications
-      });
+      // Direct update using the update method with jsonb field
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          email_preferences: emailNotifications
+        })
+        .eq("id", user?.id);
 
       if (error) throw error;
 

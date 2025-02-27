@@ -127,7 +127,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      update_email_preferences: {
+        Args: {
+          user_id: string
+          preferences: Json
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
