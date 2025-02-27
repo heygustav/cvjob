@@ -95,7 +95,6 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
       return;
     }
 
-    // Reset timer when starting a new submission
     startTimeRef.current = null;
     setElapsed(0);
     
@@ -186,6 +185,28 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      <div>
+        <label
+          htmlFor="url"
+          className="block text-sm font-medium text-gray-700 mb-1"
+        >
+          Job-URL (Valgfri)
+        </label>
+        <input
+          type="url"
+          id="url"
+          name="url"
+          value={formData.url}
+          onChange={handleChange}
+          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
+          placeholder="f.eks. https://eksempel.dk/jobs/marketingansvarlig"
+          disabled={isLoading}
+        />
+        <p className="mt-1 text-xs text-gray-500">
+          Indsæt linket til jobopslaget, hvis du har det
+        </p>
+      </div>
+
       <div className="space-y-4">
         <div>
           <label
@@ -268,44 +289,23 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div>
-            <label
-              htmlFor="contact_person"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Kontaktperson (Valgfri)
-            </label>
-            <input
-              type="text"
-              id="contact_person"
-              name="contact_person"
-              value={formData.contact_person}
-              onChange={handleChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
-              placeholder="f.eks. Jane Jensen"
-              disabled={isLoading}
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="url"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Job-URL (Valgfri)
-            </label>
-            <input
-              type="url"
-              id="url"
-              name="url"
-              value={formData.url}
-              onChange={handleChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
-              placeholder="f.eks. https://eksempel.dk/jobs/marketingansvarlig"
-              disabled={isLoading}
-            />
-          </div>
+        <div>
+          <label
+            htmlFor="contact_person"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Kontaktperson (Valgfri)
+          </label>
+          <input
+            type="text"
+            id="contact_person"
+            name="contact_person"
+            value={formData.contact_person}
+            onChange={handleChange}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
+            placeholder="f.eks. Jane Jensen"
+            disabled={isLoading}
+          />
         </div>
       </div>
 
