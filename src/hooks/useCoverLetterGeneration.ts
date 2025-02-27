@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { JobPosting, CoverLetter } from "@/lib/types";
@@ -114,7 +113,7 @@ export const useCoverLetterGeneration = (user: User | null) => {
     }
   }, [toast]);
 
-  const handleJobFormSubmit = useCallback(async (jobData: Partial<JobPosting>) => {
+const handleJobFormSubmit = useCallback(async (jobData: Partial<JobPosting>) => {
     if (!user) {
       toast({
         title: "Log ind krævet",
@@ -175,26 +174,7 @@ export const useCoverLetterGeneration = (user: User | null) => {
         jobId = data.id;
       }
 
-      // Step 2: Fetch the updated job to ensure we have the latest data
-      console.log("Job saved with ID:", jobId);
-      const { data: updatedJob, error: jobError } = await supabase
-        .from("job_postings")
-        .select("*")
-        .eq("id", jobId)
-        .single();
-
-      if (jobError) {
-        console.error("Error fetching updated job:", jobError);
-        throw new Error(`Fejl ved hentning af opdateret job: ${jobError.message}`);
-      }
-      if (!updatedJob) {
-        throw new Error("Intet job returneret fra serveren");
-      }
-
-      console.log("Retrieved updated job:", updatedJob);
-      setSelectedJob(updatedJob);
-
-      // Step 3: Fetch user profile if available
+      // Step 2: Fetch user profile if available
       console.log("Fetching user profile data");
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
@@ -204,7 +184,6 @@ export const useCoverLetterGeneration = (user: User | null) => {
 
       if (profileError && profileError.code !== "PGRST116") {
         console.error("Error fetching profile:", profileError);
-        // Continue without profile data, don't throw error here
       }
 
       const userInfo = profile || {
@@ -217,139 +196,67 @@ export const useCoverLetterGeneration = (user: User | null) => {
         skills: ""
       };
 
-      console.log("User info for generation:", userInfo);
-      
-      // Step 4: Prepare data for the edge function
-      const generationData = {
-        jobInfo: {
-          title: updatedJob.title,
-          company: updatedJob.company,
-          description: updatedJob.description,
-          contactPerson: updatedJob.contact_person,
-          url: updatedJob.url
-        },
-        userInfo: {
-          name: userInfo.name,
-          email: userInfo.email,
-          phone: userInfo.phone,
-          address: userInfo.address,
-          experience: userInfo.experience,
-          education: userInfo.education,
-          skills: userInfo.skills,
-        }
-      };
-
       console.log("Calling edge function for letter generation");
 
-      // Step 5: Call the edge function with proper error handling
-      let letterContent = "";
-      try {
-        const { data: functionData, error: functionError } = await supabase.functions.invoke('generate-cover-letter', {
-          body: generationData
-        });
-        
-        if (functionError) {
-          console.error("Edge function error:", functionError);
-          throw new Error(`Edge function fejl: ${functionError.message}`);
+      // Step 3: Call the edge function
+      const { data: functionData, error: functionError } = await supabase.functions.invoke(
+        'generate-cover-letter',
+        {
+          body: {
+            jobInfo: {
+              title: jobData.title,
+              company: jobData.company,
+              description: jobData.description,
+              contactPerson: jobData.contact_person,
+              url: jobData.url
+            },
+            userInfo: {
+              name: userInfo.name,
+              email: userInfo.email,
+              phone: userInfo.phone,
+              address: userInfo.address,
+              experience: userInfo.experience,
+              education: userInfo.education,
+              skills: userInfo.skills,
+            }
+          }
         }
-        
-        console.log("Received response from edge function:", functionData);
-        
-        if (!functionData || !functionData.content) {
-          console.error("Missing content in edge function response");
-          throw new Error("Manglende indhold i svaret fra serveren");
-        }
-        
-        letterContent = functionData.content;
-      } catch (functionError) {
-        console.error("Error calling edge function:", functionError);
-        
-        // Generate fallback content if edge function call fails
-        const today = new Date().toLocaleDateString("da-DK", {
-          day: "numeric",
-          month: "long",
-          year: "numeric",
-        });
-        
-        console.log("Generating fallback letter content");
-        letterContent = `${today}\n\nKære ${updatedJob.contact_person || 'Rekrutteringsansvarlig'},\n\nJeg skriver for at ansøge om stillingen som ${updatedJob.title} hos ${updatedJob.company}.\n\nJeg mener, at mine kvalifikationer og erfaringer gør mig til et godt match for denne rolle, og jeg ser frem til muligheden for at bidrage til jeres team.\n\nMed venlig hilsen,\n\n${userInfo.name || 'Dit navn'}${userInfo.phone ? '\n' + userInfo.phone : ''}\n${userInfo.email || 'Din e-mail'}${userInfo.address ? '\n' + userInfo.address : ''}`;
+      );
+
+      if (functionError) {
+        console.error("Edge function error:", functionError);
+        throw new Error(`Edge function fejl: ${functionError.message}`);
       }
-      
-      console.log("Letter content generated, saving to database");
-      
-      // Step 6: Save the generated letter to the database
-      let letterId: string;
-      const { data: existingLetters, error: letterCheckError } = await supabase
+
+      if (!functionData || !functionData.content) {
+        throw new Error("Intet indhold modtaget fra serveren");
+      }
+
+      // Step 4: Save the generated letter
+      const { data: letter, error: letterError } = await supabase
         .from("cover_letters")
-        .select("id")
-        .eq("job_posting_id", jobId);
-
-      if (letterCheckError) {
-        console.error("Error checking existing letters:", letterCheckError);
-        throw new Error(`Fejl ved kontrol af eksisterende ansøgninger: ${letterCheckError.message}`);
-      }
-
-      if (existingLetters && existingLetters.length > 0) {
-        console.log("Updating existing letter:", existingLetters[0].id);
-        const { error: updateError } = await supabase
-          .from("cover_letters")
-          .update({
-            content: letterContent,
-            updated_at: new Date().toISOString()
-          })
-          .eq("id", existingLetters[0].id);
-
-        if (updateError) {
-          console.error("Error updating letter:", updateError);
-          throw new Error(`Fejl ved opdatering af ansøgning: ${updateError.message}`);
-        }
-        letterId = existingLetters[0].id;
-      } else {
-        console.log("Creating new letter");
-        const { data: newLetter, error: createError } = await supabase
-          .from("cover_letters")
-          .insert({
-            user_id: user.id,
-            job_posting_id: jobId,
-            content: letterContent
-          })
-          .select()
-          .single();
-
-        if (createError) {
-          console.error("Error creating letter:", createError);
-          throw new Error(`Fejl ved oprettelse af ansøgning: ${createError.message}`);
-        }
-        if (!newLetter) {
-          throw new Error("Ingen ansøgnings-id returneret fra serveren");
-        }
-        letterId = newLetter.id;
-      }
-
-      // Step 7: Fetch the saved letter
-      console.log("Letter saved with ID:", letterId);
-      const { data: updatedLetter, error: fetchError } = await supabase
-        .from("cover_letters")
-        .select("*")
-        .eq("id", letterId)
+        .insert({
+          user_id: user.id,
+          job_posting_id: jobId,
+          content: functionData.content
+        })
+        .select()
         .single();
 
-      if (fetchError) {
-        console.error("Error fetching updated letter:", fetchError);
-        throw new Error(`Fejl ved hentning af opdateret ansøgning: ${fetchError.message}`);
-      }
-      if (!updatedLetter) {
-        throw new Error("Ingen ansøgning returneret fra serveren");
+      if (letterError) {
+        console.error("Error saving letter:", letterError);
+        throw new Error(`Fejl ved gem af ansøgning: ${letterError.message}`);
       }
 
-      console.log("Retrieved updated letter:", updatedLetter);
-      setGeneratedLetter(updatedLetter);
+      console.log("Letter saved successfully:", letter);
+      setGeneratedLetter(letter);
       setStep(2);
 
       toast({
         title: "Ansøgning genereret",
         description: "Din ansøgning er blevet oprettet med succes.",
       });
+
     } catch (error) {
       console.error('Error in job submission process:', error);
       toast({
@@ -362,7 +269,7 @@ export const useCoverLetterGeneration = (user: User | null) => {
     } finally {
       setIsGenerating(false);
     }
-  }, [selectedJob, toast, user]);
+  }, [selectedJob, toast, user, setStep]);
 
   const handleEditLetter = useCallback(async (updatedContent: string) => {
     if (!generatedLetter || !user) return;

@@ -1,0 +1,10 @@
+
+project_id = "zfyzkiseykwvpckavbxd"
+
+[global]
+compatibility_date = "2024-02-27"
+
+[[edge_functions]]
+name = "generate-cover-letter"
+verify_jwt = false
+
