@@ -7,7 +7,7 @@ const DashboardHeader: React.FC = () => {
   return (
     <div className="md:flex md:items-center md:justify-between mb-8">
       <div className="flex-1 min-w-0">
-        <h1 className="text-3xl font-bold leading-tight text-gray-900">Dashboard</h1>
+        <h1 className="text-3xl font-bold leading-tight text-gray-900">Sendte ansøgninger</h1>
         <p className="mt-1 text-lg text-gray-600">
           Administrer dine jobansøgninger og ansøgningsbreve
         </p>

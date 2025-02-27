@@ -62,15 +62,6 @@ const Navbar: React.FC = () => {
             {session ? (
               <>
                 <Link 
-                  to="/dashboard" 
-                  className={`text-sm font-medium transition-colors hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 rounded px-2 py-1 ${
-                    isActive("/dashboard") ? "text-blue-600" : "text-gray-600"
-                  }`}
-                  aria-current={isActive("/dashboard") ? "page" : undefined}
-                >
-                  Dashboard
-                </Link>
-                <Link 
                   to="/generator" 
                   className={`text-sm font-medium transition-colors hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 rounded px-2 py-1 ${
                     isActive("/generator") ? "text-blue-600" : "text-gray-600"
@@ -78,6 +69,15 @@ const Navbar: React.FC = () => {
                   aria-current={isActive("/generator") ? "page" : undefined}
                 >
                   Opret Ansøgning
+                </Link>
+                <Link 
+                  to="/dashboard" 
+                  className={`text-sm font-medium transition-colors hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 rounded px-2 py-1 ${
+                    isActive("/dashboard") ? "text-blue-600" : "text-gray-600"
+                  }`}
+                  aria-current={isActive("/dashboard") ? "page" : undefined}
+                >
+                  Sendte ansøgninger
                 </Link>
                 <Link 
                   to="/profile" 
@@ -151,16 +151,6 @@ const Navbar: React.FC = () => {
           {session ? (
             <>
               <Link
-                to="/dashboard"
-                className={`flex items-center px-4 py-3 text-base font-medium rounded-md hover:bg-white transition-colors ${
-                  isActive("/dashboard") ? "bg-white text-blue-600" : "text-gray-700"
-                }`}
-                aria-current={isActive("/dashboard") ? "page" : undefined}
-              >
-                <FileText className="h-5 w-5 mr-3" aria-hidden="true" />
-                Dashboard
-              </Link>
-              <Link
                 to="/generator"
                 className={`flex items-center px-4 py-3 text-base font-medium rounded-md hover:bg-white transition-colors ${
                   isActive("/generator") ? "bg-white text-blue-600" : "text-gray-700"
@@ -169,6 +159,16 @@ const Navbar: React.FC = () => {
               >
                 <PlusCircle className="h-5 w-5 mr-3" aria-hidden="true" />
                 Opret Ansøgning
+              </Link>
+              <Link
+                to="/dashboard"
+                className={`flex items-center px-4 py-3 text-base font-medium rounded-md hover:bg-white transition-colors ${
+                  isActive("/dashboard") ? "bg-white text-blue-600" : "text-gray-700"
+                }`}
+                aria-current={isActive("/dashboard") ? "page" : undefined}
+              >
+                <FileText className="h-5 w-5 mr-3" aria-hidden="true" />
+                Sendte ansøgninger
               </Link>
               <Link
                 to="/profile"
