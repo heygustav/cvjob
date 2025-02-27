@@ -1,20 +1,50 @@
 
-import React from "react";
-import { Sparkles } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Clock } from "lucide-react";
 
 export const GenerationStatus: React.FC = () => {
+  const [timer, setTimer] = useState(0);
+  const [currentStep, setCurrentStep] = useState(1);
+  const steps = [
+    "Analyserer jobopslag...",
+    "Tjekker din profil...",
+    "Skaber din ansøgning...",
+    "Finpudser indholdet..."
+  ];
+
+  // Timer effect
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimer(prevTimer => prevTimer + 10); // Increment by 10ms
+    }, 10);
+    
+    // Move through steps
+    const stepInterval = setInterval(() => {
+      setCurrentStep(prev => (prev < steps.length ? prev + 1 : 1));
+    }, 3000);
+    
+    return () => {
+      clearInterval(interval);
+      clearInterval(stepInterval);
+    };
+  }, []);
+
+  const formatTime = (time: number) => {
+    const seconds = Math.floor(time / 1000);
+    const milliseconds = Math.floor((time % 1000) / 10);
+    return `${seconds}.${milliseconds.toString().padStart(2, '0')}`;
+  };
+
   return (
-    <div className="mt-6 md:mt-8 flex items-center justify-center px-4">
-      <div className="text-center">
-        <div className="inline-flex items-center justify-center w-12 h-12 md:w-16 md:h-16 bg-gray-100 rounded-full mb-3 md:mb-4">
-          <Sparkles className="h-6 w-6 md:h-8 md:w-8 text-gray-600 animate-pulse-subtle" />
+    <div className="mt-6 p-4 bg-gray-50 rounded-md">
+      <div className="flex items-center justify-center space-x-4">
+        <Clock className="animate-pulse h-5 w-5 text-gray-600" />
+        <div className="text-sm text-gray-600">
+          {steps[currentStep - 1]} {formatTime(timer)}s
         </div>
-        <h3 className="text-base md:text-lg font-medium text-gray-900 mb-1 md:mb-2">
-          Genererer din ansøgning
-        </h3>
-        <p className="text-xs md:text-sm text-gray-500 max-w-xs md:max-w-md mx-auto">
-          Vores AI analyserer jobopslaget og udarbejder en personlig ansøgning til dig. Dette skulle kun tage få sekunder...
-        </p>
+      </div>
+      <div className="mt-2 text-center text-xs text-gray-500">
+        Tålmodighed er det bedste mod...
       </div>
     </div>
   );
