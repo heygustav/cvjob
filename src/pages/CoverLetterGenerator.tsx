@@ -90,4 +90,122 @@ VEDRØRENDE: ANSØGNING TIL STILLINGEN SOM ${job.title.toUpperCase()} HOS ${job.
 
 Jeg skriver til dig for at ansøge om stillingen som ${job.title} hos ${job.company}, som jeg så annonceret. Med min baggrund inden for dette felt og mine færdigheder, tror jeg, at jeg vil være et værdifuldt aktiv for jeres team.
 
-Gennem min karriere har jeg opbygget omfattende erfaring inden for ${job.title.toLowerCase()}-området. Jeg har arbejdet på projekter, der krævede stærke analytiske evner, problemløsningskomp
+Gennem min karriere har jeg opbygget omfattende erfaring inden for ${job.title.toLowerCase()}-området. Jeg har arbejdet på projekter, der krævede stærke analytiske evner, problemløsningskompetencer og teknisk ekspertise. Min erfaring har givet mig et solidt fundament, som jeg kan bygge videre på i denne rolle.
+
+Jeg er særligt tiltrukket af ${job.company} på grund af jeres omdømme for innovation og kvalitet inden for branchen. Jeres fokus på [relevant virksomhedsværdi] matcher perfekt med mine egne professionelle værdier og ambitioner.
+
+Jeg ser frem til muligheden for at diskutere, hvordan mine kvalifikationer kan bidrage til jeres team. Jeg er tilgængelig for et interview på et tidspunkt, der passer jer.
+
+Med venlig hilsen,
+
+Demo Bruger
+Telefon: +45 12 34 56 78
+Email: demo@example.com`;
+
+    const newLetter: CoverLetter = {
+      id: generatedLetter?.id || `letter-${Date.now()}`,
+      userId: "1", // Assuming logged in user has ID 1
+      jobPostingId: job.id,
+      content: letterContent,
+      createdAt: new Date(),
+    };
+
+    setGeneratedLetter(newLetter);
+
+    // In a real app, we would save the letter to the database here
+    toast({
+      title: "Cover letter generated",
+      description: "Your cover letter has been created successfully.",
+    });
+  };
+
+  const handleEditLetter = (updatedContent: string) => {
+    if (generatedLetter) {
+      setGeneratedLetter({
+        ...generatedLetter,
+        content: updatedContent,
+      });
+    }
+  };
+
+  const handleSaveLetter = () => {
+    toast({
+      title: "Cover letter saved",
+      description: "Your cover letter has been saved to your account.",
+    });
+    // In a real app, we would update the letter in the database here
+  };
+
+  const handleBackToJobDetails = () => {
+    setStep(1);
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 pt-20">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-3xl font-bold leading-tight text-gray-900">
+              {step === 1 ? "Enter Job Details" : "Your Cover Letter"}
+            </h1>
+            <p className="mt-1 text-lg text-gray-600">
+              {step === 1
+                ? "Provide information about the job you're applying for"
+                : "Review and edit your AI-generated cover letter"}
+            </p>
+          </div>
+          {step === 2 && (
+            <button
+              onClick={handleBackToJobDetails}
+              className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
+            >
+              Edit Job Details
+            </button>
+          )}
+        </div>
+
+        <div className="bg-white shadow-sm rounded-lg overflow-hidden border border-gray-100">
+          {step === 1 ? (
+            <div className="p-6">
+              <JobPostingForm
+                onSubmit={handleJobFormSubmit}
+                initialData={selectedJob || undefined}
+                isLoading={isGenerating}
+              />
+
+              {isGenerating && (
+                <div className="mt-8 flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
+                      <Sparkles className="h-8 w-8 text-gray-600 animate-pulse-subtle" />
+                    </div>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">
+                      Generating your cover letter
+                    </h3>
+                    <p className="text-sm text-gray-500 max-w-md mx-auto">
+                      Our AI is analyzing the job posting and crafting a personalized cover letter just for you. This should only take a few seconds...
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="p-6">
+              {generatedLetter && selectedJob && (
+                <CoverLetterPreview
+                  content={generatedLetter.content}
+                  jobTitle={selectedJob.title}
+                  company={selectedJob.company}
+                  onEdit={handleEditLetter}
+                  onSave={handleSaveLetter}
+                />
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default CoverLetterGenerator;
