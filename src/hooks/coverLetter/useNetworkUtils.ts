@@ -1,36 +1,57 @@
 
-import { useCallback } from "react";
-import { GenerationError } from "./types";
+import { useState, useEffect } from "react";
 
-// Timeout utility for network requests
 export const useNetworkUtils = () => {
-  // Helper for creating typed errors
-  const createError = useCallback((phase: 'job-save' | 'user-fetch' | 'generation' | 'letter-save', message: string, recoverable: boolean = true): GenerationError => {
-    const error = new Error(message) as GenerationError;
-    error.phase = phase;
-    error.recoverable = recoverable;
-    return error;
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
   }, []);
 
-  // Timeout utility for network requests
-  const fetchWithTimeout = useCallback(async (promise: Promise<any>, timeoutMs: number = 15000) => {
-    let timeoutId: NodeJS.Timeout;
+  /**
+   * Wraps a promise with a timeout
+   */
+  const fetchWithTimeout = async <T,>(promise: Promise<T>, timeoutMs = 30000): Promise<T> => {
+    let timeoutId: ReturnType<typeof setTimeout>;
     
-    const timeoutPromise = new Promise((_, reject) => {
+    const timeoutPromise = new Promise<never>((_, reject) => {
       timeoutId = setTimeout(() => {
-        reject(new Error('Forbindelsen tog for lang tid. Kontroller din internetforbindelse.'));
+        reject(new Error('Operation timed out'));
       }, timeoutMs);
     });
 
     try {
-      return await Promise.race([promise, timeoutPromise]);
-    } finally {
+      const result = await Promise.race([promise, timeoutPromise]);
       clearTimeout(timeoutId);
+      return result as T;
+    } catch (error) {
+      clearTimeout(timeoutId);
+      throw error;
     }
-  }, []);
+  };
+
+  /**
+   * Creates a standardized error with a phase indicator
+   */
+  const createError = (phase: string, message: string, recoverable = true) => {
+    const error = new Error(message);
+    (error as any).phase = phase;
+    (error as any).recoverable = recoverable;
+    return error;
+  };
 
   return {
-    createError,
-    fetchWithTimeout
+    isOnline,
+    fetchWithTimeout,
+    createError
   };
 };
