@@ -44,7 +44,7 @@ const SubmitButton: React.FC<SubmitButtonProps> = ({
           ? "Genererer ansøgning..." 
           : isSuccess 
             ? "Ansøgning genereret" 
-            : "Generer ansøgning"
+            : "Generer ansøgning nu"
       }
     >
       {isLoading ? (
@@ -55,7 +55,7 @@ const SubmitButton: React.FC<SubmitButtonProps> = ({
       ) : isSuccess ? (
         <Check className="h-5 w-5 mx-auto animate-scale-in text-white" />
       ) : (
-        "Generer ansøgning"
+        "Generer ansøgning nu"
       )}
     </button>
   );
