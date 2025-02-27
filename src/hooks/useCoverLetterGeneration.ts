@@ -15,7 +15,7 @@ import { generateCoverLetter } from "@/services/coverLetter/generator";
 import { JobFormData } from "@/services/coverLetter/types";
 
 // Timeout utility for network requests
-const fetchWithTimeout = async (promise: Promise<any>, timeoutMs: number = 10000) => {
+const fetchWithTimeout = async (promise: Promise<any>, timeoutMs: number = 15000) => {
   let timeoutId: NodeJS.Timeout;
   
   const timeoutPromise = new Promise((_, reject) => {
@@ -97,8 +97,15 @@ export const useCoverLetterGeneration = (user: User | null) => {
       setIsLoading(true);
       setGenerationError(null);
       
-      // Use fetchWithTimeout to guard against network issues
-      const job = await fetchWithTimeout(fetchJobById(id));
+      // Try without timeout first to avoid unnecessary delays
+      let job;
+      try {
+        job = await fetchJobById(id);
+      } catch (directError) {
+        console.warn("Direct fetch failed, retrying with timeout:", directError);
+        // Fallback to timeout version if direct fetch fails
+        job = await fetchWithTimeout(fetchJobById(id));
+      }
       
       if (!job) {
         toast(toastMessages.jobNotFound);
@@ -109,7 +116,14 @@ export const useCoverLetterGeneration = (user: User | null) => {
       setSelectedJob(job);
 
       try {
-        const letters = await fetchWithTimeout(fetchLettersForJob(id));
+        // Try without timeout first
+        let letters;
+        try {
+          letters = await fetchLettersForJob(id);
+        } catch (directError) {
+          console.warn("Direct letters fetch failed, retrying with timeout:", directError);
+          letters = await fetchWithTimeout(fetchLettersForJob(id));
+        }
         
         if (letters && letters.length > 0) {
           console.log("Found existing letters for job:", letters[0]);
@@ -127,7 +141,11 @@ export const useCoverLetterGeneration = (user: User | null) => {
     } catch (error) {
       console.error("Error in fetchJob:", error);
       const isNetworkError = !navigator.onLine || 
-        (error instanceof Error && error.message.includes('forbindelse'));
+        (error instanceof Error && (
+          error.message.includes('forbindelse') ||
+          error.message.includes('timeout') ||
+          error.message.includes('network')
+        ));
       
       toast(isNetworkError ? toastMessages.networkError : {
         title: "Fejl ved indlæsning",
@@ -147,7 +165,14 @@ export const useCoverLetterGeneration = (user: User | null) => {
       setIsLoading(true);
       setGenerationError(null);
       
-      const letter = await fetchWithTimeout(fetchLetterById(id));
+      // Try without timeout first
+      let letter;
+      try {
+        letter = await fetchLetterById(id);
+      } catch (directError) {
+        console.warn("Direct letter fetch failed, retrying with timeout:", directError);
+        letter = await fetchWithTimeout(fetchLetterById(id));
+      }
       
       if (!letter) {
         toast(toastMessages.letterNotFound);
@@ -159,7 +184,15 @@ export const useCoverLetterGeneration = (user: User | null) => {
       setGeneratedLetter(letter);
 
       try {
-        const job = await fetchWithTimeout(fetchJobById(letter.job_posting_id));
+        // Try without timeout first for the job fetch
+        let job;
+        try {
+          job = await fetchJobById(letter.job_posting_id);
+        } catch (directError) {
+          console.warn("Direct job fetch for letter failed, retrying with timeout:", directError);
+          job = await fetchWithTimeout(fetchJobById(letter.job_posting_id));
+        }
+        
         if (job) {
           console.log("Fetched job for letter:", job);
           setSelectedJob(job);
@@ -176,7 +209,11 @@ export const useCoverLetterGeneration = (user: User | null) => {
     } catch (error) {
       console.error("Error in fetchLetter:", error);
       const isNetworkError = !navigator.onLine || 
-        (error instanceof Error && error.message.includes('forbindelse'));
+        (error instanceof Error && (
+          error.message.includes('forbindelse') ||
+          error.message.includes('timeout') ||
+          error.message.includes('network')
+        ));
       
       toast(isNetworkError ? toastMessages.networkError : {
         title: "Fejl ved indlæsning",
