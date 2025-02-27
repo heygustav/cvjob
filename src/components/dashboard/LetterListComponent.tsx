@@ -1,8 +1,26 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { PlusCircle, Calendar, FileText, Edit, Trash2, ExternalLink } from "lucide-react";
-import { JobPosting, CoverLetter } from "@/lib/types";
+import { Download, FileText, Trash2, MoreHorizontal, ExternalLink } from "lucide-react";
+import { CoverLetter, JobPosting } from "@/lib/types";
+import { 
+  DropdownMenu, 
+  DropdownMenuTrigger, 
+  DropdownMenuContent, 
+  DropdownMenuItem,
+  DropdownMenuSeparator
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 import { formatDistanceToNow } from "date-fns";
 import { da } from "date-fns/locale";
 
@@ -10,7 +28,7 @@ interface LetterListComponentProps {
   coverLetters: CoverLetter[];
   jobPostings: JobPosting[];
   isDeleting: boolean;
-  onLetterDelete: (id: string) => Promise<void>;
+  onLetterDelete: (id: string) => void;
   findJobForLetter: (jobPostingId: string) => JobPosting | undefined;
 }
 
@@ -19,97 +37,186 @@ const LetterListComponent: React.FC<LetterListComponentProps> = ({
   jobPostings,
   isDeleting,
   onLetterDelete,
-  findJobForLetter
+  findJobForLetter,
 }) => {
-  return (
-    <>
-      {coverLetters.length === 0 ? (
-        <div className="py-12 text-center bg-white rounded-lg shadow-sm border border-gray-200">
+  const [letterToDelete, setLetterToDelete] = useState<string | null>(null);
+
+  const handleDeleteClick = (id: string) => {
+    setLetterToDelete(id);
+  };
+
+  const confirmDelete = () => {
+    if (letterToDelete) {
+      onLetterDelete(letterToDelete);
+      setLetterToDelete(null);
+    }
+  };
+
+  const cancelDelete = () => {
+    setLetterToDelete(null);
+  };
+
+  const formatDate = (dateString: string) => {
+    try {
+      return formatDistanceToNow(new Date(dateString), {
+        addSuffix: true,
+        locale: da,
+      });
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return "Ukendt dato";
+    }
+  };
+
+  if (coverLetters.length === 0) {
+    return (
+      <div className="text-left py-10">
+        <div className="text-center">
           <FileText className="mx-auto h-12 w-12 text-gray-400" />
-          <h3 className="mt-2 text-lg font-medium text-gray-900">Ingen ansøgninger endnu</h3>
+          <h3 className="mt-2 text-sm font-semibold text-gray-900">Ingen ansøgninger endnu</h3>
           <p className="mt-1 text-sm text-gray-500">
-            Generer din første ansøgning til et jobopslag.
+            Du har ikke gemt nogen ansøgninger endnu.
           </p>
           <div className="mt-6">
-            <Link
-              to="/generator"
-              className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
-            >
-              <PlusCircle className="h-4 w-4 mr-2" />
-              Opret ansøgning
+            <Link to="/generator">
+              <Button>
+                Opret din første ansøgning
+              </Button>
             </Link>
           </div>
         </div>
-      ) : (
-        <div className="overflow-hidden bg-white shadow-sm sm:rounded-md border border-gray-200">
-          <ul className="divide-y divide-gray-200">
+      </div>
+    );
+  }
+
+  return (
+    <div className="overflow-hidden">
+      <div className="text-left mb-4">
+        <h2 className="text-lg font-medium text-gray-900">Dine ansøgninger</h2>
+        <p className="text-sm text-gray-500">
+          Se og administrer dine gemte ansøgninger.
+        </p>
+      </div>
+
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Virksomhed
+              </th>
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Stilling
+              </th>
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Oprettet
+              </th>
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Handlinger
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
             {coverLetters.map((letter) => {
               const job = findJobForLetter(letter.job_posting_id);
               return (
-                <li key={letter.id} className="px-4 py-5 sm:px-6 hover:bg-gray-50 transition-colors">
-                  <div className="flex items-center justify-between">
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center">
-                        <div className="h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center text-primary border border-blue-100">
-                          <FileText className="h-5 w-5" />
-                        </div>
-                        <div className="ml-4">
-                          <h3 className="text-base font-medium text-gray-900 truncate">
-                            Ansøgning til {job?.title || "Ukendt stilling"}
-                          </h3>
-                          <div className="mt-1 flex items-center">
-                            <span className="text-sm text-gray-600 truncate">{job?.company || "Ukendt virksomhed"}</span>
-                            {job?.url && (
-                              <a 
-                                href={job.url} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="ml-2 text-primary hover:text-blue-600 inline-flex items-center text-xs transition-colors"
-                              >
-                                <ExternalLink className="h-3 w-3 mr-1" />
-                                <span>Se jobopslag</span>
-                              </a>
-                            )}
-                          </div>
-                        </div>
+                <tr key={letter.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap text-left">
+                    <div className="flex items-center">
+                      <div className="text-sm font-medium text-gray-900">
+                        {job?.company_name || "Ukendt virksomhed"}
                       </div>
                     </div>
-                    <div className="ml-5 flex flex-shrink-0 items-center space-x-4">
-                      <div className="flex items-center text-sm text-gray-500">
-                        <Calendar className="mr-1.5 h-4 w-4 flex-shrink-0 text-gray-400" />
-                        <span>{formatDistanceToNow(new Date(letter.created_at), { addSuffix: true, locale: da })}</span>
-                      </div>
-                      <div className="flex flex-row items-center space-x-2">
-                        <Link
-                          to={`/generator?letterId=${letter.id}`}
-                          className="p-1.5 rounded-full text-gray-600 hover:text-primary hover:bg-blue-50 focus:outline-none transition-colors"
-                        >
-                          <Edit className="h-5 w-5" />
-                          <span className="sr-only">Rediger</span>
-                        </Link>
-                        <button
-                          onClick={() => onLetterDelete(letter.id)}
-                          disabled={isDeleting}
-                          className={`p-1.5 rounded-full text-gray-600 hover:text-red-600 hover:bg-red-50 focus:outline-none transition-colors ${
-                            isDeleting ? "opacity-50 cursor-not-allowed" : ""
-                          }`}
-                        >
-                          <Trash2 className="h-5 w-5" />
-                          <span className="sr-only">Slet</span>
-                        </button>
-                      </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-left">
+                    <div className="text-sm text-gray-900">{job?.job_title || "Ukendt stilling"}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-left">
+                    <div className="text-sm text-gray-500">{formatDate(letter.created_at)}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-left text-sm font-medium">
+                    <div className="flex items-center space-x-3">
+                      <Link
+                        to={`/generator?letterId=${letter.id}`}
+                        className="text-primary hover:text-primary-700 transition-colors"
+                        aria-label={`Rediger ansøgning til ${job?.job_title || "Ukendt stilling"}`}
+                      >
+                        <span className="hidden sm:inline">Rediger</span>
+                        <ExternalLink className="h-4 w-4 inline sm:hidden" />
+                      </Link>
+
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button 
+                            className="p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary" 
+                            aria-label="Flere handlinger"
+                          >
+                            <MoreHorizontal className="h-5 w-5" />
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48">
+                          <DropdownMenuItem asChild>
+                            <Link 
+                              to={`/generator?letterId=${letter.id}`}
+                              className="flex items-center cursor-pointer"
+                            >
+                              <FileText className="mr-2 h-4 w-4" />
+                              <span>Rediger</span>
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <a 
+                              href={`/api/download/letter/${letter.id}`} 
+                              download
+                              className="flex items-center cursor-pointer"
+                            >
+                              <Download className="mr-2 h-4 w-4" />
+                              <span>Download</span>
+                            </a>
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onClick={() => handleDeleteClick(letter.id)}
+                            className="flex items-center text-red-600 cursor-pointer"
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            <span>Slet</span>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
-                  </div>
-                  <div className="mt-2 ml-14">
-                    <p className="text-sm text-gray-600 line-clamp-3 whitespace-pre-line">{letter.content}</p>
-                  </div>
-                </li>
+                  </td>
+                </tr>
               );
             })}
-          </ul>
-        </div>
-      )}
-    </>
+          </tbody>
+        </table>
+      </div>
+
+      <AlertDialog open={!!letterToDelete} onOpenChange={() => !isDeleting && setLetterToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Er du sikker?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Denne handling kan ikke fortrydes. Dette vil permanent slette din
+              ansøgning.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting} onClick={cancelDelete}>
+              Annuller
+            </AlertDialogCancel>
+            <AlertDialogAction
+              disabled={isDeleting}
+              onClick={confirmDelete}
+              className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+            >
+              {isDeleting ? "Sletter..." : "Slet"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
   );
 };
 

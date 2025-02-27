@@ -2,21 +2,25 @@
 import React from "react";
 
 interface TabNavProps {
-  activeTab: "letters";
-  onTabChange: (tab: "letters") => void;
+  activeTab: "letters" | "jobs";
+  onTabChange: (tab: "letters" | "jobs") => void;
 }
 
 const TabNav: React.FC<TabNavProps> = ({ activeTab, onTabChange }) => {
   return (
     <div className="border-b border-gray-200">
-      <nav className="-mb-px flex">
+      <nav className="flex space-x-6 px-6" aria-label="Tabs">
         <button
-          className={`w-full py-4 px-1 text-center border-b-2 font-medium text-sm ${
-            activeTab === "letters"
-              ? "border-black text-black"
-              : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-          }`}
           onClick={() => onTabChange("letters")}
+          className={`
+            py-4 text-sm font-medium border-b-2 px-1 text-left
+            ${
+              activeTab === "letters"
+                ? "border-primary text-primary"
+                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+            }
+          `}
+          aria-current={activeTab === "letters" ? "page" : undefined}
         >
           Ansøgninger
         </button>
