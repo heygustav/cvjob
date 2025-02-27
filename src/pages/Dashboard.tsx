@@ -205,13 +205,13 @@ const Dashboard = () => {
             {activeTab === "jobs" && (
               <>
                 {jobPostings.length === 0 ? (
-                  <div className="text-center py-12">
+                  <div className="py-12">
                     <FileText className="mx-auto h-12 w-12 text-gray-400" />
-                    <h3 className="mt-2 text-lg font-medium text-gray-900">Ingen jobopslag endnu</h3>
-                    <p className="mt-1 text-sm text-gray-500">
+                    <h3 className="mt-2 text-lg font-medium text-gray-900 text-center">Ingen jobopslag endnu</h3>
+                    <p className="mt-1 text-sm text-gray-500 text-center">
                       Start med at tilføje et jobopslag for at generere en ansøgning.
                     </p>
-                    <div className="mt-6">
+                    <div className="mt-6 flex justify-center">
                       <Link
                         to="/generator"
                         className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
@@ -304,13 +304,13 @@ const Dashboard = () => {
             {activeTab === "letters" && (
               <>
                 {coverLetters.length === 0 ? (
-                  <div className="text-center py-12">
+                  <div className="py-12">
                     <FileText className="mx-auto h-12 w-12 text-gray-400" />
-                    <h3 className="mt-2 text-lg font-medium text-gray-900">Ingen ansøgninger endnu</h3>
-                    <p className="mt-1 text-sm text-gray-500">
+                    <h3 className="mt-2 text-lg font-medium text-gray-900 text-center">Ingen ansøgninger endnu</h3>
+                    <p className="mt-1 text-sm text-gray-500 text-center">
                       Generer din første ansøgning til et jobopslag.
                     </p>
-                    <div className="mt-6">
+                    <div className="mt-6 flex justify-center">
                       <Link
                         to="/generator"
                         className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"

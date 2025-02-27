@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { FileText, CheckCircle, Sparkles, ChevronRight } from 'lucide-react';
@@ -54,7 +55,7 @@ const Index = () => {
 
       {/* Features section */}
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="mx-auto max-w-2xl lg:text-center">
+        <div className="mx-auto max-w-2xl lg:text-left">
           <h2 className="text-base font-semibold leading-7 text-black">
             Spar tid på jobsøgningen
           </h2>
@@ -124,7 +125,7 @@ const Index = () => {
 
       {/* How it works section */}
       <div id="how-it-works" className="mx-auto mt-32 max-w-7xl px-6 sm:mt-56 lg:px-8">
-        <div className="mx-auto max-w-2xl lg:text-center">
+        <div className="mx-auto max-w-2xl lg:text-left">
           <h2 className="text-base font-semibold leading-7 text-black">
             Sådan fungerer det
           </h2>

@@ -64,7 +64,7 @@ const GenerationProgressIndicator: React.FC<GenerationProgressProps> = ({
         
         {/* Show retry button if taking too long */}
         {isTakingTooLong && onRetry && (
-          <div className="flex justify-center mt-2">
+          <div className="flex justify-start mt-2">
             <button
               onClick={onRetry}
               className="text-sm font-medium text-black underline hover:text-gray-700"
@@ -74,7 +74,7 @@ const GenerationProgressIndicator: React.FC<GenerationProgressProps> = ({
           </div>
         )}
         
-        <div className="mt-2 text-center text-xs text-gray-500">
+        <div className="mt-2 text-xs text-gray-500">
           Tålmodighed er det bedste mod...
         </div>
       </div>

@@ -169,7 +169,7 @@ const CoverLetterGenerator: React.FC = () => {
                   onSave={handleSaveLetter}
                 />
               ) : (
-                <div className="text-center py-10">
+                <div className="text-left py-10">
                   <p className="text-gray-500">
                     Der opstod en fejl ved indlæsning af ansøgningen. Prøv igen.
                   </p>
