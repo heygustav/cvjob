@@ -124,7 +124,7 @@ const CoverLetterGenerator = () => {
             title: jobData.title,
             company: jobData.company,
             description: jobData.description,
-            contact_person: jobData.contactPerson,
+            contact_person: jobData.contact_person,
             url: jobData.url,
             updated_at: new Date().toISOString()
           })
@@ -141,7 +141,7 @@ const CoverLetterGenerator = () => {
             title: jobData.title || "",
             company: jobData.company || "",
             description: jobData.description || "",
-            contact_person: jobData.contactPerson,
+            contact_person: jobData.contact_person,
             url: jobData.url
           })
           .select()

@@ -21,7 +21,7 @@ const ApplicationHistory: React.FC<ApplicationHistoryProps> = ({
 }) => {
   // Function to find a cover letter for a specific job
   const findLetterForJob = (jobId: string) => {
-    return coverLetters.find((letter) => letter.jobPostingId === jobId);
+    return coverLetters.find((letter) => letter.job_posting_id === jobId);
   };
 
   // Function to find a job for a specific cover letter
@@ -59,7 +59,7 @@ const ApplicationHistory: React.FC<ApplicationHistoryProps> = ({
                     <div className="mt-1 flex items-center text-sm text-gray-500">
                       <Calendar className="mr-1.5 h-4 w-4 flex-shrink-0 text-gray-400" />
                       <span>
-                        {formatDistanceToNow(job.createdAt, { addSuffix: true, locale: da })}
+                        {formatDistanceToNow(new Date(job.created_at), { addSuffix: true, locale: da })}
                       </span>
                     </div>
                   </div>
@@ -113,7 +113,7 @@ const ApplicationHistory: React.FC<ApplicationHistoryProps> = ({
         ) : (
           <div className="space-y-4">
             {coverLetters.slice(0, 3).map((letter) => {
-              const job = findJobForLetter(letter.jobPostingId);
+              const job = findJobForLetter(letter.job_posting_id);
               return (
                 <div
                   key={letter.id}
@@ -132,7 +132,7 @@ const ApplicationHistory: React.FC<ApplicationHistoryProps> = ({
                     <div className="mt-1 flex items-center text-sm text-gray-500">
                       <Calendar className="mr-1.5 h-4 w-4 flex-shrink-0 text-gray-400" />
                       <span>
-                        {formatDistanceToNow(letter.createdAt, {
+                        {formatDistanceToNow(new Date(letter.created_at), {
                           addSuffix: true,
                           locale: da
                         })}

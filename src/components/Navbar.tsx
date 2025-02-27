@@ -2,15 +2,12 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X, User, FileText, PlusCircle, LogOut } from "lucide-react";
+import { useAuth } from "./AuthProvider";
 
-interface NavbarProps {
-  isAuthenticated: boolean;
-  onLogout: () => void;
-}
-
-const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onLogout }) => {
+const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const { session, signOut } = useAuth();
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -21,7 +18,7 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onLogout }) => {
   };
 
   const handleLogout = () => {
-    onLogout();
+    signOut();
     closeMenu();
   };
 
@@ -43,7 +40,7 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onLogout }) => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            {isAuthenticated ? (
+            {session ? (
               <>
                 <Link 
                   to="/dashboard" 
@@ -70,7 +67,7 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onLogout }) => {
                   Profil
                 </Link>
                 <button 
-                  onClick={onLogout} 
+                  onClick={handleLogout} 
                   className="text-sm font-medium text-gray-600 hover:text-black transition-colors flex items-center"
                 >
                   <LogOut className="h-4 w-4 mr-1" />
@@ -80,15 +77,15 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onLogout }) => {
             ) : (
               <>
                 <Link 
-                  to="/login" 
+                  to="/auth" 
                   className={`text-sm font-medium transition-colors hover:text-black ${
-                    isActive("/login") ? "text-black" : "text-gray-600"
+                    isActive("/auth") || isActive("/login") ? "text-black" : "text-gray-600"
                   }`}
                 >
                   Log ind
                 </Link>
                 <Link 
-                  to="/signup" 
+                  to="/auth?signup=true" 
                   className="px-4 py-2 text-sm font-medium text-white bg-black rounded-md hover:bg-gray-800 transition-colors"
                 >
                   Opret konto
@@ -120,7 +117,7 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onLogout }) => {
         }`}
       >
         <div className="space-y-1 px-4 py-6">
-          {isAuthenticated ? (
+          {session ? (
             <>
               <Link
                 to="/dashboard"
@@ -157,14 +154,14 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onLogout }) => {
           ) : (
             <>
               <Link
-                to="/login"
+                to="/auth"
                 className="block w-full px-4 py-3 text-base font-medium rounded-md hover:bg-gray-50"
                 onClick={closeMenu}
               >
                 Log ind
               </Link>
               <Link
-                to="/signup"
+                to="/auth?signup=true"
                 className="block w-full mt-2 px-4 py-3 text-base font-medium bg-black text-white rounded-md hover:bg-gray-800 text-center"
                 onClick={closeMenu}
               >

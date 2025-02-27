@@ -9,7 +9,7 @@ interface JobPostingFormProps {
     title: string;
     company: string;
     description: string;
-    contactPerson?: string;
+    contact_person?: string;
     url?: string;
   }) => void;
   initialData?: JobPosting;
@@ -25,7 +25,7 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
     title: initialData?.title || "",
     company: initialData?.company || "",
     description: initialData?.description || "",
-    contactPerson: initialData?.contact_person || "",
+    contact_person: initialData?.contact_person || "",
     url: initialData?.url || "",
   });
   const { toast } = useToast();
@@ -88,10 +88,10 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
     }
 
     // Try to extract contact person
-    if (!formData.contactPerson) {
+    if (!formData.contact_person) {
       const contactMatches = description.match(/(?:kontakt|kontaktperson|send .+ til)\s+["']?([^"'\n,]+)["']?/i);
       if (contactMatches && contactMatches[1]) {
-        newFormData.contactPerson = contactMatches[1].trim();
+        newFormData.contact_person = contactMatches[1].trim();
       }
     }
 
@@ -183,16 +183,16 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label
-              htmlFor="contactPerson"
+              htmlFor="contact_person"
               className="block text-sm font-medium text-gray-700"
             >
               Kontaktperson (Valgfri)
             </label>
             <input
               type="text"
-              id="contactPerson"
-              name="contactPerson"
-              value={formData.contactPerson}
+              id="contact_person"
+              name="contact_person"
+              value={formData.contact_person}
               onChange={handleChange}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
               placeholder="f.eks. Jane Jensen"
