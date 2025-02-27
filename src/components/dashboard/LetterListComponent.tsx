@@ -23,6 +23,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { formatDistanceToNow } from "date-fns";
 import { da } from "date-fns/locale";
+import { supabase } from "@/integrations/supabase/client";
+import { saveAs } from "file-saver";
 
 interface LetterListComponentProps {
   coverLetters: CoverLetter[];
@@ -40,6 +42,7 @@ const LetterListComponent: React.FC<LetterListComponentProps> = ({
   findJobForLetter,
 }) => {
   const [letterToDelete, setLetterToDelete] = useState<string | null>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const handleDeleteClick = (id: string) => {
     setLetterToDelete(id);
@@ -73,6 +76,29 @@ const LetterListComponent: React.FC<LetterListComponentProps> = ({
     } catch (error) {
       console.error("Error formatting date:", error);
       return "Ukendt dato";
+    }
+  };
+
+  const handleDownload = async (letter: CoverLetter) => {
+    try {
+      setIsDownloading(true);
+      const job = findJobForLetter(letter.job_posting_id);
+      
+      // Create a filename based on company and job title
+      const companyName = job?.company || "ukendt-virksomhed";
+      const jobTitle = job?.title || "ukendt-stilling";
+      const fileName = `ansøgning-${companyName.toLowerCase().replace(/\s+/g, '-')}-${jobTitle.toLowerCase().replace(/\s+/g, '-')}.txt`;
+      
+      // Create a blob with the letter content
+      const blob = new Blob([letter.content], { type: 'text/plain;charset=utf-8' });
+      
+      // Use FileSaver to save the file
+      saveAs(blob, fileName);
+    } catch (error) {
+      console.error("Error downloading letter:", error);
+      alert("Der opstod en fejl under download af ansøgning.");
+    } finally {
+      setIsDownloading(false);
     }
   };
 
@@ -172,15 +198,13 @@ const LetterListComponent: React.FC<LetterListComponentProps> = ({
                               <span>Rediger</span>
                             </Link>
                           </DropdownMenuItem>
-                          <DropdownMenuItem asChild>
-                            <a 
-                              href={`/api/download/letter/${letter.id}`} 
-                              download
-                              className="flex items-center cursor-pointer"
-                            >
-                              <Download className="mr-2 h-4 w-4" />
-                              <span>Download</span>
-                            </a>
+                          <DropdownMenuItem 
+                            onClick={() => handleDownload(letter)}
+                            disabled={isDownloading}
+                            className="flex items-center cursor-pointer"
+                          >
+                            <Download className="mr-2 h-4 w-4" />
+                            <span>{isDownloading ? "Downloader..." : "Download"}</span>
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
