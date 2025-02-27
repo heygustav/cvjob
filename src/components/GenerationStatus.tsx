@@ -1,13 +1,10 @@
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { Clock } from "lucide-react";
 
 export const GenerationStatus: React.FC = () => {
   const [timer, setTimer] = useState(0);
   const [currentStep, setCurrentStep] = useState(1);
-  const timerRef = useRef<number>(0);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const stepIntervalRef = useRef<NodeJS.Timeout | null>(null);
   
   const steps = [
     "Analyserer jobopslag...",
@@ -18,32 +15,23 @@ export const GenerationStatus: React.FC = () => {
 
   // Timer effect with cleanup
   useEffect(() => {
-    const startTimer = () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-      intervalRef.current = setInterval(() => {
-        timerRef.current += 10;
-        setTimer(timerRef.current);
-      }, 10);
-    };
-
-    const startStepRotation = () => {
-      if (stepIntervalRef.current) {
-        clearInterval(stepIntervalRef.current);
-      }
-      stepIntervalRef.current = setInterval(() => {
-        setCurrentStep(prev => (prev < steps.length ? prev + 1 : 1));
-      }, 3000);
-    };
-
-    startTimer();
-    startStepRotation();
+    let timerInterval: NodeJS.Timeout | null = null;
+    let stepInterval: NodeJS.Timeout | null = null;
+    
+    // Start the timer
+    timerInterval = setInterval(() => {
+      setTimer(prev => prev + 10);
+    }, 10);
+    
+    // Move through steps
+    stepInterval = setInterval(() => {
+      setCurrentStep(prev => (prev < steps.length ? prev + 1 : 1));
+    }, 3000);
     
     // Cleanup function
     return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-      if (stepIntervalRef.current) clearInterval(stepIntervalRef.current);
+      if (timerInterval) clearInterval(timerInterval);
+      if (stepInterval) clearInterval(stepInterval);
     };
   }, []); // Empty dependency array means this effect runs once on mount
 

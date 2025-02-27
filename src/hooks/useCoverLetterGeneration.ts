@@ -149,6 +149,7 @@ export const useCoverLetterGeneration = (user: User | null) => {
 
     try {
       setIsGenerating(true);
+      setIsLoading(true); // Also set general loading state
       
       // Step 1: Save or update the job posting
       const jobId = await saveOrUpdateJob(
@@ -196,6 +197,7 @@ export const useCoverLetterGeneration = (user: User | null) => {
     } finally {
       console.log(`Attempt #${currentAttempt}: Generation process completed`);
       setIsGenerating(false);
+      setIsLoading(false);
     }
   }, [selectedJob, toast, user, setStep]);
 

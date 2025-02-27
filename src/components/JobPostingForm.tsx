@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Search, Clock } from "lucide-react";
 import { JobPosting } from "../lib/types";
@@ -26,34 +26,26 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
   });
   const [isExtracting, setIsExtracting] = useState(false);
   const [timer, setTimer] = useState(0);
-  const timerRef = useRef<number>(0);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
 
-  // Timer effect for loading state with cleanup
+  // Timer effect for loading state
   useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+    
     if (isLoading) {
-      // Clear existing timer if any
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-      
       // Reset timer
-      timerRef.current = 0;
       setTimer(0);
       
       // Start timer
-      intervalRef.current = setInterval(() => {
-        timerRef.current += 10;
-        setTimer(timerRef.current);
+      interval = setInterval(() => {
+        setTimer(prev => prev + 10);
       }, 10);
-    } else if (intervalRef.current) {
-      clearInterval(intervalRef.current);
     }
     
+    // Cleanup function
     return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
+      if (interval) {
+        clearInterval(interval);
       }
     };
   }, [isLoading]);
