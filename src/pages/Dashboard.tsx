@@ -14,6 +14,7 @@ const Dashboard = () => {
   const [coverLetters, setCoverLetters] = useState<CoverLetter[]>([]);
   const [activeTab, setActiveTab] = useState<"jobs" | "letters">("jobs");
   const [isLoading, setIsLoading] = useState(true);
+  const [isDeleting, setIsDeleting] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -64,6 +65,30 @@ const Dashboard = () => {
 
   const deleteJobPosting = async (id: string) => {
     try {
+      setIsDeleting(true);
+      
+      // First check if job has any cover letters
+      const jobLetters = coverLetters.filter(letter => letter.job_posting_id === id);
+      
+      if (jobLetters.length > 0) {
+        // If there are cover letters, delete them first
+        for (const letter of jobLetters) {
+          const { error: deleteLetterError } = await supabase
+            .from("cover_letters")
+            .delete()
+            .eq("id", letter.id);
+          
+          if (deleteLetterError) {
+            console.error("Error deleting cover letter:", deleteLetterError);
+            throw deleteLetterError;
+          }
+        }
+        
+        // Update cover letters state
+        setCoverLetters(coverLetters.filter(letter => letter.job_posting_id !== id));
+      }
+      
+      // Then delete the job posting
       const { error } = await supabase
         .from("job_postings")
         .delete()
@@ -72,8 +97,6 @@ const Dashboard = () => {
       if (error) throw error;
 
       setJobPostings(jobPostings.filter(job => job.id !== id));
-      // Cover letters will be automatically deleted due to the foreign key constraint
-      setCoverLetters(coverLetters.filter(letter => letter.job_posting_id !== id));
 
       toast({
         title: "Jobopslag slettet",
@@ -86,11 +109,14 @@ const Dashboard = () => {
         description: "Der opstod en fejl under sletning af jobopslaget.",
         variant: "destructive",
       });
+    } finally {
+      setIsDeleting(false);
     }
   };
 
   const deleteCoverLetter = async (id: string) => {
     try {
+      setIsDeleting(true);
       const { error } = await supabase
         .from("cover_letters")
         .delete()
@@ -111,6 +137,8 @@ const Dashboard = () => {
         description: "Der opstod en fejl under sletning af ansøgningen.",
         variant: "destructive",
       });
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -237,7 +265,10 @@ const Dashboard = () => {
                                 </Link>
                                 <button
                                   onClick={() => deleteJobPosting(job.id)}
-                                  className="p-1 rounded-full text-gray-600 hover:text-red-600 focus:outline-none"
+                                  disabled={isDeleting}
+                                  className={`p-1 rounded-full text-gray-600 hover:text-red-600 focus:outline-none ${
+                                    isDeleting ? "opacity-50 cursor-not-allowed" : ""
+                                  }`}
                                 >
                                   <Trash2 className="h-5 w-5" />
                                   <span className="sr-only">Slet</span>
@@ -327,7 +358,10 @@ const Dashboard = () => {
                                   </Link>
                                   <button
                                     onClick={() => deleteCoverLetter(letter.id)}
-                                    className="p-1 rounded-full text-gray-600 hover:text-red-600 focus:outline-none"
+                                    disabled={isDeleting}
+                                    className={`p-1 rounded-full text-gray-600 hover:text-red-600 focus:outline-none ${
+                                      isDeleting ? "opacity-50 cursor-not-allowed" : ""
+                                    }`}
                                   >
                                     <Trash2 className="h-5 w-5" />
                                     <span className="sr-only">Slet</span>
