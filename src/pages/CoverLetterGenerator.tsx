@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import JobPostingForm from "../components/JobPostingForm";
 import CoverLetterPreview from "../components/CoverLetterPreview";
@@ -16,15 +16,16 @@ const CoverLetterGenerator: React.FC = () => {
   const jobId = searchParams.get("jobId");
   const letterId = searchParams.get("letterId");
   const { session } = useAuth();
-  const [isInitialized, setIsInitialized] = useState(false);
+  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const initStarted = useRef(false);
   
   // Convert Supabase user to our app's User type
   const user: User | null = session?.user ? {
     id: session.user.id,
     email: session.user.email || "",
-    name: session.user.user_metadata?.name || "", // Get name from metadata if available
-    profileComplete: false // Default value
+    name: session.user.user_metadata?.name || "",
+    profileComplete: false
   } : null;
 
   const {
@@ -46,107 +47,81 @@ const CoverLetterGenerator: React.FC = () => {
     resetError,
   } = useCoverLetterGeneration(user);
 
-  // Use a ref to prevent multiple initialization attempts
-  const initRef = React.useRef(false);
-
+  // One-time initialization
   useEffect(() => {
-    // Guard against running the effect multiple times
-    if (initRef.current) return;
+    let isMounted = true;
     
-    const initializeGenerator = async () => {
+    const initialize = async () => {
+      if (initStarted.current) return;
+      initStarted.current = true;
+      
       try {
         if (!user) {
-          console.log("No user found, skipping initialization");
-          setIsInitialized(true);
+          console.log("No user found, can't initialize");
+          if (isMounted) setLoading(false);
           return;
         }
         
-        if (jobId) {
-          console.log("Initializing generator with jobId:", jobId);
-          await fetchJob(jobId);
-        } else if (letterId) {
-          console.log("Initializing generator with letterId:", letterId);
-          await fetchLetter(letterId);
-        }
+        console.log("Starting initialization with params:", { jobId, letterId });
         
-        // Mark as initialized regardless of outcome
-        console.log("Generator initialization complete");
+        if (jobId) {
+          await fetchJob(jobId);
+          console.log("Job fetched, any loading state should now be managed by the hook");
+        } else if (letterId) {
+          await fetchLetter(letterId);
+          console.log("Letter fetched, any loading state should now be managed by the hook");
+        } else {
+          console.log("No job or letter ID provided");
+        }
       } catch (error) {
-        console.error("Error initializing generator:", error);
-        toast({
-          title: "Fejl ved indlæsning",
-          description: "Der opstod en fejl under indlæsning af data.",
-          variant: "destructive",
-        });
+        console.error("Initialization error:", error);
+        if (isMounted) {
+          toast({
+            title: "Fejl ved indlæsning",
+            description: "Der opstod en fejl under indlæsning af data.",
+            variant: "destructive",
+          });
+        }
       } finally {
-        setIsInitialized(true);
-        // Set the ref to true to prevent re-runs
-        initRef.current = true;
+        if (isMounted) {
+          setLoading(false);
+          console.log("Initialization complete, loading set to false");
+        }
       }
     };
-
-    initializeGenerator();
     
-    // Cleanup: nothing specific needed here
+    initialize();
+    
     return () => {
+      isMounted = false;
       console.log("Generator component unmounting");
     };
-  }, [user, jobId, letterId, fetchJob, fetchLetter, toast]);
+  }, [fetchJob, fetchLetter, jobId, letterId, toast, user]);
 
-  // Determine if we should show the loading spinner
-  const showLoadingSpinner = !isInitialized || isLoading;
-
-  // Get appropriate loading message
-  const getLoadingMessage = () => {
-    if (!isInitialized) return "Indlæser data...";
+  // Show main loading state during initial data fetch
+  if (loading) {
+    return <LoadingSpinner message="Indlæser data..." progress={20} />;
+  }
+  
+  // Show loading state for generation or other operations
+  if (isLoading) {
+    const message = isGenerating 
+      ? (generationPhase === 'user-fetch' ? "Henter brugerdata..." :
+         generationPhase === 'job-save' ? "Gemmer jobdetaljer..." :
+         generationPhase === 'generation' ? (generationProgress?.message || "Genererer ansøgning...") :
+         generationPhase === 'letter-save' ? "Gemmer ansøgning..." : "Arbejder...")
+      : (loadingState === "saving" ? "Gemmer ændringer..." : "Indlæser data...");
     
-    if (isGenerating && generationProgress?.message) {
-      return generationProgress.message;
-    }
+    const progress = generationProgress?.progress || 30;
     
-    if (isGenerating) {
-      if (generationPhase === 'user-fetch') return "Henter brugerdata...";
-      if (generationPhase === 'job-save') return "Gemmer jobdetaljer...";
-      if (generationPhase === 'generation') return "Genererer ansøgning...";
-      if (generationPhase === 'letter-save') return "Gemmer ansøgning...";
-      return "Genererer ansøgning...";
-    }
-    
-    if (loadingState === "saving") return "Gemmer ændringer...";
-    if (loadingState === "initializing") return "Indlæser data...";
-    
-    return "Indlæser jobinformation...";
-  };
-
-  // Calculate progress value with fallback
-  const getProgressValue = () => {
-    if (!isInitialized) return 10; // Initial loading progress
-    
-    // For generation phase, use the specific progress
-    if (isGenerating && generationProgress?.progress) {
-      return generationProgress.progress;
-    }
-    
-    // For other loading phases, use a static value
-    if (isLoading) return 30;
-    
-    return 0; // No progress shown when not loading
-  };
-
-  // Show loading state when initializing or generating
-  if (showLoadingSpinner) {
-    const progressValue = getProgressValue();
-    console.log("Showing loading spinner with progress:", progressValue);
-    return <LoadingSpinner message={getLoadingMessage()} progress={progressValue} />;
+    return <LoadingSpinner message={message} progress={progress} />;
   }
 
-  console.log("Rendering generator content:", { 
-    step, 
-    generatedLetter: generatedLetter?.id, 
-    selectedJob: selectedJob?.id, 
-    generationError,
-    phase: generationPhase,
-    progress: generationProgress
+  console.log("Rendering generator content:", {
+    step,
+    generatedLetter: generatedLetter?.id,
+    selectedJob: selectedJob?.id,
+    generationError
   });
 
   return (
