@@ -73,18 +73,18 @@ serve(async (req) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'gpt-4o-mini', // Using GPT-4 for better quality
+          model: 'gpt-4', // Using the exact GPT-4 model
           messages: [
             {
               role: 'system',
-              content: 'Du er en ekspert i at skrive professionelle og overbevisende jobansøgninger på dansk. Du er særligt god til at tilpasse ansøgninger til specifikke stillinger og virksomheder, samt at fremhæve relevante kompetencer og erfaringer på en engagerende måde.'
+              content: 'Du er en professionel jobansøger, der skriver overbevisende og detaljerede ansøgninger.'
             },
             {
               role: 'user',
               content: prompt
             }
           ],
-          temperature: 0.7,
+          temperature: 0.5, // Exact temperature as specified
         }),
       });
 
