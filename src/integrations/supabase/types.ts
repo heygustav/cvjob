@@ -86,6 +86,7 @@ export type Database = {
           created_at: string | null
           education: string | null
           email: string | null
+          email_preferences: Json | null
           experience: string | null
           id: string
           name: string | null
@@ -98,6 +99,7 @@ export type Database = {
           created_at?: string | null
           education?: string | null
           email?: string | null
+          email_preferences?: Json | null
           experience?: string | null
           id: string
           name?: string | null
@@ -110,6 +112,7 @@ export type Database = {
           created_at?: string | null
           education?: string | null
           email?: string | null
+          email_preferences?: Json | null
           experience?: string | null
           id?: string
           name?: string | null

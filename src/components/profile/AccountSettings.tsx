@@ -76,12 +76,12 @@ const AccountSettings: React.FC = () => {
 
   const handleEmailPreferencesUpdate = async () => {
     try {
-      const { error } = await supabase
-        .from("profiles")
-        .update({
-          email_preferences: emailNotifications
-        })
-        .eq("id", user?.id);
+      // We need to handle this differently as email_preferences isn't in the type
+      // We'll use a raw update query with JSON
+      const { error } = await supabase.rpc('update_email_preferences', {
+        user_id: user?.id,
+        preferences: emailNotifications
+      });
 
       if (error) throw error;
 
