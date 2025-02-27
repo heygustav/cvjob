@@ -4,6 +4,7 @@ import { Upload } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { PersonalInfoFormState } from '@/pages/Profile';
+import { useNetworkUtils } from "@/hooks/coverLetter/useNetworkUtils";
 
 interface ResumeUploaderProps {
   onExtractedData: (data: Partial<PersonalInfoFormState>) => void;
@@ -12,6 +13,7 @@ interface ResumeUploaderProps {
 const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
   const [isExtracting, setIsExtracting] = useState(false);
   const { toast } = useToast();
+  const { fetchWithTimeout } = useNetworkUtils();
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -46,14 +48,17 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
         throw new Error('Du skal være logget ind for at uploade dit CV');
       }
 
-      // Upload the file and extract text
-      const response = await fetch('https://zfyzkiseykwvpckavbxd.functions.supabase.co/extract-resume-data', {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'Authorization': `Bearer ${accessToken}`
-        }
-      });
+      // Upload the file and extract text with timeout protection
+      const response = await fetchWithTimeout(
+        fetch('https://zfyzkiseykwvpckavbxd.functions.supabase.co/extract-resume-data', {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'Authorization': `Bearer ${accessToken}`
+          }
+        }),
+        30000 // 30 second timeout for PDF processing
+      );
 
       if (!response.ok) {
         const errorText = await response.text();
