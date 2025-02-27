@@ -1,6 +1,8 @@
 
 import React from 'react';
 import { Clock, RefreshCw } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Button } from './ui/button';
 
 interface GenerationProgressProps {
   phase: string;
@@ -28,11 +30,15 @@ const GenerationProgressIndicator: React.FC<GenerationProgressProps> = ({
   const isTakingTooLong = elapsed > 3000;
   
   return (
-    <div className="mt-6 p-5 bg-white rounded-lg shadow-sm border border-gray-200" aria-live="polite" role="status">
+    <div 
+      className="mt-6 p-5 bg-white rounded-lg shadow-sm border border-gray-200" 
+      aria-live="polite" 
+      role="status"
+    >
       <div className="flex flex-col space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <Clock className="animate-pulse h-5 w-5 text-blue-600" aria-hidden="true" />
+            <Clock className="animate-pulse h-5 w-5 text-primary" aria-hidden="true" />
             <span className="text-sm font-medium text-gray-800">{message}</span>
           </div>
           <span className="text-sm font-medium text-gray-700">{formatTime(elapsed)}s</span>
@@ -40,7 +46,7 @@ const GenerationProgressIndicator: React.FC<GenerationProgressProps> = ({
         
         {/* Progress bar */}
         <div 
-          className="w-full bg-gray-200 rounded-full h-3" 
+          className="w-full bg-gray-100 rounded-full h-3 overflow-hidden" 
           aria-valuemin={0} 
           aria-valuemax={100} 
           aria-valuenow={progress} 
@@ -48,23 +54,27 @@ const GenerationProgressIndicator: React.FC<GenerationProgressProps> = ({
           aria-label={`${progress}% komplet`}
         >
           <div 
-            className="bg-blue-600 h-3 rounded-full transition-all duration-500 ease-in-out" 
+            className="bg-primary h-3 rounded-full transition-all duration-500 ease-in-out" 
             style={{ width: `${Math.max(5, progress)}%` }}
           ></div>
         </div>
         
         {/* Phase indicator */}
         <div className="flex justify-between text-xs text-gray-500 pt-1">
-          <span className={`transition-colors duration-300 ${phase === 'job-save' ? 'font-medium text-blue-700 underline' : ''}`}>
+          <span className={cn("transition-colors duration-300", 
+            phase === 'job-save' ? "font-medium text-primary underline" : "")}>
             Gem job
           </span>
-          <span className={`transition-colors duration-300 ${phase === 'user-fetch' ? 'font-medium text-blue-700 underline' : ''}`}>
+          <span className={cn("transition-colors duration-300", 
+            phase === 'user-fetch' ? "font-medium text-primary underline" : "")}>
             Profil
           </span>
-          <span className={`transition-colors duration-300 ${phase === 'generation' ? 'font-medium text-blue-700 underline' : ''}`}>
+          <span className={cn("transition-colors duration-300", 
+            phase === 'generation' ? "font-medium text-primary underline" : "")}>
             AI
           </span>
-          <span className={`transition-colors duration-300 ${phase === 'letter-save' ? 'font-medium text-blue-700 underline' : ''}`}>
+          <span className={cn("transition-colors duration-300", 
+            phase === 'letter-save' ? "font-medium text-primary underline" : "")}>
             Færdig
           </span>
         </div>
@@ -72,14 +82,15 @@ const GenerationProgressIndicator: React.FC<GenerationProgressProps> = ({
         {/* Show retry button if taking too long */}
         {isTakingTooLong && onRetry && (
           <div className="flex justify-start mt-3">
-            <button
+            <Button 
               onClick={onRetry}
-              className="flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              aria-label="Prøv igen"
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-2"
             >
-              <RefreshCw className="h-4 w-4 mr-2" aria-hidden="true" />
+              <RefreshCw className="h-4 w-4" aria-hidden="true" />
               Prøv igen
-            </button>
+            </Button>
           </div>
         )}
         

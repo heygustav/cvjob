@@ -16,41 +16,19 @@ const SubmitButton: React.FC<SubmitButtonProps> = ({
 }) => {
   const [isSuccess, setIsSuccess] = useState(false);
   
-  // Only set success state when loading changes from true to false
+  // Track previous loading state to detect when loading completes
   useEffect(() => {
-    let timer: NodeJS.Timeout;
-    
-    if (isLoading) {
-      setIsSuccess(false);
-    } else if (isLoading === false && isSuccess) {
+    if (isLoading === false && isSuccess === false) {
+      setIsSuccess(true);
+      
       // Reset success state after animation completes
-      timer = setTimeout(() => {
+      const timer = setTimeout(() => {
         setIsSuccess(false);
       }, 2000);
+      
+      return () => clearTimeout(timer);
     }
-    
-    return () => {
-      if (timer) clearTimeout(timer);
-    };
   }, [isLoading, isSuccess]);
-
-  // Handle successful completion of loading
-  const handleLoadingComplete = () => {
-    if (isLoading === false && !isSuccess) {
-      setIsSuccess(true);
-    }
-  };
-
-  // Call handleLoadingComplete when isLoading changes from true to false
-  useEffect(() => {
-    let prevLoading = isLoading;
-    return () => {
-      if (prevLoading && !isLoading) {
-        handleLoadingComplete();
-      }
-      prevLoading = isLoading;
-    };
-  }, [isLoading]);
 
   return (
     <button
@@ -58,7 +36,7 @@ const SubmitButton: React.FC<SubmitButtonProps> = ({
       disabled={isLoading || isSuccess}
       className={cn(
         "px-4 py-2 rounded-md shadow-sm text-sm font-medium text-white disabled:opacity-80 disabled:cursor-not-allowed transition-all duration-300",
-        isSuccess ? "bg-green-500 w-12" : "bg-[#1EAEDB] hover:bg-[#0FA0CE]",
+        isSuccess ? "bg-green-500 w-12" : "bg-primary hover:bg-primary-600",
         className
       )}
       aria-label={

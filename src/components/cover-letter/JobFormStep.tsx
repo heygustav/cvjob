@@ -4,6 +4,8 @@ import JobPostingForm from "../JobPostingForm";
 import { GenerationStatus } from "../GenerationStatus";
 import { JobPosting } from "@/lib/types";
 import { JobFormData } from "@/services/coverLetter/types";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { InfoIcon } from "lucide-react";
 
 interface JobFormStepProps {
   selectedJob: JobPosting | null;
@@ -31,13 +33,14 @@ const JobFormStep: React.FC<JobFormStepProps> = ({
   return (
     <div className="p-4 sm:p-6 md:p-8">
       {isSavedJob && (
-        <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-md">
-          <h3 className="text-amber-800 font-medium">Bemærk</h3>
-          <p className="text-amber-700 text-sm">
+        <Alert className="mb-6 bg-amber-50 border-amber-200 text-amber-800">
+          <InfoIcon className="h-4 w-4 text-amber-800" />
+          <AlertTitle className="text-amber-800 font-medium">Bemærk</AlertTitle>
+          <AlertDescription className="text-amber-700 text-sm">
             Denne funktion understøtter i øjeblikket kun generering af ansøgninger for nye jobannoncer. 
             Hvis du vil generere en ansøgning til dette job, skal du kopiere jobdetaljerne og starte en ny.
-          </p>
-        </div>
+          </AlertDescription>
+        </Alert>
       )}
       
       <JobPostingForm
