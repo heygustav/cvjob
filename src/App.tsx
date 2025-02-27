@@ -12,13 +12,14 @@ import { Toaster } from "./components/ui/toaster";
 import "./App.css";
 import { AuthProvider, useAuth } from "./components/AuthProvider";
 import Auth from "./pages/Auth";
+import { LoadingSpinner } from "./components/LoadingSpinner";
 
 // Protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { session, isLoading } = useAuth();
 
   if (isLoading) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+    return <LoadingSpinner />;
   }
 
   if (!session) {
@@ -66,9 +67,13 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-        <Navbar />
-        <AppRoutes />
-        <Toaster />
+        <div className="flex flex-col min-h-screen">
+          <Navbar />
+          <main className="flex-grow pt-16">
+            <AppRoutes />
+          </main>
+          <Toaster />
+        </div>
       </AuthProvider>
     </Router>
   );

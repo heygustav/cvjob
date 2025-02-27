@@ -1,13 +1,29 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X, User, FileText, PlusCircle, LogOut } from "lucide-react";
 import { useAuth } from "./AuthProvider";
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
   const { session, signOut } = useAuth();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 10) {
+        setScrolled(true);
+      } else {
+        setScrolled(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -27,7 +43,9 @@ const Navbar: React.FC = () => {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
+    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-200 ${
+      scrolled ? "bg-white/90 shadow-sm" : "bg-white/80"
+    } backdrop-blur-md border-b border-gray-100`}>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <Link 
@@ -35,11 +53,11 @@ const Navbar: React.FC = () => {
             className="text-xl font-medium tracking-tight text-gray-900 flex items-center"
             onClick={closeMenu}
           >
-            <span className="text-2xl font-semibold">Winston Assistant</span>
+            <span className="text-xl sm:text-2xl font-semibold truncate max-w-[180px] sm:max-w-none">Winston Assistant</span>
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
+          <nav className="hidden md:flex items-center space-x-6 lg:space-x-8">
             {session ? (
               <>
                 <Link 
@@ -99,6 +117,7 @@ const Navbar: React.FC = () => {
             onClick={toggleMenu}
             className="md:hidden flex items-center p-2"
             aria-expanded={isOpen}
+            aria-label="Åbn hovedmenu"
           >
             <span className="sr-only">Åbn hovedmenu</span>
             {isOpen ? (
@@ -110,10 +129,12 @@ const Navbar: React.FC = () => {
         </div>
       </div>
 
-      {/* Mobile menu */}
+      {/* Mobile menu - improved for mobile */}
       <div
-        className={`md:hidden ${
-          isOpen ? "fixed inset-0 z-40 bg-white pt-16" : "hidden"
+        className={`md:hidden transition-all duration-300 ease-in-out ${
+          isOpen 
+            ? "fixed inset-0 z-40 bg-white pt-16 opacity-100 translate-y-0" 
+            : "fixed inset-0 z-40 bg-white pt-16 opacity-0 -translate-y-full pointer-events-none"
         }`}
       >
         <div className="space-y-1 px-4 py-6">

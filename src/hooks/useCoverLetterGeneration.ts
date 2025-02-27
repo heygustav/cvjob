@@ -241,32 +241,18 @@ export const useCoverLetterGeneration = (user: User | null) => {
 
       console.log("Calling edge function for letter generation");
 
-      // Step 5: Call the edge function with a timeout
+      // Step 5: Call the edge function with proper error handling
       let letterContent = "";
       try {
-        // Use a simple timeout to avoid waiting forever
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 seconds timeout
-        
-        const response = await fetch(`${supabase.functions.url}/generate-cover-letter`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${supabase.auth.getSession() ? (await supabase.auth.getSession()).data.session?.access_token : ''}`,
-          },
-          body: JSON.stringify(generationData),
-          signal: controller.signal
+        const { data: functionData, error: functionError } = await supabase.functions.invoke('generate-cover-letter', {
+          body: generationData
         });
         
-        clearTimeout(timeoutId);
-        
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error(`Edge function error (${response.status}):`, errorText);
-          throw new Error(`Edge function fejl: ${response.status}`);
+        if (functionError) {
+          console.error("Edge function error:", functionError);
+          throw new Error(`Edge function fejl: ${functionError.message}`);
         }
         
-        const functionData = await response.json();
         console.log("Received response from edge function:", functionData);
         
         if (!functionData || !functionData.content) {
@@ -275,8 +261,8 @@ export const useCoverLetterGeneration = (user: User | null) => {
         }
         
         letterContent = functionData.content;
-      } catch (fetchError) {
-        console.error("Error calling edge function:", fetchError);
+      } catch (functionError) {
+        console.error("Error calling edge function:", functionError);
         
         // Generate fallback content if edge function call fails
         const today = new Date().toLocaleDateString("da-DK", {
@@ -376,7 +362,7 @@ export const useCoverLetterGeneration = (user: User | null) => {
     } finally {
       setIsGenerating(false);
     }
-  }, [selectedJob, toast, user, supabase]);
+  }, [selectedJob, toast, user]);
 
   const handleEditLetter = useCallback(async (updatedContent: string) => {
     if (!generatedLetter || !user) return;
@@ -413,7 +399,7 @@ export const useCoverLetterGeneration = (user: User | null) => {
         variant: "destructive",
       });
     }
-  }, [generatedLetter, toast, user, supabase]);
+  }, [generatedLetter, toast, user]);
 
   const handleSaveLetter = useCallback(() => {
     navigate("/dashboard");

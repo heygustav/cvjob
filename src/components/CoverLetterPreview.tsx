@@ -1,7 +1,7 @@
 
 import React, { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { Download, Copy, Save } from "lucide-react";
+import { Download, Copy, Save, Edit } from "lucide-react";
 
 interface CoverLetterPreviewProps {
   content: string;
@@ -77,13 +77,13 @@ const CoverLetterPreview: React.FC<CoverLetterPreviewProps> = ({
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
-      <div className="flex items-center justify-between p-4 border-b border-gray-100">
-        <h3 className="text-lg font-medium text-gray-900">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 border-b border-gray-100">
+        <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2 sm:mb-0 truncate">
           {jobTitle && company
             ? `Ansøgning til ${jobTitle} hos ${company}`
             : "Ansøgningsforhåndsvisning"}
         </h3>
-        <div className="flex space-x-2">
+        <div className="flex flex-wrap gap-2">
           {isEditing ? (
             <button
               onClick={handleSaveChanges}
@@ -96,58 +96,61 @@ const CoverLetterPreview: React.FC<CoverLetterPreviewProps> = ({
               {isEditable && (
                 <button
                   onClick={() => setIsEditing(true)}
-                  className="inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
+                  className="inline-flex items-center px-2 sm:px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
                 >
-                  Rediger
+                  <Edit className="h-4 w-4 sm:mr-1" />
+                  <span className="hidden sm:inline">Rediger</span>
                 </button>
               )}
               <button
                 onClick={handleCopy}
-                className="inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
+                className="inline-flex items-center px-2 sm:px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
                 title="Kopier til udklipsholder"
               >
-                <Copy className="h-4 w-4" />
+                <Copy className="h-4 w-4 sm:mr-1" />
+                <span className="hidden sm:inline">Kopier</span>
               </button>
               <button
                 onClick={handleDownload}
-                className="inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
+                className="inline-flex items-center px-2 sm:px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
                 title="Download som tekstfil"
               >
-                <Download className="h-4 w-4" />
+                <Download className="h-4 w-4 sm:mr-1" />
+                <span className="hidden sm:inline">Download</span>
               </button>
               {onSave && (
                 <button
                   onClick={handleSave}
-                  className="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md text-sm font-medium text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
+                  className="inline-flex items-center px-2 sm:px-3 py-1.5 border border-transparent rounded-md text-sm font-medium text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
                   title="Gem til din konto"
                 >
-                  <Save className="h-4 w-4 mr-1" />
-                  Gem
+                  <Save className="h-4 w-4 sm:mr-1" />
+                  <span className="hidden sm:inline">Gem</span>
                 </button>
               )}
             </>
           )}
         </div>
       </div>
-      <div className="p-4">
+      <div className="p-3 sm:p-4">
         {isEditing ? (
           <textarea
             value={editedContent}
             onChange={handleTextChange}
-            className="w-full h-96 p-4 border border-gray-300 rounded-md focus:border-black focus:ring-black font-serif text-base"
+            className="w-full h-72 sm:h-96 p-3 sm:p-4 border border-gray-300 rounded-md focus:border-black focus:ring-black font-serif text-sm sm:text-base"
           />
         ) : (
-          <div className="prose max-w-none font-serif whitespace-pre-line">
+          <div className="prose max-w-none font-serif whitespace-pre-line text-sm sm:text-base overflow-auto">
             {editedContent}
           </div>
         )}
       </div>
-      <div className="flex items-center justify-between p-4 border-t border-gray-100 bg-gray-50 text-xs text-gray-500">
+      <div className="flex items-center justify-between p-3 sm:p-4 border-t border-gray-100 bg-gray-50 text-xs text-gray-500">
         <p>
-          Sidst opdateret: {new Date().toLocaleDateString("da-DK")}
+          {new Date().toLocaleDateString("da-DK")}
         </p>
         <p>
-          Oprettet med JobMagic
+          JobMagic
         </p>
       </div>
     </div>
