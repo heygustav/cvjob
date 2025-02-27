@@ -16,7 +16,7 @@ const CoverLetterGenerator: React.FC = () => {
   const jobId = searchParams.get("jobId");
   const letterId = searchParams.get("letterId");
   const { session } = useAuth();
-  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [isInitialized, setIsInitialized] = useState(false);
   const { toast } = useToast();
   
   // Convert Supabase user to our app's User type
@@ -46,55 +46,64 @@ const CoverLetterGenerator: React.FC = () => {
     resetError,
   } = useCoverLetterGeneration(user);
 
+  // Use a ref to prevent multiple initialization attempts
+  const initRef = React.useRef(false);
+
   useEffect(() => {
-    let mounted = true;
+    // Guard against running the effect multiple times
+    if (initRef.current) return;
     
     const initializeGenerator = async () => {
       try {
-        if (user) {
-          if (jobId) {
-            console.log("Initializing generator with jobId:", jobId);
-            const job = await fetchJob(jobId);
-            
-            // If the job exists but there's no letter, we'll stay on step 1
-            // and let the user click generate to create a letter
-            console.log("Job fetched, checking for any existing letters");
-          } else if (letterId) {
-            console.log("Initializing generator with letterId:", letterId);
-            await fetchLetter(letterId);
-          }
+        if (!user) {
+          console.log("No user found, skipping initialization");
+          setIsInitialized(true);
+          return;
         }
+        
+        if (jobId) {
+          console.log("Initializing generator with jobId:", jobId);
+          await fetchJob(jobId);
+        } else if (letterId) {
+          console.log("Initializing generator with letterId:", letterId);
+          await fetchLetter(letterId);
+        }
+        
+        // Mark as initialized regardless of outcome
+        console.log("Generator initialization complete");
       } catch (error) {
         console.error("Error initializing generator:", error);
-        if (mounted) {
-          toast({
-            title: "Fejl ved indlæsning",
-            description: "Der opstod en fejl under indlæsning af data.",
-            variant: "destructive",
-          });
-        }
+        toast({
+          title: "Fejl ved indlæsning",
+          description: "Der opstod en fejl under indlæsning af data.",
+          variant: "destructive",
+        });
       } finally {
-        if (mounted) {
-          setIsInitialLoading(false);
-        }
+        setIsInitialized(true);
+        // Set the ref to true to prevent re-runs
+        initRef.current = true;
       }
     };
 
     initializeGenerator();
     
+    // Cleanup: nothing specific needed here
     return () => {
-      mounted = false;
+      console.log("Generator component unmounting");
     };
   }, [user, jobId, letterId, fetchJob, fetchLetter, toast]);
 
-  // Determine loading state - either initial loading or generation in progress
-  const showLoadingSpinner = isInitialLoading || isLoading;
+  // Determine if we should show the loading spinner
+  const showLoadingSpinner = !isInitialized || isLoading;
 
   // Get appropriate loading message
   const getLoadingMessage = () => {
+    if (!isInitialized) return "Indlæser data...";
+    
     if (isGenerating && generationProgress?.message) {
       return generationProgress.message;
     }
+    
     if (isGenerating) {
       if (generationPhase === 'user-fetch') return "Henter brugerdata...";
       if (generationPhase === 'job-save') return "Gemmer jobdetaljer...";
@@ -102,19 +111,36 @@ const CoverLetterGenerator: React.FC = () => {
       if (generationPhase === 'letter-save') return "Gemmer ansøgning...";
       return "Genererer ansøgning...";
     }
+    
     if (loadingState === "saving") return "Gemmer ændringer...";
     if (loadingState === "initializing") return "Indlæser data...";
+    
     return "Indlæser jobinformation...";
+  };
+
+  // Calculate progress value with fallback
+  const getProgressValue = () => {
+    if (!isInitialized) return 10; // Initial loading progress
+    
+    // For generation phase, use the specific progress
+    if (isGenerating && generationProgress?.progress) {
+      return generationProgress.progress;
+    }
+    
+    // For other loading phases, use a static value
+    if (isLoading) return 30;
+    
+    return 0; // No progress shown when not loading
   };
 
   // Show loading state when initializing or generating
   if (showLoadingSpinner) {
-    const progressValue = generationProgress?.progress || 0;
+    const progressValue = getProgressValue();
     console.log("Showing loading spinner with progress:", progressValue);
     return <LoadingSpinner message={getLoadingMessage()} progress={progressValue} />;
   }
 
-  console.log("Rendering state:", { 
+  console.log("Rendering generator content:", { 
     step, 
     generatedLetter: generatedLetter?.id, 
     selectedJob: selectedJob?.id, 

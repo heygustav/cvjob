@@ -67,10 +67,17 @@ export const useCoverLetterGeneration = (user: User | null) => {
   const navigate = useNavigate();
   const generationAttemptRef = useRef(0);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const isMountedRef = useRef(true);
 
   // Cleanup timeouts when component unmounts
   useEffect(() => {
+    // Set mount state
+    isMountedRef.current = true;
+    
     return () => {
+      // Mark as unmounted
+      isMountedRef.current = false;
+      
       // Clear any pending generation timeout
       if ((window as any).__generationTimeoutId) {
         clearTimeout((window as any).__generationTimeoutId);
@@ -89,6 +96,13 @@ export const useCoverLetterGeneration = (user: User | null) => {
   const isLoading = loadingState !== "idle";
   const isGenerating = loadingState === "generating";
   const isInitializing = loadingState === "initializing";
+
+  // Safe state updater helpers that check if component is still mounted
+  const safeSetState = <T,>(stateSetter: React.Dispatch<React.SetStateAction<T>>, value: T) => {
+    if (isMountedRef.current) {
+      stateSetter(value);
+    }
+  };
 
   // Memoize toast configurations
   const toastMessages = useMemo(() => ({
@@ -154,11 +168,13 @@ export const useCoverLetterGeneration = (user: User | null) => {
   }, []);
 
   const fetchJob = useCallback(async (id: string) => {
+    if (!isMountedRef.current) return null;
+    
     try {
-      setLoadingState("initializing");
-      setGenerationError(null);
-      setGenerationPhase(null);
-      setGenerationProgress({
+      safeSetState(setLoadingState, "initializing");
+      safeSetState(setGenerationError, null);
+      safeSetState(setGenerationPhase, null);
+      safeSetState(setGenerationProgress, {
         phase: 'job-save',
         progress: 0,
         message: 'Henter jobinformation...'
@@ -176,16 +192,18 @@ export const useCoverLetterGeneration = (user: User | null) => {
         job = await fetchWithTimeout(fetchJobById(id));
       }
       
-      if (!job) {
-        toast(toastMessages.jobNotFound);
-        navigate("/dashboard");
+      if (!job || !isMountedRef.current) {
+        if (!job) {
+          toast(toastMessages.jobNotFound);
+          navigate("/dashboard");
+        }
         return null;
       }
 
       console.log("Successfully fetched job:", job);
-      setSelectedJob(job);
+      safeSetState(setSelectedJob, job);
 
-      setGenerationProgress({
+      safeSetState(setGenerationProgress, {
         phase: 'job-save',
         progress: 50,
         message: 'Søger efter eksisterende ansøgninger...'
@@ -201,29 +219,36 @@ export const useCoverLetterGeneration = (user: User | null) => {
           letters = await fetchWithTimeout(fetchLettersForJob(id));
         }
         
-        if (letters && letters.length > 0) {
+        if (letters && letters.length > 0 && isMountedRef.current) {
           console.log("Found existing letters for job:", letters[0]);
-          setGeneratedLetter(letters[0]);
-          setStep(2);
-        } else {
+          safeSetState(setGeneratedLetter, letters[0]);
+          safeSetState(setStep, 2);
+        } else if (isMountedRef.current) {
           console.log("No existing letters found, staying on step 1");
-          setStep(1);
+          safeSetState(setStep, 1);
         }
       } catch (letterError) {
         console.error("Error fetching letters:", letterError);
         // Non-critical error, continue on step 1
-        setStep(1);
+        if (isMountedRef.current) {
+          safeSetState(setStep, 1);
+        }
       }
       
-      setGenerationProgress({
-        phase: 'job-save',
-        progress: 100,
-        message: 'Indlæsning fuldført'
-      });
+      if (isMountedRef.current) {
+        safeSetState(setGenerationProgress, {
+          phase: 'job-save',
+          progress: 100,
+          message: 'Indlæsning fuldført'
+        });
+      }
       
       return job;
     } catch (error) {
       console.error("Error in fetchJob:", error);
+      
+      if (!isMountedRef.current) return null;
+      
       const isNetworkError = !navigator.onLine || 
         (error instanceof Error && (
           error.message.includes('forbindelse') ||
@@ -240,16 +265,20 @@ export const useCoverLetterGeneration = (user: User | null) => {
       navigate("/dashboard");
       return null;
     } finally {
-      setLoadingState("idle");
+      if (isMountedRef.current) {
+        safeSetState(setLoadingState, "idle");
+      }
     }
   }, [navigate, toast, toastMessages]);
 
   const fetchLetter = useCallback(async (id: string) => {
+    if (!isMountedRef.current) return null;
+    
     try {
-      setLoadingState("initializing");
-      setGenerationError(null);
-      setGenerationPhase(null);
-      setGenerationProgress({
+      safeSetState(setLoadingState, "initializing");
+      safeSetState(setGenerationError, null);
+      safeSetState(setGenerationPhase, null);
+      safeSetState(setGenerationProgress, {
         phase: 'letter-save',
         progress: 0,
         message: 'Henter ansøgning...'
@@ -266,16 +295,18 @@ export const useCoverLetterGeneration = (user: User | null) => {
         letter = await fetchWithTimeout(fetchLetterById(id));
       }
       
-      if (!letter) {
-        toast(toastMessages.letterNotFound);
-        navigate("/dashboard");
+      if (!letter || !isMountedRef.current) {
+        if (!letter) {
+          toast(toastMessages.letterNotFound);
+          navigate("/dashboard");
+        }
         return null;
       }
 
       console.log("Fetched letter:", letter);
-      setGeneratedLetter(letter);
+      safeSetState(setGeneratedLetter, letter);
 
-      setGenerationProgress({
+      safeSetState(setGenerationProgress, {
         phase: 'letter-save',
         progress: 50,
         message: 'Henter tilhørende job...'
@@ -291,9 +322,9 @@ export const useCoverLetterGeneration = (user: User | null) => {
           job = await fetchWithTimeout(fetchJobById(letter.job_posting_id));
         }
         
-        if (job) {
+        if (job && isMountedRef.current) {
           console.log("Fetched job for letter:", job);
-          setSelectedJob(job);
+          safeSetState(setSelectedJob, job);
         } else {
           console.error("Job not found for letter:", letter.job_posting_id);
         }
@@ -302,16 +333,22 @@ export const useCoverLetterGeneration = (user: User | null) => {
         // Non-critical error, continue
       }
       
-      setGenerationProgress({
-        phase: 'letter-save',
-        progress: 100,
-        message: 'Ansøgning indlæst'
-      });
+      if (isMountedRef.current) {
+        safeSetState(setGenerationProgress, {
+          phase: 'letter-save',
+          progress: 100,
+          message: 'Ansøgning indlæst'
+        });
+        
+        safeSetState(setStep, 2);
+      }
       
-      setStep(2);
       return letter;
     } catch (error) {
       console.error("Error in fetchLetter:", error);
+      
+      if (!isMountedRef.current) return null;
+      
       const isNetworkError = !navigator.onLine || 
         (error instanceof Error && (
           error.message.includes('forbindelse') ||
@@ -328,7 +365,9 @@ export const useCoverLetterGeneration = (user: User | null) => {
       navigate("/dashboard");
       return null;
     } finally {
-      setLoadingState("idle");
+      if (isMountedRef.current) {
+        safeSetState(setLoadingState, "idle");
+      }
     }
   }, [navigate, toast, toastMessages]);
 
@@ -358,11 +397,11 @@ export const useCoverLetterGeneration = (user: User | null) => {
     abortControllerRef.current = new AbortController();
 
     // Clear any previous errors
-    setGenerationError(null);
-    setGenerationPhase(null);
+    safeSetState(setGenerationError, null);
+    safeSetState(setGenerationPhase, null);
 
     // Initial setup
-    setGenerationProgress({
+    safeSetState(setGenerationProgress, {
       phase: 'job-save',
       progress: 10,
       message: 'Forbereder generering...'
@@ -374,21 +413,26 @@ export const useCoverLetterGeneration = (user: User | null) => {
     console.log(`Starting generation attempt #${currentAttempt}`);
 
     // Set initial loading state
-    setLoadingState("generating");
+    safeSetState(setLoadingState, "generating");
 
     // Create a timeout promise for the entire generation process
     const timeoutPromise = new Promise<never>((_, reject) => {
-      setTimeout(() => {
+      const timeoutId = setTimeout(() => {
         reject(new Error('Generation timed out. Prøv igen senere.'));
       }, TIMEOUT_DURATION);
+      
+      // Store the timeout ID for cleanup
+      (window as any).__generationTimeoutId = timeoutId;
     });
 
     // Create the generation promise
     const generationPromise = (async () => {
       try {
         // Step 1: Fetch user profile first to check completeness
-        setGenerationPhase('user-fetch');
-        setGenerationProgress({
+        if (!isMountedRef.current) throw new Error('Component unmounted');
+        
+        safeSetState(setGenerationPhase, 'user-fetch');
+        safeSetState(setGenerationProgress, {
           phase: 'user-fetch',
           progress: 20,
           message: 'Henter din profil...'
@@ -404,6 +448,8 @@ export const useCoverLetterGeneration = (user: User | null) => {
           throw createError('user-fetch', 'Kunne ikke hente din profil. Prøv at opdatere siden.');
         }
         
+        if (!isMountedRef.current) throw new Error('Component unmounted');
+        
         console.log(`User profile fetched for ID: ${user.id}`, {
           hasName: !!userInfo.name,
           hasExperience: !!userInfo.experience,
@@ -417,8 +463,10 @@ export const useCoverLetterGeneration = (user: User | null) => {
         }
 
         // Step 2: Save or update the job posting
-        setGenerationPhase('job-save');
-        setGenerationProgress({
+        if (!isMountedRef.current) throw new Error('Component unmounted');
+        
+        safeSetState(setGenerationPhase, 'job-save');
+        safeSetState(setGenerationProgress, {
           phase: 'job-save',
           progress: 40,
           message: 'Gemmer jobdetaljer...'
@@ -433,11 +481,13 @@ export const useCoverLetterGeneration = (user: User | null) => {
           throw createError('job-save', 'Kunne ikke gemme jobdetaljer. Tjek din forbindelse og prøv igen.');
         }
         
+        if (!isMountedRef.current) throw new Error('Component unmounted');
+        
         console.log(`Job saved with ID: ${jobId}`);
 
         // Step 3: Generate letter content
-        setGenerationPhase('generation');
-        setGenerationProgress({
+        safeSetState(setGenerationPhase, 'generation');
+        safeSetState(setGenerationProgress, {
           phase: 'generation',
           progress: 60,
           message: 'Genererer ansøgning...'
@@ -452,11 +502,13 @@ export const useCoverLetterGeneration = (user: User | null) => {
           throw createError('generation', 'AI-tjenesten kunne ikke generere din ansøgning. Prøv igen om lidt.', false);
         }
         
+        if (!isMountedRef.current) throw new Error('Component unmounted');
+        
         console.log("Letter generated successfully, content length:", content?.length);
 
         // Step 4: Save the generated letter
-        setGenerationPhase('letter-save');
-        setGenerationProgress({
+        safeSetState(setGenerationPhase, 'letter-save');
+        safeSetState(setGenerationProgress, {
           phase: 'letter-save',
           progress: 80,
           message: 'Gemmer ansøgning...'
@@ -471,6 +523,8 @@ export const useCoverLetterGeneration = (user: User | null) => {
           throw createError('letter-save', 'Din ansøgning blev genereret, men kunne ikke gemmes. Prøv igen.');
         }
         
+        if (!isMountedRef.current) throw new Error('Component unmounted');
+        
         console.log(`Letter saved with ID: ${letter.id}`);
 
         // Update the job object first to ensure it has all necessary fields
@@ -484,7 +538,7 @@ export const useCoverLetterGeneration = (user: User | null) => {
         }
         
         // Final progress update
-        setGenerationProgress({
+        safeSetState(setGenerationProgress, {
           phase: 'letter-save',
           progress: 100,
           message: 'Færdig!'
@@ -500,24 +554,46 @@ export const useCoverLetterGeneration = (user: User | null) => {
       // Race between generation and timeout
       const result = await Promise.race([generationPromise, timeoutPromise]);
       
+      // Clear timeout
+      if ((window as any).__generationTimeoutId) {
+        clearTimeout((window as any).__generationTimeoutId);
+        (window as any).__generationTimeoutId = null;
+      }
+      
+      if (!isMountedRef.current) return;
+      
       // Success handling
-      setSelectedJob(result.job);
-      setGeneratedLetter(result.letter);
-      setStep(2);
+      safeSetState(setSelectedJob, result.job);
+      safeSetState(setGeneratedLetter, result.letter);
+      safeSetState(setStep, 2);
       
       toast(toastMessages.letterGenerated);
       
     } catch (error) {
       console.error(`Attempt #${currentAttempt}: Error in job submission process:`, error);
       
+      // Clear timeout
+      if ((window as any).__generationTimeoutId) {
+        clearTimeout((window as any).__generationTimeoutId);
+        (window as any).__generationTimeoutId = null;
+      }
+      
+      if (!isMountedRef.current) return;
+      
       let title = "Fejl ved generering";
       let description = "Der opstod en ukendt fejl. Prøv venligst igen.";
       let recoverable = true;
       
+      // Check if component was unmounted
+      if (error instanceof Error && error.message === 'Component unmounted') {
+        console.log("Generation cancelled due to component unmount");
+        return;
+      }
+      
       // Check if it was a timeout error
       if (error instanceof Error && error.message.includes('timed out')) {
         toast(toastMessages.generationTimeout);
-        setGenerationError("Generering tog for lang tid. Prøv igen senere.");
+        safeSetState(setGenerationError, "Generering tog for lang tid. Prøv igen senere.");
         return;
       }
       
@@ -565,7 +641,7 @@ export const useCoverLetterGeneration = (user: User | null) => {
       });
       
       // Set error state for UI to show
-      setGenerationError(description);
+      safeSetState(setGenerationError, description);
       
       // If not recoverable, navigate away
       if (!recoverable) {
@@ -574,17 +650,19 @@ export const useCoverLetterGeneration = (user: User | null) => {
       
     } finally {
       console.log(`Attempt #${currentAttempt}: Generation process completed`);
-      setLoadingState("idle");
+      if (isMountedRef.current) {
+        safeSetState(setLoadingState, "idle");
+      }
       abortControllerRef.current = null;
     }
   }, [createError, loadingState, navigate, selectedJob, toast, toastMessages, user]);
 
   const handleEditLetter = useCallback(async (updatedContent: string) => {
-    if (!generatedLetter || !user) return;
+    if (!generatedLetter || !user || !isMountedRef.current) return;
 
     try {
-      setLoadingState("saving");
-      setGenerationProgress({
+      safeSetState(setLoadingState, "saving");
+      safeSetState(setGenerationProgress, {
         phase: 'letter-save',
         progress: 50,
         message: 'Gemmer ændringer...'
@@ -592,12 +670,14 @@ export const useCoverLetterGeneration = (user: User | null) => {
       
       await fetchWithTimeout(updateLetterContent(generatedLetter.id, updatedContent));
 
-      setGeneratedLetter({
+      if (!isMountedRef.current) return;
+      
+      safeSetState(setGeneratedLetter, {
         ...generatedLetter,
         content: updatedContent
       });
 
-      setGenerationProgress({
+      safeSetState(setGenerationProgress, {
         phase: 'letter-save',
         progress: 100,
         message: 'Ændringer gemt!'
@@ -606,6 +686,9 @@ export const useCoverLetterGeneration = (user: User | null) => {
       toast(toastMessages.letterUpdated);
     } catch (error) {
       console.error('Error updating letter:', error);
+      
+      if (!isMountedRef.current) return;
+      
       const isNetworkError = !navigator.onLine || 
         (error instanceof Error && error.message.includes('forbindelse'));
       
@@ -617,7 +700,9 @@ export const useCoverLetterGeneration = (user: User | null) => {
         variant: "destructive",
       });
     } finally {
-      setLoadingState("idle");
+      if (isMountedRef.current) {
+        safeSetState(setLoadingState, "idle");
+      }
     }
   }, [generatedLetter, toast, toastMessages, user]);
 
@@ -627,8 +712,10 @@ export const useCoverLetterGeneration = (user: User | null) => {
   }, [navigate, toast, toastMessages]);
 
   const resetError = useCallback(() => {
-    setGenerationError(null);
-    setGenerationPhase(null);
+    if (isMountedRef.current) {
+      safeSetState(setGenerationError, null);
+      safeSetState(setGenerationPhase, null);
+    }
   }, []);
 
   return {
