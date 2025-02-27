@@ -54,7 +54,11 @@ const CoverLetterGenerator: React.FC = () => {
         if (user) {
           if (jobId) {
             console.log("Initializing generator with jobId:", jobId);
-            await fetchJob(jobId);
+            const job = await fetchJob(jobId);
+            
+            // If the job exists but there's no letter, we'll stay on step 1
+            // and let the user click generate to create a letter
+            console.log("Job fetched, checking for any existing letters");
           } else if (letterId) {
             console.log("Initializing generator with letterId:", letterId);
             await fetchLetter(letterId);

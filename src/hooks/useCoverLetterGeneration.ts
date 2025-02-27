@@ -1,5 +1,5 @@
 
-import { useState, useCallback, useRef, useMemo } from "react";
+import { useState, useCallback, useRef, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { JobPosting, CoverLetter, User } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
@@ -67,6 +67,23 @@ export const useCoverLetterGeneration = (user: User | null) => {
   const navigate = useNavigate();
   const generationAttemptRef = useRef(0);
   const abortControllerRef = useRef<AbortController | null>(null);
+
+  // Cleanup timeouts when component unmounts
+  useEffect(() => {
+    return () => {
+      // Clear any pending generation timeout
+      if ((window as any).__generationTimeoutId) {
+        clearTimeout((window as any).__generationTimeoutId);
+        (window as any).__generationTimeoutId = null;
+      }
+      
+      // Abort any in-progress API calls
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        abortControllerRef.current = null;
+      }
+    };
+  }, []);
 
   // Derived state
   const isLoading = loadingState !== "idle";
@@ -189,12 +206,13 @@ export const useCoverLetterGeneration = (user: User | null) => {
           setGeneratedLetter(letters[0]);
           setStep(2);
         } else {
-          console.log("No existing letters found, starting at step 1");
+          console.log("No existing letters found, staying on step 1");
           setStep(1);
         }
       } catch (letterError) {
         console.error("Error fetching letters:", letterError);
-        // Non-critical error, continue
+        // Non-critical error, continue on step 1
+        setStep(1);
       }
       
       setGenerationProgress({
