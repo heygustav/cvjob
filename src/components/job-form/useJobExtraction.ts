@@ -4,12 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { JobFormData } from "@/services/coverLetter/types";
 
-interface UseJobExtractionProps {
-  formData: JobFormData;
-  setFormData: React.Dispatch<React.SetStateAction<JobFormData>>;
-}
-
-export const useJobExtraction = ({ formData, setFormData }: UseJobExtractionProps) => {
+export const useJobExtraction = (formData: JobFormData, setFormData: React.Dispatch<React.SetStateAction<JobFormData>>) => {
   const [isExtracting, setIsExtracting] = useState(false);
   const { toast } = useToast();
 
