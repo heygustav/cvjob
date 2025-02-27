@@ -11,7 +11,7 @@ const GeneratorHeader: React.FC<GeneratorHeaderProps> = ({ step, setStep }) => {
     <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 md:mb-8 gap-4">
       <div>
         <h1 className="text-2xl sm:text-3xl font-bold leading-tight text-gray-900">
-          {step === 1 ? "Indtast jobdetaljer" : "Din ansøgning"}
+          {step === 1 ? "Copy/paste jobannonce" : "Din ansøgning"}
         </h1>
         <p className="mt-1 text-sm sm:text-lg text-gray-600">
           {step === 1
