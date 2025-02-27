@@ -21,12 +21,14 @@ const JobInfoFields: React.FC<JobInfoFieldsProps> = ({
   return (
     <div className="grid grid-cols-1 gap-y-4 sm:grid-cols-2 sm:gap-x-4">
       <div>
-        <label
-          htmlFor="title"
-          className="block text-sm font-medium text-gray-700 mb-1"
-        >
-          Jobtitel <span className="text-rose-500">*</span>
-        </label>
+        <div className="flex justify-between items-center mb-1">
+          <label
+            htmlFor="title"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Jobtitel <span className="text-rose-500">*</span>
+          </label>
+        </div>
         <input
           type="text"
           id="title"
@@ -51,12 +53,14 @@ const JobInfoFields: React.FC<JobInfoFieldsProps> = ({
       </div>
 
       <div>
-        <label
-          htmlFor="company"
-          className="block text-sm font-medium text-gray-700 mb-1"
-        >
-          Virksomhed <span className="text-rose-500">*</span>
-        </label>
+        <div className="flex justify-between items-center mb-1">
+          <label
+            htmlFor="company"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Virksomhed <span className="text-rose-500">*</span>
+          </label>
+        </div>
         <input
           type="text"
           id="company"
@@ -81,12 +85,14 @@ const JobInfoFields: React.FC<JobInfoFieldsProps> = ({
       </div>
 
       <div className="sm:col-span-2">
-        <label
-          htmlFor="contact_person"
-          className="block text-sm font-medium text-gray-700 mb-1"
-        >
-          Kontaktperson (Valgfri)
-        </label>
+        <div className="flex justify-between items-center mb-1">
+          <label
+            htmlFor="contact_person"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Kontaktperson (Valgfri)
+          </label>
+        </div>
         <input
           type="text"
           id="contact_person"

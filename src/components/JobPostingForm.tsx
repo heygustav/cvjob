@@ -10,7 +10,6 @@ import SubmitButton from "./job-form/SubmitButton";
 import { useTimer } from "./job-form/useTimer";
 import { useJobExtraction } from "./job-form/useJobExtraction";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/AuthProvider";
 import { saveOrUpdateJob } from "@/services/coverLetter/database";
 
@@ -113,64 +112,6 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
     }
   };
 
-  const handleSave = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    console.log("Save button clicked", formData);
-    
-    if (!validateForm()) {
-      console.log("Form validation failed for save", errors);
-      toast({
-        title: "Fejl i formular",
-        description: "Udfyld venligst alle påkrævede felter korrekt.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      setIsSaving(true);
-      console.log("Starting save process");
-      
-      // If onSave is provided, use it
-      if (onSave) {
-        console.log("Using provided onSave function");
-        await onSave(formData);
-      } 
-      // Otherwise do a direct save if we have a user
-      else if (user) {
-        console.log("Saving job for user", user.id);
-        await saveOrUpdateJob(formData, user.id, initialData?.id);
-      } else {
-        console.log("No user found, cannot save");
-        toast({
-          title: "Log ind krævet",
-          description: "Du skal være logget ind for at gemme et jobopslag.",
-          variant: "destructive",
-        });
-        setIsSaving(false);
-        return;
-      }
-      
-      console.log("Save completed successfully");
-      toast({
-        title: "Jobopslag gemt",
-        description: "Dit jobopslag er blevet gemt. Du kan generere en ansøgning senere.",
-      });
-      
-      // Always navigate to dashboard after saving
-      navigate("/dashboard");
-    } catch (error) {
-      console.error("Error saving job posting:", error);
-      toast({
-        title: "Fejl ved gem",
-        description: "Der opstod en fejl under gem af jobopslaget.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <UrlField 
@@ -200,27 +141,10 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t border-gray-100">
-        <button
-          type="button"
-          onClick={handleSave}
-          disabled={isLoading || isSaving}
-          className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black disabled:opacity-50 disabled:cursor-not-allowed"
-          aria-label="Gem jobopslag til senere"
-        >
-          {isSaving ? (
-            <span className="flex items-center justify-center">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-700 mr-2" />
-              Gemmer...
-            </span>
-          ) : (
-            "Gem til senere"
-          )}
-        </button>
-        
         <SubmitButton 
           isLoading={isLoading} 
           elapsedTime={formattedTime}
-          className="flex-1"
+          className="w-full"
         />
       </div>
     </form>

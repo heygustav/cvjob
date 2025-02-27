@@ -10,12 +10,14 @@ interface UrlFieldProps {
 const UrlField: React.FC<UrlFieldProps> = ({ value, onChange, disabled }) => {
   return (
     <div className="mb-5">
-      <label
-        htmlFor="url"
-        className="block text-sm font-medium text-gray-700 mb-1"
-      >
-        Job-URL (Valgfri)
-      </label>
+      <div className="flex justify-between items-center mb-1">
+        <label
+          htmlFor="url"
+          className="block text-sm font-medium text-gray-700"
+        >
+          Job-URL (Valgfri)
+        </label>
+      </div>
       <div className="relative">
         <input
           type="url"
