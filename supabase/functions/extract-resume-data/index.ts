@@ -1,7 +1,7 @@
 
-import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
-import "https://deno.land/x/xhr@0.3.0/mod.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.21.0";
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import "https://deno.land/x/xhr@0.1.0/mod.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 // Set up CORS headers for the function
 const corsHeaders = {
@@ -25,6 +25,17 @@ serve(async (req: Request) => {
   }
 
   try {
+    if (!openAIKey) {
+      console.error("Missing OpenAI API key");
+      return new Response(
+        JSON.stringify({ error: "Server configuration error: Missing API key" }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
     // Read the FormData from the request
     const formData = await req.formData();
     const file = formData.get("file");
@@ -84,82 +95,135 @@ serve(async (req: Request) => {
       Return your response as a JSON object with these fields. For any field where information is not found or unclear, set it to null.
     `;
 
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${openAIKey}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-4o",
-        messages: [
-          {
-            role: "system",
-            content: systemPrompt,
-          },
-          {
-            role: "user",
-            content: [
-              {
-                type: "text",
-                text: "Extract the resume information from this PDF document. Be conservative - don't make assumptions and only extract what's clearly visible.",
-              },
-              {
-                type: "image_url",
-                image_url: {
-                  url: `data:application/pdf;base64,${base64}`,
-                },
-              },
-            ],
-          },
-        ],
-        temperature: 0.2, // Setting a low temperature for more accurate extraction
-        max_tokens: 2000,
-      }),
-    });
-
-    const result = await response.json();
-    
-    if (!response.ok || !result.choices || !result.choices[0]) {
-      console.error("Error from OpenAI:", result);
-      throw new Error("Failed to extract text from PDF");
-    }
-
-    console.log("Received response from OpenAI");
-
-    // Parse the AI's JSON response
-    let extractedData;
     try {
-      // Extract JSON from the GPT response
-      const jsonContentMatch = result.choices[0].message.content.match(/\{[\s\S]*\}/);
-      
-      if (jsonContentMatch) {
-        extractedData = JSON.parse(jsonContentMatch[0]);
-        console.log("Successfully parsed extracted data");
-      } else {
-        throw new Error("Could not find valid JSON in the response");
-      }
-    } catch (error) {
-      console.error("Error parsing JSON from GPT response:", error);
-      console.log("Raw response:", result.choices[0].message.content);
-      throw new Error("Failed to parse extracted data");
-    }
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${openAIKey}`,
+        },
+        body: JSON.stringify({
+          model: "gpt-4o",
+          messages: [
+            {
+              role: "system",
+              content: systemPrompt,
+            },
+            {
+              role: "user",
+              content: [
+                {
+                  type: "text",
+                  text: "Extract the resume information from this PDF document. Be conservative - don't make assumptions and only extract what's clearly visible.",
+                },
+                {
+                  type: "image_url",
+                  image_url: {
+                    url: `data:application/pdf;base64,${base64}`,
+                  },
+                },
+              ],
+            },
+          ],
+          temperature: 0.2, // Setting a low temperature for more accurate extraction
+          max_tokens: 2000,
+        }),
+      });
 
-    return new Response(
-      JSON.stringify({
-        extractedData,
-        message: "Resume data extracted successfully",
-      }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("OpenAI API error:", response.status, errorText);
+        return new Response(
+          JSON.stringify({ 
+            error: `OpenAI API returned error ${response.status}: ${errorText.substring(0, 100)}...` 
+          }),
+          {
+            status: 500,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
+        );
       }
-    );
+
+      const result = await response.json();
+      
+      if (!result.choices || !result.choices[0]) {
+        console.error("Unexpected response format from OpenAI:", result);
+        return new Response(
+          JSON.stringify({ error: "Unexpected response format from OpenAI" }),
+          {
+            status: 500,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
+        );
+      }
+
+      console.log("Received response from OpenAI");
+
+      // Parse the AI's JSON response
+      let extractedData;
+      try {
+        // Extract JSON from the GPT response
+        const content = result.choices[0].message.content;
+        const jsonContentMatch = content.match(/\{[\s\S]*\}/);
+        
+        if (jsonContentMatch) {
+          extractedData = JSON.parse(jsonContentMatch[0]);
+          console.log("Successfully parsed extracted data");
+        } else {
+          console.error("Could not find valid JSON in response:", content);
+          return new Response(
+            JSON.stringify({ 
+              error: "Could not find valid JSON in the AI response",
+              rawResponse: content.substring(0, 200) + "..." // Include part of the raw response for debugging
+            }),
+            {
+              status: 500,
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+            }
+          );
+        }
+      } catch (error) {
+        console.error("Error parsing JSON from GPT response:", error);
+        return new Response(
+          JSON.stringify({ 
+            error: "Failed to parse extracted data: " + error.message,
+            rawResponse: result.choices[0].message.content.substring(0, 200) + "..."
+          }),
+          {
+            status: 500,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
+        );
+      }
+
+      return new Response(
+        JSON.stringify({
+          extractedData,
+          message: "Resume data extracted successfully",
+        }),
+        {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    } catch (openAIError) {
+      console.error("Error calling OpenAI API:", openAIError);
+      return new Response(
+        JSON.stringify({ 
+          error: "Error processing CV with OpenAI: " + openAIError.message 
+        }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
   } catch (error) {
-    console.error("Error processing CV:", error);
+    console.error("General error processing CV:", error);
     
     return new Response(
       JSON.stringify({
-        error: error.message || "An unknown error occurred",
+        error: "An error occurred while processing the CV: " + error.message,
       }),
       {
         status: 500,
