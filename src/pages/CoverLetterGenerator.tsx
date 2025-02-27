@@ -65,14 +65,19 @@ const CoverLetterGenerator: React.FC = () => {
         
         console.log("Starting initialization with params:", { jobId, letterId });
         
+        // For saved job viewing (no generation support for existing jobs)
         if (jobId) {
           await fetchJob(jobId);
           console.log("Job fetched, any loading state should now be managed by the hook");
-        } else if (letterId) {
+        } 
+        // For viewing generated letters
+        else if (letterId) {
           await fetchLetter(letterId);
           console.log("Letter fetched, any loading state should now be managed by the hook");
-        } else {
-          console.log("No job or letter ID provided");
+        } 
+        // Default - for new job submissions
+        else {
+          console.log("No job or letter ID provided - new submission mode");
         }
       } catch (error) {
         console.error("Initialization error:", error);
