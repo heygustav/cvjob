@@ -10,15 +10,15 @@ const Index = () => {
 
   return (
     <div className="bg-background">
-      {/* Hero section - remains centered as requested */}
-      <div className="relative isolate pt-6">
+      {/* Hero section - with adjusted background color */}
+      <div className="relative isolate pt-6 bg-background">
         <div className="py-12 sm:py-20">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="mx-auto max-w-2xl text-center">
               <div className="flex justify-center items-center mb-6">
-                <CavalierDog className="w-20 h-20 text-primary-800" />
+                <CavalierDog className="w-20 h-20 text-primary-700" />
               </div>
-              <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-6xl">
+              <h1 className="text-4xl font-bold tracking-tight text-primary-800 sm:text-6xl">
                 Ansøgninger skrevet med kunstig intelligens
               </h1>
               <p className="mt-6 text-lg leading-8 text-muted-foreground">
@@ -53,14 +53,14 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Features section - White background with left-aligned text */}
+      {/* Features section - with softgray background and improved contrast */}
       <div className="py-16 sm:py-24 bg-secondary/50">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mx-auto max-w-2xl lg:text-left">
-            <h2 className="text-base font-semibold leading-7 text-primary">
+            <h2 className="text-base font-semibold leading-7 text-primary-700">
               Spar tid på jobsøgningen
             </h2>
-            <p className="mt-2 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+            <p className="mt-2 text-3xl font-bold tracking-tight text-primary-800 sm:text-4xl">
               Fokusér på de rigtige jobs, ikke på at skrive ansøgninger
             </p>
             <p className="mt-6 text-lg leading-8 text-muted-foreground">
@@ -71,8 +71,8 @@ const Index = () => {
           <div className="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-4xl">
             <dl className="grid max-w-xl grid-cols-1 gap-x-8 gap-y-10 lg:max-w-none lg:grid-cols-2 lg:gap-y-16">
               <div className="relative pl-16">
-                <dt className="text-base font-semibold leading-7 text-foreground">
-                  <div className="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
+                <dt className="text-base font-semibold leading-7 text-primary-800">
+                  <div className="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary-700">
                     <FileText className="h-6 w-6 text-white" aria-hidden="true" />
                   </div>
                   Skræddersyede ansøgninger
@@ -83,8 +83,8 @@ const Index = () => {
                 </dd>
               </div>
               <div className="relative pl-16">
-                <dt className="text-base font-semibold leading-7 text-foreground">
-                  <div className="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
+                <dt className="text-base font-semibold leading-7 text-primary-800">
+                  <div className="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary-700">
                     <CheckCircle className="h-6 w-6 text-white" aria-hidden="true" />
                   </div>
                   Simpel og intuitiv
@@ -95,8 +95,8 @@ const Index = () => {
                 </dd>
               </div>
               <div className="relative pl-16">
-                <dt className="text-base font-semibold leading-7 text-foreground">
-                  <div className="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
+                <dt className="text-base font-semibold leading-7 text-primary-800">
+                  <div className="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary-700">
                     <Sparkles className="h-6 w-6 text-white" aria-hidden="true" />
                   </div>
                   Avanceret AI-teknologi
@@ -107,8 +107,8 @@ const Index = () => {
                 </dd>
               </div>
               <div className="relative pl-16">
-                <dt className="text-base font-semibold leading-7 text-foreground">
-                  <div className="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
+                <dt className="text-base font-semibold leading-7 text-primary-800">
+                  <div className="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary-700">
                     <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" aria-hidden="true">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
                     </svg>
@@ -191,7 +191,7 @@ const Index = () => {
       <div className="bg-background py-16 sm:py-24">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mx-auto max-w-2xl lg:max-w-4xl">
-            <h2 className="text-3xl font-bold tracking-tight text-foreground text-center">
+            <h2 className="text-3xl font-bold tracking-tight text-primary-800 text-center">
               Hvad vores brugere siger
             </h2>
             <figure className="mt-12">
@@ -204,11 +204,11 @@ const Index = () => {
               </blockquote>
               <figcaption className="mt-10">
                 <div className="mx-auto flex items-center justify-center space-x-3">
-                  <div className="h-12 w-12 rounded-full bg-primary flex items-center justify-center">
+                  <div className="h-12 w-12 rounded-full bg-primary-700 flex items-center justify-center">
                     <span className="text-lg font-semibold text-white">ML</span>
                   </div>
                   <div className="text-left">
-                    <div className="text-base font-semibold text-foreground">Mette L.</div>
+                    <div className="text-base font-semibold text-primary-800">Mette L.</div>
                     <div className="text-sm text-muted-foreground">Digital Marketing Manager</div>
                   </div>
                 </div>
