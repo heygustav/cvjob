@@ -1,10 +1,9 @@
-
 import React, { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Sparkles } from "lucide-react";
 import JobPostingForm from "../components/JobPostingForm";
 import CoverLetterPreview from "../components/CoverLetterPreview";
-import { JobPosting, CoverLetter, mockJobPostings, mockCoverLetters } from "../lib/types";
+import { JobPosting, CoverLetter, mockJobPostings, mockCoverLetters, mockUsers } from "../lib/types";
 import { useToast } from "@/hooks/use-toast";
 
 const CoverLetterGenerator = () => {
@@ -44,12 +43,10 @@ const CoverLetterGenerator = () => {
     }
   }, [jobId, letterId]);
 
-  const handleJobFormSubmit = (jobData: Partial<JobPosting>) => {
-    // In a real app, we would save this to the database
-    // For demo purposes, we'll just use the data in memory
+  const handleJobFormSubmit = async (jobData: Partial<JobPosting>) => {
     const newJob: JobPosting = {
       id: selectedJob?.id || `job-${Date.now()}`,
-      userId: "1", // Assuming logged in user has ID 1
+      userId: "1",
       title: jobData.title || "",
       company: jobData.company || "",
       description: jobData.description || "",
@@ -61,62 +58,60 @@ const CoverLetterGenerator = () => {
     setSelectedJob(newJob);
     setIsGenerating(true);
 
-    // Simulate AI-based cover letter generation
-    setTimeout(() => {
-      generateCoverLetter(newJob);
-      setIsGenerating(false);
+    try {
+      const user = mockUsers[0];
+
+      const response = await fetch('/functions/v1/generate-cover-letter', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          jobInfo: newJob,
+          userInfo: {
+            name: user.name,
+            email: user.email,
+            phone: user.phone,
+            address: user.address,
+            experience: "",
+            education: "",
+            skills: "",
+          },
+          jobPosting: newJob.description,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate cover letter');
+      }
+
+      const data = await response.json();
+      
+      const newLetter: CoverLetter = {
+        id: generatedLetter?.id || `letter-${Date.now()}`,
+        userId: "1",
+        jobPostingId: newJob.id,
+        content: data.content,
+        createdAt: new Date(),
+      };
+
+      setGeneratedLetter(newLetter);
       setStep(2);
-    }, 3000);
-  };
 
-  const generateCoverLetter = (job: JobPosting) => {
-    // In a real app, this would call an API to generate the letter using AI
-    // For demo purposes, we'll use a template
-
-    const today = new Date();
-    const formattedDate = today.toLocaleDateString("da-DK", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
-
-    const contactPerson = job.contactPerson || "Ansættelsesansvarlig";
-
-    const letterContent = `${formattedDate}
-
-Kære ${contactPerson},
-
-VEDRØRENDE: ANSØGNING TIL STILLINGEN SOM ${job.title.toUpperCase()} HOS ${job.company.toUpperCase()}
-
-Jeg skriver til dig for at ansøge om stillingen som ${job.title} hos ${job.company}, som jeg så annonceret. Med min baggrund inden for dette felt og mine færdigheder, tror jeg, at jeg vil være et værdifuldt aktiv for jeres team.
-
-Gennem min karriere har jeg opbygget omfattende erfaring inden for ${job.title.toLowerCase()}-området. Jeg har arbejdet på projekter, der krævede stærke analytiske evner, problemløsningskompetencer og teknisk ekspertise. Min erfaring har givet mig et solidt fundament, som jeg kan bygge videre på i denne rolle.
-
-Jeg er særligt tiltrukket af ${job.company} på grund af jeres omdømme for innovation og kvalitet inden for branchen. Jeres fokus på [relevant virksomhedsværdi] matcher perfekt med mine egne professionelle værdier og ambitioner.
-
-Jeg ser frem til muligheden for at diskutere, hvordan mine kvalifikationer kan bidrage til jeres team. Jeg er tilgængelig for et interview på et tidspunkt, der passer jer.
-
-Med venlig hilsen,
-
-Demo Bruger
-Telefon: +45 12 34 56 78
-Email: demo@example.com`;
-
-    const newLetter: CoverLetter = {
-      id: generatedLetter?.id || `letter-${Date.now()}`,
-      userId: "1", // Assuming logged in user has ID 1
-      jobPostingId: job.id,
-      content: letterContent,
-      createdAt: new Date(),
-    };
-
-    setGeneratedLetter(newLetter);
-
-    // In a real app, we would save the letter to the database here
-    toast({
-      title: "Ansøgning genereret",
-      description: "Din ansøgning er blevet oprettet med succes.",
-    });
+      toast({
+        title: "Ansøgning genereret",
+        description: "Din ansøgning er blevet oprettet med succes.",
+      });
+    } catch (error) {
+      console.error('Error generating cover letter:', error);
+      toast({
+        title: "Fejl ved generering",
+        description: "Der opstod en fejl under generering af ansøgningen. Prøv venligst igen.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const handleEditLetter = (updatedContent: string) => {
@@ -133,7 +128,6 @@ Email: demo@example.com`;
       title: "Ansøgning gemt",
       description: "Din ansøgning er blevet gemt til din konto.",
     });
-    // In a real app, we would update the letter in the database here
   };
 
   const handleBackToJobDetails = () => {
