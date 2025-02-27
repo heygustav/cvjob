@@ -79,7 +79,7 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
 
       console.log("Starting CV parsing process");
 
-      // Call the Supabase Edge Function
+      // Call the Supabase Edge Function with more detailed error handling
       const { data, error } = await supabase.functions.invoke('extract-resume-data', {
         body: formData,
         headers: {
@@ -91,7 +91,17 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
 
       if (error) {
         console.error("Supabase function error:", error);
-        throw new Error(error.message || 'Der opstod en fejl under behandling af CV');
+        
+        // Provide more specific error messages based on error type
+        let errorMessage = 'Der opstod en fejl under behandling af CV';
+        
+        if (error.message && error.message.includes('Failed to send a request')) {
+          errorMessage = 'Kunne ikke forbinde til CV-analyse tjenesten. Tjek din internetforbindelse og prøv igen senere.';
+        } else if (error.message) {
+          errorMessage = error.message;
+        }
+        
+        throw new Error(errorMessage);
       }
 
       if (!data || !data.extractedData) {
@@ -128,6 +138,8 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
       if (error.message) {
         if (error.message.includes('non-2xx status code')) {
           errorMessage = 'Serverfejl ved behandling af CV. Prøv igen senere.';
+        } else if (error.message.includes('Failed to send')) {
+          errorMessage = 'Kunne ikke forbinde til CV-analyse tjenesten. Tjek din internetforbindelse eller prøv igen senere.';
         } else {
           errorMessage = error.message;
         }
