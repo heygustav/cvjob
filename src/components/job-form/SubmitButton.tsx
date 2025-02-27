@@ -23,7 +23,7 @@ const SubmitButton: React.FC<SubmitButtonProps> = ({
       )}
       aria-label={isLoading ? "Genererer ansøgning..." : "Generer ansøgning"}
       style={{ 
-        backgroundColor: isLoading ? '#4caf50' : '#4caf50', 
+        backgroundColor: '#4caf50', 
         borderColor: '#388e3c',
         color: 'white'
       }}
