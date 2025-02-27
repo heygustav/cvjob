@@ -17,28 +17,26 @@ const CavalierDog: React.FC<CavalierDogProps> = ({ className = "" }) => {
       strokeLinejoin="round" 
       className={className}
     >
-      {/* Cavalier-specific features - rounder face */}
-      <path d="M12 4c3 0 5 2 5 5 0 1.5-1 3-1 3s1 1 1 3c0 2-2 5-5 5s-5-3-5-5c0-2 1-3 1-3s-1-1.5-1-3c0-3 2-5 5-5z" />
+      {/* Long ears */}
+      <path d="M3.5 12C3.5 9 5 6 6.5 6C8 6 8.5 8 8.5 10C8.5 12 8 16.5 6 18C4 19.5 3.5 16 3.5 12Z" />
+      <path d="M20.5 12C20.5 9 19 6 17.5 6C16 6 15.5 8 15.5 10C15.5 12 16 16.5 18 18C20 19.5 20.5 16 20.5 12Z" />
+
+      {/* Head shape */}
+      <path d="M8.5 10C8.5 6 10 4 12 4C14 4 15.5 6 15.5 10C15.5 14 14 17 12 17C10 17 8.5 14 8.5 10Z" />
+
+      {/* Eyes */}
+      <circle cx="9.5" cy="10" r="0.8" />
+      <circle cx="14.5" cy="10" r="0.8" />
+      <circle cx="9.5" cy="10" r="0.3" fill="currentColor" />
+      <circle cx="14.5" cy="10" r="0.3" fill="currentColor" />
+
+      {/* Face markings */}
+      <path d="M10.5 8C10.5 8 11 7 12 7C13 7 13.5 8 13.5 8" />
       
-      {/* Long, droopy ears specific to Cavalier King Charles Spaniel */}
-      <path d="M7 9c-1.5 0-3 1-3 3s1 3 3 4" />
-      <path d="M17 9c1.5 0 3 1 3 3s-1 3-3 4" />
-      
-      {/* Snout */}
-      <path d="M9 12.5c.5 1 1.5 1.5 3 1.5s2.5-.5 3-1.5" />
-      <path d="M12 14v1" />
-      
-      {/* Sweet, expressive eyes */}
-      <circle cx="9.5" cy="9.5" r=".6" />
-      <circle cx="14.5" cy="9.5" r=".6" />
-      
-      {/* Gentle expression - eyebrows */}
-      <path d="M9 8.5c.5-.5 1-.5 1.5 0" />
-      <path d="M13.5 8.5c.5-.5 1-.5 1.5 0" />
-      
-      {/* Soft, feathered coat detail on ears */}
-      <path d="M6 11c-.5 1-1 3-.5 4.5" />
-      <path d="M18 11c.5 1 1 3 .5 4.5" />
+      {/* Nose and mouth */}
+      <circle cx="12" cy="12.5" r="0.8" />
+      <path d="M10 14C10 14 11 15 12 15C13 15 14 14 14 14" />
+      <path d="M9 13.5C9 13.5 10.5 14.5 12 14.5C13.5 14.5 15 13.5 15 13.5" />
     </svg>
   );
 };
