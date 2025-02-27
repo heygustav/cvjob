@@ -31,6 +31,9 @@ interface GenerationProgress {
   message: string;
 }
 
+// Generation timeout duration in milliseconds
+const TIMEOUT_DURATION = 60000; // 1 minute
+
 // Timeout utility for network requests
 const fetchWithTimeout = async (promise: Promise<any>, timeoutMs: number = 15000) => {
   let timeoutId: NodeJS.Timeout;
@@ -117,6 +120,11 @@ export const useCoverLetterGeneration = (user: User | null) => {
       title: "Bemærk",
       description: "Udfyld venligst din profil for at få en bedre ansøgning.",
       variant: "default" as const,
+    },
+    generationTimeout: {
+      title: "Generering tog for lang tid",
+      description: "Prøv igen senere eller kontakt support hvis problemet fortsætter.",
+      variant: "destructive" as const,
     },
   }), []);
 
@@ -350,134 +358,150 @@ export const useCoverLetterGeneration = (user: User | null) => {
     // Set initial loading state
     setLoadingState("generating");
 
+    // Create a timeout promise for the entire generation process
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => {
+        reject(new Error('Generation timed out. Prøv igen senere.'));
+      }, TIMEOUT_DURATION);
+    });
+
+    // Create the generation promise
+    const generationPromise = (async () => {
+      try {
+        // Step 1: Fetch user profile first to check completeness
+        setGenerationPhase('user-fetch');
+        setGenerationProgress({
+          phase: 'user-fetch',
+          progress: 20,
+          message: 'Henter din profil...'
+        });
+        console.log("Step 1: Fetching user profile");
+        
+        let userInfo;
+        try {
+          userInfo = await fetchUserProfile(user.id);
+          userInfo.email = user.email; // Ensure email is set from authenticated user
+        } catch (error) {
+          console.error("Error fetching user profile:", error);
+          throw createError('user-fetch', 'Kunne ikke hente din profil. Prøv at opdatere siden.');
+        }
+        
+        console.log(`User profile fetched for ID: ${user.id}`, {
+          hasName: !!userInfo.name,
+          hasExperience: !!userInfo.experience,
+          hasEducation: !!userInfo.education,
+        });
+        
+        // Warn about incomplete profile but continue
+        if (!userInfo.name || !userInfo.experience || !userInfo.education) {
+          toast(toastMessages.incompleteProfile);
+          // Note: We're continuing with generation despite incomplete profile
+        }
+
+        // Step 2: Save or update the job posting
+        setGenerationPhase('job-save');
+        setGenerationProgress({
+          phase: 'job-save',
+          progress: 40,
+          message: 'Gemmer jobdetaljer...'
+        });
+        console.log("Step 2: Saving job posting");
+        
+        let jobId;
+        try {
+          jobId = await saveOrUpdateJob(jobData, user.id, selectedJob?.id);
+        } catch (error) {
+          console.error("Error saving job:", error);
+          throw createError('job-save', 'Kunne ikke gemme jobdetaljer. Tjek din forbindelse og prøv igen.');
+        }
+        
+        console.log(`Job saved with ID: ${jobId}`);
+
+        // Step 3: Generate letter content
+        setGenerationPhase('generation');
+        setGenerationProgress({
+          phase: 'generation',
+          progress: 60,
+          message: 'Genererer ansøgning...'
+        });
+        console.log("Step 3: Generating letter content");
+        
+        let content;
+        try {
+          content = await generateCoverLetter(jobData, userInfo);
+        } catch (error) {
+          console.error("Error generating letter:", error);
+          throw createError('generation', 'AI-tjenesten kunne ikke generere din ansøgning. Prøv igen om lidt.', false);
+        }
+        
+        console.log("Letter generated successfully, content length:", content?.length);
+
+        // Step 4: Save the generated letter
+        setGenerationPhase('letter-save');
+        setGenerationProgress({
+          phase: 'letter-save',
+          progress: 80,
+          message: 'Gemmer ansøgning...'
+        });
+        console.log("Step 4: Saving letter");
+        
+        let letter;
+        try {
+          letter = await saveCoverLetter(user.id, jobId, content);
+        } catch (error) {
+          console.error("Error saving letter:", error);
+          throw createError('letter-save', 'Din ansøgning blev genereret, men kunne ikke gemmes. Prøv igen.');
+        }
+        
+        console.log(`Letter saved with ID: ${letter.id}`);
+
+        // Update the job object first to ensure it has all necessary fields
+        let updatedJob;
+        try {
+          updatedJob = await fetchJobById(jobId);
+        } catch (error) {
+          console.error("Error fetching updated job:", error);
+          // Non-critical, use the existing job info
+          updatedJob = { ...jobData, id: jobId, user_id: user.id };
+        }
+        
+        // Final progress update
+        setGenerationProgress({
+          phase: 'letter-save',
+          progress: 100,
+          message: 'Færdig!'
+        });
+        
+        return { letter, job: updatedJob };
+      } catch (error) {
+        throw error;
+      }
+    })();
+
     try {
-      // Step 1: Fetch user profile first to check completeness
-      setGenerationPhase('user-fetch');
-      setGenerationProgress({
-        phase: 'user-fetch',
-        progress: 20,
-        message: 'Henter din profil...'
-      });
-      console.log("Step 1: Fetching user profile");
+      // Race between generation and timeout
+      const result = await Promise.race([generationPromise, timeoutPromise]);
       
-      let userInfo;
-      try {
-        userInfo = await fetchWithTimeout(fetchUserProfile(user.id));
-        userInfo.email = user.email; // Ensure email is set from authenticated user
-      } catch (error) {
-        console.error("Error fetching user profile:", error);
-        throw createError('user-fetch', 'Kunne ikke hente din profil. Prøv at opdatere siden.');
-      }
-      
-      console.log(`User profile fetched for ID: ${user.id}`, {
-        hasName: !!userInfo.name,
-        hasExperience: !!userInfo.experience,
-        hasEducation: !!userInfo.education,
-      });
-      
-      // Warn about incomplete profile but continue
-      if (!userInfo.name || !userInfo.experience || !userInfo.education) {
-        toast(toastMessages.incompleteProfile);
-        // Note: We're continuing with generation despite incomplete profile
-      }
-
-      // Step 2: Save or update the job posting
-      setGenerationPhase('job-save');
-      setGenerationProgress({
-        phase: 'job-save',
-        progress: 40,
-        message: 'Gemmer jobdetaljer...'
-      });
-      console.log("Step 2: Saving job posting");
-      
-      let jobId;
-      try {
-        jobId = await fetchWithTimeout(
-          saveOrUpdateJob(jobData, user.id, selectedJob?.id)
-        );
-      } catch (error) {
-        console.error("Error saving job:", error);
-        throw createError('job-save', 'Kunne ikke gemme jobdetaljer. Tjek din forbindelse og prøv igen.');
-      }
-      
-      console.log(`Job saved with ID: ${jobId}`);
-
-      // Step 3: Generate letter content
-      setGenerationPhase('generation');
-      setGenerationProgress({
-        phase: 'generation',
-        progress: 60,
-        message: 'Genererer ansøgning...'
-      });
-      console.log("Step 3: Generating letter content");
-      
-      let content;
-      try {
-        content = await fetchWithTimeout(
-          generateCoverLetter(jobData, userInfo),
-          60000 // Longer timeout for generation (60 seconds)
-        );
-      } catch (error) {
-        console.error("Error generating letter:", error);
-        throw createError('generation', 'AI-tjenesten kunne ikke generere din ansøgning. Prøv igen om lidt.', false);
-      }
-      
-      console.log("Letter generated successfully, content length:", content?.length);
-
-      // Step 4: Save the generated letter
-      setGenerationPhase('letter-save');
-      setGenerationProgress({
-        phase: 'letter-save',
-        progress: 80,
-        message: 'Gemmer ansøgning...'
-      });
-      console.log("Step 4: Saving letter");
-      
-      let letter;
-      try {
-        letter = await fetchWithTimeout(
-          saveCoverLetter(user.id, jobId, content)
-        );
-      } catch (error) {
-        console.error("Error saving letter:", error);
-        throw createError('letter-save', 'Din ansøgning blev genereret, men kunne ikke gemmes. Prøv igen.');
-      }
-      
-      console.log(`Letter saved with ID: ${letter.id}`);
-      
-      // Final progress update
-      setGenerationProgress({
-        phase: 'letter-save',
-        progress: 100,
-        message: 'Færdig!'
-      });
-      
-      // Update the job object first to ensure it has all necessary fields
-      let updatedJob;
-      try {
-        updatedJob = await fetchWithTimeout(fetchJobById(jobId));
-      } catch (error) {
-        console.error("Error fetching updated job:", error);
-        // Non-critical, use the existing job info
-        updatedJob = { ...jobData, id: jobId, user_id: user.id };
-      }
-      
-      setSelectedJob(updatedJob);
-      
-      // Then set the generated letter
-      setGeneratedLetter(letter);
-      
-      // Finally change the step after everything is ready
+      // Success handling
+      setSelectedJob(result.job);
+      setGeneratedLetter(result.letter);
       setStep(2);
-
+      
       toast(toastMessages.letterGenerated);
-
+      
     } catch (error) {
       console.error(`Attempt #${currentAttempt}: Error in job submission process:`, error);
       
       let title = "Fejl ved generering";
       let description = "Der opstod en ukendt fejl. Prøv venligst igen.";
       let recoverable = true;
+      
+      // Check if it was a timeout error
+      if (error instanceof Error && error.message.includes('timed out')) {
+        toast(toastMessages.generationTimeout);
+        setGenerationError("Generering tog for lang tid. Prøv igen senere.");
+        return;
+      }
       
       // Handle typed errors with phases
       if ((error as GenerationError).phase) {
