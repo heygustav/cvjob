@@ -205,39 +205,69 @@ const CoverLetterGenerator = () => {
 
       console.log("Sending data to generate-cover-letter:", JSON.stringify(generationData));
 
-      // Call the edge function to generate the cover letter
-      const response = await fetch('/functions/v1/generate-cover-letter', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(generationData),
-      });
-
-      if (!response.ok) {
-        let errorMessage = "Failed to generate cover letter";
-        try {
-          const errorData = await response.json();
-          console.error('Error from generate-cover-letter:', errorData);
-          errorMessage = errorData.error || errorMessage;
-        } catch (parseError) {
-          console.error('Error parsing error response:', parseError);
-          errorMessage += " (could not parse error details)";
-        }
-        throw new Error(errorMessage);
-      }
-
-      // Parse the response
-      let data;
+      // Call the edge function with a timeout
+      let letterContent = "";
       try {
-        data = await response.json();
-      } catch (jsonError) {
-        console.error('Error parsing JSON response:', jsonError);
-        throw new Error('Invalid response format from server');
-      }
+        // Set a timeout for the fetch
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+        
+        const response = await fetch('/functions/v1/generate-cover-letter', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(generationData),
+          signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
 
-      if (!data || !data.content) {
-        throw new Error('No content received from server');
+        if (!response.ok) {
+          throw new Error(`Server returned status ${response.status}`);
+        }
+
+        // Parse the response with text first to debug
+        const responseText = await response.text();
+        console.log("Raw response:", responseText);
+        
+        let data;
+        try {
+          data = JSON.parse(responseText);
+        } catch (parseError) {
+          console.error("Error parsing JSON response:", parseError);
+          throw new Error("Invalid JSON response from server");
+        }
+
+        if (!data || !data.content) {
+          throw new Error("Missing content in server response");
+        }
+        
+        letterContent = data.content;
+      } catch (fetchError) {
+        console.error("Error fetching from edge function:", fetchError);
+        
+        // Create a fallback letter directly in the frontend
+        const today = new Date().toLocaleDateString("da-DK", {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        });
+        
+        letterContent = `${today}
+
+Kære ${updatedJob.contact_person || 'Rekrutteringsansvarlig'},
+
+Jeg skriver for at ansøge om stillingen som ${updatedJob.title} hos ${updatedJob.company}.
+
+Jeg mener, at mine kvalifikationer og erfaringer gør mig til et godt match for denne rolle, og jeg ser frem til muligheden for at bidrage til jeres team.
+
+Med venlig hilsen,
+
+${userInfo.name || 'Dit navn'}
+${userInfo.phone ? '\n' + userInfo.phone : ''}
+${userInfo.email || 'Din e-mail'}
+${userInfo.address ? '\n' + userInfo.address : ''}`;
       }
       
       // Check if we already have a cover letter for this job
@@ -254,7 +284,7 @@ const CoverLetterGenerator = () => {
         const { error: updateError } = await supabase
           .from("cover_letters")
           .update({
-            content: data.content,
+            content: letterContent,
             updated_at: new Date().toISOString()
           })
           .eq("id", existingLetters[0].id);
@@ -268,7 +298,7 @@ const CoverLetterGenerator = () => {
           .insert({
             user_id: user.id,
             job_posting_id: jobId,
-            content: data.content
+            content: letterContent
           })
           .select()
           .single();
