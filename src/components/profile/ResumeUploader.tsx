@@ -56,11 +56,26 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorText = await response.text();
+        let errorData;
+        try {
+          errorData = JSON.parse(errorText);
+        } catch (e) {
+          console.error("Failed to parse error response:", errorText);
+          throw new Error('Der opstod en fejl ved behandling af dit CV. Prøv igen senere.');
+        }
         throw new Error(errorData.error || 'Fejl ved upload af CV');
       }
 
-      const result = await response.json();
+      const responseText = await response.text();
+      let result;
+      
+      try {
+        result = JSON.parse(responseText);
+      } catch (e) {
+        console.error("Failed to parse response:", responseText);
+        throw new Error('Der opstod en fejl ved fortolkning af data fra dit CV');
+      }
       
       if (result.error) {
         throw new Error(result.error);

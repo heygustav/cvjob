@@ -2,7 +2,9 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1";
+import * as pdfjs from "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.4.120/build/pdf.min.js";
 
+// Configure CORS headers
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -46,13 +48,30 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Use pdf.js or similar to extract text from PDF
-    // For this example, we'll just convert the PDF to text using PDF.js
-    // This is a simplification - in a real implementation, you would use PDF.js to extract the text
+    // Convert file to ArrayBuffer
+    const arrayBuffer = await file.arrayBuffer();
+    const uint8Array = new Uint8Array(arrayBuffer);
     
-    // For demo purposes, assuming we've extracted the text from the PDF
-    const extractedText = "This is where the extracted PDF text would be";
-    console.log("Extracted text from PDF:", extractedText);
+    // Initialize PDF.js worker
+    pdfjs.GlobalWorkerOptions.workerSrc = "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.4.120/build/pdf.worker.min.js";
+    
+    // Load PDF document
+    const loadingTask = pdfjs.getDocument({ data: uint8Array });
+    const pdfDocument = await loadingTask.promise;
+    
+    // Extract text from all pages
+    let extractedText = "";
+    for (let i = 1; i <= pdfDocument.numPages; i++) {
+      const page = await pdfDocument.getPage(i);
+      const textContent = await page.getTextContent();
+      const pageText = textContent.items.map((item) => 
+        // @ts-ignore - textContent.items may have different structure
+        item.str || item.text || ""
+      ).join(" ");
+      extractedText += pageText + "\n";
+    }
+    
+    console.log("Extracted text from PDF:", extractedText.substring(0, 500) + "...");
 
     // Use OpenAI to analyze the text
     const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
@@ -110,12 +129,27 @@ serve(async (req) => {
     // Parse the JSON response from OpenAI
     let extractedData;
     try {
-      extractedData = JSON.parse(aiContent);
+      // Remove markdown formatting if present
+      const cleanedContent = aiContent.replace(/```json\s*|\s*```/g, '');
+      extractedData = JSON.parse(cleanedContent);
       console.log("Extracted data:", extractedData);
     } catch (e) {
       console.error("Failed to parse OpenAI response as JSON:", e);
       console.log("Raw response:", aiContent);
-      throw new Error("Failed to parse AI response");
+      
+      // Try to extract JSON from a non-JSON response
+      const jsonMatch = aiContent.match(/({[\s\S]*})/);
+      if (jsonMatch) {
+        try {
+          extractedData = JSON.parse(jsonMatch[1]);
+          console.log("Successfully parsed JSON from match:", extractedData);
+        } catch (matchError) {
+          console.error("Failed to parse matched JSON:", matchError);
+          throw new Error("Failed to parse AI response");
+        }
+      } else {
+        throw new Error("Failed to parse AI response");
+      }
     }
 
     return new Response(
