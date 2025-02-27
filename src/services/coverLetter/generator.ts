@@ -22,12 +22,18 @@ export const generateCoverLetter = async (
   try {
     console.log("Calling edge function for letter generation");
     
-    // Set a timeout for the edge function call
-    const timeoutDuration = 45000; // 45 seconds
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeoutDuration);
+    // Use a timeout promise instead of AbortController
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      const timeoutId = setTimeout(() => {
+        reject(new Error('Generering af ansøgningen tog for lang tid. Prøv igen senere.'));
+      }, 45000); // 45 seconds timeout
+      
+      // Store the timeout ID in a global scope for cleanup in case of component unmount
+      (window as any).__generationTimeoutId = timeoutId;
+    });
     
-    try {
+    // Create the actual API call promise
+    const apiCallPromise = (async () => {
       const { data, error } = await supabase.functions.invoke(
         'generate-cover-letter',
         {
@@ -50,12 +56,9 @@ export const generateCoverLetter = async (
             },
             locale: navigator.language, // Send user's locale for better date formatting
             model: "gpt-4" // Always use gpt-4 for cover letter generation
-          },
-          signal: controller.signal
+          }
         }
       );
-      
-      clearTimeout(timeoutId);
 
       if (error) {
         console.error("Edge function error:", error);
@@ -73,20 +76,34 @@ export const generateCoverLetter = async (
       }
 
       console.log("Successfully received content from edge function, length:", data.content.length);
-      return data.content;
-    } catch (error) {
-      clearTimeout(timeoutId);
       
-      if (error.name === 'AbortError') {
-        throw new Error('Generering af ansøgningen tog for lang tid. Prøv igen senere.');
+      // Clear the timeout when successful
+      if ((window as any).__generationTimeoutId) {
+        clearTimeout((window as any).__generationTimeoutId);
+        (window as any).__generationTimeoutId = null;
       }
       
-      // Re-throw any other errors
-      throw error;
-    }
+      return data.content;
+    })();
+    
+    // Race between the API call and the timeout
+    return await Promise.race([apiCallPromise, timeoutPromise]);
+    
   } catch (error) {
     console.error("Error in generateCoverLetter:", error);
-    // If the API call fails completely, provide a meaningful fallback
+    
+    // Clean up any timeout if it exists
+    if ((window as any).__generationTimeoutId) {
+      clearTimeout((window as any).__generationTimeoutId);
+      (window as any).__generationTimeoutId = null;
+    }
+    
+    // If the error is a timeout error, provide a specific message
+    if (error instanceof Error && error.message.includes('tog for lang tid')) {
+      throw new Error('Generering af ansøgningen tog for lang tid. Prøv igen senere.');
+    }
+    
+    // For other errors, re-throw with the original message if possible
     if (error instanceof Error) {
       throw error;
     } else {
