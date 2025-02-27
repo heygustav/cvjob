@@ -13,6 +13,8 @@ const GeneratorErrorState: React.FC<GeneratorErrorStateProps> = ({
   resetError,
   generationPhase
 }) => {
+  console.log("Rendering error state with message:", errorMessage, "phase:", generationPhase);
+  
   return (
     <ErrorDisplay
       title="Der opstod en fejl"

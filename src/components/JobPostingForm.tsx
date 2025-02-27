@@ -85,8 +85,10 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Form submit triggered", formData);
 
     if (!validateForm()) {
+      console.log("Form validation failed", errors);
       toast({
         title: "Fejl i formular",
         description: "Udfyld venligst alle påkrævede felter korrekt.",
@@ -95,14 +97,28 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
       return;
     }
 
+    console.log("Form validation passed, proceeding with submission");
     resetTimer();
-    onSubmit(formData);
+    
+    try {
+      console.log("Calling onSubmit with form data", formData);
+      onSubmit(formData);
+    } catch (error) {
+      console.error("Error in form submission:", error);
+      toast({
+        title: "Fejl ved afsendelse",
+        description: "Der opstod en fejl ved afsendelse af formularen.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleSave = async (e: React.MouseEvent) => {
     e.preventDefault();
+    console.log("Save button clicked", formData);
     
     if (!validateForm()) {
+      console.log("Form validation failed for save", errors);
       toast({
         title: "Fejl i formular",
         description: "Udfyld venligst alle påkrævede felter korrekt.",
@@ -113,15 +129,19 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
 
     try {
       setIsSaving(true);
+      console.log("Starting save process");
       
       // If onSave is provided, use it
       if (onSave) {
+        console.log("Using provided onSave function");
         await onSave(formData);
       } 
       // Otherwise do a direct save if we have a user
       else if (user) {
+        console.log("Saving job for user", user.id);
         await saveOrUpdateJob(formData, user.id, initialData?.id);
       } else {
+        console.log("No user found, cannot save");
         toast({
           title: "Log ind krævet",
           description: "Du skal være logget ind for at gemme et jobopslag.",
@@ -131,6 +151,7 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
         return;
       }
       
+      console.log("Save completed successfully");
       toast({
         title: "Jobopslag gemt",
         description: "Dit jobopslag er blevet gemt. Du kan generere en ansøgning senere.",
