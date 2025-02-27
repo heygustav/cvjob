@@ -95,11 +95,11 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
   };
 
   return (
-    <div className="mb-6 p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50">
-      <div className="text-center">
+    <div className="mb-6 p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50 text-center">
+      <div>
         <Upload className="h-8 w-8 mx-auto text-gray-400 mb-2" />
         <h3 className="text-sm font-medium text-gray-900 mb-1">Upload dit CV</h3>
-        <p className="text-xs text-gray-500 mb-3">
+        <p className="text-xs text-gray-500 mb-3 italic">
           Upload en PDF-fil med dit CV for at automatisk udfylde din profil
         </p>
         

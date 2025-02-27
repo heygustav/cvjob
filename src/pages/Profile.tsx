@@ -148,7 +148,7 @@ const Profile: React.FC = () => {
 
         <div className="mt-8 bg-white shadow-sm rounded-lg overflow-hidden border border-gray-200">
           <div className="p-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">Kontoindstillinger</h2>
+            <h2 className="text-lg font-medium text-gray-900 mb-4 text-left">Kontoindstillinger</h2>
             <AccountSettings />
           </div>
         </div>

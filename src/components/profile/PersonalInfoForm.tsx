@@ -27,7 +27,7 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6 text-left">
       <ResumeUploader onExtractedData={handleExtractedData} />
       
       <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
@@ -127,7 +127,7 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({
               placeholder="Beskriv din erhvervserfaring..."
             />
           </div>
-          <p className="mt-2 text-sm text-gray-500">
+          <p className="mt-2 text-sm text-gray-500 italic">
             Inkluder dine jobtitler, virksomheder du har arbejdet for og hovedansvarsområder.
           </p>
         </div>
@@ -150,7 +150,7 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({
               placeholder="Beskriv din uddannelsesmæssige baggrund..."
             />
           </div>
-          <p className="mt-2 text-sm text-gray-500">
+          <p className="mt-2 text-sm text-gray-500 italic">
             Angiv dine uddannelser, institutioner og dimissionsår.
           </p>
         </div>
@@ -173,7 +173,7 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({
               placeholder="Angiv dine relevante kompetencer og kvalifikationer..."
             />
           </div>
-          <p className="mt-2 text-sm text-gray-500">
+          <p className="mt-2 text-sm text-gray-500 italic">
             Inkluder tekniske kompetencer, certificeringer, sprog og andre relevante kvalifikationer.
           </p>
         </div>
