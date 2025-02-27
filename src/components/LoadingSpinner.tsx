@@ -44,9 +44,10 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
     <div className="min-h-[60vh] md:min-h-screen bg-gray-50 flex justify-center items-center px-4">
       <div className="text-center w-full max-w-md">
         <Clock className="h-10 w-10 md:h-12 md:w-12 animate-pulse text-black mx-auto" />
-        <p className="mt-4 text-sm md:text-base text-gray-600">
-          {message} {formatTime(elapsed)}s
-        </p>
+        <div className="mt-4 flex justify-between items-center">
+          <span className="text-sm md:text-base text-gray-700 font-medium">{message}</span>
+          <span className="text-sm text-gray-500">{formatTime(elapsed)}s</span>
+        </div>
         
         {progress !== undefined && (
           <div className="mt-4 w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
@@ -57,7 +58,7 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
           </div>
         )}
         
-        <p className="mt-2 text-xs text-gray-500">
+        <p className="mt-4 text-xs text-gray-500">
           Tålmodighed er det bedste mod...
         </p>
       </div>

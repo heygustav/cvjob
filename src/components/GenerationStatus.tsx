@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from "react";
-import { Clock } from "lucide-react";
+import GenerationProgressIndicator from "./GenerationProgressIndicator";
 
 interface GenerationStatusProps {
   phase?: string;
@@ -67,62 +67,16 @@ export const GenerationStatus: React.FC<GenerationStatusProps> = ({
     };
   }, [steps.length, phase, message]);
 
-  const formatTime = (ms: number) => {
-    const seconds = Math.floor(ms / 100);
-    const hundredths = ms % 100;
-    return `${seconds}.${hundredths.toString().padStart(2, '0')}`;
-  };
-
-  // Determine if generation is taking too long (more than 30 seconds)
-  const isTakingTooLong = elapsed > 3000 && onRetry;
+  // Use the current message or rotate through steps for generation phase
+  const currentMessage = message || steps[stepIndex];
 
   return (
-    <div className="mt-6 p-4 bg-gray-50 rounded-md">
-      <div className="flex items-center justify-center space-x-4">
-        <Clock className="animate-pulse h-5 w-5 text-gray-600" />
-        <div className="text-sm text-gray-600">
-          {message || steps[stepIndex]} {formatTime(elapsed)}s
-        </div>
-      </div>
-      
-      {/* Progress bar */}
-      <div className="mt-3 w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
-        <div 
-          className="bg-black h-2 rounded-full transition-all duration-500 ease-in-out" 
-          style={{ width: `${progress}%` }}
-        ></div>
-      </div>
-      
-      {/* Phase indicator */}
-      <div className="mt-2 flex justify-between text-xs text-gray-500">
-        <span className={phase === 'job-save' ? 'font-medium text-black' : ''}>
-          Job
-        </span>
-        <span className={phase === 'user-fetch' ? 'font-medium text-black' : ''}>
-          Profil
-        </span>
-        <span className={phase === 'generation' ? 'font-medium text-black' : ''}>
-          AI
-        </span>
-        <span className={phase === 'letter-save' ? 'font-medium text-black' : ''}>
-          Færdig
-        </span>
-      </div>
-      
-      {isTakingTooLong && (
-        <div className="mt-3 text-center">
-          <button
-            onClick={onRetry}
-            className="text-xs text-gray-600 underline hover:text-gray-800"
-          >
-            Tager det for lang tid? Klik for at prøve igen
-          </button>
-        </div>
-      )}
-      
-      <div className="mt-2 text-center text-xs text-gray-500">
-        Tålmodighed er det bedste mod...
-      </div>
-    </div>
+    <GenerationProgressIndicator
+      phase={phase}
+      progress={progress}
+      elapsed={elapsed}
+      message={currentMessage}
+      onRetry={onRetry}
+    />
   );
 };
