@@ -52,9 +52,9 @@ const Navbar: React.FC = () => {
           <Link 
             to="/" 
             className="text-xl font-medium tracking-tight text-gray-900 flex items-center"
-            aria-label="Winston Assistant homepage"
+            aria-label="Winston AI homepage"
           >
-            <span className="text-xl sm:text-2xl font-semibold truncate max-w-[180px] sm:max-w-none">Winston Assistant</span>
+            <span className="text-xl sm:text-2xl font-semibold truncate max-w-[180px] sm:max-w-none">Winston AI</span>
           </Link>
 
           {/* Desktop Navigation */}
