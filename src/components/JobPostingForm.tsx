@@ -98,7 +98,7 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
     }
 
     console.log("Form validation passed, proceeding with submission");
-    resetTimer();
+    resetTimer(0, false); // Fixed: Passing proper arguments to resetTimer
     
     try {
       console.log("Calling onSubmit with form data", formData);
