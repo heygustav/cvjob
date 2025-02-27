@@ -17,58 +17,58 @@ serve(async (req) => {
   }
 
   try {
-    console.log("Resume extraction function called");
+    console.log("Resume extraction function started");
     
     // Get the PDF file from the request
-    try {
-      const formData = await req.formData();
-      const file = formData.get("file");
+    const formData = await req.formData();
+    const file = formData.get("file");
 
-      if (!file || !(file instanceof File)) {
-        console.error("No file provided or invalid file");
-        return new Response(
-          JSON.stringify({ error: "No valid file provided" }),
-          {
-            status: 400,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          }
-        );
-      }
-
-      console.log(`Processing file: ${file.name}, size: ${file.size} bytes, type: ${file.type}`);
-
-      // For now, simply return some sample data to test the connection
-      // This demonstrates that the function can receive the file and return a response
-      const sampleExtractedData = {
-        education: "Dette er et eksempel på uddannelsesinformation der blev fundet i CV'et.",
-        experience: "Dette er et eksempel på erhvervserfaring der blev fundet i CV'et.",
-        skills: "Dette er et eksempel på kompetencer der blev fundet i CV'et."
-      };
-
+    if (!file || !(file instanceof File)) {
+      console.error("No file provided or invalid file");
       return new Response(
-        JSON.stringify({
-          extractedData: sampleExtractedData,
-          message: "Resume data extracted successfully"
-        }),
-        {
-          status: 200,
-          headers: { ...corsHeaders, "Content-Type": "application/json" }
-        }
-      );
-    } catch (formError) {
-      console.error("Error processing form data:", formError);
-      return new Response(
-        JSON.stringify({ error: `Error processing file upload: ${formError.message}` }),
+        JSON.stringify({ error: "No valid file provided" }),
         {
           status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" }
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
         }
       );
     }
+
+    console.log(`Processing file: ${file.name}, size: ${file.size} bytes, type: ${file.type}`);
+
+    // Simpel PDF tekstbaseret analyse
+    // Vi laver en basal tekstanalyse baseret på almindelig erfaring med CV-struktur
+    
+    // Her kunne du bruge en PDF parsing library, men for nu laver vi en simpel analyse
+    // baseret på at identificere nøgleord og strukturer i CV'et
+    
+    // Lad os ekstraktere nogle dele af CV'et baseret på almindelige sektioner
+    
+    const extractedData = {
+      experience: "Erfaringsafsnittet fra dit CV vil blive analyseret her, når vi har implementeret en robust PDF-parser.",
+      education: "Uddannelsesafsnittet fra dit CV vil blive analyseret her, når vi har implementeret en robust PDF-parser.",
+      skills: "Kompetenceafsnittet fra dit CV vil blive analyseret her, når vi har implementeret en robust PDF-parser."
+    };
+
+    // I en reel implementering ville vi analysere PDF'en med en rigtig parser eller AI
+    // Men for denne demo returnerer vi blot en besked om, at vi har modtaget filen
+    
+    console.log("Analysis complete, returning results");
+    
+    return new Response(
+      JSON.stringify({
+        extractedData: extractedData,
+        message: "Vi har modtaget dit CV. Bemærk at vi endnu ikke har implementeret den fulde tekst-ekstraktion, så resultatet er begrænset. Du bør selv udfylde dine detaljer i profilen.",
+      }),
+      {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" }
+      }
+    );
   } catch (error) {
     console.error("Unexpected error in function:", error);
     return new Response(
-      JSON.stringify({ error: `An unexpected error occurred: ${error.message}` }),
+      JSON.stringify({ error: `Der opstod en fejl under behandling af CV'et: ${error.message}` }),
       {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" }
