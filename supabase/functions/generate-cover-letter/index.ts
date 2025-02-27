@@ -17,13 +17,30 @@ serve(async (req) => {
 
   try {
     console.log("Received request to generate-cover-letter function");
-    const requestData = await req.json();
+    
+    // Parse request data
+    let requestData;
+    try {
+      requestData = await req.json();
+      console.log("Request data parsed successfully");
+    } catch (jsonError) {
+      console.error("Error parsing request JSON:", jsonError);
+      return new Response(
+        JSON.stringify({ 
+          error: "Invalid JSON in request body",
+          details: jsonError.message
+        }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
+    }
     
     // Handle job info extraction requests (separate from letter generation)
     if (requestData.action === "extract_job_info" && requestData.text) {
       console.log("Extracting job info from text");
       
-      // Simple pattern matching extraction (reliable fallback)
+      // Simple pattern matching extraction
       const extractedInfo = {
         title: extractJobTitle(requestData.text),
         company: extractCompany(requestData.text),
@@ -38,63 +55,104 @@ serve(async (req) => {
     }
     
     // Handle cover letter generation
-    const { jobInfo, userInfo } = requestData;
-    console.log("Generating cover letter for job:", jobInfo.title);
-
-    // Generate a mock cover letter if there are issues with the API
-    // This ensures the app works even if there are API issues
-    let generatedContent;
+    console.log("Processing cover letter generation request");
     
-    try {
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${openAIApiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o',
-          messages: [
-            {
-              role: 'system',
-              content: 'Du er en professionel jobansøgningsekspert, der hjælper med at skrive overbevisende og personlige ansøgninger på dansk.'
-            },
-            {
-              role: 'user',
-              content: `
-              Som en professionel jobansøger, skriv en overbevisende og detaljeret ansøgning til stillingen som ${jobInfo.title} hos ${jobInfo.company},
-              adresseret til ${jobInfo.contactPerson || 'Rekrutteringsansvarlig'}. 
-              
-              Brug følgende information om ansøgeren:
-              Navn: ${userInfo.name || 'Ansøger'}
-              Email: ${userInfo.email || 'email@example.com'}
-              Telefon: ${userInfo.phone || ''}
-              Adresse: ${userInfo.address || ''}
-              Erfaring: ${userInfo.experience || 'Har erfaring inden for branchen.'}
-              Uddannelse: ${userInfo.education || 'Relevant uddannelse inden for feltet.'}
-              Færdigheder: ${userInfo.skills || 'Relevante kompetencer for stillingen.'}
-              
-              Jobopslag:
-              ${jobInfo.description || 'En stilling som ' + jobInfo.title + ' hos ' + jobInfo.company}
-              
-              Skriv en professionel, engagerende og overbevisende ansøgning på dansk.`
-            }
-          ],
-          temperature: 0.7,
-        }),
-      });
+    // Validate request data
+    if (!requestData.jobInfo || !requestData.userInfo) {
+      console.error("Missing required fields in request");
+      return new Response(
+        JSON.stringify({ 
+          error: "Missing required fields: jobInfo and userInfo are required" 
+        }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
+    }
+    
+    const { jobInfo, userInfo } = requestData;
+    console.log("Generating cover letter for job:", jobInfo.title || "Unknown position");
 
-      if (response.ok) {
+    // Hardcoded cover letter for testing
+    const fallbackLetterContent = `Jeg skriver for at ansøge om stillingen som ${jobInfo.title || 'den annoncerede stilling'} hos ${jobInfo.company || 'jeres virksomhed'}.
+
+Med min baggrund inden for ${userInfo.experience || 'relevante områder'} og min uddannelse som ${userInfo.education || 'relevant uddannelse'}, mener jeg, at jeg ville være et godt match til denne rolle.
+
+${jobInfo.description ? 'Ud fra jobopslaget kan jeg se, at I søger en kandidat med erfaring og kompetencer, som jeg besidder.' : 'Jeg er sikker på, at mine kvalifikationer matcher jeres behov.'}
+
+Jeg har særligt fokus på ${userInfo.skills || 'professionelle kompetencer'} og har tidligere opnået gode resultater i lignende roller.
+
+Jeg ser frem til muligheden for at diskutere, hvordan mine færdigheder og erfaringer kan bidrage til ${jobInfo.company || 'jeres virksomhed'}.
+
+I er velkomne til at kontakte mig for yderligere information eller for at arrangere et møde, hvor vi kan diskutere, hvordan jeg kan bidrage til jeres team.`;
+
+    let generatedContent = fallbackLetterContent;
+    
+    // Try to use OpenAI if the API key is available
+    if (openAIApiKey) {
+      try {
+        console.log("Attempting to generate with OpenAI");
+        
+        const prompt = `
+        Som en professionel jobansøger, skriv en overbevisende og personlig ansøgning til stillingen som ${jobInfo.title || 'en annonceret stilling'} hos ${jobInfo.company || 'en virksomhed'},
+        adresseret til ${jobInfo.contactPerson || 'Rekrutteringsansvarlig'}. 
+        
+        Brug følgende information om ansøgeren:
+        Navn: ${userInfo.name || 'Ansøgeren'}
+        Email: ${userInfo.email || 'email@example.com'}
+        Telefon: ${userInfo.phone || ''}
+        Adresse: ${userInfo.address || ''}
+        Erfaring: ${userInfo.experience || 'Har erfaring inden for branchen.'}
+        Uddannelse: ${userInfo.education || 'Relevant uddannelse inden for feltet.'}
+        Færdigheder: ${userInfo.skills || 'Relevante kompetencer for stillingen.'}
+        
+        Jobopslag:
+        ${jobInfo.description || `En stilling som ${jobInfo.title || 'medarbejder'} hos ${jobInfo.company || 'virksomheden'}`}
+        
+        Skriv en professionel, engagerende og overbevisende ansøgning på dansk på maksimalt 400-500 ord.`;
+        
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${openAIApiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: 'gpt-4o',
+            messages: [
+              {
+                role: 'system',
+                content: 'Du er en professionel jobansøgningsekspert, der hjælper med at skrive overbevisende og personlige ansøgninger på dansk.'
+              },
+              {
+                role: 'user',
+                content: prompt
+              }
+            ],
+            temperature: 0.7,
+          }),
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("OpenAI API error:", errorText);
+          throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`);
+        }
+
         const data = await response.json();
-        generatedContent = data.choices[0].message.content;
-        console.log("Successfully generated content with OpenAI");
-      } else {
-        throw new Error("Failed to get response from OpenAI");
+        if (data && data.choices && data.choices[0] && data.choices[0].message) {
+          generatedContent = data.choices[0].message.content;
+          console.log("Successfully generated content with OpenAI");
+        } else {
+          console.error("Unexpected OpenAI response format:", data);
+          throw new Error("Unexpected response format from OpenAI");
+        }
+      } catch (aiError) {
+        console.error("Error generating with OpenAI, using fallback:", aiError);
+        // We'll use the fallback content defined above
       }
-    } catch (error) {
-      console.error("Error generating with OpenAI, using fallback:", error);
-      // Fallback content if OpenAI fails
-      generatedContent = generateFallbackLetter(jobInfo, userInfo);
+    } else {
+      console.log("OpenAI API key not available, using fallback content");
     }
 
     const today = new Date();
@@ -124,7 +182,6 @@ ${userInfo.address ? '\n' + userInfo.address : ''}`;
     });
   } catch (error) {
     console.error('Error in generate-cover-letter function:', error);
-    // Return a more helpful error message
     return new Response(
       JSON.stringify({ 
         error: "Der opstod en fejl under generering af ansøgningen", 
@@ -137,19 +194,6 @@ ${userInfo.address ? '\n' + userInfo.address : ''}`;
     );
   }
 });
-
-// Function to generate a fallback cover letter if OpenAI fails
-function generateFallbackLetter(jobInfo: any, userInfo: any) {
-  return `Jeg skriver for at ansøge om stillingen som ${jobInfo.title} hos ${jobInfo.company}, som jeg så annonceret.
-
-Med min baggrund inden for ${userInfo.experience || 'relevante områder'} og min uddannelse som ${userInfo.education || 'relevant uddannelse'}, mener jeg, at jeg ville være et godt match til denne rolle. 
-
-${jobInfo.description ? 'Ud fra jobopslaget kan jeg se, at I søger en kandidat med erfaring og kompetencer, som jeg besidder.' : 'Jeg er sikker på, at mine kvalifikationer matcher jeres behov.'}
-
-Jeg har særligt fokus på ${userInfo.skills || 'professionelle kompetencer'} og har tidligere opnået gode resultater i lignende roller.
-
-Jeg ser frem til muligheden for at diskutere, hvordan mine færdigheder og erfaringer kan bidrage til ${jobInfo.company}.`;
-}
 
 // Helper functions for text extraction
 function extractJobTitle(text: string): string {

@@ -183,40 +183,62 @@ const CoverLetterGenerator = () => {
         skills: ""
       };
 
-      // Call the OpenAI function to generate the cover letter
+      // Prepare the data for edge function
+      const generationData = {
+        jobInfo: {
+          title: updatedJob.title,
+          company: updatedJob.company,
+          description: updatedJob.description,
+          contactPerson: updatedJob.contact_person,
+          url: updatedJob.url
+        },
+        userInfo: {
+          name: userInfo.name,
+          email: userInfo.email,
+          phone: userInfo.phone,
+          address: userInfo.address,
+          experience: userInfo.experience,
+          education: userInfo.education,
+          skills: userInfo.skills,
+        }
+      };
+
+      console.log("Sending data to generate-cover-letter:", JSON.stringify(generationData));
+
+      // Call the edge function to generate the cover letter
       const response = await fetch('/functions/v1/generate-cover-letter', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          jobInfo: {
-            title: updatedJob.title,
-            company: updatedJob.company,
-            description: updatedJob.description,
-            contactPerson: updatedJob.contact_person,
-            url: updatedJob.url
-          },
-          userInfo: {
-            name: userInfo.name,
-            email: userInfo.email,
-            phone: userInfo.phone,
-            address: userInfo.address,
-            experience: userInfo.experience,
-            education: userInfo.education,
-            skills: userInfo.skills,
-          },
-          jobPosting: updatedJob.description,
-        }),
+        body: JSON.stringify(generationData),
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Error from generate-cover-letter:', errorData);
-        throw new Error(errorData.error || 'Failed to generate cover letter');
+        let errorMessage = "Failed to generate cover letter";
+        try {
+          const errorData = await response.json();
+          console.error('Error from generate-cover-letter:', errorData);
+          errorMessage = errorData.error || errorMessage;
+        } catch (parseError) {
+          console.error('Error parsing error response:', parseError);
+          errorMessage += " (could not parse error details)";
+        }
+        throw new Error(errorMessage);
       }
 
-      const data = await response.json();
+      // Parse the response
+      let data;
+      try {
+        data = await response.json();
+      } catch (jsonError) {
+        console.error('Error parsing JSON response:', jsonError);
+        throw new Error('Invalid response format from server');
+      }
+
+      if (!data || !data.content) {
+        throw new Error('No content received from server');
+      }
       
       // Check if we already have a cover letter for this job
       let letterId: string;
@@ -275,7 +297,9 @@ const CoverLetterGenerator = () => {
       console.error('Error in job submission process:', error);
       toast({
         title: "Fejl ved generering",
-        description: "Der opstod en fejl under generering af ansøgningen. Prøv venligst igen.",
+        description: error instanceof Error 
+          ? `Der opstod en fejl: ${error.message}` 
+          : "Der opstod en ukendt fejl. Prøv venligst igen.",
         variant: "destructive",
       });
     } finally {
