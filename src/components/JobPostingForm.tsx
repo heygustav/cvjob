@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { JobPosting } from "../lib/types";
@@ -10,6 +9,9 @@ import SubmitButton from "./job-form/SubmitButton";
 import { useTimer } from "./job-form/useTimer";
 import { useJobExtraction } from "./job-form/useJobExtraction";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/components/AuthProvider";
+import { saveOrUpdateJob } from "@/services/coverLetter/database";
 
 interface JobPostingFormProps {
   onSubmit: (jobData: JobFormData) => void;
@@ -34,6 +36,7 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
   
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { elapsed, formattedTime, resetTimer } = useTimer(isLoading);
   const { isExtracting, extractInfoFromDescription } = useJobExtraction(formData, setFormData);
   const [isSaving, setIsSaving] = useState(false);
@@ -76,25 +79,42 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
       return;
     }
 
-    if (onSave) {
-      try {
-        setIsSaving(true);
+    try {
+      setIsSaving(true);
+      
+      // If onSave is provided, use it
+      if (onSave) {
         await onSave(formData);
+      } 
+      // Otherwise do a direct save if we have a user
+      else if (user) {
+        await saveOrUpdateJob(formData, user.id, initialData?.id);
+      } else {
         toast({
-          title: "Jobopslag gemt",
-          description: "Dit jobopslag er blevet gemt. Du kan generere en ansøgning senere.",
-        });
-        navigate("/dashboard");
-      } catch (error) {
-        console.error("Error saving job posting:", error);
-        toast({
-          title: "Fejl ved gem",
-          description: "Der opstod en fejl under gem af jobopslaget.",
+          title: "Log ind krævet",
+          description: "Du skal være logget ind for at gemme et jobopslag.",
           variant: "destructive",
         });
-      } finally {
         setIsSaving(false);
+        return;
       }
+      
+      toast({
+        title: "Jobopslag gemt",
+        description: "Dit jobopslag er blevet gemt. Du kan generere en ansøgning senere.",
+      });
+      
+      // Always navigate to dashboard after saving
+      navigate("/dashboard");
+    } catch (error) {
+      console.error("Error saving job posting:", error);
+      toast({
+        title: "Fejl ved gem",
+        description: "Der opstod en fejl under gem af jobopslaget.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
     }
   };
 
