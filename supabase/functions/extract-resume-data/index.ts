@@ -37,13 +37,10 @@ serve(async (req) => {
 
       console.log(`Processing file: ${file.name}, size: ${file.size} bytes, type: ${file.type}`);
 
-      // Read the PDF file content
-      const fileBuffer = await file.arrayBuffer();
-      
-      // Extract text from PDF using OpenAI's API
+      // Check if we have an OpenAI API key
       const apiKey = Deno.env.get("OPENAI_API_KEY");
       if (!apiKey) {
-        console.error("Missing OpenAI API key");
+        console.error("Missing OpenAI API key in environment variables");
         return new Response(
           JSON.stringify({ error: "Server configuration error: Missing API key" }),
           {
@@ -53,113 +50,124 @@ serve(async (req) => {
         );
       }
 
-      // Convert the PDF to base64 for the API request
-      const base64File = btoa(
-        new Uint8Array(fileBuffer).reduce(
-          (data, byte) => data + String.fromCharCode(byte),
-          ''
-        )
-      );
-
-      // Send the PDF to OpenAI for analysis
-      const openaiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model: "gpt-4o",
-          messages: [
-            {
-              role: "system",
-              content: "You are a resume parser that extracts structured information from resumes. Return the data in JSON format."
-            },
-            {
-              role: "user",
-              content: [
-                {
-                  type: "text",
-                  text: "Extract the following information from this resume: name, email, phone, address, education history, work experience, and skills. Format your response as a JSON object with these fields. Be concise and only include the extracted information."
-                },
-                {
-                  type: "image_url",
-                  image_url: {
-                    url: `data:application/pdf;base64,${base64File}`
-                  }
-                }
-              ]
-            }
-          ],
-          max_tokens: 2000
-        }),
-      });
-
-      if (!openaiResponse.ok) {
-        const errorText = await openaiResponse.text();
-        console.error("OpenAI API error:", errorText);
-        return new Response(
-          JSON.stringify({ error: "Error analyzing PDF content" }),
-          {
-            status: 500,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          }
-        );
-      }
-
-      const openaiData = await openaiResponse.json();
-      console.log("OpenAI content:", openaiData.choices[0].message.content);
-
-      // Parse the response content as JSON
-      let extractedData;
+      // Read the file as a buffer
+      const fileBuffer = await file.arrayBuffer();
+      const pdfBytes = new Uint8Array(fileBuffer);
+      
+      // Convert to base64
+      const base64 = btoa(String.fromCharCode(...pdfBytes));
+      
+      console.log("PDF converted to base64, length:", base64.length);
+      
+      // Use a simpler prompt with the GPT-4o-mini model
       try {
-        const contentText = openaiData.choices[0].message.content;
-        // Find JSON within the response (in case there's additional text)
-        const jsonMatch = contentText.match(/\{[\s\S]*\}/);
-        
-        if (jsonMatch) {
-          extractedData = JSON.parse(jsonMatch[0]);
-        } else {
-          throw new Error("No JSON found in response");
+        const response = await fetch("https://api.openai.com/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${apiKey}`
+          },
+          body: JSON.stringify({
+            model: "gpt-4o-mini",
+            messages: [
+              {
+                role: "system",
+                content: "You are an AI assistant that extracts information from resumes. Extract the following fields when present: experience, education, skills. Return only a JSON object."
+              },
+              {
+                role: "user",
+                content: [
+                  { 
+                    type: "text", 
+                    text: "Here is a resume in PDF format. Extract the experience, education, and skills information from it. Return the data in JSON format with these fields." 
+                  },
+                  {
+                    type: "image_url",
+                    image_url: {
+                      url: `data:application/pdf;base64,${base64}`
+                    }
+                  }
+                ]
+              }
+            ],
+            max_tokens: 800
+          })
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("OpenAI API error:", errorText);
+          throw new Error(`OpenAI API error: ${response.status} ${errorText}`);
         }
-      } catch (parseError) {
-        console.error("Error parsing API response:", parseError);
+
+        const data = await response.json();
+        console.log("OpenAI API response received");
+
+        if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+          throw new Error("Unexpected API response format");
+        }
+
+        const content = data.choices[0].message.content;
+        console.log("Response content:", content);
+
+        // Extract JSON from the content
+        try {
+          // Try to find JSON in the content using regex
+          const jsonMatch = content.match(/\{[\s\S]*\}/);
+          let extractedData;
+          
+          if (jsonMatch) {
+            extractedData = JSON.parse(jsonMatch[0]);
+          } else {
+            // If no JSON object is found, create a simple object with the content
+            extractedData = {
+              experience: content.includes("experience") ? content : "",
+              education: content.includes("education") ? content : "",
+              skills: content.includes("skills") ? content : ""
+            };
+          }
+
+          return new Response(
+            JSON.stringify({
+              extractedData,
+              message: "Resume data extracted successfully"
+            }),
+            {
+              status: 200,
+              headers: { ...corsHeaders, "Content-Type": "application/json" }
+            }
+          );
+        } catch (parseError) {
+          console.error("Error parsing JSON response:", parseError);
+          throw new Error("Could not parse the extracted data");
+        }
+      } catch (openaiError) {
+        console.error("OpenAI processing error:", openaiError);
         return new Response(
-          JSON.stringify({ error: "Failed to parse analysis results" }),
+          JSON.stringify({ error: `Error analyzing PDF: ${openaiError.message}` }),
           {
             status: 500,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
+            headers: { ...corsHeaders, "Content-Type": "application/json" }
           }
         );
       }
-
-      return new Response(
-        JSON.stringify({
-          extractedData,
-          message: "Resume data extracted successfully",
-        }),
-        {
-          status: 200,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
     } catch (formError) {
       console.error("Error processing form data:", formError);
       return new Response(
-        JSON.stringify({ error: "Error processing file upload: " + formError.message }),
+        JSON.stringify({ error: `Error processing file upload: ${formError.message}` }),
         {
           status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          headers: { ...corsHeaders, "Content-Type": "application/json" }
         }
       );
     }
   } catch (error) {
-    console.error("Unexpected error:", error);
+    console.error("Unexpected error in function:", error);
     return new Response(
-      JSON.stringify({ error: "An unexpected error occurred: " + error.message }),
+      JSON.stringify({ error: `An unexpected error occurred: ${error.message}` }),
       {
         status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { ...corsHeaders, "Content-Type": "application/json" }
       }
     );
   }
