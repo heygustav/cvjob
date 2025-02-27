@@ -8,6 +8,7 @@ import { GenerationStatus } from "../components/GenerationStatus";
 import { useAuth } from "@/components/AuthProvider";
 import { useCoverLetterGeneration } from "@/hooks/useCoverLetterGeneration";
 import { User } from "@/lib/types";
+import { useToast } from "@/hooks/use-toast";
 
 const CoverLetterGenerator: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -15,6 +16,7 @@ const CoverLetterGenerator: React.FC = () => {
   const letterId = searchParams.get("letterId");
   const { session } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
   
   // Convert Supabase user to our app's User type
   const user: User | null = session?.user ? {
@@ -39,18 +41,29 @@ const CoverLetterGenerator: React.FC = () => {
   } = useCoverLetterGeneration(user);
 
   useEffect(() => {
-    if (user) {
-      if (jobId) {
-        fetchJob(jobId).finally(() => setIsLoading(false));
-      } else if (letterId) {
-        fetchLetter(letterId).finally(() => setIsLoading(false));
-      } else {
+    const initializeGenerator = async () => {
+      try {
+        if (user) {
+          if (jobId) {
+            await fetchJob(jobId);
+          } else if (letterId) {
+            await fetchLetter(letterId);
+          }
+        }
+      } catch (error) {
+        console.error("Error initializing generator:", error);
+        toast({
+          title: "Fejl ved indlæsning",
+          description: "Der opstod en fejl under indlæsning af data.",
+          variant: "destructive",
+        });
+      } finally {
         setIsLoading(false);
       }
-    } else {
-      setIsLoading(false);
-    }
-  }, [user, jobId, letterId, fetchJob, fetchLetter]);
+    };
+
+    initializeGenerator();
+  }, [user, jobId, letterId, fetchJob, fetchLetter, toast]);
 
   if (generationLoading || isLoading) {
     return <LoadingSpinner />;

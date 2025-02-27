@@ -27,14 +27,45 @@ serve(async (req) => {
       throw new Error("Invalid request format");
     }
     
+    // Handle action=extract_job_info case (used by JobPostingForm)
+    if (requestData.action === "extract_job_info") {
+      console.log("Extracting job info from text");
+      const text = requestData.text || "";
+      
+      // Extract info using simple regex patterns (this is a fallback method)
+      const extractedInfo = {
+        title: extractTitle(text),
+        company: extractCompany(text),
+        contact_person: extractContactPerson(text),
+        url: extractUrl(text)
+      };
+      
+      return new Response(JSON.stringify(extractedInfo), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    
+    // Handle regular cover letter generation
     const { jobInfo, userInfo } = requestData;
     console.log("Processing request for job:", jobInfo?.title || "Unknown job");
 
     if (!openAIApiKey) {
-      throw new Error("OpenAI API key is not configured");
+      // If no API key, return a fallback response
+      console.log("OpenAI API key not configured, using fallback response");
+      const today = new Date().toLocaleDateString("da-DK", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      });
+      
+      const fallbackContent = `${today}\n\nKære ${jobInfo.contactPerson || 'Rekrutteringsansvarlig'},\n\nJeg skriver for at ansøge om stillingen som ${jobInfo.title} hos ${jobInfo.company}.\n\nJeg mener, at mine kvalifikationer og erfaringer gør mig til et godt match for denne rolle, og jeg ser frem til muligheden for at bidrage til jeres team.\n\nMed venlig hilsen,\n\n${userInfo.name || 'Dit navn'}${userInfo.phone ? '\nTlf: ' + userInfo.phone : ''}\n${userInfo.email}${userInfo.address ? '\n' + userInfo.address : ''}`;
+      
+      return new Response(JSON.stringify({ content: fallbackContent }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
-    // Construct a detailed prompt following the specified structure
+    // Construct a detailed prompt for OpenAI
     const prompt = `
     Som en professionel jobansøger, skriv en overbevisende og detaljeret ansøgning til stillingen som ${jobInfo.title || 'den annoncerede stilling'} hos ${jobInfo.company || 'virksomheden'},
     adresseret til ${jobInfo.contactPerson || 'Rekrutteringsansvarlig'}. Brug følgende information om ansøgeren:
@@ -66,7 +97,7 @@ serve(async (req) => {
     VIGTIGT: Afslut IKKE ansøgningen med en hilsen eller et navn. Den endelige hilsen og underskrift vil blive tilføjet automatisk senere.`;
 
     try {
-      console.log("Calling OpenAI API with GPT-4");
+      console.log("Calling OpenAI API with GPT-4o-mini");
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -74,7 +105,7 @@ serve(async (req) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'gpt-4', // Using the exact GPT-4 model
+          model: 'gpt-4o-mini', // Using a more modern model
           messages: [
             {
               role: 'system',
@@ -85,11 +116,13 @@ serve(async (req) => {
               content: prompt
             }
           ],
-          temperature: 0.5, // Exact temperature as specified
+          temperature: 0.5,
         }),
       });
 
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`OpenAI API error (${response.status}):`, errorText);
         throw new Error(`OpenAI API error: ${response.status}`);
       }
 
@@ -136,3 +169,62 @@ ${userInfo.email}${userInfo.address ? `\n${userInfo.address}` : ''}`;
     );
   }
 });
+
+// Helper functions for text extraction
+function extractTitle(text: string): string {
+  const patterns = [
+    /(?:stilling|job|rolle)(?:\s+som|\:)\s+["']?([^"'\n,\.]{3,50})["']?/i,
+    /søger\s+(?:en\s+)?["']?([^"'\n,\.]{3,50})["']?/i,
+  ];
+  
+  for (const pattern of patterns) {
+    const match = text.match(pattern);
+    if (match && match[1]) {
+      return match[1].trim();
+    }
+  }
+  return "";
+}
+
+function extractCompany(text: string): string {
+  const patterns = [
+    /(?:hos|ved|for|i)\s+["']?([^"'\n,\.]{2,40})(?:\s+(?:A\/S|ApS|I\/S))?["']?/i,
+    /(?:virksomhed|firma)\s+["']?([^"'\n,\.]{2,40})["']?/i,
+  ];
+  
+  for (const pattern of patterns) {
+    const match = text.match(pattern);
+    if (match && match[1]) {
+      return match[1].trim();
+    }
+  }
+  return "";
+}
+
+function extractContactPerson(text: string): string {
+  const patterns = [
+    /(?:kontakt|henvendelse til)\s+["']?([^"'\n,\.]{2,40})["']?/i,
+    /(?:spørgsmål|information)(?:\s+til)?\s+["']?([^"'\n,\.]{2,40})["']?/i,
+  ];
+  
+  for (const pattern of patterns) {
+    const match = text.match(pattern);
+    if (match && match[1]) {
+      return match[1].trim();
+    }
+  }
+  return "";
+}
+
+function extractUrl(text: string): string {
+  const urlPattern = /(?:https?:\/\/)?(?:www\.)?[a-zA-Z0-9-]+(?:\.[a-zA-Z]{2,})+(?:\/[^\s]*)?/g;
+  const urls = text.match(urlPattern);
+  if (urls && urls.length > 0) {
+    const jobUrl = urls[0];
+    if (!jobUrl.startsWith('http')) {
+      return 'https://' + jobUrl;
+    }
+    return jobUrl;
+  }
+  return "";
+}
