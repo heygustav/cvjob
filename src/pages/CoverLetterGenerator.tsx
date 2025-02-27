@@ -1,5 +1,5 @@
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import JobPostingForm from "../components/JobPostingForm";
 import CoverLetterPreview from "../components/CoverLetterPreview";
@@ -7,17 +7,27 @@ import { LoadingSpinner } from "../components/LoadingSpinner";
 import { GenerationStatus } from "../components/GenerationStatus";
 import { useAuth } from "@/components/AuthProvider";
 import { useCoverLetterGeneration } from "@/hooks/useCoverLetterGeneration";
+import { User } from "@/lib/types";
 
 const CoverLetterGenerator: React.FC = () => {
   const [searchParams] = useSearchParams();
   const jobId = searchParams.get("jobId");
   const letterId = searchParams.get("letterId");
-  const { user } = useAuth();
+  const { session } = useAuth();
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // Convert Supabase user to our app's User type
+  const user: User | null = session?.user ? {
+    id: session.user.id,
+    email: session.user.email || "",
+    name: "", // We'll get this from profile data
+    profileComplete: false // Default value
+  } : null;
 
   const {
     step,
     isGenerating,
-    isLoading,
+    isLoading: generationLoading,
     selectedJob,
     generatedLetter,
     setStep,
@@ -40,7 +50,7 @@ const CoverLetterGenerator: React.FC = () => {
     }
   }, [user, jobId, letterId]);
 
-  if (isLoading) {
+  if (generationLoading || isLoading) {
     return <LoadingSpinner />;
   }
 

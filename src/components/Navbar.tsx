@@ -1,7 +1,7 @@
 
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, User, FileText, PlusCircle, LogOut } from "lucide-react";
+import { Menu, X, User, FileText, PlusCircle, LogOut, Dog } from "lucide-react";
 import { useAuth } from "./AuthProvider";
 
 const Navbar: React.FC = () => {
@@ -35,7 +35,8 @@ const Navbar: React.FC = () => {
             className="text-xl font-medium tracking-tight text-gray-900 flex items-center"
             onClick={closeMenu}
           >
-            <span className="text-2xl font-semibold">JobMagic</span>
+            <Dog className="h-6 w-6 mr-2 text-black" />
+            <span className="text-2xl font-semibold">Winston Assistant</span>
           </Link>
 
           {/* Desktop Navigation */}
