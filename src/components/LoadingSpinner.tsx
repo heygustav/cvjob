@@ -13,20 +13,25 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   const timerRef = useRef<number>(0);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Timer effect
   useEffect(() => {
-    // Start timer
-    intervalRef.current = setInterval(() => {
-      timerRef.current += 10;
-      setTimer(timerRef.current);
-    }, 10);
+    const startTimer = () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+      intervalRef.current = setInterval(() => {
+        timerRef.current += 10;
+        setTimer(timerRef.current);
+      }, 10);
+    };
+
+    startTimer();
     
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
       }
     };
-  }, []);
+  }, []); // Empty dependency array means this effect runs once on mount
 
   const formatTime = (time: number) => {
     const seconds = Math.floor(time / 1000);

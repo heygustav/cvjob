@@ -18,22 +18,34 @@ export const GenerationStatus: React.FC = () => {
 
   // Timer effect with cleanup
   useEffect(() => {
-    // Start the timer
-    intervalRef.current = setInterval(() => {
-      timerRef.current += 10;
-      setTimer(timerRef.current);
-    }, 10);
+    const startTimer = () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+      intervalRef.current = setInterval(() => {
+        timerRef.current += 10;
+        setTimer(timerRef.current);
+      }, 10);
+    };
+
+    const startStepRotation = () => {
+      if (stepIntervalRef.current) {
+        clearInterval(stepIntervalRef.current);
+      }
+      stepIntervalRef.current = setInterval(() => {
+        setCurrentStep(prev => (prev < steps.length ? prev + 1 : 1));
+      }, 3000);
+    };
+
+    startTimer();
+    startStepRotation();
     
-    // Move through steps
-    stepIntervalRef.current = setInterval(() => {
-      setCurrentStep(prev => (prev < steps.length ? prev + 1 : 1));
-    }, 3000);
-    
+    // Cleanup function
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
       if (stepIntervalRef.current) clearInterval(stepIntervalRef.current);
     };
-  }, []);
+  }, []); // Empty dependency array means this effect runs once on mount
 
   const formatTime = (time: number) => {
     const seconds = Math.floor(time / 1000);

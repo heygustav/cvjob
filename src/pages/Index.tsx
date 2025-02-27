@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { FileText, CheckCircle, Sparkles, ChevronRight } from 'lucide-react';
@@ -11,12 +10,12 @@ const Index = () => {
   return (
     <div className="bg-white">
       {/* Hero section */}
-      <div className="relative isolate pt-14">
-        <div className="py-24 sm:py-32">
+      <div className="relative isolate pt-6">
+        <div className="py-12 sm:py-20">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="mx-auto max-w-2xl text-center">
-              <div className="flex justify-center items-center mb-4">
-                <CavalierDog className="w-24 h-24 text-black" />
+              <div className="flex justify-center items-center mb-6">
+                <CavalierDog className="w-20 h-20 text-black" />
               </div>
               <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
                 Ansøgninger skrevet med kunstig intelligens
