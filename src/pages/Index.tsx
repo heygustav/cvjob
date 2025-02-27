@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FileText, CheckCircle, Sparkles, ChevronRight } from 'lucide-react';
+import { FileText, CheckCircle, Sparkles, ChevronRight, FileUp, Briefcase, PenTool } from 'lucide-react';
 import { useAuth } from '../components/AuthProvider';
 import CavalierDog from '../components/CavalierDog';
 
@@ -140,7 +140,7 @@ const Index = () => {
             <ol className="grid gap-10 lg:grid-cols-3">
               <li className="relative flex flex-col items-center">
                 <div className="rounded-full bg-white p-4 text-black">
-                  <span className="text-xl font-bold">1</span>
+                  <FileUp className="h-6 w-6" aria-hidden="true" />
                 </div>
                 <h3 className="mt-6 text-xl font-bold text-white text-center">
                   Indsæt jobopslaget
@@ -152,7 +152,7 @@ const Index = () => {
               </li>
               <li className="relative flex flex-col items-center">
                 <div className="rounded-full bg-white p-4 text-black">
-                  <span className="text-xl font-bold">2</span>
+                  <Briefcase className="h-6 w-6" aria-hidden="true" />
                 </div>
                 <h3 className="mt-6 text-xl font-bold text-white text-center">
                   Tilpas din profil
@@ -164,7 +164,7 @@ const Index = () => {
               </li>
               <li className="relative flex flex-col items-center">
                 <div className="rounded-full bg-white p-4 text-black">
-                  <span className="text-xl font-bold">3</span>
+                  <PenTool className="h-6 w-6" aria-hidden="true" />
                 </div>
                 <h3 className="mt-6 text-xl font-bold text-white text-center">
                   Modtag din ansøgning

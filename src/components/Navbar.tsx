@@ -86,7 +86,7 @@ const Navbar: React.FC = () => {
                   }`}
                   aria-current={isActive("/profile") ? "page" : undefined}
                 >
-                  Profil
+                  Min profil
                 </Link>
                 <button 
                   onClick={handleLogout} 
@@ -178,7 +178,7 @@ const Navbar: React.FC = () => {
                 aria-current={isActive("/profile") ? "page" : undefined}
               >
                 <User className="h-5 w-5 mr-3" aria-hidden="true" />
-                Profil
+                Min profil
               </Link>
               <button
                 onClick={handleLogout}
