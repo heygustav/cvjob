@@ -1,29 +1,130 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { PlusCircle, Calendar, FileText, Edit, Trash2, ExternalLink } from "lucide-react";
-import { JobPosting, CoverLetter, mockJobPostings, mockCoverLetters } from "../lib/types";
+import { JobPosting, CoverLetter } from "../lib/types";
 import { formatDistanceToNow } from "date-fns";
 import { da } from "date-fns/locale";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/components/AuthProvider";
+import { useToast } from "@/hooks/use-toast";
 
 const Dashboard = () => {
-  const [jobPostings, setJobPostings] = useState<JobPosting[]>(mockJobPostings);
-  const [coverLetters, setCoverLetters] = useState<CoverLetter[]>(mockCoverLetters);
+  const [jobPostings, setJobPostings] = useState<JobPosting[]>([]);
+  const [coverLetters, setCoverLetters] = useState<CoverLetter[]>([]);
   const [activeTab, setActiveTab] = useState<"jobs" | "letters">("jobs");
+  const [isLoading, setIsLoading] = useState(true);
+  const { user } = useAuth();
+  const { toast } = useToast();
 
-  const deleteJobPosting = (id: string) => {
-    setJobPostings(jobPostings.filter(job => job.id !== id));
-    // Also delete associated cover letters
-    setCoverLetters(coverLetters.filter(letter => letter.jobPostingId !== id));
+  useEffect(() => {
+    if (user) {
+      fetchJobPostings();
+      fetchCoverLetters();
+    }
+  }, [user]);
+
+  const fetchJobPostings = async () => {
+    try {
+      setIsLoading(true);
+      const { data, error } = await supabase
+        .from("job_postings")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+
+      setJobPostings(data || []);
+    } catch (error) {
+      console.error("Error fetching job postings:", error);
+      toast({
+        title: "Fejl ved indlæsning",
+        description: "Der opstod en fejl under indlæsning af jobopslag.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const deleteCoverLetter = (id: string) => {
-    setCoverLetters(coverLetters.filter(letter => letter.id !== id));
+  const fetchCoverLetters = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("cover_letters")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+
+      setCoverLetters(data || []);
+    } catch (error) {
+      console.error("Error fetching cover letters:", error);
+    }
+  };
+
+  const deleteJobPosting = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from("job_postings")
+        .delete()
+        .eq("id", id);
+
+      if (error) throw error;
+
+      setJobPostings(jobPostings.filter(job => job.id !== id));
+      // Cover letters will be automatically deleted due to the foreign key constraint
+      setCoverLetters(coverLetters.filter(letter => letter.job_posting_id !== id));
+
+      toast({
+        title: "Jobopslag slettet",
+        description: "Jobopslaget er blevet slettet.",
+      });
+    } catch (error) {
+      console.error("Error deleting job posting:", error);
+      toast({
+        title: "Fejl ved sletning",
+        description: "Der opstod en fejl under sletning af jobopslaget.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const deleteCoverLetter = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from("cover_letters")
+        .delete()
+        .eq("id", id);
+
+      if (error) throw error;
+
+      setCoverLetters(coverLetters.filter(letter => letter.id !== id));
+
+      toast({
+        title: "Ansøgning slettet",
+        description: "Ansøgningen er blevet slettet.",
+      });
+    } catch (error) {
+      console.error("Error deleting cover letter:", error);
+      toast({
+        title: "Fejl ved sletning",
+        description: "Der opstod en fejl under sletning af ansøgningen.",
+        variant: "destructive",
+      });
+    }
   };
 
   const findJobForLetter = (jobPostingId: string) => {
     return jobPostings.find(job => job.id === jobPostingId);
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 pt-20 flex justify-center items-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 pt-20">
@@ -124,7 +225,7 @@ const Dashboard = () => {
                             <div className="ml-5 flex flex-shrink-0 items-center space-x-2">
                               <div className="flex items-center text-sm text-gray-500">
                                 <Calendar className="mr-1.5 h-4 w-4 flex-shrink-0 text-gray-400" />
-                                <span>{formatDistanceToNow(job.createdAt, { addSuffix: true, locale: da })}</span>
+                                <span>{formatDistanceToNow(new Date(job.created_at), { addSuffix: true, locale: da })}</span>
                               </div>
                               <div className="flex flex-row items-center">
                                 <Link
@@ -148,7 +249,7 @@ const Dashboard = () => {
                             <p className="text-sm text-gray-600 line-clamp-2">{job.description}</p>
                           </div>
                           <div className="mt-3">
-                            {coverLetters.filter(letter => letter.jobPostingId === job.id).length > 0 ? (
+                            {coverLetters.filter(letter => letter.job_posting_id === job.id).length > 0 ? (
                               <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
                                 Ansøgning oprettet
                               </span>
@@ -192,7 +293,7 @@ const Dashboard = () => {
                   <div className="overflow-hidden bg-white shadow sm:rounded-md">
                     <ul className="divide-y divide-gray-200">
                       {coverLetters.map((letter) => {
-                        const job = findJobForLetter(letter.jobPostingId);
+                        const job = findJobForLetter(letter.job_posting_id);
                         return (
                           <li key={letter.id} className="px-0 py-4 sm:px-0">
                             <div className="flex items-center justify-between">
@@ -214,7 +315,7 @@ const Dashboard = () => {
                               <div className="ml-5 flex flex-shrink-0 items-center space-x-2">
                                 <div className="flex items-center text-sm text-gray-500">
                                   <Calendar className="mr-1.5 h-4 w-4 flex-shrink-0 text-gray-400" />
-                                  <span>{formatDistanceToNow(letter.createdAt, { addSuffix: true, locale: da })}</span>
+                                  <span>{formatDistanceToNow(new Date(letter.created_at), { addSuffix: true, locale: da })}</span>
                                 </div>
                                 <div className="flex flex-row items-center">
                                   <Link

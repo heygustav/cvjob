@@ -1,83 +1,211 @@
+
 import React, { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { Sparkles } from "lucide-react";
 import JobPostingForm from "../components/JobPostingForm";
 import CoverLetterPreview from "../components/CoverLetterPreview";
-import { JobPosting, CoverLetter, mockJobPostings, mockCoverLetters, mockUsers } from "../lib/types";
+import { JobPosting, CoverLetter } from "../lib/types";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/components/AuthProvider";
 
 const CoverLetterGenerator = () => {
   const [searchParams] = useSearchParams();
   const jobId = searchParams.get("jobId");
   const letterId = searchParams.get("letterId");
+  const navigate = useNavigate();
+  const { user } = useAuth();
 
   const [step, setStep] = useState<1 | 2>(1);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedJob, setSelectedJob] = useState<JobPosting | null>(null);
   const [generatedLetter, setGeneratedLetter] = useState<CoverLetter | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
-    if (jobId) {
-      const job = mockJobPostings.find(j => j.id === jobId);
-      if (job) {
-        setSelectedJob(job);
-        const letter = mockCoverLetters.find(l => l.jobPostingId === jobId);
-        if (letter) {
-          setGeneratedLetter(letter);
-          setStep(2);
-        } else {
-          setStep(1);
-        }
-      }
-    } else if (letterId) {
-      const letter = mockCoverLetters.find(l => l.id === letterId);
-      if (letter) {
-        setGeneratedLetter(letter);
-        const job = mockJobPostings.find(j => j.id === letter.jobPostingId);
-        if (job) {
-          setSelectedJob(job);
-        }
-        setStep(2);
+    if (user) {
+      if (jobId) {
+        fetchJob(jobId);
+      } else if (letterId) {
+        fetchLetter(letterId);
+      } else {
+        setIsLoading(false);
       }
     }
-  }, [jobId, letterId]);
+  }, [user, jobId, letterId]);
+
+  const fetchJob = async (id: string) => {
+    try {
+      setIsLoading(true);
+      const { data: job, error: jobError } = await supabase
+        .from("job_postings")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+      if (jobError) throw jobError;
+
+      setSelectedJob(job);
+
+      // Check if there's already a cover letter for this job
+      const { data: letters, error: letterError } = await supabase
+        .from("cover_letters")
+        .select("*")
+        .eq("job_posting_id", id);
+
+      if (letterError) throw letterError;
+
+      if (letters && letters.length > 0) {
+        setGeneratedLetter(letters[0]);
+        setStep(2);
+      } else {
+        setStep(1);
+      }
+    } catch (error) {
+      console.error("Error fetching job:", error);
+      toast({
+        title: "Fejl ved indlæsning",
+        description: "Der opstod en fejl under indlæsning af jobopslaget.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchLetter = async (id: string) => {
+    try {
+      setIsLoading(true);
+      const { data: letter, error: letterError } = await supabase
+        .from("cover_letters")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+      if (letterError) throw letterError;
+
+      setGeneratedLetter(letter);
+
+      // Fetch the associated job
+      const { data: job, error: jobError } = await supabase
+        .from("job_postings")
+        .select("*")
+        .eq("id", letter.job_posting_id)
+        .single();
+
+      if (jobError) throw jobError;
+
+      setSelectedJob(job);
+      setStep(2);
+    } catch (error) {
+      console.error("Error fetching letter:", error);
+      toast({
+        title: "Fejl ved indlæsning",
+        description: "Der opstod en fejl under indlæsning af ansøgningen.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleJobFormSubmit = async (jobData: Partial<JobPosting>) => {
-    const newJob: JobPosting = {
-      id: selectedJob?.id || `job-${Date.now()}`,
-      userId: "1",
-      title: jobData.title || "",
-      company: jobData.company || "",
-      description: jobData.description || "",
-      contactPerson: jobData.contactPerson,
-      url: jobData.url,
-      createdAt: new Date(),
-    };
-    
-    setSelectedJob(newJob);
-    setIsGenerating(true);
+    if (!user) return;
 
     try {
-      const user = mockUsers[0];
+      let jobId: string;
 
+      // If we're editing an existing job
+      if (selectedJob?.id) {
+        const { error } = await supabase
+          .from("job_postings")
+          .update({
+            title: jobData.title,
+            company: jobData.company,
+            description: jobData.description,
+            contact_person: jobData.contactPerson,
+            url: jobData.url,
+            updated_at: new Date().toISOString()
+          })
+          .eq("id", selectedJob.id);
+
+        if (error) throw error;
+        jobId = selectedJob.id;
+      } else {
+        // Creating a new job
+        const { data, error } = await supabase
+          .from("job_postings")
+          .insert({
+            user_id: user.id,
+            title: jobData.title || "",
+            company: jobData.company || "",
+            description: jobData.description || "",
+            contact_person: jobData.contactPerson,
+            url: jobData.url
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+        jobId = data.id;
+      }
+
+      // Fetch the updated/created job
+      const { data: updatedJob, error: jobError } = await supabase
+        .from("job_postings")
+        .select("*")
+        .eq("id", jobId)
+        .single();
+
+      if (jobError) throw jobError;
+      setSelectedJob(updatedJob);
+      
+      setIsGenerating(true);
+
+      // Fetch user profile for AI generation
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+
+      if (profileError && profileError.code !== "PGRST116") throw profileError;
+
+      const userInfo = profile || {
+        name: "",
+        email: user.email,
+        phone: "",
+        address: "",
+        experience: "",
+        education: "",
+        skills: ""
+      };
+
+      // Call the OpenAI function to generate the cover letter
       const response = await fetch('/functions/v1/generate-cover-letter', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          jobInfo: newJob,
-          userInfo: {
-            name: user.name,
-            email: user.email,
-            phone: user.phone,
-            address: user.address,
-            experience: "",
-            education: "",
-            skills: "",
+          jobInfo: {
+            title: updatedJob.title,
+            company: updatedJob.company,
+            description: updatedJob.description,
+            contactPerson: updatedJob.contact_person,
+            url: updatedJob.url
           },
-          jobPosting: newJob.description,
+          userInfo: {
+            name: userInfo.name,
+            email: userInfo.email,
+            phone: userInfo.phone,
+            address: userInfo.address,
+            experience: userInfo.experience,
+            education: userInfo.education,
+            skills: userInfo.skills,
+          },
+          jobPosting: updatedJob.description,
         }),
       });
 
@@ -87,15 +215,53 @@ const CoverLetterGenerator = () => {
 
       const data = await response.json();
       
-      const newLetter: CoverLetter = {
-        id: generatedLetter?.id || `letter-${Date.now()}`,
-        userId: "1",
-        jobPostingId: newJob.id,
-        content: data.content,
-        createdAt: new Date(),
-      };
+      // Check if we already have a cover letter for this job
+      let letterId: string;
+      const { data: existingLetters, error: letterCheckError } = await supabase
+        .from("cover_letters")
+        .select("id")
+        .eq("job_posting_id", jobId);
 
-      setGeneratedLetter(newLetter);
+      if (letterCheckError) throw letterCheckError;
+
+      if (existingLetters && existingLetters.length > 0) {
+        // Update existing letter
+        const { error: updateError } = await supabase
+          .from("cover_letters")
+          .update({
+            content: data.content,
+            updated_at: new Date().toISOString()
+          })
+          .eq("id", existingLetters[0].id);
+
+        if (updateError) throw updateError;
+        letterId = existingLetters[0].id;
+      } else {
+        // Create new letter
+        const { data: newLetter, error: createError } = await supabase
+          .from("cover_letters")
+          .insert({
+            user_id: user.id,
+            job_posting_id: jobId,
+            content: data.content
+          })
+          .select()
+          .single();
+
+        if (createError) throw createError;
+        letterId = newLetter.id;
+      }
+
+      // Fetch the updated/created letter
+      const { data: updatedLetter, error: fetchError } = await supabase
+        .from("cover_letters")
+        .select("*")
+        .eq("id", letterId)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      setGeneratedLetter(updatedLetter);
       setStep(2);
 
       toast({
@@ -103,7 +269,7 @@ const CoverLetterGenerator = () => {
         description: "Din ansøgning er blevet oprettet med succes.",
       });
     } catch (error) {
-      console.error('Error generating cover letter:', error);
+      console.error('Error in job submission process:', error);
       toast({
         title: "Fejl ved generering",
         description: "Der opstod en fejl under generering af ansøgningen. Prøv venligst igen.",
@@ -114,16 +280,41 @@ const CoverLetterGenerator = () => {
     }
   };
 
-  const handleEditLetter = (updatedContent: string) => {
-    if (generatedLetter) {
+  const handleEditLetter = async (updatedContent: string) => {
+    if (!generatedLetter || !user) return;
+
+    try {
+      const { error } = await supabase
+        .from("cover_letters")
+        .update({
+          content: updatedContent,
+          updated_at: new Date().toISOString()
+        })
+        .eq("id", generatedLetter.id);
+
+      if (error) throw error;
+
       setGeneratedLetter({
         ...generatedLetter,
-        content: updatedContent,
+        content: updatedContent
+      });
+
+      toast({
+        title: "Ansøgning opdateret",
+        description: "Dine ændringer er blevet gemt.",
+      });
+    } catch (error) {
+      console.error('Error updating letter:', error);
+      toast({
+        title: "Fejl ved opdatering",
+        description: "Der opstod en fejl under opdatering af ansøgningen.",
+        variant: "destructive",
       });
     }
   };
 
   const handleSaveLetter = () => {
+    navigate("/dashboard");
     toast({
       title: "Ansøgning gemt",
       description: "Din ansøgning er blevet gemt til din konto.",
@@ -133,6 +324,14 @@ const CoverLetterGenerator = () => {
   const handleBackToJobDetails = () => {
     setStep(1);
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 pt-20 flex justify-center items-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 pt-20">

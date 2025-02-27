@@ -10,21 +10,23 @@ export interface User {
 
 export interface JobPosting {
   id: string;
-  userId: string;
+  user_id: string;
   title: string;
   company: string;
   description: string;
-  contactPerson?: string;
+  contact_person?: string;
   url?: string;
-  createdAt: Date;
+  created_at: string;
+  updated_at?: string;
 }
 
 export interface CoverLetter {
   id: string;
-  userId: string;
-  jobPostingId: string;
+  user_id: string;
+  job_posting_id: string;
   content: string;
-  createdAt: Date;
+  created_at: string;
+  updated_at?: string;
 }
 
 export interface PersonalInfo {
@@ -43,8 +45,7 @@ export interface AuthState {
   isLoading: boolean;
 }
 
-// Simulating authentication in a frontend-only app for demo purposes
-// In a real app, we would use proper authentication with a backend
+// Mock data for development/testing purposes
 export const mockUsers: User[] = [
   {
     id: "1",
@@ -59,32 +60,32 @@ export const mockUsers: User[] = [
 export const mockJobPostings: JobPosting[] = [
   {
     id: "1",
-    userId: "1",
+    user_id: "1",
     title: "UX Designer",
     company: "Designbureau A/S",
     description: "Vi søger en dygtig UX designer med erfaring fra digitale projekter. Du vil indgå i vores kreative team og arbejde med spændende kunder i forskellige brancher.",
-    contactPerson: "Maria Hansen",
+    contact_person: "Maria Hansen",
     url: "https://example.com/job/ux-designer",
-    createdAt: new Date()
+    created_at: new Date().toISOString()
   },
   {
     id: "2",
-    userId: "1",
+    user_id: "1",
     title: "Frontend Developer",
     company: "TechStart ApS",
     description: "Er du passioneret omkring moderne frontend-teknologier? Vi søger en udvikler der kan hjælpe os med at bygge intuitive brugergrænseflader til vores produkter.",
-    contactPerson: "Lars Jensen",
+    contact_person: "Lars Jensen",
     url: "https://example.com/job/frontend-developer",
-    createdAt: new Date()
+    created_at: new Date().toISOString()
   }
 ];
 
 export const mockCoverLetters: CoverLetter[] = [
   {
     id: "1",
-    userId: "1",
-    jobPostingId: "1",
+    user_id: "1",
+    job_posting_id: "1",
     content: "Kære Maria Hansen,\n\nJeg skriver til dig angående stillingen som UX Designer hos Designbureau A/S. Med min baggrund i brugeroplevelse og digitalt design, er jeg overbevist om, at jeg kan bidrage til jeres kreative team.\n\nMed venlig hilsen,\nDemo User\nTlf: +45 12 34 56 78\nEmail: demo@example.com",
-    createdAt: new Date()
+    created_at: new Date().toISOString()
   }
 ];

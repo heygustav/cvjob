@@ -1,61 +1,77 @@
 
-import { useState } from "react";
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Navbar from "./components/Navbar";
-import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
+import CoverLetterGenerator from "./pages/CoverLetterGenerator";
+import Profile from "./pages/Profile";
+import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-import Profile from "./pages/Profile";
-import CoverLetterGenerator from "./pages/CoverLetterGenerator";
-import NotFound from "./pages/NotFound";
+import Index from "./pages/Index";
+import { Toaster } from "./components/ui/toaster";
+import "./App.css";
+import { AuthProvider, useAuth } from "./components/AuthProvider";
+import Auth from "./pages/Auth";
 
-const queryClient = new QueryClient();
+// Protected route component
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { session, isLoading } = useAuth();
 
-const App = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userId, setUserId] = useState<string | null>(null);
+  if (isLoading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
 
-  const handleLogin = (id: string) => {
-    setUserId(id);
-    setIsAuthenticated(true);
-  };
+  if (!session) {
+    return <Navigate to="/auth" replace />;
+  }
 
-  const handleSignup = (id: string) => {
-    setUserId(id);
-    setIsAuthenticated(true);
-  };
-
-  const handleLogout = () => {
-    setUserId(null);
-    setIsAuthenticated(false);
-  };
-
-  return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Navbar isAuthenticated={isAuthenticated} onLogout={handleLogout} />
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/login" element={<Login onLogin={handleLogin} />} />
-            <Route path="/signup" element={<Signup onSignup={handleSignup} />} />
-            {/* Protected routes */}
-            <Route path="/dashboard" element={isAuthenticated ? <Dashboard /> : <Login onLogin={handleLogin} />} />
-            <Route path="/profile" element={isAuthenticated ? <Profile /> : <Login onLogin={handleLogin} />} />
-            <Route path="/generator" element={isAuthenticated ? <CoverLetterGenerator /> : <Login onLogin={handleLogin} />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </QueryClientProvider>
-  );
+  return <>{children}</>;
 };
+
+const AppRoutes = () => (
+  <Routes>
+    <Route path="/" element={<Index />} />
+    <Route path="/auth" element={<Auth />} />
+    <Route path="/login" element={<Navigate to="/auth" replace />} />
+    <Route path="/signup" element={<Navigate to="/auth?signup=true" replace />} />
+    <Route
+      path="/dashboard"
+      element={
+        <ProtectedRoute>
+          <Dashboard />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/generator"
+      element={
+        <ProtectedRoute>
+          <CoverLetterGenerator />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/profile"
+      element={
+        <ProtectedRoute>
+          <Profile />
+        </ProtectedRoute>
+      }
+    />
+    <Route path="*" element={<NotFound />} />
+  </Routes>
+);
+
+function App() {
+  return (
+    <Router>
+      <AuthProvider>
+        <Navbar />
+        <AppRoutes />
+        <Toaster />
+      </AuthProvider>
+    </Router>
+  );
+}
 
 export default App;

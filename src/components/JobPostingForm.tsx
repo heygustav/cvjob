@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Search } from "lucide-react";
+import { JobPosting } from "../lib/types";
 
 interface JobPostingFormProps {
   onSubmit: (jobData: {
@@ -11,13 +12,7 @@ interface JobPostingFormProps {
     contactPerson?: string;
     url?: string;
   }) => void;
-  initialData?: {
-    title: string;
-    company: string;
-    description: string;
-    contactPerson?: string;
-    url?: string;
-  };
+  initialData?: JobPosting;
   isLoading?: boolean;
 }
 
@@ -30,7 +25,7 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
     title: initialData?.title || "",
     company: initialData?.company || "",
     description: initialData?.description || "",
-    contactPerson: initialData?.contactPerson || "",
+    contactPerson: initialData?.contact_person || "",
     url: initialData?.url || "",
   });
   const { toast } = useToast();
