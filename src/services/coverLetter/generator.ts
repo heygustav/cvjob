@@ -50,7 +50,8 @@ export const generateCoverLetter = async (
             skills: userInfo.skills || '',
           },
           locale: navigator.language,
-          model: "gpt-4o"
+          model: "gpt-4o",
+          additionalInstructions: "Match the tone of the job ad without parroting the same words and sentences, except where necessary to explain technical qualifications or similar requirements. Create an authentic voice that resonates with the company culture while maintaining originality."
         }
       }
     );
