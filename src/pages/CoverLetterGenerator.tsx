@@ -114,6 +114,8 @@ const CoverLetterGenerator = () => {
     if (!user) return;
 
     try {
+      setIsGenerating(true);
+      
       let jobId: string;
 
       // If we're editing an existing job
@@ -160,8 +162,6 @@ const CoverLetterGenerator = () => {
 
       if (jobError) throw jobError;
       setSelectedJob(updatedJob);
-      
-      setIsGenerating(true);
 
       // Fetch user profile for AI generation
       const { data: profile, error: profileError } = await supabase
@@ -170,6 +170,7 @@ const CoverLetterGenerator = () => {
         .eq("id", user.id)
         .single();
 
+      // Allow PGRST116 error (no profile found) but not other errors
       if (profileError && profileError.code !== "PGRST116") throw profileError;
 
       const userInfo = profile || {
@@ -210,7 +211,9 @@ const CoverLetterGenerator = () => {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to generate cover letter');
+        const errorData = await response.json();
+        console.error('Error from generate-cover-letter:', errorData);
+        throw new Error(errorData.error || 'Failed to generate cover letter');
       }
 
       const data = await response.json();
