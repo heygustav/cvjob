@@ -46,9 +46,13 @@ export const useTimer = (isActive: boolean) => {
     return `${seconds}.${hundredths.toString().padStart(2, '0')}`;
   };
 
-  const resetTimer = () => {
-    startTimeRef.current = null;
-    setElapsed(0);
+  const resetTimer = (initialValue: number = 0, startImmediately: boolean = false) => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    startTimeRef.current = startImmediately ? Date.now() : null;
+    setElapsed(initialValue);
   };
 
   return {
