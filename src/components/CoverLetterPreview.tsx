@@ -1,7 +1,9 @@
 
 import React, { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { Download, Copy, Save, Edit } from "lucide-react";
+import { Download, Copy, Edit, FileText, FileWord, FilePdf } from "lucide-react";
+import { format } from "date-fns";
+import { da } from "date-fns/locale";
 
 interface CoverLetterPreviewProps {
   content: string;
@@ -17,12 +19,15 @@ const CoverLetterPreview: React.FC<CoverLetterPreviewProps> = ({
   jobTitle,
   company,
   onEdit,
-  onSave,
   isEditable = true,
 }) => {
   const [editedContent, setEditedContent] = useState(content);
   const [isEditing, setIsEditing] = useState(false);
   const { toast } = useToast();
+
+  const currentDate = new Date();
+  // Format the date in Danish, e.g., "1. februar 2025"
+  const formattedDate = format(currentDate, "d. MMMM yyyy", { locale: da });
 
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setEditedContent(e.target.value);
@@ -47,20 +52,16 @@ const CoverLetterPreview: React.FC<CoverLetterPreviewProps> = ({
     });
   };
 
-  const handleSave = () => {
-    if (onSave) {
-      onSave();
-    }
-    toast({
-      title: "Ansøgning gemt",
-      description: "Din ansøgning er blevet gemt.",
-    });
+  // Function to create formatted letter content with header
+  const getFormattedLetterContent = () => {
+    const letterHeader = `${company || "Virksomhed"}\nAtt.: Ansøgning til ${jobTitle || "stillingen"}\n\n`;
+    return letterHeader + editedContent;
   };
 
-  // Function to simulate file download
-  const handleDownload = () => {
+  // Function to download as text file
+  const handleDownloadTxt = () => {
     const element = document.createElement("a");
-    const file = new Blob([editedContent], { type: "text/plain" });
+    const file = new Blob([getFormattedLetterContent()], { type: "text/plain" });
     element.href = URL.createObjectURL(file);
     element.download = `Ansøgning - ${company || "Virksomhed"} - ${
       jobTitle || "Stilling"
@@ -71,8 +72,34 @@ const CoverLetterPreview: React.FC<CoverLetterPreviewProps> = ({
 
     toast({
       title: "Download startet",
-      description: "Din ansøgning bliver downloadet.",
+      description: "Din ansøgning bliver downloadet som tekstfil.",
     });
+  };
+
+  // Function to simulate download as PDF
+  const handleDownloadPdf = () => {
+    // This would normally use a PDF library, but for now we'll just show a toast
+    toast({
+      title: "PDF download",
+      description: "Din ansøgning bliver downloadet som PDF.",
+    });
+    
+    // For a complete implementation, you would use a library like jsPDF or
+    // call a server endpoint that generates a PDF
+    alert("PDF download funktionalitet vil blive implementeret snart.");
+  };
+
+  // Function to simulate download as Word document
+  const handleDownloadDocx = () => {
+    // This would normally use a DOCX generation library, but for now we'll just show a toast
+    toast({
+      title: "Word download",
+      description: "Din ansøgning bliver downloadet som Word-dokument.",
+    });
+    
+    // For a complete implementation, you would use a library like docx
+    // or call a server endpoint that generates a DOCX file
+    alert("Word download funktionalitet vil blive implementeret snart.");
   };
 
   const documentTitle = jobTitle && company
@@ -117,25 +144,32 @@ const CoverLetterPreview: React.FC<CoverLetterPreviewProps> = ({
                 <span className="hidden sm:inline">Kopier</span>
               </button>
               <button
-                onClick={handleDownload}
+                onClick={handleDownloadTxt}
                 className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
                 title="Download som tekstfil"
                 aria-label="Download som tekstfil"
               >
-                <Download className="h-4 w-4 sm:mr-2" aria-hidden="true" />
-                <span className="hidden sm:inline">Download</span>
+                <FileText className="h-4 w-4 sm:mr-2" aria-hidden="true" />
+                <span className="hidden sm:inline">Tekst</span>
               </button>
-              {onSave && (
-                <button
-                  onClick={handleSave}
-                  className="inline-flex items-center px-3 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
-                  title="Gem til din konto"
-                  aria-label="Gem til din konto"
-                >
-                  <Save className="h-4 w-4 sm:mr-2" aria-hidden="true" />
-                  <span className="hidden sm:inline">Gem</span>
-                </button>
-              )}
+              <button
+                onClick={handleDownloadDocx}
+                className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                title="Download som Word-dokument"
+                aria-label="Download som Word-dokument"
+              >
+                <FileWord className="h-4 w-4 sm:mr-2" aria-hidden="true" />
+                <span className="hidden sm:inline">Word</span>
+              </button>
+              <button
+                onClick={handleDownloadPdf}
+                className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                title="Download som PDF"
+                aria-label="Download som PDF"
+              >
+                <FilePdf className="h-4 w-4 sm:mr-2" aria-hidden="true" />
+                <span className="hidden sm:inline">PDF</span>
+              </button>
             </>
           )}
         </div>
@@ -149,21 +183,32 @@ const CoverLetterPreview: React.FC<CoverLetterPreviewProps> = ({
             aria-label="Rediger ansøgningstekst"
           />
         ) : (
-          <div 
-            className="prose max-w-none font-serif whitespace-pre-line text-base leading-relaxed overflow-auto h-96 p-4 bg-gray-50 rounded-md" 
-            tabIndex={0} 
-            aria-label="Ansøgningstekst"
-          >
-            {editedContent}
+          <div className="flex flex-col h-96">
+            <div className="flex justify-between mb-6">
+              <div className="font-serif">
+                <p className="font-semibold">{company || "Virksomhed"}</p>
+                <p>Att.: Ansøgning til {jobTitle || "stillingen"}</p>
+              </div>
+              <div className="font-serif text-right">
+                <p>{formattedDate}</p>
+              </div>
+            </div>
+            <div 
+              className="prose max-w-none font-serif whitespace-pre-line text-base leading-relaxed overflow-auto flex-grow p-4 bg-gray-50 rounded-md" 
+              tabIndex={0} 
+              aria-label="Ansøgningstekst"
+            >
+              {editedContent}
+            </div>
           </div>
         )}
       </div>
       <div className="flex items-center justify-between p-4 border-t border-gray-200 bg-gray-50 text-xs text-gray-500">
         <p>
-          {new Date().toLocaleDateString("da-DK")}
+          {formattedDate}
         </p>
         <p>
-          {/* JobMagic reference removed */}
+          {/* Empty right side */}
         </p>
       </div>
     </div>

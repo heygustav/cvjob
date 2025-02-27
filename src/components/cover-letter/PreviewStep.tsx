@@ -7,14 +7,12 @@ interface PreviewStepProps {
   generatedLetter: CoverLetter;
   selectedJob: JobPosting;
   onEdit: (content: string) => Promise<void>;
-  onSave: () => void;
 }
 
 const PreviewStep: React.FC<PreviewStepProps> = ({
   generatedLetter,
   selectedJob,
-  onEdit,
-  onSave
+  onEdit
 }) => {
   return (
     <div className="p-4 sm:p-6">
@@ -23,7 +21,6 @@ const PreviewStep: React.FC<PreviewStepProps> = ({
         jobTitle={selectedJob.title}
         company={selectedJob.company}
         onEdit={onEdit}
-        onSave={onSave}
       />
     </div>
   );
