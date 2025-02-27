@@ -98,7 +98,8 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
     }
 
     console.log("Form validation passed, proceeding with submission");
-    resetTimer(0, true); // Now passing the correct arguments
+    // Fixed: providing both required arguments
+    resetTimer(0, true);
     
     try {
       console.log("Calling onSubmit with form data", formData);
