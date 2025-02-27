@@ -11,7 +11,6 @@ import { useTimer } from "./job-form/useTimer";
 import { useJobExtraction } from "./job-form/useJobExtraction";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/components/AuthProvider";
-import { saveOrUpdateJob } from "@/services/coverLetter/database";
 import { Save } from "lucide-react";
 
 interface JobPostingFormProps {
@@ -135,18 +134,22 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
     setIsSaving(true);
     try {
       if (onSave) {
-        // Reset timer with both required arguments
         resetTimer(0, false);
         await onSave(formData);
       } else {
-        // Reset timer with both required arguments
         resetTimer(0, false);
-        await saveOrUpdateJob({
+        // Remove direct import and use from this component
+        // The function was previously imported at the top
+        const jobData = {
           ...formData,
           id: initialData?.id,
           user_id: user.id,
           created_at: initialData?.created_at || new Date().toISOString(),
-        });
+        };
+        
+        // Import this function from external services
+        const { saveOrUpdateJob } = await import('@/services/coverLetter/database');
+        await saveOrUpdateJob(jobData);
         
         toast({
           title: "Jobopslag gemt",
