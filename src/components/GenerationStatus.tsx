@@ -1,13 +1,10 @@
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { Clock } from "lucide-react";
 
 export const GenerationStatus: React.FC = () => {
   const [elapsed, setElapsed] = useState(0);
   const [stepIndex, setStepIndex] = useState(0);
-  const startTimeRef = useRef<number>(Date.now());
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const stepIntervalRef = useRef<NodeJS.Timeout | null>(null);
   
   const steps = [
     "Analyserer jobopslag...",
@@ -18,28 +15,23 @@ export const GenerationStatus: React.FC = () => {
 
   // Start timers on component mount
   useEffect(() => {
-    // Clear any existing intervals
-    if (intervalRef.current) clearInterval(intervalRef.current);
-    if (stepIntervalRef.current) clearInterval(stepIntervalRef.current);
-    
-    // Reset start time
-    startTimeRef.current = Date.now();
+    const startTime = Date.now();
     
     // Start elapsed time timer
-    intervalRef.current = setInterval(() => {
-      const currentElapsed = Math.floor((Date.now() - startTimeRef.current) / 10);
+    const intervalId = setInterval(() => {
+      const currentElapsed = Math.floor((Date.now() - startTime) / 10);
       setElapsed(currentElapsed);
     }, 100);
     
     // Start step rotation
-    stepIntervalRef.current = setInterval(() => {
+    const stepIntervalId = setInterval(() => {
       setStepIndex(prev => (prev + 1) % steps.length);
     }, 3000);
     
     // Cleanup on unmount
     return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-      if (stepIntervalRef.current) clearInterval(stepIntervalRef.current);
+      clearInterval(intervalId);
+      clearInterval(stepIntervalId);
     };
   }, [steps.length]);
 

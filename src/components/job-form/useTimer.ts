@@ -7,18 +7,16 @@ export const useTimer = (isActive: boolean) => {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    // Clear any existing timer
+    // Clear any existing timer when component updates
     if (timerRef.current) {
       clearInterval(timerRef.current);
       timerRef.current = null;
     }
     
     if (isActive) {
-      // Only set start time if it hasn't been set yet
-      if (!startTimeRef.current) {
-        startTimeRef.current = Date.now();
-        setElapsed(0);
-      }
+      // Set start time when loading begins
+      startTimeRef.current = Date.now();
+      setElapsed(0);
       
       // Start a new timer
       timerRef.current = setInterval(() => {
