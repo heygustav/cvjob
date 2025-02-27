@@ -1,6 +1,7 @@
 
 import React from "react";
 import { formatDistanceToNow } from "date-fns";
+import { da } from "date-fns/locale";
 import { Calendar, File, Edit, Trash2 } from "lucide-react";
 import { JobPosting, CoverLetter } from "../lib/types";
 import { Link } from "react-router-dom";
@@ -31,9 +32,9 @@ const ApplicationHistory: React.FC<ApplicationHistoryProps> = ({
   return (
     <div className="space-y-8">
       <div>
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Recent Job Postings</h3>
+        <h3 className="text-lg font-medium text-gray-900 mb-4">Seneste jobopslag</h3>
         {jobPostings.length === 0 ? (
-          <p className="text-gray-500 text-sm">No job postings yet.</p>
+          <p className="text-gray-500 text-sm">Ingen jobopslag endnu.</p>
         ) : (
           <div className="space-y-4">
             {jobPostings.slice(0, 3).map((job) => {
@@ -58,7 +59,7 @@ const ApplicationHistory: React.FC<ApplicationHistoryProps> = ({
                     <div className="mt-1 flex items-center text-sm text-gray-500">
                       <Calendar className="mr-1.5 h-4 w-4 flex-shrink-0 text-gray-400" />
                       <span>
-                        {formatDistanceToNow(job.createdAt, { addSuffix: true })}
+                        {formatDistanceToNow(job.createdAt, { addSuffix: true, locale: da })}
                       </span>
                     </div>
                   </div>
@@ -67,7 +68,7 @@ const ApplicationHistory: React.FC<ApplicationHistoryProps> = ({
                       <Link
                         to={`/generator?letterId=${letter.id}`}
                         className="text-gray-600 hover:text-gray-900 mr-2"
-                        title="View cover letter"
+                        title="Se ansøgning"
                       >
                         <File className="h-5 w-5" />
                       </Link>
@@ -75,7 +76,7 @@ const ApplicationHistory: React.FC<ApplicationHistoryProps> = ({
                       <Link
                         to={`/generator?jobId=${job.id}`}
                         className="text-gray-600 hover:text-gray-900 mr-2"
-                        title="Create cover letter"
+                        title="Opret ansøgning"
                       >
                         <Edit className="h-5 w-5" />
                       </Link>
@@ -84,7 +85,7 @@ const ApplicationHistory: React.FC<ApplicationHistoryProps> = ({
                       <button
                         onClick={() => onDeleteJob(job.id)}
                         className="text-gray-600 hover:text-red-600"
-                        title="Delete job posting"
+                        title="Slet jobopslag"
                       >
                         <Trash2 className="h-5 w-5" />
                       </button>
@@ -98,7 +99,7 @@ const ApplicationHistory: React.FC<ApplicationHistoryProps> = ({
                 to="/dashboard"
                 className="block text-center text-sm font-medium text-black hover:text-gray-800 mt-2"
               >
-                View all job postings
+                Se alle jobopslag
               </Link>
             )}
           </div>
@@ -106,9 +107,9 @@ const ApplicationHistory: React.FC<ApplicationHistoryProps> = ({
       </div>
 
       <div>
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Recent Cover Letters</h3>
+        <h3 className="text-lg font-medium text-gray-900 mb-4">Seneste ansøgninger</h3>
         {coverLetters.length === 0 ? (
-          <p className="text-gray-500 text-sm">No cover letters yet.</p>
+          <p className="text-gray-500 text-sm">Ingen ansøgninger endnu.</p>
         ) : (
           <div className="space-y-4">
             {coverLetters.slice(0, 3).map((letter) => {
@@ -125,14 +126,15 @@ const ApplicationHistory: React.FC<ApplicationHistoryProps> = ({
                   </div>
                   <div className="flex-1 min-w-0">
                     <h4 className="text-base font-medium text-gray-900 truncate">
-                      Cover Letter for {job?.title || "Unknown Position"}
+                      Ansøgning til {job?.title || "Ukendt stilling"}
                     </h4>
-                    <p className="text-sm text-gray-600">{job?.company || "Unknown Company"}</p>
+                    <p className="text-sm text-gray-600">{job?.company || "Ukendt virksomhed"}</p>
                     <div className="mt-1 flex items-center text-sm text-gray-500">
                       <Calendar className="mr-1.5 h-4 w-4 flex-shrink-0 text-gray-400" />
                       <span>
                         {formatDistanceToNow(letter.createdAt, {
                           addSuffix: true,
+                          locale: da
                         })}
                       </span>
                     </div>
@@ -141,7 +143,7 @@ const ApplicationHistory: React.FC<ApplicationHistoryProps> = ({
                     <Link
                       to={`/generator?letterId=${letter.id}`}
                       className="text-gray-600 hover:text-gray-900 mr-2"
-                      title="Edit cover letter"
+                      title="Rediger ansøgning"
                     >
                       <Edit className="h-5 w-5" />
                     </Link>
@@ -149,7 +151,7 @@ const ApplicationHistory: React.FC<ApplicationHistoryProps> = ({
                       <button
                         onClick={() => onDeleteLetter(letter.id)}
                         className="text-gray-600 hover:text-red-600"
-                        title="Delete cover letter"
+                        title="Slet ansøgning"
                       >
                         <Trash2 className="h-5 w-5" />
                       </button>
@@ -163,7 +165,7 @@ const ApplicationHistory: React.FC<ApplicationHistoryProps> = ({
                 to="/dashboard"
                 className="block text-center text-sm font-medium text-black hover:text-gray-800 mt-2"
               >
-                View all cover letters
+                Se alle ansøgninger
               </Link>
             )}
           </div>

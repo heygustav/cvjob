@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { PlusCircle, Calendar, FileText, Edit, Trash2, ExternalLink } from "lucide-react";
 import { JobPosting, CoverLetter, mockJobPostings, mockCoverLetters } from "../lib/types";
 import { formatDistanceToNow } from "date-fns";
+import { da } from "date-fns/locale";
 
 const Dashboard = () => {
   const [jobPostings, setJobPostings] = useState<JobPosting[]>(mockJobPostings);
@@ -31,7 +32,7 @@ const Dashboard = () => {
           <div className="flex-1 min-w-0">
             <h1 className="text-3xl font-bold leading-tight text-gray-900">Dashboard</h1>
             <p className="mt-1 text-lg text-gray-600">
-              Manage your job applications and cover letters
+              Administrer dine jobansøgninger og ansøgningsbreve
             </p>
           </div>
           <div className="mt-4 flex md:mt-0 md:ml-4 space-x-3">
@@ -40,7 +41,7 @@ const Dashboard = () => {
               className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
             >
               <PlusCircle className="h-4 w-4 mr-2" />
-              New Cover Letter
+              Ny ansøgning
             </Link>
           </div>
         </div>
@@ -56,7 +57,7 @@ const Dashboard = () => {
                     : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                 }`}
               >
-                Job Postings
+                Jobopslag
               </button>
               <button
                 onClick={() => setActiveTab("letters")}
@@ -66,7 +67,7 @@ const Dashboard = () => {
                     : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                 }`}
               >
-                Cover Letters
+                Ansøgninger
               </button>
             </nav>
           </div>
@@ -77,9 +78,9 @@ const Dashboard = () => {
                 {jobPostings.length === 0 ? (
                   <div className="text-center py-12">
                     <FileText className="mx-auto h-12 w-12 text-gray-400" />
-                    <h3 className="mt-2 text-lg font-medium text-gray-900">No job postings yet</h3>
+                    <h3 className="mt-2 text-lg font-medium text-gray-900">Ingen jobopslag endnu</h3>
                     <p className="mt-1 text-sm text-gray-500">
-                      Start by adding a job posting to generate a cover letter.
+                      Start med at tilføje et jobopslag for at generere en ansøgning.
                     </p>
                     <div className="mt-6">
                       <Link
@@ -87,7 +88,7 @@ const Dashboard = () => {
                         className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
                       >
                         <PlusCircle className="h-4 w-4 mr-2" />
-                        Add Job Posting
+                        Tilføj jobopslag
                       </Link>
                     </div>
                   </div>
@@ -123,7 +124,7 @@ const Dashboard = () => {
                             <div className="ml-5 flex flex-shrink-0 items-center space-x-2">
                               <div className="flex items-center text-sm text-gray-500">
                                 <Calendar className="mr-1.5 h-4 w-4 flex-shrink-0 text-gray-400" />
-                                <span>{formatDistanceToNow(job.createdAt, { addSuffix: true })}</span>
+                                <span>{formatDistanceToNow(job.createdAt, { addSuffix: true, locale: da })}</span>
                               </div>
                               <div className="flex flex-row items-center">
                                 <Link
@@ -131,14 +132,14 @@ const Dashboard = () => {
                                   className="p-1 rounded-full text-gray-600 hover:text-black focus:outline-none"
                                 >
                                   <Edit className="h-5 w-5" />
-                                  <span className="sr-only">Edit</span>
+                                  <span className="sr-only">Rediger</span>
                                 </Link>
                                 <button
                                   onClick={() => deleteJobPosting(job.id)}
                                   className="p-1 rounded-full text-gray-600 hover:text-red-600 focus:outline-none"
                                 >
                                   <Trash2 className="h-5 w-5" />
-                                  <span className="sr-only">Delete</span>
+                                  <span className="sr-only">Slet</span>
                                 </button>
                               </div>
                             </div>
@@ -149,14 +150,14 @@ const Dashboard = () => {
                           <div className="mt-3">
                             {coverLetters.filter(letter => letter.jobPostingId === job.id).length > 0 ? (
                               <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
-                                Cover letter created
+                                Ansøgning oprettet
                               </span>
                             ) : (
                               <Link
                                 to={`/generator?jobId=${job.id}`}
                                 className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800 hover:bg-gray-200"
                               >
-                                Generate cover letter
+                                Generer ansøgning
                               </Link>
                             )}
                           </div>
@@ -173,9 +174,9 @@ const Dashboard = () => {
                 {coverLetters.length === 0 ? (
                   <div className="text-center py-12">
                     <FileText className="mx-auto h-12 w-12 text-gray-400" />
-                    <h3 className="mt-2 text-lg font-medium text-gray-900">No cover letters yet</h3>
+                    <h3 className="mt-2 text-lg font-medium text-gray-900">Ingen ansøgninger endnu</h3>
                     <p className="mt-1 text-sm text-gray-500">
-                      Generate your first cover letter for a job posting.
+                      Generer din første ansøgning til et jobopslag.
                     </p>
                     <div className="mt-6">
                       <Link
@@ -183,7 +184,7 @@ const Dashboard = () => {
                         className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
                       >
                         <PlusCircle className="h-4 w-4 mr-2" />
-                        Create Cover Letter
+                        Opret ansøgning
                       </Link>
                     </div>
                   </div>
@@ -202,10 +203,10 @@ const Dashboard = () => {
                                   </div>
                                   <div className="ml-4">
                                     <h3 className="text-base font-medium text-gray-900 truncate">
-                                      Cover Letter for {job?.title || "Unknown Position"}
+                                      Ansøgning til {job?.title || "Ukendt stilling"}
                                     </h3>
                                     <div className="mt-1 flex items-center">
-                                      <span className="text-sm text-gray-600 truncate">{job?.company || "Unknown Company"}</span>
+                                      <span className="text-sm text-gray-600 truncate">{job?.company || "Ukendt virksomhed"}</span>
                                     </div>
                                   </div>
                                 </div>
@@ -213,7 +214,7 @@ const Dashboard = () => {
                               <div className="ml-5 flex flex-shrink-0 items-center space-x-2">
                                 <div className="flex items-center text-sm text-gray-500">
                                   <Calendar className="mr-1.5 h-4 w-4 flex-shrink-0 text-gray-400" />
-                                  <span>{formatDistanceToNow(letter.createdAt, { addSuffix: true })}</span>
+                                  <span>{formatDistanceToNow(letter.createdAt, { addSuffix: true, locale: da })}</span>
                                 </div>
                                 <div className="flex flex-row items-center">
                                   <Link
@@ -221,14 +222,14 @@ const Dashboard = () => {
                                     className="p-1 rounded-full text-gray-600 hover:text-black focus:outline-none"
                                   >
                                     <Edit className="h-5 w-5" />
-                                    <span className="sr-only">Edit</span>
+                                    <span className="sr-only">Rediger</span>
                                   </Link>
                                   <button
                                     onClick={() => deleteCoverLetter(letter.id)}
                                     className="p-1 rounded-full text-gray-600 hover:text-red-600 focus:outline-none"
                                   >
                                     <Trash2 className="h-5 w-5" />
-                                    <span className="sr-only">Delete</span>
+                                    <span className="sr-only">Slet</span>
                                   </button>
                                 </div>
                               </div>

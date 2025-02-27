@@ -54,8 +54,8 @@ const Profile = () => {
       }));
 
       toast({
-        title: "Profile updated",
-        description: "Your profile information has been saved.",
+        title: "Profil opdateret",
+        description: "Dine profiloplysninger er blevet gemt.",
       });
 
       setIsLoading(false);
@@ -68,10 +68,10 @@ const Profile = () => {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold leading-tight text-gray-900">
-              Profile
+              Profil
             </h1>
             <p className="mt-1 text-lg text-gray-600">
-              Manage your personal information
+              Administrer dine personlige oplysninger
             </p>
           </div>
         </div>
@@ -85,7 +85,7 @@ const Profile = () => {
                     htmlFor="name"
                     className="block text-sm font-medium text-gray-700"
                   >
-                    Full Name
+                    Fulde navn
                   </label>
                   <div className="mt-1">
                     <input
@@ -105,7 +105,7 @@ const Profile = () => {
                     htmlFor="email"
                     className="block text-sm font-medium text-gray-700"
                   >
-                    Email Address
+                    E-mailadresse
                   </label>
                   <div className="mt-1">
                     <input
@@ -125,7 +125,7 @@ const Profile = () => {
                     htmlFor="phone"
                     className="block text-sm font-medium text-gray-700"
                   >
-                    Phone Number
+                    Telefonnummer
                   </label>
                   <div className="mt-1">
                     <input
@@ -144,7 +144,7 @@ const Profile = () => {
                     htmlFor="address"
                     className="block text-sm font-medium text-gray-700"
                   >
-                    Address
+                    Adresse
                   </label>
                   <div className="mt-1">
                     <input
@@ -163,7 +163,7 @@ const Profile = () => {
                     htmlFor="experience"
                     className="block text-sm font-medium text-gray-700"
                   >
-                    Work Experience
+                    Erhvervserfaring
                   </label>
                   <div className="mt-1">
                     <textarea
@@ -173,12 +173,11 @@ const Profile = () => {
                       value={formData.experience}
                       onChange={handleChange}
                       className="block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
-                      placeholder="Describe your work experience..."
+                      placeholder="Beskriv din erhvervserfaring..."
                     />
                   </div>
                   <p className="mt-2 text-sm text-gray-500">
-                    Include your job titles, companies you've worked for, and key
-                    responsibilities.
+                    Inkluder dine jobtitler, virksomheder du har arbejdet for og hovedansvarsområder.
                   </p>
                 </div>
 
@@ -187,7 +186,7 @@ const Profile = () => {
                     htmlFor="education"
                     className="block text-sm font-medium text-gray-700"
                   >
-                    Education
+                    Uddannelse
                   </label>
                   <div className="mt-1">
                     <textarea
@@ -197,11 +196,11 @@ const Profile = () => {
                       value={formData.education}
                       onChange={handleChange}
                       className="block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
-                      placeholder="Describe your educational background..."
+                      placeholder="Beskriv din uddannelsesmæssige baggrund..."
                     />
                   </div>
                   <p className="mt-2 text-sm text-gray-500">
-                    List your degrees, institutions, and graduation years.
+                    Angiv dine uddannelser, institutioner og dimissionsår.
                   </p>
                 </div>
 
@@ -210,7 +209,7 @@ const Profile = () => {
                     htmlFor="skills"
                     className="block text-sm font-medium text-gray-700"
                   >
-                    Skills & Qualifications
+                    Kompetencer & kvalifikationer
                   </label>
                   <div className="mt-1">
                     <textarea
@@ -220,12 +219,11 @@ const Profile = () => {
                       value={formData.skills}
                       onChange={handleChange}
                       className="block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
-                      placeholder="List your relevant skills and qualifications..."
+                      placeholder="Angiv dine relevante kompetencer og kvalifikationer..."
                     />
                   </div>
                   <p className="mt-2 text-sm text-gray-500">
-                    Include technical skills, certifications, languages, and
-                    other relevant qualifications.
+                    Inkluder tekniske kompetencer, certificeringer, sprog og andre relevante kvalifikationer.
                   </p>
                 </div>
               </div>
@@ -259,12 +257,12 @@ const Profile = () => {
                             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                           ></path>
                         </svg>
-                        Saving...
+                        Gemmer...
                       </>
                     ) : (
                       <>
                         <Save className="h-4 w-4 mr-2" />
-                        Save Profile
+                        Gem profil
                       </>
                     )}
                   </button>
@@ -276,36 +274,36 @@ const Profile = () => {
 
         <div className="mt-8 bg-white shadow-sm rounded-lg overflow-hidden border border-gray-100">
           <div className="p-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">Account Settings</h2>
+            <h2 className="text-lg font-medium text-gray-900 mb-4">Kontoindstillinger</h2>
             
             <div className="space-y-4">
               <div className="flex justify-between items-center py-3 border-b border-gray-100">
                 <div>
-                  <h3 className="text-sm font-medium text-gray-900">Password</h3>
-                  <p className="text-sm text-gray-500">Update your password</p>
+                  <h3 className="text-sm font-medium text-gray-900">Adgangskode</h3>
+                  <p className="text-sm text-gray-500">Opdater din adgangskode</p>
                 </div>
                 <button className="text-sm font-medium text-black hover:text-gray-800">
-                  Change
+                  Ændre
                 </button>
               </div>
               
               <div className="flex justify-between items-center py-3 border-b border-gray-100">
                 <div>
-                  <h3 className="text-sm font-medium text-gray-900">Email Notifications</h3>
-                  <p className="text-sm text-gray-500">Manage your email preferences</p>
+                  <h3 className="text-sm font-medium text-gray-900">E-mailnotifikationer</h3>
+                  <p className="text-sm text-gray-500">Administrer dine e-mailpræferencer</p>
                 </div>
                 <button className="text-sm font-medium text-black hover:text-gray-800">
-                  Manage
+                  Administrer
                 </button>
               </div>
               
               <div className="flex justify-between items-center py-3">
                 <div>
-                  <h3 className="text-sm font-medium text-gray-900">Delete Account</h3>
-                  <p className="text-sm text-gray-500">Permanently delete your account and all data</p>
+                  <h3 className="text-sm font-medium text-gray-900">Slet konto</h3>
+                  <p className="text-sm text-gray-500">Slet permanent din konto og alle data</p>
                 </div>
                 <button className="text-sm font-medium text-red-600 hover:text-red-800">
-                  Delete
+                  Slet
                 </button>
               </div>
             </div>

@@ -50,8 +50,8 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
 
     if (!formData.title || !formData.company || !formData.description) {
       toast({
-        title: "Missing information",
-        description: "Please fill out at least the job title, company, and description",
+        title: "Manglende information",
+        description: "Udfyld venligst som minimum jobtitel, virksomhed og beskrivelse",
         variant: "destructive",
       });
       return;
@@ -67,8 +67,8 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
     
     if (!description) {
       toast({
-        title: "No description to analyze",
-        description: "Please paste a job description first",
+        title: "Ingen beskrivelse at analysere",
+        description: "Indsæt venligst en jobbeskrivelse først",
         variant: "destructive",
       });
       return;
@@ -78,7 +78,7 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
 
     // Try to extract title if not already present
     if (!formData.title) {
-      const titleMatches = description.match(/(?:position|job|role|titel)(?::\s*|\s+is\s+|\s+as\s+|\s+)["']?([^"'\n,]+)["']?/i);
+      const titleMatches = description.match(/(?:stilling|job|rolle|titel)(?::\s*|\s+er\s+|\s+som\s+|\s+)["']?([^"'\n,]+)["']?/i);
       if (titleMatches && titleMatches[1]) {
         newFormData.title = titleMatches[1].trim();
       }
@@ -86,7 +86,7 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
 
     // Try to extract company if not already present
     if (!formData.company) {
-      const companyMatches = description.match(/(?:at|for|with|hos|ved)\s+["']?([^"'\n,]+)["']?/i);
+      const companyMatches = description.match(/(?:hos|ved|for|i)\s+["']?([^"'\n,]+)["']?/i);
       if (companyMatches && companyMatches[1]) {
         newFormData.company = companyMatches[1].trim();
       }
@@ -94,7 +94,7 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
 
     // Try to extract contact person
     if (!formData.contactPerson) {
-      const contactMatches = description.match(/(?:contact|kontakt|send .+ to|send .+ til)\s+["']?([^"'\n,]+)["']?/i);
+      const contactMatches = description.match(/(?:kontakt|kontaktperson|send .+ til)\s+["']?([^"'\n,]+)["']?/i);
       if (contactMatches && contactMatches[1]) {
         newFormData.contactPerson = contactMatches[1].trim();
       }
@@ -103,8 +103,8 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
     setFormData(newFormData);
 
     toast({
-      title: "Job posting analyzed",
-      description: "We've extracted information from the job description",
+      title: "Jobopslag analyseret",
+      description: "Vi har udtrukket information fra jobbeskrivelsen",
     });
   };
 
@@ -116,7 +116,7 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
             htmlFor="description"
             className="block text-sm font-medium text-gray-700 mb-1"
           >
-            Job Description
+            Jobbeskrivelse
           </label>
           <div className="relative rounded-md shadow-sm">
             <textarea
@@ -126,7 +126,7 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
               value={formData.description}
               onChange={handleChange}
               className="block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
-              placeholder="Paste the job posting description here..."
+              placeholder="Indsæt jobbeskrivelsen her..."
             />
             <div className="absolute inset-y-0 right-0 flex items-center pr-3">
               <button
@@ -136,12 +136,12 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
                 disabled={!formData.description || isLoading}
               >
                 <Search className="h-5 w-5" />
-                <span className="sr-only">Extract information</span>
+                <span className="sr-only">Udtræk information</span>
               </button>
             </div>
           </div>
           <p className="mt-1 text-xs text-gray-500">
-            Paste the full job posting here, and we'll try to extract key information automatically
+            Indsæt hele jobopslaget her, og vi vil forsøge at udtrække nøgleinformation automatisk
           </p>
         </div>
 
@@ -151,7 +151,7 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
               htmlFor="title"
               className="block text-sm font-medium text-gray-700"
             >
-              Job Title
+              Jobtitel
             </label>
             <input
               type="text"
@@ -161,7 +161,7 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
               onChange={handleChange}
               required
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
-              placeholder="e.g., Marketing Manager"
+              placeholder="f.eks. Marketingansvarlig"
             />
           </div>
 
@@ -170,7 +170,7 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
               htmlFor="company"
               className="block text-sm font-medium text-gray-700"
             >
-              Company
+              Virksomhed
             </label>
             <input
               type="text"
@@ -180,7 +180,7 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
               onChange={handleChange}
               required
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
-              placeholder="e.g., Acme Inc."
+              placeholder="f.eks. Acme A/S"
             />
           </div>
         </div>
@@ -191,7 +191,7 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
               htmlFor="contactPerson"
               className="block text-sm font-medium text-gray-700"
             >
-              Contact Person (Optional)
+              Kontaktperson (Valgfri)
             </label>
             <input
               type="text"
@@ -200,7 +200,7 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
               value={formData.contactPerson}
               onChange={handleChange}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
-              placeholder="e.g., Jane Smith"
+              placeholder="f.eks. Jane Jensen"
             />
           </div>
 
@@ -209,7 +209,7 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
               htmlFor="url"
               className="block text-sm font-medium text-gray-700"
             >
-              Job URL (Optional)
+              Job-URL (Valgfri)
             </label>
             <input
               type="url"
@@ -218,7 +218,7 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
               value={formData.url}
               onChange={handleChange}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
-              placeholder="e.g., https://example.com/jobs/marketing-manager"
+              placeholder="f.eks. https://eksempel.dk/jobs/marketingansvarlig"
             />
           </div>
         </div>
@@ -252,10 +252,10 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
                   d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                 ></path>
               </svg>
-              Processing...
+              Behandler...
             </>
           ) : (
-            'Continue to Generate Cover Letter'
+            'Fortsæt til at generere ansøgning'
           )}
         </button>
       </div>

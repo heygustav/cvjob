@@ -114,8 +114,8 @@ Email: demo@example.com`;
 
     // In a real app, we would save the letter to the database here
     toast({
-      title: "Cover letter generated",
-      description: "Your cover letter has been created successfully.",
+      title: "Ansøgning genereret",
+      description: "Din ansøgning er blevet oprettet med succes.",
     });
   };
 
@@ -130,8 +130,8 @@ Email: demo@example.com`;
 
   const handleSaveLetter = () => {
     toast({
-      title: "Cover letter saved",
-      description: "Your cover letter has been saved to your account.",
+      title: "Ansøgning gemt",
+      description: "Din ansøgning er blevet gemt til din konto.",
     });
     // In a real app, we would update the letter in the database here
   };
@@ -146,12 +146,12 @@ Email: demo@example.com`;
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold leading-tight text-gray-900">
-              {step === 1 ? "Enter Job Details" : "Your Cover Letter"}
+              {step === 1 ? "Indtast jobdetaljer" : "Din ansøgning"}
             </h1>
             <p className="mt-1 text-lg text-gray-600">
               {step === 1
-                ? "Provide information about the job you're applying for"
-                : "Review and edit your AI-generated cover letter"}
+                ? "Angiv information om jobbet, du søger"
+                : "Gennemgå og rediger din AI-genererede ansøgning"}
             </p>
           </div>
           {step === 2 && (
@@ -159,7 +159,7 @@ Email: demo@example.com`;
               onClick={handleBackToJobDetails}
               className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
             >
-              Edit Job Details
+              Rediger jobdetaljer
             </button>
           )}
         </div>
@@ -180,10 +180,10 @@ Email: demo@example.com`;
                       <Sparkles className="h-8 w-8 text-gray-600 animate-pulse-subtle" />
                     </div>
                     <h3 className="text-lg font-medium text-gray-900 mb-2">
-                      Generating your cover letter
+                      Genererer din ansøgning
                     </h3>
                     <p className="text-sm text-gray-500 max-w-md mx-auto">
-                      Our AI is analyzing the job posting and crafting a personalized cover letter just for you. This should only take a few seconds...
+                      Vores AI analyserer jobopslaget og udarbejder en personlig ansøgning til dig. Dette skulle kun tage få sekunder...
                     </p>
                   </div>
                 </div>

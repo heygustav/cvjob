@@ -50,14 +50,14 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
           // For demo purposes, we'll just log in the user
           onLogin(user.id);
           toast({
-            title: "Login successful",
-            description: `Welcome back, ${user.name}!`,
+            title: "Login succesfuldt",
+            description: `Velkommen tilbage, ${user.name}!`,
           });
           navigate("/dashboard");
         } else {
           toast({
-            title: "Login failed",
-            description: "Invalid email or password. Try using demo@example.com",
+            title: "Login mislykkedes",
+            description: "Ugyldig email eller adgangskode. Prøv at bruge demo@example.com",
             variant: "destructive",
           });
         }
@@ -65,8 +65,8 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       }, 1000);
     } catch (error) {
       toast({
-        title: "Login failed",
-        description: "An error occurred during login",
+        title: "Login mislykkedes",
+        description: "Der opstod en fejl under login",
         variant: "destructive",
       });
       setIsLoading(false);
@@ -79,15 +79,15 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10 border border-gray-100">
           <div className="sm:mx-auto sm:w-full sm:max-w-md mb-8">
             <h2 className="text-center text-3xl font-bold tracking-tight text-gray-900">
-              Welcome back
+              Velkommen tilbage
             </h2>
             <p className="mt-2 text-center text-sm text-gray-600">
-              Don't have an account?{" "}
+              Har du ikke en konto?{" "}
               <Link
                 to="/signup"
                 className="font-medium text-black hover:text-gray-800"
               >
-                Sign up
+                Opret konto
               </Link>
             </p>
           </div>
@@ -98,7 +98,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                 htmlFor="email"
                 className="block text-sm font-medium text-gray-700"
               >
-                Email address
+                E-mailadresse
               </label>
               <div className="mt-1">
                 <input
@@ -110,7 +110,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                   value={formData.email}
                   onChange={handleChange}
                   className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-black focus:outline-none focus:ring-black sm:text-sm"
-                  placeholder="you@example.com"
+                  placeholder="dig@eksempel.dk"
                 />
               </div>
             </div>
@@ -120,7 +120,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                 htmlFor="password"
                 className="block text-sm font-medium text-gray-700"
               >
-                Password
+                Adgangskode
               </label>
               <div className="mt-1 relative">
                 <input
@@ -160,7 +160,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                   htmlFor="remember-me"
                   className="ml-2 block text-sm text-gray-700"
                 >
-                  Remember me
+                  Husk mig
                 </label>
               </div>
 
@@ -169,7 +169,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                   href="#"
                   className="font-medium text-black hover:text-gray-800"
                 >
-                  Forgot your password?
+                  Glemt din adgangskode?
                 </a>
               </div>
             </div>
@@ -202,11 +202,11 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                       ></path>
                     </svg>
-                    Logging in...
+                    Logger ind...
                   </span>
                 ) : (
                   <span className="flex items-center">
-                    Sign in
+                    Log ind
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </span>
                 )}
@@ -225,9 +225,9 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             </div>
 
             <div className="mt-6 text-sm text-center text-gray-500">
-              <p>Use these credentials for demo access:</p>
+              <p>Brug disse oplysninger til demo-adgang:</p>
               <p className="font-mono mt-1">Email: demo@example.com</p>
-              <p className="font-mono">Password: any password will work</p>
+              <p className="font-mono">Adgangskode: enhver adgangskode vil virke</p>
             </div>
           </div>
         </div>

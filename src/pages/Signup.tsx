@@ -42,8 +42,8 @@ const Signup: React.FC<SignupProps> = ({ onSignup }) => {
   const validateForm = () => {
     if (formData.password !== formData.confirmPassword) {
       toast({
-        title: "Password error",
-        description: "Passwords don't match",
+        title: "Adgangskode fejl",
+        description: "Adgangskoderne stemmer ikke overens",
         variant: "destructive",
       });
       return false;
@@ -51,8 +51,8 @@ const Signup: React.FC<SignupProps> = ({ onSignup }) => {
 
     if (formData.password.length < 8) {
       toast({
-        title: "Password error",
-        description: "Password must be at least 8 characters",
+        title: "Adgangskode fejl",
+        description: "Adgangskoden skal være mindst 8 tegn",
         variant: "destructive",
       });
       return false;
@@ -78,8 +78,8 @@ const Signup: React.FC<SignupProps> = ({ onSignup }) => {
         onSignup(newUserId);
         
         toast({
-          title: "Account created",
-          description: "Your account has been successfully created!",
+          title: "Konto oprettet",
+          description: "Din konto er blevet oprettet med succes!",
         });
         
         navigate("/dashboard");
@@ -87,8 +87,8 @@ const Signup: React.FC<SignupProps> = ({ onSignup }) => {
       }, 1500);
     } catch (error) {
       toast({
-        title: "Sign up failed",
-        description: "An error occurred during sign up",
+        title: "Oprettelse mislykkedes",
+        description: "Der opstod en fejl under oprettelse af kontoen",
         variant: "destructive",
       });
       setIsLoading(false);
@@ -107,10 +107,10 @@ const Signup: React.FC<SignupProps> = ({ onSignup }) => {
   const getPasswordStrengthText = () => {
     const strength = passwordStrength();
     if (strength === 0) return "";
-    if (strength === 1) return "Weak";
-    if (strength === 2) return "Fair";
-    if (strength === 3) return "Good";
-    return "Strong";
+    if (strength === 1) return "Svag";
+    if (strength === 2) return "Rimelig";
+    if (strength === 3) return "God";
+    return "Stærk";
   };
 
   const getPasswordStrengthColor = () => {
@@ -128,15 +128,15 @@ const Signup: React.FC<SignupProps> = ({ onSignup }) => {
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10 border border-gray-100">
           <div className="sm:mx-auto sm:w-full sm:max-w-md mb-8">
             <h2 className="text-center text-3xl font-bold tracking-tight text-gray-900">
-              Create your account
+              Opret din konto
             </h2>
             <p className="mt-2 text-center text-sm text-gray-600">
-              Already have an account?{" "}
+              Har du allerede en konto?{" "}
               <Link
                 to="/login"
                 className="font-medium text-black hover:text-gray-800"
               >
-                Sign in
+                Log ind
               </Link>
             </p>
           </div>
@@ -147,7 +147,7 @@ const Signup: React.FC<SignupProps> = ({ onSignup }) => {
                 htmlFor="name"
                 className="block text-sm font-medium text-gray-700"
               >
-                Full Name
+                Fulde navn
               </label>
               <div className="mt-1">
                 <input
@@ -159,7 +159,7 @@ const Signup: React.FC<SignupProps> = ({ onSignup }) => {
                   value={formData.name}
                   onChange={handleChange}
                   className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-black focus:outline-none focus:ring-black sm:text-sm"
-                  placeholder="John Doe"
+                  placeholder="Anders Andersen"
                 />
               </div>
             </div>
@@ -169,7 +169,7 @@ const Signup: React.FC<SignupProps> = ({ onSignup }) => {
                 htmlFor="email"
                 className="block text-sm font-medium text-gray-700"
               >
-                Email address
+                E-mailadresse
               </label>
               <div className="mt-1">
                 <input
@@ -181,7 +181,7 @@ const Signup: React.FC<SignupProps> = ({ onSignup }) => {
                   value={formData.email}
                   onChange={handleChange}
                   className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-black focus:outline-none focus:ring-black sm:text-sm"
-                  placeholder="you@example.com"
+                  placeholder="dig@eksempel.dk"
                 />
               </div>
             </div>
@@ -191,7 +191,7 @@ const Signup: React.FC<SignupProps> = ({ onSignup }) => {
                 htmlFor="password"
                 className="block text-sm font-medium text-gray-700"
               >
-                Password
+                Adgangskode
               </label>
               <div className="mt-1 relative">
                 <input
@@ -239,7 +239,7 @@ const Signup: React.FC<SignupProps> = ({ onSignup }) => {
                             : "text-gray-400"
                         }`}
                       />
-                      At least 8 characters
+                      Mindst 8 tegn
                     </li>
                     <li className="flex items-center">
                       <Check
@@ -249,7 +249,7 @@ const Signup: React.FC<SignupProps> = ({ onSignup }) => {
                             : "text-gray-400"
                         }`}
                       />
-                      At least one uppercase letter
+                      Mindst et stort bogstav
                     </li>
                     <li className="flex items-center">
                       <Check
@@ -259,7 +259,7 @@ const Signup: React.FC<SignupProps> = ({ onSignup }) => {
                             : "text-gray-400"
                         }`}
                       />
-                      At least one number
+                      Mindst et tal
                     </li>
                   </ul>
                 </div>
@@ -271,7 +271,7 @@ const Signup: React.FC<SignupProps> = ({ onSignup }) => {
                 htmlFor="confirmPassword"
                 className="block text-sm font-medium text-gray-700"
               >
-                Confirm Password
+                Bekræft adgangskode
               </label>
               <div className="mt-1">
                 <input
@@ -295,8 +295,8 @@ const Signup: React.FC<SignupProps> = ({ onSignup }) => {
                   }`}
                 >
                   {formData.password === formData.confirmPassword
-                    ? "Passwords match"
-                    : "Passwords don't match"}
+                    ? "Adgangskoderne stemmer overens"
+                    : "Adgangskoderne stemmer ikke overens"}
                 </p>
               )}
             </div>
@@ -313,19 +313,19 @@ const Signup: React.FC<SignupProps> = ({ onSignup }) => {
                 htmlFor="terms"
                 className="ml-2 block text-sm text-gray-700"
               >
-                I agree to the{" "}
+                Jeg accepterer{" "}
                 <a
                   href="#"
                   className="font-medium text-black hover:text-gray-800"
                 >
-                  Terms of Service
+                  Brugsbetingelserne
                 </a>{" "}
-                and{" "}
+                og{" "}
                 <a
                   href="#"
                   className="font-medium text-black hover:text-gray-800"
                 >
-                  Privacy Policy
+                  Privatlivspolitikken
                 </a>
               </label>
             </div>
@@ -358,11 +358,11 @@ const Signup: React.FC<SignupProps> = ({ onSignup }) => {
                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                       ></path>
                     </svg>
-                    Creating account...
+                    Opretter konto...
                   </span>
                 ) : (
                   <span className="flex items-center">
-                    Create Account
+                    Opret konto
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </span>
                 )}

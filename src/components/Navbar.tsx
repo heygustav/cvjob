@@ -59,7 +59,7 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onLogout }) => {
                     isActive("/generator") ? "text-black" : "text-gray-600"
                   }`}
                 >
-                  Generate Cover Letter
+                  Opret Ansøgning
                 </Link>
                 <Link 
                   to="/profile" 
@@ -67,14 +67,14 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onLogout }) => {
                     isActive("/profile") ? "text-black" : "text-gray-600"
                   }`}
                 >
-                  Profile
+                  Profil
                 </Link>
                 <button 
                   onClick={onLogout} 
                   className="text-sm font-medium text-gray-600 hover:text-black transition-colors flex items-center"
                 >
                   <LogOut className="h-4 w-4 mr-1" />
-                  Log Out
+                  Log ud
                 </button>
               </>
             ) : (
@@ -85,13 +85,13 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onLogout }) => {
                     isActive("/login") ? "text-black" : "text-gray-600"
                   }`}
                 >
-                  Log In
+                  Log ind
                 </Link>
                 <Link 
                   to="/signup" 
                   className="px-4 py-2 text-sm font-medium text-white bg-black rounded-md hover:bg-gray-800 transition-colors"
                 >
-                  Sign Up
+                  Opret konto
                 </Link>
               </>
             )}
@@ -103,7 +103,7 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onLogout }) => {
             className="md:hidden flex items-center p-2"
             aria-expanded={isOpen}
           >
-            <span className="sr-only">Open main menu</span>
+            <span className="sr-only">Åbn hovedmenu</span>
             {isOpen ? (
               <X className="h-6 w-6" aria-hidden="true" />
             ) : (
@@ -136,7 +136,7 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onLogout }) => {
                 onClick={closeMenu}
               >
                 <PlusCircle className="h-5 w-5 mr-3" />
-                Generate Cover Letter
+                Opret Ansøgning
               </Link>
               <Link
                 to="/profile"
@@ -144,14 +144,14 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onLogout }) => {
                 onClick={closeMenu}
               >
                 <User className="h-5 w-5 mr-3" />
-                Profile
+                Profil
               </Link>
               <button
                 onClick={handleLogout}
                 className="flex w-full items-center px-4 py-3 text-base font-medium rounded-md hover:bg-gray-50 text-left"
               >
                 <LogOut className="h-5 w-5 mr-3" />
-                Log Out
+                Log ud
               </button>
             </>
           ) : (
@@ -161,14 +161,14 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onLogout }) => {
                 className="block w-full px-4 py-3 text-base font-medium rounded-md hover:bg-gray-50"
                 onClick={closeMenu}
               >
-                Log In
+                Log ind
               </Link>
               <Link
                 to="/signup"
                 className="block w-full mt-2 px-4 py-3 text-base font-medium bg-black text-white rounded-md hover:bg-gray-800 text-center"
                 onClick={closeMenu}
               >
-                Sign Up
+                Opret konto
               </Link>
             </>
           )}
