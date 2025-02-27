@@ -80,6 +80,8 @@ Skriv ansøgningen på dansk og hold den professionel, engagerende og overbevise
 med en optimal længde for en motiveret jobansøgning (typisk omkring 400-600 ord eller 1-1.5 A4-sider).
 
 VIGTIGT: Afslut IKKE ansøgningen med en hilsen eller et navn. Den endelige hilsen og underskrift vil blive tilføjet automatisk senere.
+
+Match the tone of the job ad without parroting the same words and sentences, except where necessary to explain technical qualifications or similar requirements. Create an authentic voice that resonates with the company culture while maintaining originality.
           `
         }
       }
