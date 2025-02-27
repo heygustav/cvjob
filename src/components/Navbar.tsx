@@ -46,7 +46,7 @@ const Navbar: React.FC = () => {
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-200 ${
       scrolled ? "shadow-md" : "backdrop-blur-sm"
-    } bg-[#065086] border-b border-[#065086]/20`}>
+    } bg-primary border-b border-primary/20`}>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <Link 
@@ -63,7 +63,7 @@ const Navbar: React.FC = () => {
               <>
                 <Link 
                   to="/generator" 
-                  className={`text-sm font-medium transition-colors hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#065086] rounded px-2 py-1 ${
+                  className={`text-sm font-medium transition-colors hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary rounded px-2 py-1 ${
                     isActive("/generator") ? "text-white" : "text-primary-100"
                   }`}
                   aria-current={isActive("/generator") ? "page" : undefined}
@@ -72,7 +72,7 @@ const Navbar: React.FC = () => {
                 </Link>
                 <Link 
                   to="/dashboard" 
-                  className={`text-sm font-medium transition-colors hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#065086] rounded px-2 py-1 ${
+                  className={`text-sm font-medium transition-colors hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary rounded px-2 py-1 ${
                     isActive("/dashboard") ? "text-white" : "text-primary-100"
                   }`}
                   aria-current={isActive("/dashboard") ? "page" : undefined}
@@ -81,7 +81,7 @@ const Navbar: React.FC = () => {
                 </Link>
                 <Link 
                   to="/profile" 
-                  className={`text-sm font-medium transition-colors hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#065086] rounded px-2 py-1 ${
+                  className={`text-sm font-medium transition-colors hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary rounded px-2 py-1 ${
                     isActive("/profile") ? "text-white" : "text-primary-100"
                   }`}
                   aria-current={isActive("/profile") ? "page" : undefined}
@@ -90,7 +90,7 @@ const Navbar: React.FC = () => {
                 </Link>
                 <button 
                   onClick={handleLogout} 
-                  className="text-sm font-medium text-primary-100 hover:text-white transition-colors flex items-center focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#065086] rounded px-2 py-1"
+                  className="text-sm font-medium text-primary-100 hover:text-white transition-colors flex items-center focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary rounded px-2 py-1"
                   aria-label="Log ud af din konto"
                 >
                   <LogOut className="h-4 w-4 mr-1" aria-hidden="true" />
@@ -101,7 +101,7 @@ const Navbar: React.FC = () => {
               <>
                 <Link 
                   to="/auth" 
-                  className={`text-sm font-medium transition-colors hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#065086] rounded px-2 py-1 ${
+                  className={`text-sm font-medium transition-colors hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary rounded px-2 py-1 ${
                     isActive("/auth") || isActive("/login") ? "text-white" : "text-primary-100"
                   }`}
                   aria-current={(isActive("/auth") || isActive("/login")) ? "page" : undefined}
@@ -110,7 +110,7 @@ const Navbar: React.FC = () => {
                 </Link>
                 <Link 
                   to="/auth?signup=true" 
-                  className="px-4 py-2 text-sm font-medium text-[#065086] bg-white rounded-md hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#065086]"
+                  className="px-4 py-2 text-sm font-medium text-primary bg-white rounded-md hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary"
                   aria-label="Opret ny konto"
                 >
                   Opret konto
@@ -122,7 +122,7 @@ const Navbar: React.FC = () => {
           {/* Mobile menu button */}
           <button
             onClick={toggleMenu}
-            className="md:hidden flex items-center p-2 rounded-md text-white hover:bg-[#065086]/80 transition-colors focus:outline-none focus:ring-2 focus:ring-white"
+            className="md:hidden flex items-center p-2 rounded-md text-white hover:bg-primary-800 active:bg-primary-900 transition-colors focus:outline-none focus:ring-2 focus:ring-white"
             aria-expanded={isOpen}
             aria-label={isOpen ? "Luk hovedmenu" : "Åbn hovedmenu"}
             aria-controls="mobile-menu"
@@ -147,13 +147,13 @@ const Navbar: React.FC = () => {
         }`}
         aria-hidden={!isOpen}
       >
-        <div className="space-y-1 px-4 py-6 bg-[#054370] border-t border-[#076aa4]">
+        <div className="space-y-1 px-4 py-6 bg-primary-800 border-t border-primary-600">
           {session ? (
             <>
               <Link
                 to="/generator"
-                className={`flex items-center px-4 py-3 text-base font-medium rounded-md hover:bg-[#065086] transition-colors ${
-                  isActive("/generator") ? "bg-[#065086] text-white" : "text-primary-100"
+                className={`flex items-center px-4 py-3 text-base font-medium rounded-md hover:bg-primary/90 active:bg-primary-900 transition-colors ${
+                  isActive("/generator") ? "bg-primary-700 text-white" : "text-primary-100"
                 }`}
                 aria-current={isActive("/generator") ? "page" : undefined}
               >
@@ -162,8 +162,8 @@ const Navbar: React.FC = () => {
               </Link>
               <Link
                 to="/dashboard"
-                className={`flex items-center px-4 py-3 text-base font-medium rounded-md hover:bg-[#065086] transition-colors ${
-                  isActive("/dashboard") ? "bg-[#065086] text-white" : "text-primary-100"
+                className={`flex items-center px-4 py-3 text-base font-medium rounded-md hover:bg-primary/90 active:bg-primary-900 transition-colors ${
+                  isActive("/dashboard") ? "bg-primary-700 text-white" : "text-primary-100"
                 }`}
                 aria-current={isActive("/dashboard") ? "page" : undefined}
               >
@@ -172,8 +172,8 @@ const Navbar: React.FC = () => {
               </Link>
               <Link
                 to="/profile"
-                className={`flex items-center px-4 py-3 text-base font-medium rounded-md hover:bg-[#065086] transition-colors ${
-                  isActive("/profile") ? "bg-[#065086] text-white" : "text-primary-100"
+                className={`flex items-center px-4 py-3 text-base font-medium rounded-md hover:bg-primary/90 active:bg-primary-900 transition-colors ${
+                  isActive("/profile") ? "bg-primary-700 text-white" : "text-primary-100"
                 }`}
                 aria-current={isActive("/profile") ? "page" : undefined}
               >
@@ -182,7 +182,7 @@ const Navbar: React.FC = () => {
               </Link>
               <button
                 onClick={handleLogout}
-                className="flex w-full items-center px-4 py-3 text-base font-medium rounded-md hover:bg-[#065086] transition-colors text-left text-primary-100"
+                className="flex w-full items-center px-4 py-3 text-base font-medium rounded-md hover:bg-primary/90 active:bg-primary-900 transition-colors text-left text-primary-100"
                 aria-label="Log ud af din konto"
               >
                 <LogOut className="h-5 w-5 mr-3" aria-hidden="true" />
@@ -193,8 +193,8 @@ const Navbar: React.FC = () => {
             <>
               <Link
                 to="/auth"
-                className={`block w-full px-4 py-3 text-base font-medium rounded-md hover:bg-[#065086] transition-colors ${
-                  isActive("/auth") || isActive("/login") ? "bg-[#065086] text-white" : "text-primary-100"
+                className={`block w-full px-4 py-3 text-base font-medium rounded-md hover:bg-primary/90 active:bg-primary-900 transition-colors ${
+                  isActive("/auth") || isActive("/login") ? "bg-primary-700 text-white" : "text-primary-100"
                 }`}
                 aria-current={(isActive("/auth") || isActive("/login")) ? "page" : undefined}
               >
@@ -202,7 +202,7 @@ const Navbar: React.FC = () => {
               </Link>
               <Link
                 to="/auth?signup=true"
-                className="block w-full mt-2 px-4 py-3 text-base font-medium bg-white text-[#065086] rounded-md hover:bg-gray-100 transition-colors text-center"
+                className="block w-full mt-2 px-4 py-3 text-base font-medium bg-white text-primary rounded-md hover:bg-gray-100 active:bg-gray-200 transition-colors text-center"
                 aria-label="Opret ny konto"
               >
                 Opret konto

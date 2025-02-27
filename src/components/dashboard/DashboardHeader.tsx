@@ -15,7 +15,7 @@ const DashboardHeader: React.FC = () => {
           </p>
         </div>
         <Link to="/generator">
-          <Button className="flex items-center bg-[#065086] hover:bg-[#054370] text-white">
+          <Button className="flex items-center">
             <PlusCircle className="h-4 w-4 mr-2" />
             Opret ny ansøgning
           </Button>

@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, ArrowRight } from "lucide-react";
 import { mockUsers } from "../lib/types";
 import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
 
 interface LoginFormData {
   email: string;
@@ -85,7 +86,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
               Har du ikke en konto?{" "}
               <Link
                 to="/signup"
-                className="font-medium text-black hover:text-gray-800"
+                className="font-medium text-primary hover:text-primary-700"
               >
                 Opret konto
               </Link>
@@ -109,7 +110,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                   required
                   value={formData.email}
                   onChange={handleChange}
-                  className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-black focus:outline-none focus:ring-black sm:text-sm"
+                  className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-primary focus:outline-none focus:ring-primary sm:text-sm"
                   placeholder="dig@eksempel.dk"
                 />
               </div>
@@ -131,7 +132,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                   required
                   value={formData.password}
                   onChange={handleChange}
-                  className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-black focus:outline-none focus:ring-black sm:text-sm"
+                  className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-primary focus:outline-none focus:ring-primary sm:text-sm"
                   placeholder="••••••••"
                 />
                 <button
@@ -154,7 +155,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                   id="remember-me"
                   name="remember-me"
                   type="checkbox"
-                  className="h-4 w-4 rounded border-gray-300 text-black focus:ring-black"
+                  className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
                 />
                 <label
                   htmlFor="remember-me"
@@ -167,7 +168,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
               <div className="text-sm">
                 <a
                   href="#"
-                  className="font-medium text-black hover:text-gray-800"
+                  className="font-medium text-primary hover:text-primary-700"
                 >
                   Glemt din adgangskode?
                 </a>
@@ -175,10 +176,10 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             </div>
 
             <div>
-              <button
+              <Button
                 type="submit"
                 disabled={isLoading}
-                className="flex w-full justify-center items-center rounded-md border border-transparent bg-black py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                className="flex w-full justify-center items-center"
               >
                 {isLoading ? (
                   <span className="flex items-center">
@@ -210,7 +211,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </span>
                 )}
-              </button>
+              </Button>
             </div>
           </form>
 
