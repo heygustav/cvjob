@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Save } from "lucide-react";
+import { Save, KeyRound, Mail, Trash2 } from "lucide-react";
 
 interface PersonalInfoFormState {
   name: string;
@@ -120,18 +120,18 @@ const Profile = () => {
   if (isProfileLoading) {
     return (
       <div className="min-h-screen bg-gray-50 pt-20 flex justify-center items-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-20">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div className="min-h-screen bg-gray-50 pt-16 md:pt-20">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10">
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold leading-tight text-gray-900">
-              Profil
+              Min profil
             </h1>
             <p className="mt-1 text-lg text-gray-600">
               Administrer dine personlige oplysninger
@@ -139,7 +139,7 @@ const Profile = () => {
           </div>
         </div>
 
-        <div className="bg-white shadow-sm rounded-lg overflow-hidden border border-gray-100">
+        <div className="bg-white shadow-sm rounded-lg overflow-hidden border border-gray-200">
           <div className="p-6">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
@@ -158,7 +158,7 @@ const Profile = () => {
                       value={formData.name}
                       onChange={handleChange}
                       required
-                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
+                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
                     />
                   </div>
                 </div>
@@ -178,7 +178,7 @@ const Profile = () => {
                       value={formData.email}
                       onChange={handleChange}
                       required
-                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
+                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
                     />
                   </div>
                 </div>
@@ -197,7 +197,7 @@ const Profile = () => {
                       id="phone"
                       value={formData.phone}
                       onChange={handleChange}
-                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
+                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
                     />
                   </div>
                 </div>
@@ -216,7 +216,7 @@ const Profile = () => {
                       id="address"
                       value={formData.address}
                       onChange={handleChange}
-                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
+                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
                     />
                   </div>
                 </div>
@@ -235,7 +235,7 @@ const Profile = () => {
                       rows={4}
                       value={formData.experience}
                       onChange={handleChange}
-                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
+                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
                       placeholder="Beskriv din erhvervserfaring..."
                     />
                   </div>
@@ -258,7 +258,7 @@ const Profile = () => {
                       rows={3}
                       value={formData.education}
                       onChange={handleChange}
-                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
+                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
                       placeholder="Beskriv din uddannelsesmæssige baggrund..."
                     />
                   </div>
@@ -281,7 +281,7 @@ const Profile = () => {
                       rows={3}
                       value={formData.skills}
                       onChange={handleChange}
-                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
+                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
                       placeholder="Angiv dine relevante kompetencer og kvalifikationer..."
                     />
                   </div>
@@ -296,7 +296,7 @@ const Profile = () => {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black disabled:opacity-70"
+                    className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors disabled:opacity-70"
                   >
                     {isLoading ? (
                       <>
@@ -335,37 +335,46 @@ const Profile = () => {
           </div>
         </div>
 
-        <div className="mt-8 bg-white shadow-sm rounded-lg overflow-hidden border border-gray-100">
+        <div className="mt-8 bg-white shadow-sm rounded-lg overflow-hidden border border-gray-200">
           <div className="p-6">
             <h2 className="text-lg font-medium text-gray-900 mb-4">Kontoindstillinger</h2>
             
             <div className="space-y-4">
-              <div className="flex justify-between items-center py-3 border-b border-gray-100">
-                <div>
-                  <h3 className="text-sm font-medium text-gray-900">Adgangskode</h3>
-                  <p className="text-sm text-gray-500">Opdater din adgangskode</p>
+              <div className="flex justify-between items-center py-3 border-b border-gray-200">
+                <div className="flex items-center">
+                  <KeyRound className="h-5 w-5 text-gray-400 mr-3" />
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-900">Adgangskode</h3>
+                    <p className="text-sm text-gray-500">Opdater din adgangskode</p>
+                  </div>
                 </div>
-                <button className="text-sm font-medium text-black hover:text-gray-800">
+                <button className="text-sm font-medium text-primary hover:text-blue-600 transition-colors">
                   Ændre
                 </button>
               </div>
               
-              <div className="flex justify-between items-center py-3 border-b border-gray-100">
-                <div>
-                  <h3 className="text-sm font-medium text-gray-900">E-mailnotifikationer</h3>
-                  <p className="text-sm text-gray-500">Administrer dine e-mailpræferencer</p>
+              <div className="flex justify-between items-center py-3 border-b border-gray-200">
+                <div className="flex items-center">
+                  <Mail className="h-5 w-5 text-gray-400 mr-3" />
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-900">E-mailnotifikationer</h3>
+                    <p className="text-sm text-gray-500">Administrer dine e-mailpræferencer</p>
+                  </div>
                 </div>
-                <button className="text-sm font-medium text-black hover:text-gray-800">
+                <button className="text-sm font-medium text-primary hover:text-blue-600 transition-colors">
                   Administrer
                 </button>
               </div>
               
               <div className="flex justify-between items-center py-3">
-                <div>
-                  <h3 className="text-sm font-medium text-gray-900">Slet konto</h3>
-                  <p className="text-sm text-gray-500">Slet permanent din konto og alle data</p>
+                <div className="flex items-center">
+                  <Trash2 className="h-5 w-5 text-red-500 mr-3" />
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-900">Slet konto</h3>
+                    <p className="text-sm text-gray-500">Slet permanent din konto og alle data</p>
+                  </div>
                 </div>
-                <button className="text-sm font-medium text-red-600 hover:text-red-800">
+                <button className="text-sm font-medium text-red-600 hover:text-red-700 transition-colors">
                   Slet
                 </button>
               </div>

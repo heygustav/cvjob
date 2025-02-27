@@ -12,6 +12,7 @@ import { useJobExtraction } from "./job-form/useJobExtraction";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/components/AuthProvider";
 import { saveOrUpdateJob } from "@/services/coverLetter/database";
+import { Save } from "lucide-react";
 
 interface JobPostingFormProps {
   onSubmit: (jobData: JobFormData) => void;
@@ -112,6 +113,54 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
     }
   };
 
+  const handleSave = async () => {
+    if (!user) {
+      toast({
+        title: "Ikke logget ind",
+        description: "Du skal være logget ind for at gemme et jobopslag.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!validateForm()) {
+      toast({
+        title: "Fejl i formular",
+        description: "Udfyld venligst alle påkrævede felter korrekt.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      if (onSave) {
+        await onSave(formData);
+      } else {
+        await saveOrUpdateJob({
+          ...formData,
+          id: initialData?.id,
+          user_id: user.id,
+          created_at: initialData?.created_at || new Date().toISOString(),
+        });
+        
+        toast({
+          title: "Jobopslag gemt",
+          description: "Jobopslaget er blevet gemt i din profil.",
+        });
+      }
+    } catch (error) {
+      console.error("Error saving job:", error);
+      toast({
+        title: "Fejl ved gemning",
+        description: "Der opstod en fejl ved gemning af jobopslaget.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <UrlField 
@@ -140,12 +189,52 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
         />
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t border-gray-100">
+      <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t border-gray-200">
         <SubmitButton 
           isLoading={isLoading} 
           elapsedTime={formattedTime}
-          className="w-full"
+          className="w-full sm:flex-1"
         />
+        
+        {!isLoading && (
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={isSaving}
+            className="inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-70 transition-colors"
+          >
+            {isSaving ? (
+              <>
+                <svg
+                  className="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-700"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+                Gemmer...
+              </>
+            ) : (
+              <>
+                <Save className="h-4 w-4 mr-2" />
+                Gem jobopslag
+              </>
+            )}
+          </button>
+        )}
       </div>
     </form>
   );
