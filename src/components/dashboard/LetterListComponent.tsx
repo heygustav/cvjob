@@ -200,7 +200,20 @@ const LetterListComponent: React.FC<LetterListComponentProps> = ({
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-left">
-                    <div className="text-sm text-gray-900">{job?.title || "Ukendt stilling"}</div>
+                    <div className="flex items-center">
+                      <div className="text-sm text-gray-900">{job?.title || "Ukendt stilling"}</div>
+                      {job?.url && (
+                        <a 
+                          href={job.url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="ml-2 text-primary hover:text-primary-700"
+                          aria-label="Åbn jobopslag"
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                        </a>
+                      )}
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-left">
                     <div className="text-sm text-gray-500">{formatDate(letter.created_at)}</div>
@@ -243,6 +256,19 @@ const LetterListComponent: React.FC<LetterListComponentProps> = ({
                             <Download className="mr-2 h-4 w-4" />
                             <span>{isDownloading ? "Downloader..." : "Download PDF"}</span>
                           </DropdownMenuItem>
+                          {job?.url && (
+                            <DropdownMenuItem asChild>
+                              <a 
+                                href={job.url} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="flex items-center cursor-pointer"
+                              >
+                                <ExternalLink className="mr-2 h-4 w-4" />
+                                <span>Åbn jobopslag</span>
+                              </a>
+                            </DropdownMenuItem>
+                          )}
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
                             onClick={() => handleDeleteClick(letter.id)}
