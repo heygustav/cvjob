@@ -50,8 +50,37 @@ export const generateCoverLetter = async (
             skills: userInfo.skills || '',
           },
           locale: navigator.language,
-          model: "gpt-4o",
-          additionalInstructions: "Match the tone of the job ad without parroting the same words and sentences, except where necessary to explain technical qualifications or similar requirements. Create an authentic voice that resonates with the company culture while maintaining originality."
+          model: "gpt-4",
+          temperature: 0.5,
+          promptTemplate: `
+Som en professionel jobansøger, skriv en overbevisende og detaljeret ansøgning til stillingen som {jobTitle} hos {company},
+adresseret til {contactPerson}. Brug følgende information om ansøgeren:
+
+Navn: {name}
+Email: {email}
+Telefon: {phone}
+Adresse: {address}
+Erfaring: {experience}
+Uddannelse: {education}
+Færdigheder: {skills}
+
+Jobopslag:
+{jobDescription}
+
+Følg disse retningslinjer for at skrive ansøgningen:
+
+1. Start med en stærk og fængende indledning, der straks fanger læserens opmærksomhed.
+2. Brug konkrete og specifikke eksempler på færdigheder og resultater. Vær detaljeret og kvantificer præstationer hvor muligt.
+3. Forklar grundigt, hvorfor ansøgeren er interesseret i denne specifikke stilling.
+4. Uddyb hvordan kompetencerne matcher præcis det, som virksomheden/organisationen leder efter til stillingen. Brug specifikke eksempler.
+5. Beskriv hvordan ansøgerens personlige og professionelle værdier aligner med virksomhedens værdier og kultur.
+6. Afslut med en klar opfordring til handling og udtryk, at ansøgeren ser frem til muligheden for at uddybe ved en personlig samtale.
+
+Skriv ansøgningen på dansk og hold den professionel, engagerende og overbevisende. Sørg for, at ansøgningen er grundig og detaljeret,
+med en optimal længde for en motiveret jobansøgning (typisk omkring 400-600 ord eller 1-1.5 A4-sider).
+
+VIGTIGT: Afslut IKKE ansøgningen med en hilsen eller et navn. Den endelige hilsen og underskrift vil blive tilføjet automatisk senere.
+          `
         }
       }
     );

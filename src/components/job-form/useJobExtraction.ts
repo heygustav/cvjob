@@ -31,7 +31,12 @@ export const useJobExtraction = (formData: JobFormData, setFormData: React.Dispa
 
       // Call our Edge Function that uses OpenAI
       const { data, error } = await supabase.functions.invoke('extract-job-info', {
-        body: { jobDescription: description }
+        body: { 
+          jobDescription: description,
+          // For extraction, we can use a different model than GPT-4
+          model: "gpt-4o-mini", 
+          temperature: 0.3
+        }
       });
       
       if (error) {
