@@ -1,22 +1,23 @@
 
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
-import JobPostingForm from "../components/JobPostingForm";
-import CoverLetterPreview from "../components/CoverLetterPreview";
-import { LoadingSpinner } from "../components/LoadingSpinner";
-import { GenerationStatus } from "../components/GenerationStatus";
-import ErrorDisplay from "../components/ErrorDisplay";
 import { useAuth } from "@/components/AuthProvider";
 import { useCoverLetterGeneration } from "@/hooks/useCoverLetterGeneration";
 import { User } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
+import GeneratorHeader from "@/components/cover-letter/GeneratorHeader";
+import GeneratorLoadingState from "@/components/cover-letter/GeneratorLoadingState";
+import GeneratorErrorState from "@/components/cover-letter/GeneratorErrorState";
+import JobFormStep from "@/components/cover-letter/JobFormStep";
+import PreviewStep from "@/components/cover-letter/PreviewStep";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 
 const CoverLetterGenerator: React.FC = () => {
   const [searchParams] = useSearchParams();
   const jobId = searchParams.get("jobId");
   const letterId = searchParams.get("letterId");
   const { session } = useAuth();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = React.useState(true);
   const { toast } = useToast();
   const initStarted = useRef(false);
   
@@ -98,112 +99,88 @@ const CoverLetterGenerator: React.FC = () => {
     };
   }, [fetchJob, fetchLetter, jobId, letterId, toast, user]);
 
-  // Show main loading state during initial data fetch
-  if (loading) {
-    return <LoadingSpinner message="Indlæser data..." progress={20} />;
-  }
-  
-  // Show loading state for generation or other operations
-  if (isLoading) {
-    const message = isGenerating 
-      ? (generationPhase === 'user-fetch' ? "Henter brugerdata..." :
-         generationPhase === 'job-save' ? "Gemmer jobdetaljer..." :
-         generationPhase === 'generation' ? (generationProgress?.message || "Genererer ansøgning...") :
-         generationPhase === 'letter-save' ? "Gemmer ansøgning..." : "Arbejder...")
-      : (loadingState === "saving" ? "Gemmer ændringer..." : "Indlæser data...");
+  // Render functions
+  const renderContent = () => {
+    // Show main loading state during initial data fetch
+    if (loading) {
+      return <LoadingSpinner message="Indlæser data..." progress={20} />;
+    }
     
-    const progress = generationProgress?.progress || 30;
-    
-    return <LoadingSpinner message={message} progress={progress} />;
-  }
+    // Show loading state for generation or other operations
+    if (isLoading) {
+      return (
+        <GeneratorLoadingState 
+          isGenerating={isGenerating}
+          loadingState={loadingState}
+          generationPhase={generationPhase}
+          generationProgress={generationProgress}
+          resetError={resetError}
+        />
+      );
+    }
 
-  console.log("Rendering generator content:", {
-    step,
-    generatedLetter: generatedLetter?.id,
-    selectedJob: selectedJob?.id,
-    generationError
-  });
+    console.log("Rendering generator content:", {
+      step,
+      generatedLetter: generatedLetter?.id,
+      selectedJob: selectedJob?.id,
+      generationError
+    });
 
-  return (
-    <div className="min-h-screen bg-gray-50 pt-16 md:pt-20">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 md:mb-8 gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold leading-tight text-gray-900">
-              {step === 1 ? "Indtast jobdetaljer" : "Din ansøgning"}
-            </h1>
-            <p className="mt-1 text-sm sm:text-lg text-gray-600">
-              {step === 1
-                ? "Angiv information om jobbet, du søger"
-                : "Gennemgå og rediger din AI-genererede ansøgning"}
-            </p>
-          </div>
-          {step === 2 && (
-            <button
-              onClick={() => setStep(1)}
-              className="inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black w-full sm:w-auto"
-            >
-              Rediger jobdetaljer
-            </button>
+    return (
+      <div className="min-h-screen bg-gray-50 pt-16 md:pt-20">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10">
+          <GeneratorHeader step={step} setStep={setStep} />
+
+          {/* Error message section */}
+          {generationError && (
+            <GeneratorErrorState 
+              errorMessage={generationError} 
+              resetError={resetError} 
+              generationPhase={generationPhase}
+            />
           )}
-        </div>
 
-        {/* Error message section */}
-        {generationError && (
-          <ErrorDisplay
-            title="Der opstod en fejl"
-            message={generationError}
-            onRetry={resetError}
-            phase={generationPhase as any}
-          />
-        )}
-
-        <div className="bg-white shadow-sm rounded-lg overflow-hidden border border-gray-100">
-          {step === 1 ? (
-            <div className="p-4 sm:p-6">
-              <JobPostingForm
+          <div className="bg-white shadow-sm rounded-lg overflow-hidden border border-gray-100">
+            {step === 1 ? (
+              <JobFormStep
+                selectedJob={selectedJob}
+                isGenerating={isGenerating}
+                generationPhase={generationPhase}
+                generationProgress={generationProgress}
+                resetError={resetError}
                 onSubmit={handleJobFormSubmit}
-                initialData={selectedJob || undefined}
-                isLoading={isGenerating}
               />
-              {isGenerating && (
-                <GenerationStatus 
-                  phase={generationPhase || 'generation'} 
-                  progress={generationProgress?.progress || 0}
-                  message={generationProgress?.message}
-                  onRetry={resetError}
-                />
-              )}
-            </div>
-          ) : (
-            <div className="p-4 sm:p-6">
-              {generatedLetter && selectedJob ? (
-                <CoverLetterPreview
-                  content={generatedLetter.content}
-                  jobTitle={selectedJob.title}
-                  company={selectedJob.company}
-                  onEdit={handleEditLetter}
-                  onSave={handleSaveLetter}
-                />
-              ) : (
-                <div className="text-left py-10">
-                  <p className="text-gray-500">
-                    Der opstod en fejl ved indlæsning af ansøgningen. Prøv igen.
-                  </p>
-                  <button
-                    onClick={() => setStep(1)}
-                    className="mt-4 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
-                  >
-                    Gå tilbage
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
+            ) : (
+              <>
+                {generatedLetter && selectedJob ? (
+                  <PreviewStep
+                    generatedLetter={generatedLetter}
+                    selectedJob={selectedJob}
+                    onEdit={handleEditLetter}
+                    onSave={handleSaveLetter}
+                  />
+                ) : (
+                  <div className="text-left py-10 p-4 sm:p-6">
+                    <p className="text-gray-500">
+                      Der opstod en fejl ved indlæsning af ansøgningen. Prøv igen.
+                    </p>
+                    <button
+                      onClick={() => setStep(1)}
+                      className="mt-4 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
+                    >
+                      Gå tilbage
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
+
+  return renderContent();
 };
 
 export default CoverLetterGenerator;
