@@ -33,10 +33,10 @@ const JobFormStep: React.FC<JobFormStepProps> = ({
   return (
     <div className="p-4 sm:p-6 md:p-8">
       {isSavedJob && (
-        <Alert className="mb-6 bg-amber-50 border-amber-200 text-amber-800">
-          <InfoIcon className="h-4 w-4 text-amber-800" />
-          <AlertTitle className="text-amber-800 font-medium">Bemærk</AlertTitle>
-          <AlertDescription className="text-amber-700 text-sm">
+        <Alert variant="destructive" className="mb-6">
+          <InfoIcon className="h-4 w-4" />
+          <AlertTitle>Bemærk</AlertTitle>
+          <AlertDescription className="text-sm">
             Denne funktion understøtter i øjeblikket kun generering af ansøgninger for nye jobannoncer. 
             Hvis du vil generere en ansøgning til dette job, skal du kopiere jobdetaljerne og starte en ny.
           </AlertDescription>
@@ -50,7 +50,7 @@ const JobFormStep: React.FC<JobFormStepProps> = ({
       />
       
       {isGenerating && (
-        <div className="mt-8 border-t border-gray-100 pt-6">
+        <div className="mt-8 border-t border-muted pt-6">
           <GenerationStatus 
             phase={generationPhase || 'generation'} 
             progress={generationProgress?.progress || 0}

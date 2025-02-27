@@ -31,7 +31,7 @@ const GenerationProgressIndicator: React.FC<GenerationProgressProps> = ({
   
   return (
     <div 
-      className="mt-6 p-5 bg-white rounded-lg shadow-sm border border-gray-200" 
+      className="mt-6 p-5 bg-background rounded-lg shadow-sm border border-border" 
       aria-live="polite" 
       role="status"
     >
@@ -39,14 +39,14 @@ const GenerationProgressIndicator: React.FC<GenerationProgressProps> = ({
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <Clock className="animate-pulse h-5 w-5 text-primary" aria-hidden="true" />
-            <span className="text-sm font-medium text-gray-800">{message}</span>
+            <span className="text-sm font-medium text-foreground">{message}</span>
           </div>
-          <span className="text-sm font-medium text-gray-700">{formatTime(elapsed)}s</span>
+          <span className="text-sm font-medium text-muted-foreground">{formatTime(elapsed)}s</span>
         </div>
         
         {/* Progress bar */}
         <div 
-          className="w-full bg-gray-100 rounded-full h-3 overflow-hidden" 
+          className="w-full bg-muted rounded-full h-3 overflow-hidden" 
           aria-valuemin={0} 
           aria-valuemax={100} 
           aria-valuenow={progress} 
@@ -60,7 +60,7 @@ const GenerationProgressIndicator: React.FC<GenerationProgressProps> = ({
         </div>
         
         {/* Phase indicator */}
-        <div className="flex justify-between text-xs text-gray-500 pt-1">
+        <div className="flex justify-between text-xs text-muted-foreground pt-1">
           <span className={cn("transition-colors duration-300", 
             phase === 'job-save' ? "font-medium text-primary underline" : "")}>
             Gem job
@@ -94,7 +94,7 @@ const GenerationProgressIndicator: React.FC<GenerationProgressProps> = ({
           </div>
         )}
         
-        <div className="mt-2 text-xs text-gray-500 italic">
+        <div className="mt-2 text-xs text-muted-foreground italic">
           Tålmod er det bedste mod.
         </div>
       </div>
