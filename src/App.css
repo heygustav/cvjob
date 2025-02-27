@@ -1,3 +1,4 @@
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -39,4 +40,30 @@
 
 .read-the-docs {
   color: #888;
+}
+
+/* Index page specific styles */
+.index-page h1, 
+.index-page h2 {
+  margin-bottom: 1rem;
+}
+
+.index-page .section {
+  padding: 4rem 0;
+}
+
+.index-page .section-dark {
+  background-color: #000;
+  color: #fff;
+}
+
+.index-page .section-light {
+  background-color: #fff;
+  color: #000;
+}
+
+.index-page .container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
 }
