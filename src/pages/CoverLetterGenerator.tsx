@@ -205,47 +205,25 @@ const CoverLetterGenerator = () => {
 
       console.log("Sending data to generate-cover-letter:", JSON.stringify(generationData));
 
-      // Call the edge function with a timeout
+      // Call the edge function directly using Supabase functions.invoke
       let letterContent = "";
       try {
-        // Set a timeout for the fetch
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
-        
-        const response = await fetch('/functions/v1/generate-cover-letter', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(generationData),
-          signal: controller.signal
+        const { data: functionData, error: functionError } = await supabase.functions.invoke('generate-cover-letter', {
+          body: generationData
         });
         
-        clearTimeout(timeoutId);
-
-        if (!response.ok) {
-          throw new Error(`Server returned status ${response.status}`);
-        }
-
-        // Parse the response with text first to debug
-        const responseText = await response.text();
-        console.log("Raw response:", responseText);
-        
-        let data;
-        try {
-          data = JSON.parse(responseText);
-        } catch (parseError) {
-          console.error("Error parsing JSON response:", parseError);
-          throw new Error("Invalid JSON response from server");
-        }
-
-        if (!data || !data.content) {
-          throw new Error("Missing content in server response");
+        if (functionError) {
+          console.error("Edge function error:", functionError);
+          throw new Error(`Edge function error: ${functionError.message}`);
         }
         
-        letterContent = data.content;
+        if (!functionData || !functionData.content) {
+          throw new Error("Missing content in edge function response");
+        }
+        
+        letterContent = functionData.content;
       } catch (fetchError) {
-        console.error("Error fetching from edge function:", fetchError);
+        console.error("Error calling edge function:", fetchError);
         
         // Create a fallback letter directly in the frontend
         const today = new Date().toLocaleDateString("da-DK", {
