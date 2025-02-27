@@ -67,3 +67,12 @@
   margin: 0 auto;
   padding: 0 1rem;
 }
+
+/* Override any green button styles */
+button[type="submit"]:not(.bg-green-600) {
+  background-color: #065086 !important;
+}
+
+button[type="submit"]:hover:not(.bg-green-600) {
+  background-color: #054370 !important;
+}
