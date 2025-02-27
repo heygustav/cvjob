@@ -28,12 +28,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+// Define the type structure for email preferences
+interface EmailPreferences {
+  jobAlerts: boolean;
+  newsletters: boolean;
+  accountUpdates: boolean;
+}
+
 const AccountSettings: React.FC = () => {
   const { user, signOut } = useAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [newPassword, setNewPassword] = useState("");
-  const [emailNotifications, setEmailNotifications] = useState({
+  const [emailNotifications, setEmailNotifications] = useState<EmailPreferences>({
     jobAlerts: true,
     newsletters: true,
     accountUpdates: true
@@ -57,7 +64,17 @@ const AccountSettings: React.FC = () => {
       if (error) throw error;
 
       if (data && data.email_preferences) {
-        setEmailNotifications(data.email_preferences);
+        // Safely cast and validate the email preferences
+        const preferences = data.email_preferences as any;
+        
+        // Create a validated preferences object with fallbacks
+        const validatedPreferences: EmailPreferences = {
+          jobAlerts: typeof preferences.jobAlerts === 'boolean' ? preferences.jobAlerts : true,
+          newsletters: typeof preferences.newsletters === 'boolean' ? preferences.newsletters : true,
+          accountUpdates: typeof preferences.accountUpdates === 'boolean' ? preferences.accountUpdates : true
+        };
+        
+        setEmailNotifications(validatedPreferences);
       }
     } catch (error) {
       console.error("Error fetching email preferences:", error);
