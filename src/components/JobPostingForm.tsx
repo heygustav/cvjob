@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { JobPosting } from "../lib/types";
@@ -34,6 +35,7 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
     url: initialData?.url || "",
   });
   
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const { toast } = useToast();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -49,15 +51,45 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
       ...prev,
       [name]: value,
     }));
+    
+    // Clear error for this field when user starts typing
+    if (errors[name]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
+  };
+
+  const validateForm = (): boolean => {
+    const newErrors: Record<string, string> = {};
+    
+    if (!formData.title.trim()) {
+      newErrors.title = "Jobtitel er påkrævet";
+    }
+    
+    if (!formData.company.trim()) {
+      newErrors.company = "Virksomhedsnavn er påkrævet";
+    }
+    
+    if (!formData.description.trim()) {
+      newErrors.description = "Jobbeskrivelse er påkrævet";
+    } else if (formData.description.trim().length < 100) {
+      newErrors.description = "Jobbeskrivelse skal være på mindst 100 tegn";
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.title || !formData.company || !formData.description) {
+    if (!validateForm()) {
       toast({
-        title: "Manglende information",
-        description: "Udfyld venligst som minimum jobtitel, virksomhed og beskrivelse",
+        title: "Fejl i formular",
+        description: "Udfyld venligst alle påkrævede felter korrekt.",
         variant: "destructive",
       });
       return;
@@ -70,10 +102,10 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
   const handleSave = async (e: React.MouseEvent) => {
     e.preventDefault();
     
-    if (!formData.title || !formData.company || !formData.description) {
+    if (!validateForm()) {
       toast({
-        title: "Manglende information",
-        description: "Udfyld venligst som minimum jobtitel, virksomhed og beskrivelse",
+        title: "Fejl i formular",
+        description: "Udfyld venligst alle påkrævede felter korrekt.",
         variant: "destructive",
       });
       return;
@@ -133,6 +165,7 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
           disabled={isLoading || isSaving}
           onExtract={extractInfoFromDescription}
           isExtracting={isExtracting}
+          error={errors.description}
         />
 
         <JobInfoFields 
@@ -141,6 +174,7 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
           contactPerson={formData.contact_person}
           onChange={handleChange}
           disabled={isLoading || isSaving}
+          errors={errors}
         />
       </div>
 

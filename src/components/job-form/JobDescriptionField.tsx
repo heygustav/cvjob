@@ -7,6 +7,7 @@ interface JobDescriptionFieldProps {
   disabled: boolean;
   onExtract: () => void;
   isExtracting: boolean;
+  error?: string;
 }
 
 const JobDescriptionField: React.FC<JobDescriptionFieldProps> = ({
@@ -15,6 +16,7 @@ const JobDescriptionField: React.FC<JobDescriptionFieldProps> = ({
   disabled,
   onExtract,
   isExtracting,
+  error,
 }) => {
   return (
     <div>
@@ -30,10 +32,15 @@ const JobDescriptionField: React.FC<JobDescriptionFieldProps> = ({
         rows={8}
         value={value}
         onChange={onChange}
-        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
+        className={`block w-full rounded-md ${
+          error ? 'border-red-300 ring-red-500' : 'border-gray-300'
+        } shadow-sm focus:border-black focus:ring-black sm:text-sm`}
         placeholder="Indsæt jobbeskrivelsen her..."
         disabled={disabled}
       />
+      {error && (
+        <p className="text-sm text-red-600 mt-1">{error}</p>
+      )}
       <div className="mt-2">
         <button
           type="button"

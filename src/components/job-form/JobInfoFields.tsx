@@ -7,6 +7,7 @@ interface JobInfoFieldsProps {
   contactPerson: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   disabled: boolean;
+  errors?: Record<string, string>;
 }
 
 const JobInfoFields: React.FC<JobInfoFieldsProps> = ({
@@ -15,6 +16,7 @@ const JobInfoFields: React.FC<JobInfoFieldsProps> = ({
   contactPerson,
   onChange,
   disabled,
+  errors = {},
 }) => {
   return (
     <>
@@ -33,10 +35,15 @@ const JobInfoFields: React.FC<JobInfoFieldsProps> = ({
             value={title}
             onChange={onChange}
             required
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
+            className={`mt-1 block w-full rounded-md ${
+              errors.title ? 'border-red-300 ring-red-500' : 'border-gray-300'
+            } shadow-sm focus:border-black focus:ring-black sm:text-sm`}
             placeholder="f.eks. Marketingansvarlig"
             disabled={disabled}
           />
+          {errors.title && (
+            <p className="text-sm text-red-600 mt-1">{errors.title}</p>
+          )}
         </div>
 
         <div>
@@ -53,10 +60,15 @@ const JobInfoFields: React.FC<JobInfoFieldsProps> = ({
             value={company}
             onChange={onChange}
             required
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
+            className={`mt-1 block w-full rounded-md ${
+              errors.company ? 'border-red-300 ring-red-500' : 'border-gray-300'
+            } shadow-sm focus:border-black focus:ring-black sm:text-sm`}
             placeholder="f.eks. Acme A/S"
             disabled={disabled}
           />
+          {errors.company && (
+            <p className="text-sm text-red-600 mt-1">{errors.company}</p>
+          )}
         </div>
       </div>
 
