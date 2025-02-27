@@ -1,8 +1,9 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FileText, CheckCircle, Sparkles, ChevronRight, Dog } from 'lucide-react';
+import { FileText, CheckCircle, Sparkles, ChevronRight } from 'lucide-react';
 import { useAuth } from '../components/AuthProvider';
+import CavalierDog from '../components/CavalierDog';
 
 const Index = () => {
   const { session } = useAuth();
@@ -15,7 +16,7 @@ const Index = () => {
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="mx-auto max-w-2xl text-center">
               <div className="flex justify-center items-center mb-4">
-                <Dog className="h-10 w-10 text-black" />
+                <CavalierDog className="h-10 w-10 text-black" />
               </div>
               <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
                 Ansøgninger skrevet med kunstig intelligens
