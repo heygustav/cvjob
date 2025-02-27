@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { Search, Loader } from "lucide-react";
+import { Search, Clock } from "lucide-react";
 import { JobPosting } from "../lib/types";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -29,7 +30,33 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
     url: initialData?.url || "",
   });
   const [isExtracting, setIsExtracting] = useState(false);
+  const [timer, setTimer] = useState(0);
   const { toast } = useToast();
+
+  // Timer effect for loading state
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    
+    if (isLoading) {
+      // Reset timer when loading starts
+      setTimer(0);
+      
+      // Start timer
+      interval = setInterval(() => {
+        setTimer(prevTimer => prevTimer + 10); // Increment by 10ms
+      }, 10);
+    }
+    
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isLoading]);
+
+  const formatTime = (time: number) => {
+    const seconds = Math.floor(time / 1000);
+    const milliseconds = Math.floor((time % 1000) / 10);
+    return `${seconds}.${milliseconds.toString().padStart(2, '0')}`;
+  };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -345,8 +372,11 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
         >
           {isLoading ? (
             <>
-              <Loader className="animate-spin -ml-1 mr-2 h-4 w-4" />
-              Behandler...
+              <Clock className="animate-pulse -ml-1 mr-2 h-4 w-4" />
+              <span className="mr-2">
+                Behandler... {formatTime(timer)}s
+              </span>
+              <span className="text-xs text-gray-200">Tålmodighed er det bedste mod...</span>
             </>
           ) : (
             'Generer ansøgning'
