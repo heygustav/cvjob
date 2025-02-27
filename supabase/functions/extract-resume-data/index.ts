@@ -67,21 +67,26 @@ serve(async (req) => {
           .reduce((data, byte) => data + String.fromCharCode(byte), '')
       );
       
-      // Create a prompt for OpenAI
+      // Create a prompt for OpenAI with strong emphasis on preserving special characters
       const systemPrompt = `
-        You are a specialized CV/resume parser. Your task is to extract key information from the provided resume.
+        You are a specialized CV/resume parser designed for Nordic languages. Your task is to extract key information from the provided resume.
+        
         Extract ONLY the following fields:
-        - email: The person's email address if present
+        - email: The person's email address (only if clearly present)
         - experience: A brief summary of work experience
         - education: A brief summary of education background
         - skills: A list of skills and competencies
         
-        Important rules:
-        - Return data in the original language of the resume (Danish, English, etc.)
-        - If information is not found, use an empty string for that field
-        - Extract information exactly as written - do not translate or modify
-        - Do not include personal details like phone numbers or home addresses
+        EXTREMELY IMPORTANT RULES:
+        - Use an EXTREMELY conservative approach - only extract information you are HIGHLY CONFIDENT about
+        - If information is not 100% clear, use an empty string for that field
+        - DO NOT INVENT or INFER any information - only extract what is explicitly stated
+        - PRESERVE ALL SPECIAL CHARACTERS exactly as written, especially Nordic letters like "ø", "æ", and "å"
+        - DO NOT normalize, transliterate, or modify special characters in any way
+        - Return data in the EXACT original language of the resume (Danish, Norwegian, Swedish, etc.)
+        - DO NOT include phone numbers or home addresses
         - Format your response as a valid JSON object with these fields ONLY
+        - If a section is unclear or has low confidence, return an empty string for that field
       `;
 
       // Call OpenAI API with simple error handling
@@ -106,7 +111,7 @@ serve(async (req) => {
                 content: [
                   {
                     type: "text",
-                    text: "Extract information from this CV/resume according to the guidelines.",
+                    text: "Extract information from this CV/resume according to the extremely conservative guidelines. ONLY extract information you are 100% confident about. Preserve all special characters like 'ø', 'æ', 'å' exactly as written.",
                   },
                   {
                     type: "image_url",
@@ -117,7 +122,7 @@ serve(async (req) => {
                 ],
               },
             ],
-            temperature: 0.1,
+            temperature: 0.0, // Absolute minimum temperature for most deterministic output
           }),
         });
 
@@ -146,6 +151,13 @@ serve(async (req) => {
             extractedData = JSON.parse(jsonMatch[0]);
           } else {
             extractedData = JSON.parse(content);
+          }
+          
+          // Additional validation to ensure empty strings rather than null values
+          for (const key of ['email', 'experience', 'education', 'skills']) {
+            if (extractedData[key] === null || extractedData[key] === undefined) {
+              extractedData[key] = '';
+            }
           }
           
           console.log("Successfully parsed extracted data:", extractedData);
