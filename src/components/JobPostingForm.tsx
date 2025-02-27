@@ -134,14 +134,13 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
 
     setIsSaving(true);
     try {
-      // Reset timer with both required arguments
-      resetTimer(0, false);
-      
       if (onSave) {
-        // Reset timer before calling onSave with both required arguments
+        // Reset timer with both required arguments
         resetTimer(0, false);
         await onSave(formData);
       } else {
+        // Reset timer with both required arguments
+        resetTimer(0, false);
         await saveOrUpdateJob({
           ...formData,
           id: initialData?.id,
