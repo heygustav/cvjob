@@ -90,19 +90,17 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
       // Now try the edge function for potentially better extraction
       try {
         console.log("Calling edge function for extraction");
-        const response = await fetch('/functions/v1/generate-cover-letter', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
+        const { data, error } = await supabase.functions.invoke('generate-cover-letter', {
+          body: {
             action: "extract_job_info",
             text: description
-          }),
+          },
         });
         
-        if (response.ok) {
-          const data = await response.json();
+        if (error) {
+          console.error("Edge function error:", error);
+          // Continue with our local extraction results
+        } else if (data) {
           console.log("Received extraction data:", data);
           
           // Only update fields that were found by the edge function and not already set
@@ -121,8 +119,6 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
           if (data.url && !formData.url) {
             newFormData.url = data.url;
           }
-        } else {
-          console.error("Error from extraction endpoint:", await response.text());
         }
       } catch (fetchError) {
         console.error("Error calling extraction endpoint:", fetchError);
@@ -372,7 +368,7 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
               Behandler...
             </>
           ) : (
-            'Fortsæt til at generere ansøgning'
+            'Generer ansøgning'
           )}
         </button>
       </div>

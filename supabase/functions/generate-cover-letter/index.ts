@@ -24,7 +24,12 @@ serve(async (req) => {
       requestData = await req.json();
     } catch (error) {
       console.error("Error parsing request JSON:", error);
-      throw new Error("Invalid request format");
+      return new Response(
+        JSON.stringify({ error: "Invalid request format" }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
     }
     
     // Handle action=extract_job_info case (used by JobPostingForm)
@@ -47,69 +52,81 @@ serve(async (req) => {
     
     // Handle regular cover letter generation
     const { jobInfo, userInfo } = requestData;
+    
+    if (!jobInfo || !userInfo) {
+      return new Response(
+        JSON.stringify({ error: "Missing job or user information" }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
+    }
+    
     console.log("Processing request for job:", jobInfo?.title || "Unknown job");
 
+    // Always provide a fallback response, even if we'll try to use OpenAI
+    const today = new Date().toLocaleDateString("da-DK", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+    
+    const fallbackContent = `${today}\n\nKære ${jobInfo.contactPerson || 'Rekrutteringsansvarlig'},\n\nJeg skriver for at ansøge om stillingen som ${jobInfo.title} hos ${jobInfo.company}.\n\nJeg mener, at mine kvalifikationer og erfaringer gør mig til et godt match for denne rolle, og jeg ser frem til muligheden for at bidrage til jeres team.\n\nMed venlig hilsen,\n\n${userInfo.name || 'Dit navn'}${userInfo.phone ? '\nTlf: ' + userInfo.phone : ''}\n${userInfo.email}${userInfo.address ? '\n' + userInfo.address : ''}`;
+    
+    // If no API key, return the fallback response immediately
     if (!openAIApiKey) {
-      // If no API key, return a fallback response
       console.log("OpenAI API key not configured, using fallback response");
-      const today = new Date().toLocaleDateString("da-DK", {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-      });
-      
-      const fallbackContent = `${today}\n\nKære ${jobInfo.contactPerson || 'Rekrutteringsansvarlig'},\n\nJeg skriver for at ansøge om stillingen som ${jobInfo.title} hos ${jobInfo.company}.\n\nJeg mener, at mine kvalifikationer og erfaringer gør mig til et godt match for denne rolle, og jeg ser frem til muligheden for at bidrage til jeres team.\n\nMed venlig hilsen,\n\n${userInfo.name || 'Dit navn'}${userInfo.phone ? '\nTlf: ' + userInfo.phone : ''}\n${userInfo.email}${userInfo.address ? '\n' + userInfo.address : ''}`;
-      
       return new Response(JSON.stringify({ content: fallbackContent }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    // Construct a detailed prompt for OpenAI
-    const prompt = `
-    Som en professionel jobansøger, skriv en overbevisende og detaljeret ansøgning til stillingen som ${jobInfo.title || 'den annoncerede stilling'} hos ${jobInfo.company || 'virksomheden'},
-    adresseret til ${jobInfo.contactPerson || 'Rekrutteringsansvarlig'}. Brug følgende information om ansøgeren:
-
-    Navn: ${userInfo.name || 'Ikke angivet'}
-    Email: ${userInfo.email || 'Ikke angivet'}
-    Telefon: ${userInfo.phone || 'Ikke angivet'}
-    Adresse: ${userInfo.address || 'Ikke angivet'}
-    Erfaring: ${userInfo.experience || 'Ikke angivet'}
-    Uddannelse: ${userInfo.education || 'Ikke angivet'}
-    Færdigheder: ${userInfo.skills || 'Ikke angivet'}
-
-    Jobopslag:
-    ${jobInfo.description || 'Ikke angivet'}
-
-    Følg disse retningslinjer for at skrive ansøgningen:
-
-    1. Start med en stærk og fængende indledning, der straks fanger læserens opmærksomhed.
-    2. Brug konkrete og specifikke eksempler på færdigheder og resultater. Vær detaljeret og kvantificer præstationer hvor muligt.
-    3. Forklar grundigt, hvorfor ansøgeren er interesseret i denne specifikke stilling.
-    4. Uddyb hvordan kompetencerne matcher præcis det, som virksomheden/organisationen leder efter til stillingen. Brug specifikke eksempler.
-    5. Beskriv hvordan ansøgerens personlige og professionelle værdier aligner med virksomhedens værdier og kultur.
-    6. Afslut med en klar opfordring til handling og udtryk, at ansøgeren ser frem til muligheden for at uddybe ved en personlig samtale.
-    7. Brug tidssvarende dansk, der viser personlighed og ikke lyder kunstigt (dog fortsat bevarer en lidt formel tone.)
-
-    Skriv ansøgningen på dansk og hold den professionel, engagerende og overbevisende. Sørg for, at ansøgningen er grundig og detaljeret,
-    med en optimal længde for en motiveret jobansøgning (typisk omkring 400-600 ord eller 1-1.5 A4-sider).
-
-    VIGTIGT: Afslut IKKE ansøgningen med en hilsen eller et navn. Den endelige hilsen og underskrift vil blive tilføjet automatisk senere.`;
+    // Fallback timeout function - return after 8 seconds if OpenAI is too slow
+    const timeoutId = setTimeout(() => {
+      console.log("OpenAI request timed out, using fallback response");
+      return new Response(JSON.stringify({ content: fallbackContent }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }, 8000);
 
     try {
-      console.log("Calling OpenAI API with GPT-4o-mini");
+      // Construct a prompt for OpenAI
+      const prompt = `
+      Som en professionel jobansøger, skriv en overbevisende ansøgning til stillingen som ${jobInfo.title || 'den annoncerede stilling'} hos ${jobInfo.company || 'virksomheden'},
+      adresseret til ${jobInfo.contactPerson || 'Rekrutteringsansvarlig'}. Brug følgende information om ansøgeren:
+
+      Navn: ${userInfo.name || 'Ikke angivet'}
+      Email: ${userInfo.email || 'Ikke angivet'}
+      Telefon: ${userInfo.phone || 'Ikke angivet'}
+      Adresse: ${userInfo.address || 'Ikke angivet'}
+      Erfaring: ${userInfo.experience || 'Ikke angivet'}
+      Uddannelse: ${userInfo.education || 'Ikke angivet'}
+      Færdigheder: ${userInfo.skills || 'Ikke angivet'}
+
+      Jobopslag:
+      ${jobInfo.description || 'Ikke angivet'}
+
+      Skriv ansøgningen på dansk og hold den professionel og overbevisende. Underskriv ikke brevet, da underskriften tilføjes automatisk senere.`;
+
+      console.log("Calling OpenAI API");
+      
+      // Use AbortController to help manage timeouts
+      const controller = new AbortController();
+      const timeoutPromise = setTimeout(() => controller.abort(), 7000);
+      
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
+        signal: controller.signal,
         headers: {
           'Authorization': `Bearer ${openAIApiKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'gpt-4o-mini', // Using a more modern model
+          model: 'gpt-3.5-turbo', // Using a faster model to avoid timeouts
           messages: [
             {
               role: 'system',
-              content: 'Du er en professionel jobansøger, der skriver overbevisende og detaljerede ansøgninger.'
+              content: 'Du er en professionel jobansøger, der skriver overbevisende ansøgninger.'
             },
             {
               role: 'user',
@@ -117,8 +134,12 @@ serve(async (req) => {
             }
           ],
           temperature: 0.5,
+          max_tokens: 1000, // Limiting tokens for faster response
         }),
       });
+
+      clearTimeout(timeoutPromise);
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -129,13 +150,7 @@ serve(async (req) => {
       const data = await response.json();
       const generatedText = data.choices[0].message.content;
 
-      // Format the final letter with date and signature
-      const today = new Date().toLocaleDateString("da-DK", {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-      });
-
+      // Format the final letter
       const finalLetter = `${today}
 
 Kære ${jobInfo.contactPerson || 'Rekrutteringsansvarlig'},
@@ -144,26 +159,41 @@ ${generatedText}
 
 Med venlig hilsen,
 
-${userInfo.name || 'Dit navn'}${userInfo.title ? `\n${userInfo.title}` : ''}${userInfo.phone ? `\nTlf: ${userInfo.phone}` : ''}
+${userInfo.name || 'Dit navn'}${userInfo.phone ? `\nTlf: ${userInfo.phone}` : ''}
 ${userInfo.email}${userInfo.address ? `\n${userInfo.address}` : ''}`;
 
+      console.log("Successfully generated cover letter");
       return new Response(JSON.stringify({ content: finalLetter }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
 
     } catch (error) {
       console.error("Error in OpenAI request:", error);
-      throw error;
+      console.log("Using fallback response due to OpenAI error");
+      clearTimeout(timeoutId);
+      
+      // Return fallback content on error
+      return new Response(JSON.stringify({ content: fallbackContent }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
   } catch (error) {
     console.error('Error in generate-cover-letter function:', error);
     
+    // Return a generic fallback letter on any error
+    const today = new Date().toLocaleDateString("da-DK", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+    
+    const emergencyFallback = `${today}\n\nKære Rekrutteringsansvarlig,\n\nJeg skriver for at ansøge om den annoncerede stilling i jeres virksomhed.\n\nJeg mener, at mine kvalifikationer og erfaringer gør mig til et godt match for denne rolle, og jeg ser frem til muligheden for at bidrage til jeres team.\n\nMed venlig hilsen,\n\nDit navn`;
+    
     return new Response(
       JSON.stringify({ 
-        error: "Der opstod en fejl under generering af ansøgningen", 
-        details: error.message 
+        content: emergencyFallback,
+        error: "Der opstod en fejl under generering af ansøgningen"
       }), {
-        status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
     );

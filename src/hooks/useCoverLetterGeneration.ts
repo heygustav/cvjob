@@ -186,6 +186,7 @@ export const useCoverLetterGeneration = (user: User | null) => {
       console.log("Retrieved updated job:", updatedJob);
       setSelectedJob(updatedJob);
 
+      // Fetch user profile data for the letter
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("*")
@@ -194,7 +195,7 @@ export const useCoverLetterGeneration = (user: User | null) => {
 
       if (profileError && profileError.code !== "PGRST116") {
         console.error("Error fetching profile:", profileError);
-        throw profileError;
+        // Continue without profile data, don't throw error here
       }
 
       const userInfo = profile || {
@@ -233,9 +234,19 @@ export const useCoverLetterGeneration = (user: User | null) => {
       let letterContent = "";
       try {
         console.log("Calling edge function...");
-        const { data: functionData, error: functionError } = await supabase.functions.invoke('generate-cover-letter', {
+        
+        // Set a timeout to prevent infinite waiting
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error("Function timeout after 15 seconds")), 15000);
+        });
+        
+        const functionPromise = supabase.functions.invoke('generate-cover-letter', {
           body: generationData
         });
+        
+        // Race between timeout and actual function call
+        const result = await Promise.race([functionPromise, timeoutPromise]);
+        const { data: functionData, error: functionError } = result as any;
         
         if (functionError) {
           console.error("Edge function error:", functionError);
@@ -252,6 +263,7 @@ export const useCoverLetterGeneration = (user: User | null) => {
       } catch (fetchError) {
         console.error("Error calling edge function:", fetchError);
         
+        // Generate fallback content if edge function call fails
         const today = new Date().toLocaleDateString("da-DK", {
           day: "numeric",
           month: "long",

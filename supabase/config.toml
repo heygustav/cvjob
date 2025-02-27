@@ -1,2 +1,11 @@
 
 project_id = "zfyzkiseykwvpckavbxd"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "storage"]
+
+[[functions]]
+name = "generate-cover-letter"
+verify_jwt = false
