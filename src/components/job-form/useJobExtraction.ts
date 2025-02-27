@@ -45,13 +45,12 @@ export const useJobExtraction = (formData: JobFormData, setFormData: React.Dispa
       
       console.log("Received extraction data:", data);
       
-      // Update form with the extracted data
+      // Update form with the extracted data, NOT including URL
       const newFormData = { 
         ...formData,
         title: data.title || formData.title,
         company: data.company || formData.company,
         contact_person: data.contact_person || formData.contact_person,
-        url: data.url || formData.url
       };
       
       setFormData(newFormData);
@@ -61,7 +60,6 @@ export const useJobExtraction = (formData: JobFormData, setFormData: React.Dispa
       if (data.title && newFormData.title !== formData.title) extractedFields.push('jobtitel');
       if (data.company && newFormData.company !== formData.company) extractedFields.push('virksomhed');
       if (data.contact_person && newFormData.contact_person !== formData.contact_person) extractedFields.push('kontaktperson');
-      if (data.url && newFormData.url !== formData.url) extractedFields.push('URL');
       
       if (extractedFields.length > 0) {
         toast({
