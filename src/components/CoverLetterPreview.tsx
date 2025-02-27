@@ -4,6 +4,9 @@ import { useToast } from "@/hooks/use-toast";
 import { Copy, Edit, FileText, File, FileIcon } from "lucide-react";
 import { format } from "date-fns";
 import { da } from "date-fns/locale";
+import { jsPDF } from "jspdf";
+import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } from "docx";
+import { saveAs } from "file-saver";
 
 interface CoverLetterPreviewProps {
   content: string;
@@ -75,30 +78,138 @@ const CoverLetterPreview: React.FC<CoverLetterPreviewProps> = ({
     });
   };
 
-  // Function to simulate download as PDF
+  // Function to download as PDF
   const handleDownloadPdf = () => {
-    // This would normally use a PDF library, but for now we'll just show a toast
-    toast({
-      title: "PDF download",
-      description: "Din ansøgning bliver downloadet som PDF.",
-    });
-    
-    // For a complete implementation, you would use a library like jsPDF or
-    // call a server endpoint that generates a PDF
-    alert("PDF download funktionalitet vil blive implementeret snart.");
+    try {
+      const doc = new jsPDF();
+      const companyName = company || "Virksomhed";
+      const jobTitleText = jobTitle || "stillingen";
+      
+      // Set font for the entire document
+      doc.setFont("helvetica", "normal");
+      
+      // Add company and job title
+      doc.setFontSize(12);
+      doc.text(companyName, 20, 20);
+      doc.text(`Att.: Ansøgning til ${jobTitleText}`, 20, 30);
+      
+      // Add date on the right
+      const dateText = formattedDate;
+      const dateWidth = doc.getStringUnitWidth(dateText) * 12 / doc.internal.scaleFactor;
+      doc.text(dateText, doc.internal.pageSize.width - 20 - dateWidth, 30);
+      
+      // Add the content
+      doc.setFontSize(11);
+      
+      // Split content by new lines and add line by line to handle word wrapping
+      const contentLines = editedContent.split("\n");
+      let yPosition = 50;
+      const lineHeight = 7;
+      
+      contentLines.forEach(line => {
+        // Use splitTextToSize to handle word wrapping (limit line width to 170 mm)
+        const wrappedText = doc.splitTextToSize(line, 170);
+        wrappedText.forEach(wrappedLine => {
+          doc.text(wrappedLine, 20, yPosition);
+          yPosition += lineHeight;
+          
+          // Add a new page if we're near the bottom
+          if (yPosition > 280) {
+            doc.addPage();
+            yPosition = 20;
+          }
+        });
+        
+        // Add space between paragraphs
+        yPosition += 3;
+      });
+      
+      // Save the PDF
+      doc.save(`Ansøgning - ${companyName} - ${jobTitleText}.pdf`);
+      
+      toast({
+        title: "PDF download startet",
+        description: "Din ansøgning bliver downloadet som PDF.",
+      });
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      toast({
+        title: "Fejl ved generering af PDF",
+        description: "Der opstod en fejl. Prøv igen senere.",
+        variant: "destructive",
+      });
+    }
   };
 
-  // Function to simulate download as Word document
+  // Function to download as Word document
   const handleDownloadDocx = () => {
-    // This would normally use a DOCX generation library, but for now we'll just show a toast
-    toast({
-      title: "Word download",
-      description: "Din ansøgning bliver downloadet som Word-dokument.",
-    });
-    
-    // For a complete implementation, you would use a library like docx
-    // or call a server endpoint that generates a DOCX file
-    alert("Word download funktionalitet vil blive implementeret snart.");
+    try {
+      const companyName = company || "Virksomhed";
+      const jobTitleText = jobTitle || "stillingen";
+      
+      // Create a new document
+      const doc = new Document({
+        sections: [
+          {
+            properties: {},
+            children: [
+              // Company name
+              new Paragraph({
+                text: companyName,
+                heading: HeadingLevel.HEADING_3,
+              }),
+              
+              // Job title
+              new Paragraph({
+                text: `Att.: Ansøgning til ${jobTitleText}`,
+                spacing: {
+                  after: 200,
+                },
+              }),
+              
+              // Date - right-aligned
+              new Paragraph({
+                alignment: AlignmentType.RIGHT,
+                children: [
+                  new TextRun({
+                    text: formattedDate,
+                  }),
+                ],
+                spacing: {
+                  after: 400,
+                },
+              }),
+              
+              // Content - split by paragraphs
+              ...editedContent.split("\n\n").map(paragraph => 
+                new Paragraph({
+                  text: paragraph,
+                  spacing: {
+                    after: 200,
+                  },
+                })
+              ),
+            ],
+          },
+        ],
+      });
+      
+      // Generate and download the document
+      Packer.toBlob(doc).then(blob => {
+        saveAs(blob, `Ansøgning - ${companyName} - ${jobTitleText}.docx`);
+        toast({
+          title: "Word download startet",
+          description: "Din ansøgning bliver downloadet som Word-dokument.",
+        });
+      });
+    } catch (error) {
+      console.error("Error generating Word document:", error);
+      toast({
+        title: "Fejl ved generering af Word-dokument",
+        description: "Der opstod en fejl. Prøv igen senere.",
+        variant: "destructive",
+      });
+    }
   };
 
   const documentTitle = jobTitle && company
