@@ -20,25 +20,20 @@ const SubmitButton: React.FC<SubmitButtonProps> = ({
   useEffect(() => {
     if (isLoading) {
       setIsSuccess(false);
-    }
-  }, [isLoading]);
-  
-  // Handle the button click animation
-  const handleClick = () => {
-    if (!isLoading && !isSuccess) {
+    } else if (isLoading === false && !isSuccess) {
+      // When loading stops, show success state
       setIsSuccess(true);
       // Reset after animation completes
       setTimeout(() => {
         setIsSuccess(false);
       }, 2000);
     }
-  };
+  }, [isLoading, isSuccess]);
 
   return (
     <button
       type="submit"
       disabled={isLoading || isSuccess}
-      onClick={handleClick}
       className={cn(
         "px-4 py-2 rounded-md shadow-sm text-sm font-medium text-white disabled:opacity-80 disabled:cursor-not-allowed transition-all duration-300",
         isSuccess ? "bg-green-500 w-12" : "bg-[#1EAEDB] hover:bg-[#0FA0CE]",
