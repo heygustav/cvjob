@@ -23,11 +23,22 @@ export const useCoverLetterGeneration = (user: User | null) => {
         .from("job_postings")
         .select("*")
         .eq("id", id)
-        .single();
+        .maybeSingle();
 
       if (jobError) {
         console.error("Error fetching job:", jobError);
         throw jobError;
+      }
+
+      if (!job) {
+        console.log("No job found with ID:", id);
+        toast({
+          title: "Job ikke fundet",
+          description: "Det valgte job kunne ikke findes.",
+          variant: "destructive",
+        });
+        navigate("/dashboard");
+        return null;
       }
 
       console.log("Retrieved job:", job);
@@ -40,7 +51,7 @@ export const useCoverLetterGeneration = (user: User | null) => {
 
       if (letterError) {
         console.error("Error fetching letters:", letterError);
-        throw letterError;
+        // Don't throw here, just log the error as this is not critical
       }
 
       console.log("Retrieved letters:", letters);
@@ -54,16 +65,25 @@ export const useCoverLetterGeneration = (user: User | null) => {
       return job;
     } catch (error) {
       console.error("Error in fetchJob:", error);
-      toast({
-        title: "Fejl ved indlæsning",
-        description: "Der opstod en fejl under indlæsning af jobopslaget.",
-        variant: "destructive",
-      });
-      throw error;
+      if (!navigator.onLine) {
+        toast({
+          title: "Ingen internetforbindelse",
+          description: "Kontroller din internetforbindelse og prøv igen.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Fejl ved indlæsning",
+          description: "Der opstod en fejl under indlæsning. Prøv igen senere.",
+          variant: "destructive",
+        });
+      }
+      navigate("/dashboard");
+      return null;
     } finally {
       setIsLoading(false);
     }
-  }, [toast]);
+  }, [toast, navigate]);
 
   const fetchLetter = useCallback(async (id: string) => {
     try {
@@ -74,11 +94,22 @@ export const useCoverLetterGeneration = (user: User | null) => {
         .from("cover_letters")
         .select("*")
         .eq("id", id)
-        .single();
+        .maybeSingle();
 
       if (letterError) {
         console.error("Error fetching letter:", letterError);
         throw letterError;
+      }
+
+      if (!letter) {
+        console.log("No letter found with ID:", id);
+        toast({
+          title: "Ansøgning ikke fundet",
+          description: "Den valgte ansøgning kunne ikke findes.",
+          variant: "destructive",
+        });
+        navigate("/dashboard");
+        return null;
       }
 
       console.log("Retrieved letter:", letter);
@@ -88,30 +119,41 @@ export const useCoverLetterGeneration = (user: User | null) => {
         .from("job_postings")
         .select("*")
         .eq("id", letter.job_posting_id)
-        .single();
+        .maybeSingle();
 
       if (jobError) {
         console.error("Error fetching job for letter:", jobError);
-        throw jobError;
+        // Don't throw here, just log the error
       }
 
-      console.log("Retrieved job for letter:", job);
-      setSelectedJob(job);
-      setStep(2);
+      if (job) {
+        console.log("Retrieved job for letter:", job);
+        setSelectedJob(job);
+      }
       
+      setStep(2);
       return letter;
     } catch (error) {
       console.error("Error in fetchLetter:", error);
-      toast({
-        title: "Fejl ved indlæsning",
-        description: "Der opstod en fejl under indlæsning af ansøgningen.",
-        variant: "destructive",
-      });
-      throw error;
+      if (!navigator.onLine) {
+        toast({
+          title: "Ingen internetforbindelse",
+          description: "Kontroller din internetforbindelse og prøv igen.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Fejl ved indlæsning",
+          description: "Der opstod en fejl under indlæsning. Prøv igen senere.",
+          variant: "destructive",
+        });
+      }
+      navigate("/dashboard");
+      return null;
     } finally {
       setIsLoading(false);
     }
-  }, [toast]);
+  }, [toast, navigate]);
 
 const handleJobFormSubmit = useCallback(async (jobData: Partial<JobPosting>) => {
     if (!user) {
