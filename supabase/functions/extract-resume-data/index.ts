@@ -1,8 +1,6 @@
 
-// Follow this Deno deployment checklist: https://deno.com/deploy/docs/deployctl
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1";
 
 // Set up CORS headers for the function
 const corsHeaders = {
@@ -42,13 +40,12 @@ serve(async (req) => {
       // Read the PDF file content
       const fileBuffer = await file.arrayBuffer();
       
-      // Extract text from PDF using an external API
-      // We'll use OpenAI's API to help extract structured information from the PDF
+      // Extract text from PDF using OpenAI's API
       const apiKey = Deno.env.get("OPENAI_API_KEY");
       if (!apiKey) {
         console.error("Missing OpenAI API key");
         return new Response(
-          JSON.stringify({ error: "Server configuration error" }),
+          JSON.stringify({ error: "Server configuration error: Missing API key" }),
           {
             status: 500,
             headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -64,7 +61,7 @@ serve(async (req) => {
         )
       );
 
-      // Send the PDF to OpenAI for text extraction and analysis
+      // Send the PDF to OpenAI for analysis
       const openaiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -72,18 +69,18 @@ serve(async (req) => {
           "Authorization": `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-          model: "gpt-4-vision-preview",
+          model: "gpt-4o",
           messages: [
             {
               role: "system",
-              content: "You are a PDF resume parser. Extract structured information from the resume. Return only a JSON object with fields for education, experience, and skills. Don't include any additional text or markdown formatting."
+              content: "You are a resume parser that extracts structured information from resumes. Return the data in JSON format."
             },
             {
               role: "user",
               content: [
                 {
                   type: "text",
-                  text: "Extract the following information from this resume PDF: education history, work experience, and skills. Format the response as a JSON object with these fields."
+                  text: "Extract the following information from this resume: name, email, phone, address, education history, work experience, and skills. Format your response as a JSON object with these fields. Be concise and only include the extracted information."
                 },
                 {
                   type: "image_url",
@@ -94,13 +91,13 @@ serve(async (req) => {
               ]
             }
           ],
-          max_tokens: 1500,
-          response_format: { type: "json_object" }
+          max_tokens: 2000
         }),
       });
 
       if (!openaiResponse.ok) {
-        console.error("OpenAI API error:", await openaiResponse.text());
+        const errorText = await openaiResponse.text();
+        console.error("OpenAI API error:", errorText);
         return new Response(
           JSON.stringify({ error: "Error analyzing PDF content" }),
           {
@@ -111,25 +108,20 @@ serve(async (req) => {
       }
 
       const openaiData = await openaiResponse.json();
-      console.log("OpenAI response received");
-
-      if (!openaiData.choices || !openaiData.choices[0] || !openaiData.choices[0].message) {
-        console.error("Unexpected API response format:", openaiData);
-        return new Response(
-          JSON.stringify({ error: "Invalid response from analysis service" }),
-          {
-            status: 500,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          }
-        );
-      }
+      console.log("OpenAI content:", openaiData.choices[0].message.content);
 
       // Parse the response content as JSON
       let extractedData;
       try {
-        const responseContent = openaiData.choices[0].message.content;
-        extractedData = JSON.parse(responseContent);
-        console.log("Successfully parsed extracted data:", extractedData);
+        const contentText = openaiData.choices[0].message.content;
+        // Find JSON within the response (in case there's additional text)
+        const jsonMatch = contentText.match(/\{[\s\S]*\}/);
+        
+        if (jsonMatch) {
+          extractedData = JSON.parse(jsonMatch[0]);
+        } else {
+          throw new Error("No JSON found in response");
+        }
       } catch (parseError) {
         console.error("Error parsing API response:", parseError);
         return new Response(
