@@ -36,24 +36,28 @@ export const useLetterGeneration = (
   const handleJobFormSubmit = useCallback(async (jobData: JobFormData) => {
     // Validate user login
     if (!user) {
+      console.error("Cannot generate letter: No authenticated user");
       toast(toastMessages.loginRequired);
       return;
     }
 
     // Guard against multiple submissions
     if (loadingState !== "idle") {
+      console.warn("Generation already in progress, state:", loadingState);
       toast(toastMessages.generationInProgress);
       return;
     }
 
     // Form validation
     if (!jobData.title || !jobData.company || !jobData.description) {
+      console.error("Form validation failed: Missing required fields");
       toast(toastMessages.missingFields);
       return;
     }
 
     // Cancel any in-progress generation
     if (abortControllerRef.current) {
+      console.log("Aborting previous generation attempt");
       abortControllerRef.current.abort();
     }
     abortControllerRef.current = new AbortController();
@@ -72,7 +76,11 @@ export const useLetterGeneration = (
     // Increment generation attempt counter
     generationAttemptRef.current += 1;
     const currentAttempt = generationAttemptRef.current;
-    console.log(`Starting generation attempt #${currentAttempt}`);
+    console.log(`Starting generation attempt #${currentAttempt} with job data:`, {
+      title: jobData.title,
+      company: jobData.company,
+      descriptionLength: jobData.description?.length
+    });
 
     // Set initial loading state
     safeSetState(setLoadingState, "generating");
@@ -80,6 +88,7 @@ export const useLetterGeneration = (
     // Create a timeout promise for the entire generation process
     const timeoutPromise = new Promise<never>((_, reject) => {
       const timeoutId = setTimeout(() => {
+        console.error("Generation timed out after 60 seconds");
         reject(new Error('Generation timed out. Prøv igen senere.'));
       }, TIMEOUT_DURATION);
       
@@ -91,7 +100,10 @@ export const useLetterGeneration = (
     const generationPromise = (async () => {
       try {
         // Step 1: Fetch user profile first to check completeness
-        if (!isMountedRef.current) throw new Error('Component unmounted');
+        if (!isMountedRef.current) {
+          console.warn("Component unmounted during generation");
+          throw new Error('Component unmounted');
+        }
         
         safeSetState(setGenerationPhase, 'user-fetch');
         safeSetState(setGenerationProgress, {
@@ -110,7 +122,10 @@ export const useLetterGeneration = (
           throw createError('user-fetch', 'Kunne ikke hente din profil. Prøv at opdatere siden.');
         }
         
-        if (!isMountedRef.current) throw new Error('Component unmounted');
+        if (!isMountedRef.current) {
+          console.warn("Component unmounted after fetching user profile");
+          throw new Error('Component unmounted');
+        }
         
         console.log(`User profile fetched for ID: ${user.id}`, {
           hasName: !!userInfo.name,
@@ -120,12 +135,20 @@ export const useLetterGeneration = (
         
         // Warn about incomplete profile but continue
         if (!userInfo.name || !userInfo.experience || !userInfo.education) {
+          console.warn("User profile incomplete:", {
+            hasName: !!userInfo.name,
+            hasExperience: !!userInfo.experience, 
+            hasEducation: !!userInfo.education
+          });
           toast(toastMessages.incompleteProfile);
           // Note: We're continuing with generation despite incomplete profile
         }
 
         // Step 2: Save or update the job posting
-        if (!isMountedRef.current) throw new Error('Component unmounted');
+        if (!isMountedRef.current) {
+          console.warn("Component unmounted before saving job");
+          throw new Error('Component unmounted');
+        }
         
         safeSetState(setGenerationPhase, 'job-save');
         safeSetState(setGenerationProgress, {
@@ -143,7 +166,10 @@ export const useLetterGeneration = (
           throw createError('job-save', 'Kunne ikke gemme jobdetaljer. Tjek din forbindelse og prøv igen.');
         }
         
-        if (!isMountedRef.current) throw new Error('Component unmounted');
+        if (!isMountedRef.current) {
+          console.warn("Component unmounted after saving job");
+          throw new Error('Component unmounted');
+        }
         
         console.log(`Job saved with ID: ${jobId}`);
 
@@ -154,17 +180,22 @@ export const useLetterGeneration = (
           progress: 60,
           message: 'Genererer ansøgning...'
         });
-        console.log("Step 3: Generating letter content");
+        console.log("Step 3: Generating letter content with job ID:", jobId);
         
         let content;
         try {
+          console.log("Calling generateCoverLetter with job data and user info");
           content = await generateCoverLetter(jobData, userInfo);
+          console.log("Cover letter generation successful, content length:", content?.length);
         } catch (error) {
           console.error("Error generating letter:", error);
           throw createError('generation', 'AI-tjenesten kunne ikke generere din ansøgning. Prøv igen om lidt.', false);
         }
         
-        if (!isMountedRef.current) throw new Error('Component unmounted');
+        if (!isMountedRef.current) {
+          console.warn("Component unmounted after generating content");
+          throw new Error('Component unmounted');
+        }
         
         console.log("Letter generated successfully, content length:", content?.length);
 
@@ -185,7 +216,10 @@ export const useLetterGeneration = (
           throw createError('letter-save', 'Din ansøgning blev genereret, men kunne ikke gemmes. Prøv igen.');
         }
         
-        if (!isMountedRef.current) throw new Error('Component unmounted');
+        if (!isMountedRef.current) {
+          console.warn("Component unmounted after saving letter");
+          throw new Error('Component unmounted');
+        }
         
         console.log(`Letter saved with ID: ${letter.id}`);
 
@@ -208,6 +242,7 @@ export const useLetterGeneration = (
         
         return { letter, job: updatedJob };
       } catch (error) {
+        console.error("Error in generation process:", error);
         throw error;
       }
     })();
@@ -222,9 +257,13 @@ export const useLetterGeneration = (
         (window as any).__generationTimeoutId = null;
       }
       
-      if (!isMountedRef.current) return;
+      if (!isMountedRef.current) {
+        console.warn("Component unmounted after generation completed");
+        return;
+      }
       
       // Success handling
+      console.log("Generation completed successfully:", result);
       safeSetState(setSelectedJob, result.job);
       safeSetState(setGeneratedLetter, result.letter);
       safeSetState(setStep, 2);
@@ -240,7 +279,10 @@ export const useLetterGeneration = (
         (window as any).__generationTimeoutId = null;
       }
       
-      if (!isMountedRef.current) return;
+      if (!isMountedRef.current) {
+        console.warn("Component unmounted after error");
+        return;
+      }
       
       let title = "Fejl ved generering";
       let description = "Der opstod en ukendt fejl. Prøv venligst igen.";
@@ -254,6 +296,7 @@ export const useLetterGeneration = (
       
       // Check if it was a timeout error
       if (error instanceof Error && error.message.includes('timed out')) {
+        console.error("Generation timed out");
         toast(toastMessages.generationTimeout);
         safeSetState(setGenerationError, "Generering tog for lang tid. Prøv igen senere.");
         return;

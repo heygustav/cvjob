@@ -19,62 +19,75 @@ export const generateCoverLetter = async (
     hasSkills: !!userInfo.skills,
   });
   
-  // Create a timeout promise
+  // Set up a timeout without AbortController
+  let timeoutId: ReturnType<typeof setTimeout>;
   const timeoutPromise = new Promise<never>((_, reject) => {
-    const timeoutId = setTimeout(() => {
-      clearTimeout(timeoutId);
-      reject(new Error('Generering af ansøgningen tog for lang tid. Prøv igen senere.'));
+    timeoutId = setTimeout(() => {
       console.log("Generation timed out after 45 seconds");
+      reject(new Error('Generering af ansøgningen tog for lang tid. Prøv igen senere.'));
     }, 45000);
   });
   
   try {
-    console.log("Calling edge function for letter generation");
+    console.log("Preparing to call edge function for letter generation");
     
-    // Create the main generation promise
-    const generationPromise = supabase.functions.invoke(
-      'generate-cover-letter',
-      {
-        body: {
-          jobInfo: {
-            title: jobInfo.title,
-            company: jobInfo.company,
-            description: jobInfo.description,
-            contactPerson: jobInfo.contact_person,
-            url: jobInfo.url
-          },
-          userInfo: {
-            name: userInfo.name || '',
-            email: userInfo.email || '',
-            phone: userInfo.phone || '',
-            address: userInfo.address || '',
-            experience: userInfo.experience || '',
-            education: userInfo.education || '',
-            skills: userInfo.skills || '',
-          },
-          locale: navigator.language, // Send user's locale for better date formatting
-          model: "gpt-4" // Always use gpt-4 for cover letter generation
-        }
+    // Create the generation promise
+    const generatePromise = new Promise<{ data: any, error: any }>(async (resolve, reject) => {
+      try {
+        console.log("Calling Supabase function with payload:", {
+          title: jobInfo.title,
+          company: jobInfo.company,
+          description: jobInfo.description?.substring(0, 50) + '...'
+        });
+        
+        const result = await supabase.functions.invoke(
+          'generate-cover-letter',
+          {
+            body: {
+              jobInfo: {
+                title: jobInfo.title,
+                company: jobInfo.company,
+                description: jobInfo.description,
+                contactPerson: jobInfo.contact_person,
+                url: jobInfo.url
+              },
+              userInfo: {
+                name: userInfo.name || '',
+                email: userInfo.email || '',
+                phone: userInfo.phone || '',
+                address: userInfo.address || '',
+                experience: userInfo.experience || '',
+                education: userInfo.education || '',
+                skills: userInfo.skills || '',
+              },
+              locale: navigator.language,
+              model: "gpt-4o"
+            }
+          }
+        );
+        console.log("Edge function call completed", result);
+        resolve(result);
+      } catch (error) {
+        console.error("Error in invoke call:", error);
+        reject(error);
       }
-    );
+    });
 
-    // Race between the generation and the timeout
-    const { data, error } = await Promise.race([
-      generationPromise,
-      timeoutPromise.then(() => {
-        throw new Error('Generering af ansøgningen tog for lang tid. Prøv igen senere.');
-      })
-    ]);
+    // Race between generation and timeout
+    const result = await Promise.race([generatePromise, timeoutPromise]);
+    
+    // Clear the timeout since we got a response
+    clearTimeout(timeoutId!);
+    
+    // Destructure the result
+    const { data, error } = result as { data: any, error: any };
 
     if (error) {
       console.error("Edge function error:", error);
-      // Extract and use the original error message if possible
-      const message = error.message || "Unknown error";
-      throw new Error(`Cover letter generation failed: ${message}`);
+      throw new Error(`Cover letter generation failed: ${error.message || "Unknown error"}`);
     }
 
-    // Log the response to see what's coming back
-    console.log("Response from edge function:", data);
+    console.log("Response received from edge function:", data);
 
     if (!data || !data.content) {
       console.error("No content received from edge function:", data);
@@ -87,21 +100,29 @@ export const generateCoverLetter = async (
   } catch (error) {
     console.error("Error in generateCoverLetter:", error);
     
+    // Clear the timeout to prevent memory leaks
+    clearTimeout(timeoutId!);
+    
     // Handle timeout errors
     if (error instanceof Error && error.message.includes('tog for lang tid')) {
       throw new Error('Generering af ansøgningen tog for lang tid. Prøv igen senere.');
     }
     
     // Handle network errors
-    if (!navigator.onLine || (error instanceof Error && error.message.includes('network'))) {
+    if (!navigator.onLine || (error instanceof Error && 
+        (error.message.includes('network') || 
+         error.message.includes('connection') || 
+         error.message.includes('offline')))) {
       throw new Error('Der opstod en netværksfejl. Kontroller din forbindelse og prøv igen.');
     }
     
     // For other errors, re-throw with the original message if possible
     if (error instanceof Error) {
-      throw error;
+      // Include more details in the error
+      console.error("Error details:", error.stack);
+      throw new Error(`Fejl ved generering: ${error.message}`);
     } else {
-      throw new Error("Der opstod en fejl ved generering af ansøgningen. Prøv igen senere.");
+      throw new Error("Der opstod en ukendt fejl ved generering af ansøgningen. Prøv igen senere.");
     }
   }
 };
