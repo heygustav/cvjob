@@ -20,7 +20,7 @@ const CoverLetterGenerator: React.FC = () => {
   const user: User | null = session?.user ? {
     id: session.user.id,
     email: session.user.email || "",
-    name: "", // We'll get this from profile data
+    name: session.user.user_metadata?.name || "", // Get name from metadata if available
     profileComplete: false // Default value
   } : null;
 
@@ -41,14 +41,16 @@ const CoverLetterGenerator: React.FC = () => {
   useEffect(() => {
     if (user) {
       if (jobId) {
-        fetchJob(jobId);
+        fetchJob(jobId).finally(() => setIsLoading(false));
       } else if (letterId) {
-        fetchLetter(letterId);
+        fetchLetter(letterId).finally(() => setIsLoading(false));
       } else {
         setIsLoading(false);
       }
+    } else {
+      setIsLoading(false);
     }
-  }, [user, jobId, letterId]);
+  }, [user, jobId, letterId, fetchJob, fetchLetter]);
 
   if (generationLoading || isLoading) {
     return <LoadingSpinner />;
