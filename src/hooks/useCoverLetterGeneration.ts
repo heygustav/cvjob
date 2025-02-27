@@ -24,6 +24,13 @@ interface GenerationError extends Error {
 // Define loading state type
 type LoadingState = "idle" | "initializing" | "generating" | "saving";
 
+// Add detailed progress tracking interface
+interface GenerationProgress {
+  phase: 'job-save' | 'user-fetch' | 'generation' | 'letter-save';
+  progress: number; // 0-100
+  message: string;
+}
+
 // Timeout utility for network requests
 const fetchWithTimeout = async (promise: Promise<any>, timeoutMs: number = 15000) => {
   let timeoutId: NodeJS.Timeout;
@@ -48,6 +55,11 @@ export const useCoverLetterGeneration = (user: User | null) => {
   const [generatedLetter, setGeneratedLetter] = useState<CoverLetter | null>(null);
   const [generationError, setGenerationError] = useState<string | null>(null);
   const [generationPhase, setGenerationPhase] = useState<string | null>(null);
+  const [generationProgress, setGenerationProgress] = useState<GenerationProgress>({
+    phase: 'job-save',
+    progress: 0,
+    message: 'Forbereder...'
+  });
   const { toast } = useToast();
   const navigate = useNavigate();
   const generationAttemptRef = useRef(0);
@@ -121,6 +133,11 @@ export const useCoverLetterGeneration = (user: User | null) => {
       setLoadingState("initializing");
       setGenerationError(null);
       setGenerationPhase(null);
+      setGenerationProgress({
+        phase: 'job-save',
+        progress: 0,
+        message: 'Henter jobinformation...'
+      });
       
       console.log("Fetching job with ID:", id);
       
@@ -142,6 +159,12 @@ export const useCoverLetterGeneration = (user: User | null) => {
 
       console.log("Successfully fetched job:", job);
       setSelectedJob(job);
+
+      setGenerationProgress({
+        phase: 'job-save',
+        progress: 50,
+        message: 'Søger efter eksisterende ansøgninger...'
+      });
 
       try {
         // Try without timeout first
@@ -165,6 +188,12 @@ export const useCoverLetterGeneration = (user: User | null) => {
         console.error("Error fetching letters:", letterError);
         // Non-critical error, continue
       }
+      
+      setGenerationProgress({
+        phase: 'job-save',
+        progress: 100,
+        message: 'Indlæsning fuldført'
+      });
       
       return job;
     } catch (error) {
@@ -194,6 +223,11 @@ export const useCoverLetterGeneration = (user: User | null) => {
       setLoadingState("initializing");
       setGenerationError(null);
       setGenerationPhase(null);
+      setGenerationProgress({
+        phase: 'letter-save',
+        progress: 0,
+        message: 'Henter ansøgning...'
+      });
       
       console.log("Fetching letter with ID:", id);
       
@@ -215,6 +249,12 @@ export const useCoverLetterGeneration = (user: User | null) => {
       console.log("Fetched letter:", letter);
       setGeneratedLetter(letter);
 
+      setGenerationProgress({
+        phase: 'letter-save',
+        progress: 50,
+        message: 'Henter tilhørende job...'
+      });
+
       try {
         // Try without timeout first for the job fetch
         let job;
@@ -235,6 +275,12 @@ export const useCoverLetterGeneration = (user: User | null) => {
         console.error("Error fetching job for letter:", jobError);
         // Non-critical error, continue
       }
+      
+      setGenerationProgress({
+        phase: 'letter-save',
+        progress: 100,
+        message: 'Ansøgning indlæst'
+      });
       
       setStep(2);
       return letter;
@@ -289,6 +335,13 @@ export const useCoverLetterGeneration = (user: User | null) => {
     setGenerationError(null);
     setGenerationPhase(null);
 
+    // Initial setup
+    setGenerationProgress({
+      phase: 'job-save',
+      progress: 10,
+      message: 'Forbereder generering...'
+    });
+
     // Increment generation attempt counter
     generationAttemptRef.current += 1;
     const currentAttempt = generationAttemptRef.current;
@@ -300,6 +353,11 @@ export const useCoverLetterGeneration = (user: User | null) => {
     try {
       // Step 1: Fetch user profile first to check completeness
       setGenerationPhase('user-fetch');
+      setGenerationProgress({
+        phase: 'user-fetch',
+        progress: 20,
+        message: 'Henter din profil...'
+      });
       console.log("Step 1: Fetching user profile");
       
       let userInfo;
@@ -325,6 +383,11 @@ export const useCoverLetterGeneration = (user: User | null) => {
 
       // Step 2: Save or update the job posting
       setGenerationPhase('job-save');
+      setGenerationProgress({
+        phase: 'job-save',
+        progress: 40,
+        message: 'Gemmer jobdetaljer...'
+      });
       console.log("Step 2: Saving job posting");
       
       let jobId;
@@ -341,6 +404,11 @@ export const useCoverLetterGeneration = (user: User | null) => {
 
       // Step 3: Generate letter content
       setGenerationPhase('generation');
+      setGenerationProgress({
+        phase: 'generation',
+        progress: 60,
+        message: 'Genererer ansøgning...'
+      });
       console.log("Step 3: Generating letter content");
       
       let content;
@@ -358,6 +426,11 @@ export const useCoverLetterGeneration = (user: User | null) => {
 
       // Step 4: Save the generated letter
       setGenerationPhase('letter-save');
+      setGenerationProgress({
+        phase: 'letter-save',
+        progress: 80,
+        message: 'Gemmer ansøgning...'
+      });
       console.log("Step 4: Saving letter");
       
       let letter;
@@ -371,6 +444,13 @@ export const useCoverLetterGeneration = (user: User | null) => {
       }
       
       console.log(`Letter saved with ID: ${letter.id}`);
+      
+      // Final progress update
+      setGenerationProgress({
+        phase: 'letter-save',
+        progress: 100,
+        message: 'Færdig!'
+      });
       
       // Update the job object first to ensure it has all necessary fields
       let updatedJob;
@@ -462,11 +542,23 @@ export const useCoverLetterGeneration = (user: User | null) => {
 
     try {
       setLoadingState("saving");
+      setGenerationProgress({
+        phase: 'letter-save',
+        progress: 50,
+        message: 'Gemmer ændringer...'
+      });
+      
       await fetchWithTimeout(updateLetterContent(generatedLetter.id, updatedContent));
 
       setGeneratedLetter({
         ...generatedLetter,
         content: updatedContent
+      });
+
+      setGenerationProgress({
+        phase: 'letter-save',
+        progress: 100,
+        message: 'Ændringer gemt!'
       });
 
       toast(toastMessages.letterUpdated);
@@ -503,6 +595,7 @@ export const useCoverLetterGeneration = (user: User | null) => {
     isLoading,
     loadingState,
     generationPhase,
+    generationProgress,
     selectedJob,
     generatedLetter,
     generationError,

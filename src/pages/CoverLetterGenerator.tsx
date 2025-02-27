@@ -33,6 +33,7 @@ const CoverLetterGenerator: React.FC = () => {
     isLoading,
     loadingState,
     generationPhase,
+    generationProgress,
     selectedJob,
     generatedLetter,
     generationError,
@@ -77,6 +78,9 @@ const CoverLetterGenerator: React.FC = () => {
 
   // Get appropriate loading message
   const getLoadingMessage = () => {
+    if (isGenerating && generationProgress?.message) {
+      return generationProgress.message;
+    }
     if (isGenerating) {
       if (generationPhase === 'user-fetch') return "Henter brugerdata...";
       if (generationPhase === 'job-save') return "Gemmer jobdetaljer...";
@@ -99,7 +103,8 @@ const CoverLetterGenerator: React.FC = () => {
     generatedLetter: generatedLetter?.id, 
     selectedJob: selectedJob?.id, 
     generationError,
-    phase: generationPhase
+    phase: generationPhase,
+    progress: generationProgress
   });
 
   return (
@@ -163,7 +168,14 @@ const CoverLetterGenerator: React.FC = () => {
                 initialData={selectedJob || undefined}
                 isLoading={isGenerating}
               />
-              {isGenerating && <GenerationStatus phase={generationPhase || 'generation'} />}
+              {isGenerating && (
+                <GenerationStatus 
+                  phase={generationPhase || 'generation'} 
+                  progress={generationProgress.progress}
+                  message={generationProgress.message}
+                  onRetry={resetError}
+                />
+              )}
             </div>
           ) : (
             <div className="p-4 sm:p-6">

@@ -4,11 +4,15 @@ import { Clock } from "lucide-react";
 
 interface GenerationStatusProps {
   phase?: string;
+  progress?: number;
+  message?: string;
   onRetry?: () => void;
 }
 
 export const GenerationStatus: React.FC<GenerationStatusProps> = ({ 
   phase = 'generation',
+  progress = 0,
+  message,
   onRetry
 }) => {
   const [elapsed, setElapsed] = useState(0);
@@ -16,6 +20,8 @@ export const GenerationStatus: React.FC<GenerationStatusProps> = ({
   
   // Define steps based on the current phase
   const getPhaseSpecificStep = () => {
+    if (message) return message;
+    
     switch (phase) {
       case 'user-fetch':
         return "Henter din profil...";
@@ -49,7 +55,7 @@ export const GenerationStatus: React.FC<GenerationStatusProps> = ({
     
     // Start step rotation (only rotate generic steps if we're in generation phase)
     const stepIntervalId = setInterval(() => {
-      if (phase === 'generation') {
+      if (phase === 'generation' && !message) {
         setStepIndex(prev => (prev + 1) % steps.length);
       }
     }, 3000);
@@ -59,7 +65,7 @@ export const GenerationStatus: React.FC<GenerationStatusProps> = ({
       clearInterval(intervalId);
       clearInterval(stepIntervalId);
     };
-  }, [steps.length, phase]);
+  }, [steps.length, phase, message]);
 
   const formatTime = (ms: number) => {
     const seconds = Math.floor(ms / 100);
@@ -75,8 +81,32 @@ export const GenerationStatus: React.FC<GenerationStatusProps> = ({
       <div className="flex items-center justify-center space-x-4">
         <Clock className="animate-pulse h-5 w-5 text-gray-600" />
         <div className="text-sm text-gray-600">
-          {steps[stepIndex]} {formatTime(elapsed)}s
+          {message || steps[stepIndex]} {formatTime(elapsed)}s
         </div>
+      </div>
+      
+      {/* Progress bar */}
+      <div className="mt-3 w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
+        <div 
+          className="bg-black h-2 rounded-full transition-all duration-500 ease-in-out" 
+          style={{ width: `${progress}%` }}
+        ></div>
+      </div>
+      
+      {/* Phase indicator */}
+      <div className="mt-2 flex justify-between text-xs text-gray-500">
+        <span className={phase === 'job-save' ? 'font-medium text-black' : ''}>
+          Job
+        </span>
+        <span className={phase === 'user-fetch' ? 'font-medium text-black' : ''}>
+          Profil
+        </span>
+        <span className={phase === 'generation' ? 'font-medium text-black' : ''}>
+          AI
+        </span>
+        <span className={phase === 'letter-save' ? 'font-medium text-black' : ''}>
+          Færdig
+        </span>
       </div>
       
       {isTakingTooLong && (
