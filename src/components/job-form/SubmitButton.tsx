@@ -49,7 +49,7 @@ const SubmitButton: React.FC<SubmitButtonProps> = ({
         "px-4 py-2 rounded-md shadow-sm text-sm font-medium text-white disabled:opacity-80 disabled:cursor-not-allowed transition-all duration-300",
         isSuccess 
           ? "bg-green-600 w-12" 
-          : "bg-primary hover:bg-primary-800",
+          : "bg-primary hover:bg-primary/90 active:bg-primary-800",
         className
       )}
       aria-label={

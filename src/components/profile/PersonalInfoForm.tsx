@@ -3,6 +3,7 @@ import React from "react";
 import { Save } from "lucide-react";
 import { PersonalInfoFormState } from "@/pages/Profile";
 import ResumeUploader from "./ResumeUploader";
+import { Button } from "@/components/ui/button";
 
 interface PersonalInfoFormProps {
   formData: PersonalInfoFormState;
@@ -181,10 +182,10 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({
 
       <div className="pt-5">
         <div className="flex justify-end">
-          <button
+          <Button
             type="submit"
             disabled={isLoading}
-            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors disabled:opacity-70"
+            className="inline-flex items-center"
           >
             {isLoading ? (
               <>
@@ -216,7 +217,7 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({
                 Gem profil
               </>
             )}
-          </button>
+          </Button>
         </div>
       </div>
     </form>
