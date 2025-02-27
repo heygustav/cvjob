@@ -16,19 +16,41 @@ const SubmitButton: React.FC<SubmitButtonProps> = ({
 }) => {
   const [isSuccess, setIsSuccess] = useState(false);
   
-  // Reset success state when loading changes
+  // Only set success state when loading changes from true to false
   useEffect(() => {
+    let timer: NodeJS.Timeout;
+    
     if (isLoading) {
       setIsSuccess(false);
-    } else if (isLoading === false && !isSuccess) {
-      // When loading stops, show success state
-      setIsSuccess(true);
-      // Reset after animation completes
-      setTimeout(() => {
+    } else if (isLoading === false && isSuccess) {
+      // Reset success state after animation completes
+      timer = setTimeout(() => {
         setIsSuccess(false);
       }, 2000);
     }
+    
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
   }, [isLoading, isSuccess]);
+
+  // Handle successful completion of loading
+  const handleLoadingComplete = () => {
+    if (isLoading === false && !isSuccess) {
+      setIsSuccess(true);
+    }
+  };
+
+  // Call handleLoadingComplete when isLoading changes from true to false
+  useEffect(() => {
+    let prevLoading = isLoading;
+    return () => {
+      if (prevLoading && !isLoading) {
+        handleLoadingComplete();
+      }
+      prevLoading = isLoading;
+    };
+  }, [isLoading]);
 
   return (
     <button
