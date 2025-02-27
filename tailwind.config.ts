@@ -38,8 +38,8 @@ export default {
           400: '#38aef5',
           500: '#0e96e9',
           600: '#0075c7',
-          700: '#005ea3',
-          800: '#065086',
+          700: '#065086', // Standardizing on this as our primary blue
+          800: '#054370',
           900: '#0a4570',
           950: '#072b4a',
         },
@@ -93,7 +93,7 @@ export default {
           dark: '#388e3c'
         },
         softgray: '#F9FAFB',
-        appblue: '#065086',
+        appblue: '#065086', // Keep this consistent with primary-700
       },
       borderRadius: {
         lg: 'var(--radius)',

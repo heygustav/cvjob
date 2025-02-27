@@ -70,7 +70,7 @@
 
 /* Override any green button styles */
 button[type="submit"]:not(.bg-green-600) {
-  background-color: #065086 !important;
+  background-color: var(--primary) !important;
 }
 
 button[type="submit"]:hover:not(.bg-green-600) {
