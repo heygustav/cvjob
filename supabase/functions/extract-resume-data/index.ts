@@ -1,246 +1,170 @@
 
-// Required for fetch in Deno
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
+import "https://deno.land/x/xhr@0.3.0/mod.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.21.0";
 
-const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
-
+// Set up CORS headers for the function
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-serve(async (req) => {
+const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
+const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
+const openAIKey = Deno.env.get("OPENAI_API_KEY") || "";
+
+// Create a Supabase client
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+serve(async (req: Request) => {
   // Handle CORS preflight requests
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+  if (req.method === "OPTIONS") {
+    return new Response(null, {
+      headers: corsHeaders,
+    });
   }
 
-  console.log("Received request to extract-resume-data");
-
   try {
-    // Check request method
-    if (req.method !== 'POST') {
-      return new Response(
-        JSON.stringify({ error: 'Only POST requests are allowed' }),
-        { status: 405, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
+    // Read the FormData from the request
+    const formData = await req.formData();
+    const file = formData.get("file");
 
-    // Get the form data
-    let formData;
-    try {
-      formData = await req.formData();
-    } catch (error) {
-      console.error("Error parsing form data:", error);
-      return new Response(
-        JSON.stringify({ error: "Invalid form data: " + error.message }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // Get the file from form data
-    const file = formData.get('file');
     if (!file || !(file instanceof File)) {
-      console.error("No file in request");
       return new Response(
-        JSON.stringify({ error: "No file found in the request" }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: "No file provided or invalid file format" }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
       );
     }
 
-    console.log(`File received: ${file.name}, type: ${file.type}, size: ${file.size} bytes`);
+    // Check if the file is a PDF
+    if (file.type !== "application/pdf") {
+      return new Response(
+        JSON.stringify({ error: "Only PDF files are supported" }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
 
-    // Extract text from the file - simple approach just reading as text
-    let fileText = "";
-    try {
-      fileText = await file.text();
-      console.log(`Extracted text length: ${fileText.length} characters`);
+    console.log("Received file:", file.name, "Size:", file.size);
+
+    // Read the file content as ArrayBuffer
+    const arrayBuffer = await file.arrayBuffer();
+    const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+
+    console.log("File converted to base64");
+
+    // Send the file to OpenAI for text extraction using GPT-4 Vision
+    console.log("Sending to OpenAI for processing");
+    
+    // Prepare system prompt for GPT-4 Vision
+    const systemPrompt = `
+      You are an AI designed to extract structured resume information from a PDF.
+      Analyze the provided resume PDF carefully and extract the following information if available:
+      - name: The person's full name as it appears on the resume, preserving any special characters or diacritics
+      - email: The person's email address
+      - experience: A summary of their work experience (max 800 characters)
+      - education: A summary of their educational background (max 600 characters)
+      - skills: A summary of their professional skills and competencies (max 400 characters)
       
-      // If extracted text is very short, this might not be proper text extraction
-      if (fileText.length < 100) {
-        console.warn("Extracted text is suspiciously short, might not be properly extracted");
-      }
-    } catch (error) {
-      console.error("Error reading file:", error);
-      return new Response(
-        JSON.stringify({ error: "Error reading file: " + error.message }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // For debugging, log a sample of the extracted text
-    console.log("Sample of extracted text:", fileText.substring(0, 200) + "...");
-
-    if (!openAIApiKey) {
-      console.error("OpenAI API key not found");
-      return new Response(
-        JSON.stringify({ error: "OpenAI API key is not configured" }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    console.log("Calling OpenAI API...");
-    
-    // Create an improved prompt for OpenAI that emphasizes preserving original text
-    const prompt = `
-    Please extract the following information from this resume/CV text:
-    
-    Resume text:
-    ${fileText}
-    
-    IMPORTANT: Extract these fields in JSON format and preserve EXACTLY the original spelling, capitalization, and accented characters (æ, ø, å, etc). Do NOT translate, normalize, or modify any text from the original CV:
-    - name: The person's full name EXACTLY as written
-    - email: Their email address EXACTLY as written
-    - phone: Their phone number EXACTLY as written with original formatting
-    - address: Their physical address EXACTLY as written (preserve street names like "Molestien" or "Nørrelund" with accents)
-    - experience: Their work experience (as a formatted text with positions, companies, dates)
-    - education: Their educational background (as formatted text with institutions, degrees, dates)
-    - skills: Their skills and competencies (as a comma-separated list)
-    
-    Return ONLY a valid JSON object with these fields and nothing else. DO NOT normalize, translate or modify the original text in any way.
+      IMPORTANT EXTRACTION RULES:
+      - Do NOT make assumptions about information that isn't clearly visible in the document
+      - Extract ONLY information that is explicitly stated in the document
+      - For name, preserve all special characters (like æ, ø, å, ü, é)
+      - ONLY include phone and address if they are EXPLICITLY and CLEARLY stated
+      - If any fields cannot be found with high confidence, leave them empty
+      - Do NOT translate content - keep it in its original language
+      - Do NOT make up or infer missing information
+      - Preserve formatting and language as it appears in the original document
+      
+      Return your response as a JSON object with these fields. For any field where information is not found or unclear, set it to null.
     `;
+
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${openAIKey}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: systemPrompt,
+          },
+          {
+            role: "user",
+            content: [
+              {
+                type: "text",
+                text: "Extract the resume information from this PDF document. Be conservative - don't make assumptions and only extract what's clearly visible.",
+              },
+              {
+                type: "image_url",
+                image_url: {
+                  url: `data:application/pdf;base64,${base64}`,
+                },
+              },
+            ],
+          },
+        ],
+        temperature: 0.2, // Setting a low temperature for more accurate extraction
+        max_tokens: 2000,
+      }),
+    });
+
+    const result = await response.json();
     
-    // Call OpenAI API
-    let openAIResponse;
-    try {
-      openAIResponse = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${openAIApiKey}`
-        },
-        body: JSON.stringify({
-          model: "gpt-4o-mini",
-          messages: [
-            {
-              role: "system",
-              content: "You are a helpful assistant that extracts structured information from resumes/CVs. Return only valid JSON. IMPORTANT: Preserve the EXACT original spelling, capitalization, and special characters in ALL extracted text. Never modify, normalize, or translate any text."
-            },
-            {
-              role: "user",
-              content: prompt
-            }
-          ],
-          temperature: 0.1, // Lower temperature for more deterministic outputs
-        })
-      });
-    } catch (error) {
-      console.error("Error calling OpenAI API:", error);
-      return new Response(
-        JSON.stringify({ error: "Failed to call OpenAI API: " + error.message }),
-        { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    if (!response.ok || !result.choices || !result.choices[0]) {
+      console.error("Error from OpenAI:", result);
+      throw new Error("Failed to extract text from PDF");
     }
 
-    // Check the response status
-    if (!openAIResponse.ok) {
-      const errorText = await openAIResponse.text();
-      console.error(`OpenAI API returned status ${openAIResponse.status}:`, errorText);
-      return new Response(
-        JSON.stringify({ 
-          error: `OpenAI API returned error: ${openAIResponse.status}`,
-          details: errorText
-        }),
-        { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
+    console.log("Received response from OpenAI");
 
-    // Parse the OpenAI response
-    let openAIData;
-    try {
-      openAIData = await openAIResponse.json();
-      console.log("Received response from OpenAI");
-    } catch (error) {
-      console.error("Error parsing OpenAI response:", error);
-      return new Response(
-        JSON.stringify({ error: "Invalid response from OpenAI: " + error.message }),
-        { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // Validate OpenAI response structure
-    if (!openAIData.choices || !openAIData.choices[0] || !openAIData.choices[0].message) {
-      console.error("Invalid OpenAI response format:", openAIData);
-      return new Response(
-        JSON.stringify({ 
-          error: "Invalid response format from OpenAI", 
-          details: JSON.stringify(openAIData)
-        }),
-        { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // Get the content from OpenAI response
-    const content = openAIData.choices[0].message.content;
-    console.log("OpenAI content:", content);
-
-    // Parse the JSON from the content
+    // Parse the AI's JSON response
     let extractedData;
     try {
-      // Find JSON in the response (in case there's extra text)
-      const jsonMatch = content.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        extractedData = JSON.parse(jsonMatch[0]);
+      // Extract JSON from the GPT response
+      const jsonContentMatch = result.choices[0].message.content.match(/\{[\s\S]*\}/);
+      
+      if (jsonContentMatch) {
+        extractedData = JSON.parse(jsonContentMatch[0]);
+        console.log("Successfully parsed extracted data");
       } else {
-        throw new Error("No JSON found in OpenAI response");
+        throw new Error("Could not find valid JSON in the response");
       }
-      
-      console.log("Successfully parsed extracted data:", extractedData);
     } catch (error) {
-      console.error("Error parsing JSON from OpenAI response:", error);
-      
-      // Create a fallback object with basic structure
-      extractedData = {
-        name: "",
-        email: "",
-        phone: "",
-        address: "",
-        experience: "",
-        education: "",
-        skills: ""
-      };
-      
-      // Try to extract data with regex
-      try {
-        // Helper function to extract field with regex
-        const extractField = (fieldName) => {
-          const regex = new RegExp(`["']?${fieldName}["']?\\s*:\\s*["']([^"']*)["']`, "i");
-          const match = content.match(regex);
-          return match ? match[1].trim() : "";
-        };
-        
-        extractedData.name = extractField("name");
-        extractedData.email = extractField("email");
-        extractedData.phone = extractField("phone");
-        extractedData.address = extractField("address");
-        extractedData.experience = extractField("experience");
-        extractedData.education = extractField("education");
-        extractedData.skills = extractField("skills");
-        
-        console.log("Created fallback data with regex:", extractedData);
-      } catch (regexError) {
-        console.error("Error extracting data with regex:", regexError);
-      }
+      console.error("Error parsing JSON from GPT response:", error);
+      console.log("Raw response:", result.choices[0].message.content);
+      throw new Error("Failed to parse extracted data");
     }
 
-    // Return successful response with extracted data
     return new Response(
       JSON.stringify({
-        success: true,
-        extractedData: extractedData
+        extractedData,
+        message: "Resume data extracted successfully",
       }),
-      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
     );
-    
   } catch (error) {
-    console.error("Unhandled error in extract-resume-data:", error);
+    console.error("Error processing CV:", error);
+    
     return new Response(
-      JSON.stringify({ 
-        error: "Internal server error: " + error.message,
-        stack: error.stack
+      JSON.stringify({
+        error: error.message || "An unknown error occurred",
       }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
     );
   }
 });

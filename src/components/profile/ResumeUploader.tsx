@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, DragEvent } from 'react';
 import { Upload } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
@@ -16,6 +15,45 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // This function will validate and sanitize the extracted data
+  const validateExtractedData = (data: any): Partial<PersonalInfoFormState> => {
+    const validated: Partial<PersonalInfoFormState> = {};
+    
+    // Only include fields that have high confidence
+    // Keep the original values for important fields like name, phone, and address
+    // We'll only use extracted data for less critical fields like experience, education, and skills
+    
+    // For skills, education, and experience, we can be more permissive as users can easily edit these
+    if (data.skills && typeof data.skills === 'string' && data.skills.trim().length > 10) {
+      validated.skills = data.skills;
+    }
+    
+    if (data.education && typeof data.education === 'string' && data.education.trim().length > 10) {
+      validated.education = data.education;
+    }
+    
+    if (data.experience && typeof data.experience === 'string' && data.experience.trim().length > 10) {
+      validated.experience = data.experience;
+    }
+    
+    // For email, we'll do a basic validation
+    if (data.email && typeof data.email === 'string' && 
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+      validated.email = data.email;
+    }
+    
+    // Name can be included, but we won't auto-convert characters
+    if (data.name && typeof data.name === 'string' && data.name.trim().length > 2) {
+      validated.name = data.name;
+    }
+    
+    // For phone and address, we'll be very conservative - not including these at all
+    // as they're sensitive information and it's better for users to enter them manually
+    // than to have incorrect information
+    
+    return validated;
+  };
 
   const processPdfFile = async (file: File) => {
     // Check if the file is a PDF
@@ -61,14 +99,27 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
         throw new Error('Kunne ikke hente data fra CV');
       }
 
-      // Extract the data
-      const extractedData = data.extractedData;
-      onExtractedData(extractedData);
+      // Validate and sanitize the extracted data
+      const validatedData = validateExtractedData(data.extractedData);
       
-      toast({
-        title: "CV analyseret",
-        description: "Dine profiloplysninger er blevet udfyldt baseret på dit CV.",
-      });
+      // Log what was extracted vs. what was validated
+      console.log("Raw extracted data:", data.extractedData);
+      console.log("Validated data being used:", validatedData);
+      
+      // Only update if we have some validated data
+      if (Object.keys(validatedData).length > 0) {
+        onExtractedData(validatedData);
+        
+        toast({
+          title: "CV analyseret",
+          description: "Nogle af dine profiloplysninger er blevet udfyldt baseret på dit CV. Vi har kun medtaget information med høj sikkerhed.",
+        });
+      } else {
+        toast({
+          title: "Begrænset information fundet",
+          description: "Vi kunne ikke finde tilstrækkelig information i dit CV. Prøv venligst at udfylde oplysningerne manuelt.",
+        });
+      }
     } catch (error: any) {
       console.error('Error extracting resume data:', error);
       
@@ -187,7 +238,7 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
       </div>
       
       <p className="text-xs text-gray-500 mt-2 mb-3 italic text-left">
-        OBS: Hvis funktionen her ikke ekstraherer den rigtige information fra dit CV, så vil dit CV i nuværende form sandsynligvis ikke bestå de fleste CV-scannere hos arbejdsgivere.
+        OBS: Vi vil kun forsøge at udfylde din profil med information, der kan udtrækkes med høj sikkerhed. Personlige oplysninger som telefon og adresse skal du selv udfylde manuelt.
       </p>
       
       {error && (
