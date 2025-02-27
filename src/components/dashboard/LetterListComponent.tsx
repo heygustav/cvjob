@@ -25,6 +25,7 @@ import { formatDistanceToNow } from "date-fns";
 import { da } from "date-fns/locale";
 import { supabase } from "@/integrations/supabase/client";
 import { saveAs } from "file-saver";
+import { jsPDF } from "jspdf";
 
 interface LetterListComponentProps {
   coverLetters: CoverLetter[];
@@ -87,15 +88,30 @@ const LetterListComponent: React.FC<LetterListComponentProps> = ({
       // Create a filename based on company and job title
       const companyName = job?.company || "ukendt-virksomhed";
       const jobTitle = job?.title || "ukendt-stilling";
-      const fileName = `ansøgning-${companyName.toLowerCase().replace(/\s+/g, '-')}-${jobTitle.toLowerCase().replace(/\s+/g, '-')}.txt`;
+      const fileName = `ansøgning-${companyName.toLowerCase().replace(/\s+/g, '-')}-${jobTitle.toLowerCase().replace(/\s+/g, '-')}.pdf`;
       
-      // Create a blob with the letter content
-      const blob = new Blob([letter.content], { type: 'text/plain;charset=utf-8' });
+      // Create a new PDF document
+      const doc = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+      });
       
-      // Use FileSaver to save the file
-      saveAs(blob, fileName);
+      // Set font
+      doc.setFont("helvetica");
+      doc.setFontSize(11);
+      
+      // Add content with line wrapping 
+      // Split content into lines that fit within the page width
+      const textLines = doc.splitTextToSize(letter.content, 180);
+      
+      // Add the text to the PDF with proper positioning (20mm margins)
+      doc.text(textLines, 20, 20);
+      
+      // Save the PDF
+      doc.save(fileName);
     } catch (error) {
-      console.error("Error downloading letter:", error);
+      console.error("Error downloading letter as PDF:", error);
       alert("Der opstod en fejl under download af ansøgning.");
     } finally {
       setIsDownloading(false);
@@ -204,7 +220,7 @@ const LetterListComponent: React.FC<LetterListComponentProps> = ({
                             className="flex items-center cursor-pointer"
                           >
                             <Download className="mr-2 h-4 w-4" />
-                            <span>{isDownloading ? "Downloader..." : "Download"}</span>
+                            <span>{isDownloading ? "Downloader..." : "Download PDF"}</span>
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
