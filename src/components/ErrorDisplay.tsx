@@ -32,25 +32,32 @@ const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
   };
   
   return (
-    <div className="mt-6 p-4 bg-red-50 rounded-md border border-red-100">
+    <div 
+      className="mt-6 p-5 bg-red-50 rounded-lg border border-red-200 shadow-sm" 
+      role="alert" 
+      aria-live="assertive"
+    >
       <div className="flex flex-col space-y-4">
         <div className="flex items-start">
-          <AlertCircle className="h-5 w-5 text-red-600 mr-2 mt-0.5 flex-shrink-0" />
+          <AlertCircle className="h-5 w-5 text-red-600 mr-3 mt-0.5 flex-shrink-0" aria-hidden="true" />
           <div>
-            <h3 className="text-sm font-medium text-red-800">{title}</h3>
-            <p className="text-sm text-red-700 mt-1">{message}</p>
-            <p className="text-xs text-red-600 mt-2">{getHelpText()}</p>
+            <h3 className="text-base font-semibold text-red-800">{title}</h3>
+            <p className="text-sm text-red-700 mt-2">{message}</p>
+            <p className="text-xs text-red-600 mt-3 pb-1">{getHelpText()}</p>
           </div>
         </div>
         
         {onRetry && (
-          <button
-            onClick={onRetry}
-            className="bg-white border border-red-300 rounded-md py-2 px-4 inline-flex items-center justify-center text-sm font-medium text-red-700 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-          >
-            <RefreshCw className="h-4 w-4 mr-1.5" />
-            Prøv igen
-          </button>
+          <div className="flex">
+            <button
+              onClick={onRetry}
+              className="flex items-center px-4 py-2 bg-white border border-red-300 rounded-md text-sm font-medium text-red-700 hover:bg-red-50 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+              aria-label="Prøv igen"
+            >
+              <RefreshCw className="h-4 w-4 mr-2" aria-hidden="true" />
+              Prøv igen
+            </button>
+          </div>
         )}
       </div>
     </div>

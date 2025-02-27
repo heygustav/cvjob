@@ -68,10 +68,17 @@ function App() {
     <Router>
       <AuthProvider>
         <div className="flex flex-col min-h-screen">
+          {/* Skip to content link for keyboard users */}
+          <a href="#main-content" className="skip-to-content">
+            Skip til indhold
+          </a>
+          
           <Navbar />
-          <main className="flex-grow pt-16">
+          
+          <main id="main-content" className="flex-grow pt-16" tabIndex={-1}>
             <AppRoutes />
           </main>
+          
           <Toaster />
         </div>
       </AuthProvider>

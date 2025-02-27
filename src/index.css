@@ -14,7 +14,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 3.9%;
 
-    --primary: 240 5.9% 10%;
+    --primary: 221 83% 53%;
     --primary-foreground: 0 0% 98%;
 
     --secondary: 240 4.8% 95.9%;
@@ -31,7 +31,7 @@
 
     --border: 240 5.9% 90%;
     --input: 240 5.9% 90%;
-    --ring: 240 5.9% 10%;
+    --ring: 221 83% 53%;
 
     --radius: 0.5rem;
 
@@ -57,7 +57,7 @@
     --popover: 240 10% 3.9%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 0 0% 98%;
+    --primary: 221 83% 53%;
     --primary-foreground: 240 5.9% 10%;
 
     --secondary: 240 3.7% 15.9%;
@@ -97,11 +97,23 @@
     font-feature-settings: "ss01", "ss03", "cv01", "cv02", "cv03";
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
   }
   
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-sans);
+    line-height: 1.5;
+  }
+
+  /* Improved focus styles for accessibility */
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-blue-600;
+  }
+
+  /* Skip to content link for keyboard users */
+  .skip-to-content {
+    @apply sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-white focus:text-blue-600 focus:font-medium focus:rounded-md focus:shadow-md;
   }
 
   .glass-morphism {
@@ -116,17 +128,19 @@
     text-wrap: balance;
   }
 
-  /* Subtle animations */
-  .fade-in {
-    animation: fadeIn 0.6s ease-in-out;
-  }
+  /* Accessibility-friendly subtle animations */
+  @media (prefers-reduced-motion: no-preference) {
+    .fade-in {
+      animation: fadeIn 0.6s ease-in-out;
+    }
 
-  .slide-up {
-    animation: slideUp 0.5s ease-out;
-  }
+    .slide-up {
+      animation: slideUp 0.5s ease-out;
+    }
 
-  .scale-in {
-    animation: scaleIn 0.4s ease-out;
+    .scale-in {
+      animation: scaleIn 0.4s ease-out;
+    }
   }
 
   @keyframes fadeIn {
@@ -146,20 +160,35 @@
 }
 
 /* Page transitions */
-.page-enter {
-  opacity: 0;
+@media (prefers-reduced-motion: no-preference) {
+  .page-enter {
+    opacity: 0;
+  }
+
+  .page-enter-active {
+    opacity: 1;
+    transition: opacity 300ms;
+  }
+
+  .page-exit {
+    opacity: 1;
+  }
+
+  .page-exit-active {
+    opacity: 0;
+    transition: opacity 300ms;
+  }
 }
 
-.page-enter-active {
-  opacity: 1;
-  transition: opacity 300ms;
-}
-
-.page-exit {
-  opacity: 1;
-}
-
-.page-exit-active {
-  opacity: 0;
-  transition: opacity 300ms;
+/* Accessible hiding for screen readers */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
 }

@@ -41,26 +41,27 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   };
 
   return (
-    <div className="min-h-[60vh] md:min-h-screen bg-gray-50 flex justify-center items-center px-4">
-      <div className="w-full max-w-md">
-        <div className="flex justify-center">
-          <Clock className="h-10 w-10 md:h-12 md:w-12 animate-pulse text-black" />
+    <div className="min-h-[60vh] md:min-h-screen bg-gray-50 flex justify-center items-center px-4" aria-live="polite" role="status">
+      <div className="w-full max-w-md bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+        <div className="flex justify-center" aria-hidden="true">
+          <Clock className="h-12 w-12 animate-pulse text-gray-700" />
         </div>
-        <div className="mt-4 flex justify-between items-center">
-          <span className="text-sm md:text-base text-gray-700 font-medium">{message}</span>
-          <span className="text-sm text-gray-500">{formatTime(elapsed)}s</span>
+        <h2 className="mt-4 text-lg font-medium text-gray-800 text-center">{message}</h2>
+        <div className="mt-3 flex justify-between items-center">
+          <span className="text-sm text-gray-600">Vent venligst</span>
+          <span className="text-sm font-medium text-gray-700">{formatTime(elapsed)}s</span>
         </div>
         
         {progress !== undefined && (
-          <div className="mt-4 w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+          <div className="mt-4 w-full bg-gray-200 rounded-full h-2.5" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress} role="progressbar">
             <div 
-              className="bg-black h-2.5 rounded-full transition-all duration-500 ease-in-out" 
+              className="bg-blue-600 h-2.5 rounded-full transition-all duration-500 ease-in-out" 
               style={{ width: `${progress}%` }}
             ></div>
           </div>
         )}
         
-        <p className="mt-4 text-sm text-gray-500">
+        <p className="mt-4 text-sm text-gray-500 text-center">
           Tålmodighed er det bedste mod...
         </p>
       </div>
