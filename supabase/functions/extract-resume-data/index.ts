@@ -2,6 +2,10 @@
 // Follow this Deno deployment checklist: https://deno.com/deploy/docs/deployctl
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
+import { createRequire } from "https://deno.land/std@0.177.0/node/module.ts";
+
+const require = createRequire(import.meta.url);
+const pdfParse = require("pdf-parse");
 
 // Set up CORS headers for the function
 const corsHeaders = {
@@ -60,16 +64,45 @@ serve(async (req) => {
 
       console.log("Processing PDF file:", file.name);
 
-      // Convert PDF to base64
-      const arrayBuffer = await file.arrayBuffer();
-      const base64 = btoa(
-        new Uint8Array(arrayBuffer)
-          .reduce((data, byte) => data + String.fromCharCode(byte), '')
-      );
+      // Get the PDF data as buffer
+      const fileBuffer = await file.arrayBuffer();
+      
+      // Extract text from PDF
+      let pdfText;
+      try {
+        const pdfData = await pdfParse(new Uint8Array(fileBuffer));
+        pdfText = pdfData.text;
+        
+        if (!pdfText || pdfText.trim().length === 0) {
+          console.error("No text could be extracted from PDF");
+          return new Response(
+            JSON.stringify({ 
+              error: "Could not extract any text from the PDF. The file might be scan-only or corrupted." 
+            }),
+            {
+              status: 400,
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+            }
+          );
+        }
+        
+        console.log("Successfully extracted text from PDF, length:", pdfText.length);
+        // Log the first 500 characters for debugging
+        console.log("First 500 chars:", pdfText.substring(0, 500));
+      } catch (pdfError) {
+        console.error("Error extracting text from PDF:", pdfError);
+        return new Response(
+          JSON.stringify({ error: "Error extracting text from PDF" }),
+          {
+            status: 500,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
+        );
+      }
       
       // Create a prompt for OpenAI with strong emphasis on preserving special characters
       const systemPrompt = `
-        You are a specialized CV/resume parser designed for Nordic languages. Your task is to extract key information from the provided resume.
+        You are a specialized CV/resume parser designed for Nordic languages. Your task is to extract key information from the provided resume text.
         
         Extract ONLY the following fields:
         - email: The person's email address (only if clearly present)
@@ -85,13 +118,14 @@ serve(async (req) => {
         - DO NOT normalize, transliterate, or modify special characters in any way
         - Return data in the EXACT original language of the resume (Danish, Norwegian, Swedish, etc.)
         - DO NOT include phone numbers or home addresses
-        - Format your response as a valid JSON object with these fields ONLY
+        - Format your response ONLY as a valid JSON object with these fields
         - If a section is unclear or has low confidence, return an empty string for that field
+        - Your entire response must be valid JSON with NO explanatory text before or after
       `;
 
-      // Call OpenAI API with simple error handling
+      // Call OpenAI API with the extracted text
       try {
-        console.log("Sending PDF to OpenAI for analysis");
+        console.log("Sending PDF text to OpenAI for analysis");
         
         const openAIResponse = await fetch("https://api.openai.com/v1/chat/completions", {
           method: "POST",
@@ -108,20 +142,10 @@ serve(async (req) => {
               },
               {
                 role: "user",
-                content: [
-                  {
-                    type: "text",
-                    text: "Extract information from this CV/resume according to the extremely conservative guidelines. ONLY extract information you are 100% confident about. Preserve all special characters like 'ø', 'æ', 'å' exactly as written.",
-                  },
-                  {
-                    type: "image_url",
-                    image_url: {
-                      url: `data:application/pdf;base64,${base64}`,
-                    },
-                  },
-                ],
+                content: pdfText,
               },
             ],
+            response_format: { type: "json_object" },
             temperature: 0.0, // Absolute minimum temperature for most deterministic output
           }),
         });
@@ -142,16 +166,10 @@ serve(async (req) => {
         const content = openAIData.choices[0].message.content;
         console.log("Raw OpenAI response:", content);
 
-        // Try to parse the JSON from the response
+        // Parse the JSON response
         let extractedData;
         try {
-          // Look for a JSON object in the content
-          const jsonMatch = content.match(/\{[\s\S]*\}/);
-          if (jsonMatch) {
-            extractedData = JSON.parse(jsonMatch[0]);
-          } else {
-            extractedData = JSON.parse(content);
-          }
+          extractedData = JSON.parse(content);
           
           // Additional validation to ensure empty strings rather than null values
           for (const key of ['email', 'experience', 'education', 'skills']) {

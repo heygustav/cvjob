@@ -1,3 +1,5 @@
 
 project_id = "zfyzkiseykwvpckavbxd"
 handle_routes = "*"
+[build]
+command = "npm install pdf-parse"
