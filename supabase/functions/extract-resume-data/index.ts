@@ -82,23 +82,23 @@ serve(async (req) => {
 
     console.log("Calling OpenAI API...");
     
-    // Create the prompt for OpenAI
+    // Create an improved prompt for OpenAI that emphasizes preserving original text
     const prompt = `
     Please extract the following information from this resume/CV text:
     
     Resume text:
     ${fileText}
     
-    Extract these fields in JSON format:
-    - name: The person's full name
-    - email: Their email address
-    - phone: Their phone number
-    - address: Their physical address
+    IMPORTANT: Extract these fields in JSON format and preserve EXACTLY the original spelling, capitalization, and accented characters (æ, ø, å, etc). Do NOT translate, normalize, or modify any text from the original CV:
+    - name: The person's full name EXACTLY as written
+    - email: Their email address EXACTLY as written
+    - phone: Their phone number EXACTLY as written with original formatting
+    - address: Their physical address EXACTLY as written (preserve street names like "Molestien" or "Nørrelund" with accents)
     - experience: Their work experience (as a formatted text with positions, companies, dates)
     - education: Their educational background (as formatted text with institutions, degrees, dates)
     - skills: Their skills and competencies (as a comma-separated list)
     
-    Return ONLY a valid JSON object with these fields and nothing else.
+    Return ONLY a valid JSON object with these fields and nothing else. DO NOT normalize, translate or modify the original text in any way.
     `;
     
     // Call OpenAI API
@@ -115,14 +115,14 @@ serve(async (req) => {
           messages: [
             {
               role: "system",
-              content: "You are a helpful assistant that extracts structured information from resumes/CVs. Return only valid JSON."
+              content: "You are a helpful assistant that extracts structured information from resumes/CVs. Return only valid JSON. IMPORTANT: Preserve the EXACT original spelling, capitalization, and special characters in ALL extracted text. Never modify, normalize, or translate any text."
             },
             {
               role: "user",
               content: prompt
             }
           ],
-          temperature: 0.2,
+          temperature: 0.1, // Lower temperature for more deterministic outputs
         })
       });
     } catch (error) {
