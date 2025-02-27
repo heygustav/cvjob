@@ -157,16 +157,21 @@ export const useCoverLetterGeneration = (user: User | null) => {
         user.id, 
         selectedJob?.id
       );
+      console.log(`Job saved with ID: ${jobId}`);
 
       // Step 2: Fetch user profile
       const userInfo = await fetchUserProfile(user.id);
       userInfo.email = user.email; // Ensure email is set from authenticated user
+      console.log(`User profile fetched for ID: ${user.id}`);
 
       // Step 3: Generate letter content
+      console.log("Starting letter generation");
       const content = await generateCoverLetter(jobData, userInfo);
+      console.log("Letter generated successfully");
 
       // Step 4: Save the generated letter
       const letter = await saveCoverLetter(user.id, jobId, content);
+      console.log(`Letter saved with ID: ${letter.id}`);
       
       setGeneratedLetter(letter);
       setStep(2);
@@ -179,21 +184,31 @@ export const useCoverLetterGeneration = (user: User | null) => {
     } catch (error) {
       console.error(`Attempt #${currentAttempt}: Error in job submission process:`, error);
       
-      if (!navigator.onLine) {
-        toast({
-          title: "Ingen internetforbindelse",
-          description: "Kontroller din internetforbindelse og prøv igen.",
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Fejl ved generering",
-          description: error instanceof Error 
-            ? `Der opstod en fejl: ${error.message}` 
-            : "Der opstod en ukendt fejl. Prøv venligst igen.",
-          variant: "destructive",
-        });
+      let errorMessage = "Der opstod en ukendt fejl. Prøv venligst igen.";
+      
+      if (error instanceof Error) {
+        errorMessage = `Der opstod en fejl: ${error.message}`;
+        console.error(`Error details: ${error.stack}`);
       }
+      
+      if (!navigator.onLine) {
+        errorMessage = "Kontroller din internetforbindelse og prøv igen.";
+      }
+      
+      toast({
+        title: "Fejl ved generering",
+        description: errorMessage,
+        variant: "destructive",
+      });
+      
+      // Stay on the current page instead of navigating away
+      // Only reset the states
+      setIsGenerating(false);
+      setIsLoading(false);
+      
+      // Don't navigate away on error
+      return;
+      
     } finally {
       console.log(`Attempt #${currentAttempt}: Generation process completed`);
       setIsGenerating(false);

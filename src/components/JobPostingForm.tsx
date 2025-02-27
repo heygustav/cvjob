@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+
+import React, { useState, useEffect, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Search, Clock } from "lucide-react";
 import { JobPosting } from "../lib/types";
@@ -25,32 +26,46 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
   });
   const [isExtracting, setIsExtracting] = useState(false);
   const [elapsed, setElapsed] = useState(0);
-  const [startTime, setStartTime] = useState<number | null>(null);
+  const startTimeRef = useRef<number | null>(null);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
 
   // Timer effect for loading state
   useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
+    // Clear any existing timer
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
     
     if (isLoading) {
-      // Start or reset timer when loading starts
-      setStartTime(Date.now());
+      // Only set start time if it hasn't been set yet
+      if (!startTimeRef.current) {
+        startTimeRef.current = Date.now();
+        setElapsed(0);
+      }
       
-      interval = setInterval(() => {
-        if (startTime) {
-          setElapsed(Math.floor((Date.now() - startTime) / 10));
+      // Start a new timer
+      timerRef.current = setInterval(() => {
+        if (startTimeRef.current) {
+          const currentElapsed = Math.floor((Date.now() - startTimeRef.current) / 10);
+          setElapsed(currentElapsed);
         }
       }, 100);
     } else {
-      // Reset when loading stops
-      setStartTime(null);
+      // Reset timer when loading stops
+      startTimeRef.current = null;
       setElapsed(0);
     }
     
+    // Cleanup function
     return () => {
-      if (interval) clearInterval(interval);
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
     };
-  }, [isLoading, startTime]);
+  }, [isLoading]);
 
   const formatTime = (ms: number) => {
     const seconds = Math.floor(ms / 100);
@@ -80,6 +95,10 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
       return;
     }
 
+    // Reset timer when starting a new submission
+    startTimeRef.current = null;
+    setElapsed(0);
+    
     onSubmit(formData);
   };
 
