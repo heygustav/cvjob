@@ -1,4 +1,5 @@
 
+// Required for fetch in Deno
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
@@ -15,181 +16,182 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  console.log("Received request to extract-resume-data");
+
   try {
-    // Only process POST requests
+    // Check request method
     if (req.method !== 'POST') {
       return new Response(
-        JSON.stringify({ error: 'Method not allowed' }),
+        JSON.stringify({ error: 'Only POST requests are allowed' }),
         { status: 405, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    console.log("Received request to extract resume data");
-    
-    // Parse the multipart form data to get the PDF file
+    // Get the form data
     let formData;
     try {
       formData = await req.formData();
-    } catch (e) {
-      console.error("Error parsing form data:", e);
+    } catch (error) {
+      console.error("Error parsing form data:", error);
       return new Response(
-        JSON.stringify({ error: 'Invalid form data', details: e.message }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-    
-    const file = formData.get('file');
-    
-    if (!file || !(file instanceof File)) {
-      console.error("No file provided in request");
-      return new Response(
-        JSON.stringify({ error: 'No PDF file found in request' }),
+        JSON.stringify({ error: "Invalid form data: " + error.message }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    console.log(`Processing PDF file: ${file.name}, size: ${file.size} bytes`);
-    
-    // Read the file as text
-    let pdfText;
-    try {
-      pdfText = await file.text();
-      console.log(`Extracted ${pdfText.length} characters of text from PDF`);
-      
-      if (pdfText.length < 50) {
-        console.warn("Extracted text is suspiciously short:", pdfText);
-      }
-    } catch (e) {
-      console.error("Error reading file as text:", e);
+    // Get the file from form data
+    const file = formData.get('file');
+    if (!file || !(file instanceof File)) {
+      console.error("No file in request");
       return new Response(
-        JSON.stringify({ error: 'Failed to read PDF content', details: e.message }),
+        JSON.stringify({ error: "No file found in the request" }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
-    
-    if (!openAIApiKey) {
-      console.error("OpenAI API key not configured");
+
+    console.log(`File received: ${file.name}, type: ${file.type}, size: ${file.size} bytes`);
+
+    // Extract text from the file - simple approach just reading as text
+    let fileText = "";
+    try {
+      fileText = await file.text();
+      console.log(`Extracted text length: ${fileText.length} characters`);
+      
+      // If extracted text is very short, this might not be proper text extraction
+      if (fileText.length < 100) {
+        console.warn("Extracted text is suspiciously short, might not be properly extracted");
+      }
+    } catch (error) {
+      console.error("Error reading file:", error);
       return new Response(
-        JSON.stringify({ 
-          error: 'OpenAI API key not configured in Supabase',
-          message: 'Please set up the OPENAI_API_KEY secret in your Supabase project.'
-        }),
+        JSON.stringify({ error: "Error reading file: " + error.message }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // If the text is too short, provide a fallback response for testing
-    if (pdfText.length < 50) {
-      console.log("Text too short, using fallback sample data");
-      
-      const fallbackData = {
-        name: "Test Person",
-        email: "test@example.com",
-        phone: "+45 12 34 56 78",
-        address: "Test Address 123, 1234 City",
-        experience: "Test Company - Test Position (2020-Present)",
-        education: "Test University - Test Degree (2016-2020)",
-        skills: "Test Skill 1, Test Skill 2, Test Skill 3"
-      };
-      
+    // For debugging, log a sample of the extracted text
+    console.log("Sample of extracted text:", fileText.substring(0, 200) + "...");
+
+    if (!openAIApiKey) {
+      console.error("OpenAI API key not found");
       return new Response(
-        JSON.stringify({ 
-          success: true, 
-          extractedData: fallbackData,
-          note: "Using fallback data because extracted text was too short"
-        }),
-        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: "OpenAI API key is not configured" }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Call OpenAI API to parse the resume
+    console.log("Calling OpenAI API...");
+    
+    // Create the prompt for OpenAI
+    const prompt = `
+    Please extract the following information from this resume/CV text:
+    
+    Resume text:
+    ${fileText}
+    
+    Extract these fields in JSON format:
+    - name: The person's full name
+    - email: Their email address
+    - phone: Their phone number
+    - address: Their physical address
+    - experience: Their work experience (as a formatted text with positions, companies, dates)
+    - education: Their educational background (as formatted text with institutions, degrees, dates)
+    - skills: Their skills and competencies (as a comma-separated list)
+    
+    Return ONLY a valid JSON object with these fields and nothing else.
+    `;
+    
+    // Call OpenAI API
     let openAIResponse;
     try {
-      console.log("Calling OpenAI API");
-      openAIResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
+      openAIResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
         headers: {
-          'Authorization': `Bearer ${openAIApiKey}`,
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${openAIApiKey}`
         },
         body: JSON.stringify({
-          model: 'gpt-4o-mini',
+          model: "gpt-4o-mini",
           messages: [
             {
-              role: 'system',
-              content: `You are a resume parser. Extract the following information from the provided CV/resume:
-              - Full name
-              - Email address
-              - Phone number
-              - Physical address
-              - Work experience (formatted as text, with each role on a new line)
-              - Education (formatted as text, with each qualification on a new line)
-              - Skills (as a comma-separated list)
-              
-              Return the data in JSON format with these exact keys: 
-              name, email, phone, address, experience, education, skills.`
+              role: "system",
+              content: "You are a helpful assistant that extracts structured information from resumes/CVs. Return only valid JSON."
             },
             {
-              role: 'user',
-              content: pdfText
+              role: "user",
+              content: prompt
             }
           ],
-          temperature: 0.3,
-        }),
+          temperature: 0.2,
+        })
       });
-    } catch (e) {
-      console.error("Error calling OpenAI API:", e);
+    } catch (error) {
+      console.error("Error calling OpenAI API:", error);
       return new Response(
-        JSON.stringify({ error: 'Failed to connect to OpenAI API', details: e.message }),
+        JSON.stringify({ error: "Failed to call OpenAI API: " + error.message }),
         { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
+    // Check the response status
     if (!openAIResponse.ok) {
       const errorText = await openAIResponse.text();
-      console.error(`OpenAI API returned error status ${openAIResponse.status}:`, errorText);
+      console.error(`OpenAI API returned status ${openAIResponse.status}:`, errorText);
       return new Response(
         JSON.stringify({ 
-          error: `OpenAI API returned status ${openAIResponse.status}`,
+          error: `OpenAI API returned error: ${openAIResponse.status}`,
           details: errorText
         }),
         { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
+    // Parse the OpenAI response
     let openAIData;
     try {
       openAIData = await openAIResponse.json();
       console.log("Received response from OpenAI");
-    } catch (e) {
-      console.error("Error parsing OpenAI response as JSON:", e);
+    } catch (error) {
+      console.error("Error parsing OpenAI response:", error);
       return new Response(
-        JSON.stringify({ error: 'Invalid response from OpenAI API', details: e.message }),
-        { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-    
-    if (!openAIData.choices || !openAIData.choices[0]) {
-      console.error("OpenAI response missing choices:", openAIData);
-      return new Response(
-        JSON.stringify({ error: 'Invalid response format from OpenAI API', details: JSON.stringify(openAIData) }),
+        JSON.stringify({ error: "Invalid response from OpenAI: " + error.message }),
         { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Extract the generated content
+    // Validate OpenAI response structure
+    if (!openAIData.choices || !openAIData.choices[0] || !openAIData.choices[0].message) {
+      console.error("Invalid OpenAI response format:", openAIData);
+      return new Response(
+        JSON.stringify({ 
+          error: "Invalid response format from OpenAI", 
+          details: JSON.stringify(openAIData)
+        }),
+        { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Get the content from OpenAI response
     const content = openAIData.choices[0].message.content;
-    
-    // Parse the JSON response
-    let parsedData;
+    console.log("OpenAI content:", content);
+
+    // Parse the JSON from the content
+    let extractedData;
     try {
-      parsedData = JSON.parse(content);
-      console.log("Successfully parsed resume data:", parsedData);
-    } catch (e) {
-      console.error("Error parsing OpenAI response as JSON:", e, "Content:", content);
+      // Find JSON in the response (in case there's extra text)
+      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        extractedData = JSON.parse(jsonMatch[0]);
+      } else {
+        throw new Error("No JSON found in OpenAI response");
+      }
       
-      // Try a fallback approach - create an object with empty fields
-      parsedData = {
+      console.log("Successfully parsed extracted data:", extractedData);
+    } catch (error) {
+      console.error("Error parsing JSON from OpenAI response:", error);
+      
+      // Create a fallback object with basic structure
+      extractedData = {
         name: "",
         email: "",
         phone: "",
@@ -199,50 +201,46 @@ serve(async (req) => {
         skills: ""
       };
       
-      // Use regex to try to find each field in the content
-      const nameMatch = content.match(/name[:\s]+(.*?)(\n|$)/i);
-      const emailMatch = content.match(/email[:\s]+(.*?)(\n|$)/i);
-      const phoneMatch = content.match(/phone[:\s]+(.*?)(\n|$)/i);
-      const addressMatch = content.match(/address[:\s]+(.*?)(\n|$)/i);
-      
-      if (nameMatch) parsedData.name = nameMatch[1].trim();
-      if (emailMatch) parsedData.email = emailMatch[1].trim();
-      if (phoneMatch) parsedData.phone = phoneMatch[1].trim();
-      if (addressMatch) parsedData.address = addressMatch[1].trim();
-      
-      console.log("Created fallback parsed data using regex:", parsedData);
+      // Try to extract data with regex
+      try {
+        // Helper function to extract field with regex
+        const extractField = (fieldName) => {
+          const regex = new RegExp(`["']?${fieldName}["']?\\s*:\\s*["']([^"']*)["']`, "i");
+          const match = content.match(regex);
+          return match ? match[1].trim() : "";
+        };
+        
+        extractedData.name = extractField("name");
+        extractedData.email = extractField("email");
+        extractedData.phone = extractField("phone");
+        extractedData.address = extractField("address");
+        extractedData.experience = extractField("experience");
+        extractedData.education = extractField("education");
+        extractedData.skills = extractField("skills");
+        
+        console.log("Created fallback data with regex:", extractedData);
+      } catch (regexError) {
+        console.error("Error extracting data with regex:", regexError);
+      }
     }
 
-    // Return the extracted data
+    // Return successful response with extracted data
     return new Response(
-      JSON.stringify({ 
-        success: true, 
-        extractedData: parsedData 
+      JSON.stringify({
+        success: true,
+        extractedData: extractedData
       }),
-      { 
-        status: 200, 
-        headers: { 
-          ...corsHeaders, 
-          'Content-Type': 'application/json'
-        } 
-      }
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
-
-  } catch (error) {
-    console.error("Unhandled error processing PDF:", error);
     
+  } catch (error) {
+    console.error("Unhandled error in extract-resume-data:", error);
     return new Response(
       JSON.stringify({ 
-        error: error.message || 'Failed to process PDF',
+        error: "Internal server error: " + error.message,
         stack: error.stack
       }),
-      { 
-        status: 500, 
-        headers: { 
-          ...corsHeaders, 
-          'Content-Type': 'application/json'
-        } 
-      }
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });
