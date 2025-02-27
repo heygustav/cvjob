@@ -28,10 +28,10 @@ const Index = () => {
               <div className="mt-10 flex items-center justify-center gap-x-6">
                 {session ? (
                   <Link
-                    to="/dashboard"
+                    to="/generator"
                     className="rounded-md bg-primary px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-primary-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                   >
-                    Gå til dashboard
+                    Opret ansøgning
                   </Link>
                 ) : (
                   <Link
@@ -42,10 +42,10 @@ const Index = () => {
                   </Link>
                 )}
                 <Link
-                  to="#how-it-works"
+                  to={session ? "/dashboard" : "#how-it-works"}
                   className="text-sm font-semibold leading-6 text-primary hover:text-primary-700 transition-colors"
                 >
-                  Se hvordan det virker <span aria-hidden="true">→</span>
+                  {session ? "Gemte ansøgninger" : "Se hvordan det virker"} <span aria-hidden="true">→</span>
                 </Link>
               </div>
             </div>
