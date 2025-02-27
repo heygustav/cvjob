@@ -1,7 +1,7 @@
 
 import React, { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { Download, Copy, Edit, FileText, FileWord, FilePdf } from "lucide-react";
+import { Copy, Edit, FileText, File, FileIcon } from "lucide-react";
 import { format } from "date-fns";
 import { da } from "date-fns/locale";
 
@@ -10,7 +10,6 @@ interface CoverLetterPreviewProps {
   jobTitle?: string;
   company?: string;
   onEdit?: (content: string) => void;
-  onSave?: () => void;
   isEditable?: boolean;
 }
 
@@ -158,7 +157,7 @@ const CoverLetterPreview: React.FC<CoverLetterPreviewProps> = ({
                 title="Download som Word-dokument"
                 aria-label="Download som Word-dokument"
               >
-                <FileWord className="h-4 w-4 sm:mr-2" aria-hidden="true" />
+                <File className="h-4 w-4 sm:mr-2" aria-hidden="true" />
                 <span className="hidden sm:inline">Word</span>
               </button>
               <button
@@ -167,7 +166,7 @@ const CoverLetterPreview: React.FC<CoverLetterPreviewProps> = ({
                 title="Download som PDF"
                 aria-label="Download som PDF"
               >
-                <FilePdf className="h-4 w-4 sm:mr-2" aria-hidden="true" />
+                <FileIcon className="h-4 w-4 sm:mr-2" aria-hidden="true" />
                 <span className="hidden sm:inline">PDF</span>
               </button>
             </>

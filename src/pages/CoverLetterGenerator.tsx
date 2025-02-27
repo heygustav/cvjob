@@ -162,7 +162,6 @@ const CoverLetterGenerator: React.FC = () => {
                     generatedLetter={generatedLetter}
                     selectedJob={selectedJob}
                     onEdit={handleEditLetter}
-                    onSave={handleSaveLetter}
                   />
                 ) : (
                   <div className="text-left py-10 p-4 sm:p-6">
