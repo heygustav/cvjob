@@ -16,19 +16,30 @@ const SubmitButton: React.FC<SubmitButtonProps> = ({
 }) => {
   const [isSuccess, setIsSuccess] = useState(false);
   
+  // Reset success state when component mounts to ensure we start in default state
+  useEffect(() => {
+    setIsSuccess(false);
+  }, []);
+  
   // Track previous loading state to detect when loading completes
   useEffect(() => {
     if (isLoading === false && isSuccess === false) {
-      setIsSuccess(true);
-      
-      // Reset success state after animation completes
-      const timer = setTimeout(() => {
-        setIsSuccess(false);
-      }, 2000);
-      
-      return () => clearTimeout(timer);
+      // Only set success if we were previously loading
+      // This prevents the success state on initial render
+      if (elapsedTime !== "") {
+        setIsSuccess(true);
+        
+        // Reset success state after animation completes
+        const timer = setTimeout(() => {
+          setIsSuccess(false);
+        }, 2000);
+        
+        return () => clearTimeout(timer);
+      }
     }
-  }, [isLoading, isSuccess]);
+  }, [isLoading, isSuccess, elapsedTime]);
+
+  console.log("Button state:", { isLoading, isSuccess, elapsedTime });
 
   return (
     <button
@@ -36,7 +47,9 @@ const SubmitButton: React.FC<SubmitButtonProps> = ({
       disabled={isLoading || isSuccess}
       className={cn(
         "px-4 py-2 rounded-md shadow-sm text-sm font-medium text-white disabled:opacity-80 disabled:cursor-not-allowed transition-all duration-300",
-        isSuccess ? "bg-green-600 w-12" : "bg-primary hover:bg-primary-800",
+        isSuccess 
+          ? "bg-green-600 w-12" 
+          : "bg-primary hover:bg-primary-800",
         className
       )}
       aria-label={

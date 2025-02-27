@@ -68,11 +68,11 @@
   padding: 0 1rem;
 }
 
-/* Override any green button styles */
-button[type="submit"]:not(.bg-green-600) {
-  background-color: var(--primary) !important;
+/* Force submit button to use primary color */
+button[type="submit"]:not(.bg-green-600):not([disabled]) {
+  background-color: hsl(var(--primary)) !important;
 }
 
-button[type="submit"]:hover:not(.bg-green-600) {
+button[type="submit"]:hover:not(.bg-green-600):not([disabled]) {
   background-color: #054370 !important;
 }

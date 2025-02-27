@@ -12,6 +12,7 @@ const FormActions: React.FC<FormActionsProps> = ({
   isLoading,
   className
 }) => {
+  console.log("FormActions isLoading:", isLoading);
   const { formattedTime } = useTimer(isLoading);
 
   return (
