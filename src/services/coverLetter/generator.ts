@@ -69,7 +69,7 @@ Jobopslag:
 
 Følg disse retningslinjer for at skrive ansøgningen:
 
-1. Start med en stærk og fængende indledning, der straks fanger læserens opmærksomhed.
+1. Start direkte med en stærk og fængende indledning, der straks fanger læserens opmærksomhed.
 2. Brug konkrete og specifikke eksempler på færdigheder og resultater. Vær detaljeret og kvantificer præstationer hvor muligt.
 3. Forklar grundigt, hvorfor ansøgeren er interesseret i denne specifikke stilling.
 4. Uddyb hvordan kompetencerne matcher præcis det, som virksomheden/organisationen leder efter til stillingen. Brug specifikke eksempler.
@@ -79,9 +79,13 @@ Følg disse retningslinjer for at skrive ansøgningen:
 Skriv ansøgningen på dansk og hold den professionel, engagerende og overbevisende. Sørg for, at ansøgningen er grundig og detaljeret,
 med en optimal længde for en motiveret jobansøgning (typisk omkring 400-600 ord eller 1-1.5 A4-sider).
 
-VIGTIGT: Afslut IKKE ansøgningen med en hilsen eller et navn. Den endelige hilsen og underskrift vil blive tilføjet automatisk senere.
+VIGTIGT: 
+- IKKE inkluder "Dato:", "Til:", "Fra:", "Emne:" eller lignende formelle e-mail-headers. 
+- IKKE gentag virksomhedens navn og jobstilling i starten af ansøgningen, da dette allerede vil være indsat i layoutet.
+- Start ansøgningen med "Kære {contactPerson}" (eller passende alternativ hvis ingen kontaktperson er oplyst).
+- IKKE afslut med "Med venlig hilsen" og navn, da dette vil blive tilføjet automatisk senere.
 
-Match the tone of the job ad without parroting the same words and sentences, except where necessary to explain technical qualifications or similar requirements. Create an authentic voice that resonates with the company culture while maintaining originality.
+Match tonen i jobopslaget uden at gentage de samme ord og sætninger, undtagen hvor det er nødvendigt for at forklare tekniske kvalifikationer eller lignende krav. Skab en autentisk stemme, der resonerer med virksomhedskulturen, mens du bevarer originalitet.
           `
         }
       }

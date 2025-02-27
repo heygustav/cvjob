@@ -46,7 +46,9 @@
 
     --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     
-    --header-bg: 201 92% 27%; /* #065086 - standardized */
+    --gradient-start: 201 92% 27%; /* #065086 - primary */
+    --gradient-middle: 201 90% 22%; /* darker blue */
+    --gradient-end: 204 96% 18%; /* darker blue */
   }
 
   .dark {
@@ -87,7 +89,9 @@
     --sidebar-border: 217 32% 17%;
     --sidebar-ring: 224.3 76.3% 48%;
     
-    --header-bg: 201 92% 27%; /* #065086 - standardized */
+    --gradient-start: 201 92% 27%; /* #065086 - primary */
+    --gradient-middle: 201 85% 22%; /* darker blue */
+    --gradient-end: 204 90% 18%; /* darker blue */
   }
 }
 
@@ -161,6 +165,11 @@
     from { transform: scale(0.95); opacity: 0; }
     to { transform: scale(1); opacity: 1; }
   }
+}
+
+/* For our gradient header */
+.gradient-header {
+  background: linear-gradient(to right, hsl(var(--gradient-start)), hsl(var(--gradient-middle)), hsl(var(--gradient-end)));
 }
 
 /* Page transitions */
