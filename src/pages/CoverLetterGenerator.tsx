@@ -5,11 +5,11 @@ import JobPostingForm from "../components/JobPostingForm";
 import CoverLetterPreview from "../components/CoverLetterPreview";
 import { LoadingSpinner } from "../components/LoadingSpinner";
 import { GenerationStatus } from "../components/GenerationStatus";
+import ErrorDisplay from "../components/ErrorDisplay";
 import { useAuth } from "@/components/AuthProvider";
 import { useCoverLetterGeneration } from "@/hooks/useCoverLetterGeneration";
 import { User } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
-import { AlertTriangle, RefreshCcw } from "lucide-react";
 
 const CoverLetterGenerator: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -133,31 +133,12 @@ const CoverLetterGenerator: React.FC = () => {
 
         {/* Error message section */}
         {generationError && (
-          <div className="mb-6 p-4 sm:p-5 bg-red-50 border border-red-200 rounded-lg">
-            <div className="flex items-start space-x-3">
-              <div className="flex-shrink-0">
-                <AlertTriangle className="h-5 w-5 text-red-600" />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-sm font-medium text-red-800">
-                  Der opstod en fejl under generering af ansøgningen
-                </h3>
-                <div className="mt-2 text-sm text-red-700">
-                  <p>{generationError}</p>
-                </div>
-                <div className="mt-4">
-                  <button
-                    type="button"
-                    onClick={resetError}
-                    className="inline-flex items-center px-3 py-1.5 border border-red-600 text-xs font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                  >
-                    <RefreshCcw className="mr-1.5 h-3 w-3" />
-                    Prøv igen
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
+          <ErrorDisplay
+            title="Der opstod en fejl"
+            message={generationError}
+            onRetry={resetError}
+            phase={generationPhase as any}
+          />
         )}
 
         <div className="bg-white shadow-sm rounded-lg overflow-hidden border border-gray-100">
