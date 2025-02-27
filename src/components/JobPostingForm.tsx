@@ -98,7 +98,7 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
     }
 
     console.log("Form validation passed, proceeding with submission");
-    // Fixed: providing both required arguments
+    // Reset timer with both required arguments
     resetTimer(0, true);
     
     try {
@@ -135,6 +135,9 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
 
     setIsSaving(true);
     try {
+      // Reset timer with both required arguments (line 141)
+      resetTimer(0, false);
+      
       if (onSave) {
         await onSave(formData);
       } else {
