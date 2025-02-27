@@ -58,26 +58,122 @@ serve(async (req) => {
         );
       }
 
-      // Simple approach for now - create a basic extracted data object
-      // This will help us test if the function is working
-      const extractedData = {
-        email: "example@email.com",
-        experience: "3 years of software development experience",
-        education: "Bachelor's degree in Computer Science",
-        skills: "JavaScript, TypeScript, React, Node.js"
-      };
+      console.log("Processing PDF file:", file.name);
 
-      // Return a successful response
-      return new Response(
-        JSON.stringify({
-          extractedData,
-          message: "Resume data extracted successfully",
-        }),
-        {
-          status: 200,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
+      // Convert PDF to base64
+      const arrayBuffer = await file.arrayBuffer();
+      const base64 = btoa(
+        new Uint8Array(arrayBuffer)
+          .reduce((data, byte) => data + String.fromCharCode(byte), '')
       );
+      
+      // Create a prompt for OpenAI
+      const systemPrompt = `
+        You are a specialized CV/resume parser. Your task is to extract key information from the provided resume.
+        Extract ONLY the following fields:
+        - email: The person's email address if present
+        - experience: A brief summary of work experience
+        - education: A brief summary of education background
+        - skills: A list of skills and competencies
+        
+        Important rules:
+        - Return data in the original language of the resume (Danish, English, etc.)
+        - If information is not found, use an empty string for that field
+        - Extract information exactly as written - do not translate or modify
+        - Do not include personal details like phone numbers or home addresses
+        - Format your response as a valid JSON object with these fields ONLY
+      `;
+
+      // Call OpenAI API with simple error handling
+      try {
+        console.log("Sending PDF to OpenAI for analysis");
+        
+        const openAIResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${openAIKey}`,
+          },
+          body: JSON.stringify({
+            model: "gpt-4o",
+            messages: [
+              {
+                role: "system",
+                content: systemPrompt,
+              },
+              {
+                role: "user",
+                content: [
+                  {
+                    type: "text",
+                    text: "Extract information from this CV/resume according to the guidelines.",
+                  },
+                  {
+                    type: "image_url",
+                    image_url: {
+                      url: `data:application/pdf;base64,${base64}`,
+                    },
+                  },
+                ],
+              },
+            ],
+            temperature: 0.1,
+          }),
+        });
+
+        if (!openAIResponse.ok) {
+          const errorText = await openAIResponse.text();
+          console.error("OpenAI API error:", openAIResponse.status, errorText);
+          throw new Error(`OpenAI API error: ${openAIResponse.status}`);
+        }
+
+        const openAIData = await openAIResponse.json();
+        
+        if (!openAIData.choices || !openAIData.choices[0] || !openAIData.choices[0].message) {
+          console.error("Unexpected OpenAI response format", openAIData);
+          throw new Error("Invalid response format from OpenAI");
+        }
+
+        const content = openAIData.choices[0].message.content;
+        console.log("Raw OpenAI response:", content);
+
+        // Try to parse the JSON from the response
+        let extractedData;
+        try {
+          // Look for a JSON object in the content
+          const jsonMatch = content.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            extractedData = JSON.parse(jsonMatch[0]);
+          } else {
+            extractedData = JSON.parse(content);
+          }
+          
+          console.log("Successfully parsed extracted data:", extractedData);
+        } catch (parseError) {
+          console.error("Error parsing JSON from OpenAI response:", parseError);
+          throw new Error("Could not parse resume data from AI response");
+        }
+
+        return new Response(
+          JSON.stringify({
+            extractedData,
+            message: "Resume data extracted successfully",
+          }),
+          {
+            status: 200,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
+        );
+      } catch (aiError) {
+        console.error("Error during OpenAI processing:", aiError);
+        return new Response(
+          JSON.stringify({ error: "Error analyzing PDF: " + aiError.message }),
+          {
+            status: 500,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
+        );
+      }
     } catch (formError) {
       console.error("Error processing form data:", formError);
       return new Response(
