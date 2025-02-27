@@ -91,7 +91,8 @@ export default {
         limegreen: {
           DEFAULT: '#4caf50',
           dark: '#388e3c'
-        }
+        },
+        softgray: '#F9FAFB'
       },
       borderRadius: {
         lg: 'var(--radius)',
