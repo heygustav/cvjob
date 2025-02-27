@@ -31,6 +31,9 @@ const CoverLetterPreview: React.FC<CoverLetterPreviewProps> = ({
   // Format the date in Danish, e.g., "1. februar 2025"
   const formattedDate = format(currentDate, "d. MMMM yyyy", { locale: da });
 
+  // Calculate word count
+  const wordCount = editedContent.trim() ? editedContent.trim().split(/\s+/).length : 0;
+
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setEditedContent(e.target.value);
   };
@@ -315,10 +318,10 @@ const CoverLetterPreview: React.FC<CoverLetterPreviewProps> = ({
       </div>
       <div className="flex items-center justify-between p-4 border-t border-gray-200 bg-gray-50 text-xs text-gray-500">
         <p>
-          {formattedDate}
+          {wordCount} {wordCount === 1 ? "ord" : "ord"}
         </p>
         <p>
-          {/* Empty right side */}
+          {/* You can add additional footer content here if needed */}
         </p>
       </div>
     </div>
