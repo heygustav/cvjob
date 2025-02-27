@@ -163,7 +163,7 @@ const CoverLetterPreview: React.FC<CoverLetterPreviewProps> = ({
           {new Date().toLocaleDateString("da-DK")}
         </p>
         <p>
-          JobMagic
+          {/* JobMagic reference removed */}
         </p>
       </div>
     </div>
