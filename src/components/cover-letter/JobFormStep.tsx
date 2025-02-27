@@ -31,9 +31,9 @@ const JobFormStep: React.FC<JobFormStepProps> = ({
   const isSavedJob = selectedJob !== null;
 
   return (
-    <div className="p-4 sm:p-6 md:p-8">
+    <div className="p-4 sm:p-6 md:p-8 text-left">
       {isSavedJob && (
-        <Alert variant="default" className="mb-6 bg-blue-50 border-blue-200">
+        <Alert variant="default" className="mb-6 bg-blue-50 border-blue-200 text-left">
           <InfoIcon className="h-4 w-4 text-blue-700" />
           <AlertTitle className="text-blue-800">Bemærk</AlertTitle>
           <AlertDescription className="text-sm text-blue-700">

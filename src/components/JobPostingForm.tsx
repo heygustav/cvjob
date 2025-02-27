@@ -34,7 +34,7 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
   const { isExtracting, extractInfoFromDescription } = useJobExtraction(formData, setFormData);
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6 text-left">
       <UrlField 
         value={formData.url} 
         onChange={handleChange} 
