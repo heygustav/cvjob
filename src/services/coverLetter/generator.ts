@@ -43,7 +43,7 @@ export const generateCoverLetter = async (
             skills: userInfo.skills || '',
           },
           locale: navigator.language, // Send user's locale for better date formatting
-          model: "gpt-4o-mini" // Use gpt-4o-mini for faster responses
+          model: "gpt-4" // Always use gpt-4 for cover letter generation
         }
       }
     );

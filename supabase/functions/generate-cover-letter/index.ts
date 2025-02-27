@@ -34,8 +34,9 @@ serve(async (req) => {
       return handleExtractJobInfo(requestData.text);
     }
     
-    // Default action: generate cover letter
-    const { jobInfo, userInfo, model = "gpt-4o-mini" } = requestData;
+    // Default action: generate cover letter - always use gpt-4 regardless of what's passed
+    const { jobInfo, userInfo } = requestData;
+    const model = "gpt-4"; // Always use gpt-4, ignoring any model parameter from client
 
     // Enhanced validation
     if (!jobInfo) {
@@ -119,7 +120,7 @@ Generer nu en komplet ansøgning på dansk til denne stilling baseret på ovenst
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: model, // Using the explicitly requested model (defaults to gpt-4o-mini)
+        model: model, // Always using gpt-4
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
