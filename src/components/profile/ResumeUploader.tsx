@@ -186,6 +186,10 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
         </div>
       </div>
       
+      <p className="text-xs text-gray-500 mt-2 mb-3 italic text-left">
+        OBS: Hvis funktionen her ikke ekstraherer den rigtige information fra dit CV, så vil dit CV i nuværende form sandsynligvis ikke bestå de fleste CV-scannere hos arbejdsgivere.
+      </p>
+      
       {error && (
         <ErrorDisplay
           title="Fejl ved analyse af CV"
