@@ -35,7 +35,7 @@ serve(async (req) => {
     }
     
     // Default action: generate cover letter
-    const { jobInfo, userInfo } = requestData;
+    const { jobInfo, userInfo, model = "gpt-4" } = requestData;
 
     // Enhanced validation
     if (!jobInfo) {
@@ -58,41 +58,102 @@ serve(async (req) => {
       throw new Error('Missing company name');
     }
 
-    console.log(`Generating cover letter for ${jobInfo.title} at ${jobInfo.company}`);
+    console.log(`Generating cover letter for ${jobInfo.title} at ${jobInfo.company} using model: ${model}`);
+
+    // Ensure we use gpt-4 for generation
+    const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+    if (!openAIApiKey) {
+      throw new Error('OpenAI API key not configured');
+    }
 
     // Get user's locale or default to Danish
     const locale = requestData.locale || "da-DK";
     
-    // Generate a simple cover letter template
+    // Create a more detailed prompt for better cover letter generation
+    const systemPrompt = `
+Du er en professionel karrierevejleder, der specialiserer sig i at skrive personlige og effektive jobansøgninger på dansk.
+Din opgave er at generere en overbevisende ansøgning til en ${jobInfo.title} stilling hos ${jobInfo.company} baseret på følgende information.
+
+Følg disse retningslinjer:
+1. Brug en formel men personlig tone
+2. Fremhæv ansøgerens relevante erfaringer og kompetencer
+3. Relatér til virksomhedens behov og jobbets krav
+4. Inkluder standardoplysninger som dato, indledning, afslutning og kontaktoplysninger
+5. Vær konkret omkring, hvorfor ansøgeren er et godt match til stillingen
+6. Hold længden på mellem 300-500 ord
+7. Vær professionel, men undgå klichéer og tom floskelsnak
+8. Læg vægt på ansøgerens motivation og hvorfor netop denne virksomhed og stilling er interessant`;
+
+    const userPrompt = `
+JOBTITEL: ${jobInfo.title}
+VIRKSOMHED: ${jobInfo.company}
+JOBBESKRIVELSE:
+${jobInfo.description}
+
+ANSØGERS INFORMATION:
+Navn: ${userInfo.name}
+Email: ${userInfo.email}
+Telefon: ${userInfo.phone}
+Adresse: ${userInfo.address}
+
+ERFARING:
+${userInfo.experience}
+
+UDDANNELSE:
+${userInfo.education}
+
+KOMPETENCER:
+${userInfo.skills}
+
+KONTAKTPERSON: ${jobInfo.contactPerson || 'Rekrutteringsansvarlig'}
+
+Generer nu en komplet ansøgning på dansk til denne stilling baseret på ovenstående information.`;
+
+    // Call OpenAI for cover letter generation
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openAIApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: model, // Using the explicitly requested model (defaults to gpt-4)
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt }
+        ],
+        temperature: 0.7, // Slightly higher temperature for creativity in the cover letter
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('OpenAI API error:', response.status, errorText);
+      throw new Error(`OpenAI API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    
+    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+      console.error('Invalid response from OpenAI:', JSON.stringify(data));
+      throw new Error('Invalid response from OpenAI');
+    }
+
+    const content = data.choices[0].message.content;
+
+    // Format today's date according to locale
     const today = new Date().toLocaleDateString(locale, {
       day: "numeric",
       month: "long",
       year: "numeric",
     });
 
-    const content = `${today}
-
-Kære ${jobInfo.contactPerson || 'Rekrutteringsansvarlig'},
-
-Jeg skriver for at ansøge om stillingen som ${jobInfo.title} hos ${jobInfo.company}.
-
-Med baggrund i min erfaring inden for ${jobInfo.title.toLowerCase()} og min passion for branchen, er jeg overbevist om, at jeg kan bidrage betydeligt til ${jobInfo.company}.
-
-${userInfo && userInfo.experience ? `\nMin erfaring omfatter:\n${userInfo.experience}\n` : ''}
-${userInfo && userInfo.skills ? `\nMine relevante kompetencer inkluderer:\n${userInfo.skills}\n` : ''}
-${userInfo && userInfo.education ? `\nMin uddannelsesmæssige baggrund:\n${userInfo.education}\n` : ''}
-
-Jeg ser frem til muligheden for at uddybe mine kvalifikationer ved en personlig samtale.
-
-Med venlig hilsen,
-${userInfo && userInfo.name ? userInfo.name : 'Dit navn'}${userInfo && userInfo.phone ? '\n' + userInfo.phone : ''}
-${userInfo && userInfo.email ? userInfo.email : 'Din e-mail'}${userInfo && userInfo.address ? '\n' + userInfo.address : ''}`;
-
     console.log("Cover letter generated successfully");
     
     return new Response(
       JSON.stringify({
         content: content,
+        date: today
       }),
       { 
         headers: { 
@@ -119,7 +180,7 @@ ${userInfo && userInfo.email ? userInfo.email : 'Din e-mail'}${userInfo && userI
 });
 
 // Helper function to extract job information from text
-function handleExtractJobInfo(text: string) {
+function handleExtractJobInfo(text) {
   console.log("Extracting job info from text");
   
   if (!text) {

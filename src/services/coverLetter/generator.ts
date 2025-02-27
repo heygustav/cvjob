@@ -31,7 +31,8 @@ export const generateCoverLetter = async (
             education: userInfo.education || '',
             skills: userInfo.skills || '',
           },
-          locale: navigator.language // Send user's locale for better date formatting
+          locale: navigator.language, // Send user's locale for better date formatting
+          model: "gpt-4" // Explicitly specify gpt-4 model for cover letter generation
         }
       }
     );
