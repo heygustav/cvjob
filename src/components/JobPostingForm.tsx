@@ -179,7 +179,7 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
         disabled={isLoading || isSaving} 
       />
 
-      <div className="space-y-4">
+      <div className="space-y-6">
         <JobDescriptionField 
           value={formData.description}
           onChange={handleChange}
@@ -199,12 +199,13 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
         />
       </div>
 
-      <div className="flex gap-4">
+      <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t border-gray-100">
         <button
           type="button"
           onClick={handleSave}
           disabled={isLoading || isSaving}
-          className="flex-1 px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black disabled:opacity-50 disabled:cursor-not-allowed"
+          aria-label="Gem jobopslag til senere"
         >
           {isSaving ? (
             <span className="flex items-center justify-center">

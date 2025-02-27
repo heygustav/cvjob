@@ -145,7 +145,7 @@ const CoverLetterGenerator: React.FC = () => {
             />
           )}
 
-          <div className="bg-white shadow-sm rounded-lg overflow-hidden border border-gray-100">
+          <div className="bg-white shadow-sm rounded-lg overflow-hidden border border-gray-200">
             {step === 1 ? (
               <JobFormStep
                 selectedJob={selectedJob}

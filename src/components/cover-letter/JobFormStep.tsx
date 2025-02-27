@@ -29,9 +29,9 @@ const JobFormStep: React.FC<JobFormStepProps> = ({
   const isSavedJob = selectedJob !== null;
 
   return (
-    <div className="p-4 sm:p-6">
+    <div className="p-4 sm:p-6 md:p-8">
       {isSavedJob && (
-        <div className="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-md">
+        <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-md">
           <h3 className="text-amber-800 font-medium">Bemærk</h3>
           <p className="text-amber-700 text-sm">
             Denne funktion understøtter i øjeblikket kun generering af ansøgninger for nye jobannoncer. 
@@ -47,12 +47,14 @@ const JobFormStep: React.FC<JobFormStepProps> = ({
       />
       
       {isGenerating && (
-        <GenerationStatus 
-          phase={generationPhase || 'generation'} 
-          progress={generationProgress?.progress || 0}
-          message={generationProgress?.message}
-          onRetry={resetError}
-        />
+        <div className="mt-8 border-t border-gray-100 pt-6">
+          <GenerationStatus 
+            phase={generationPhase || 'generation'} 
+            progress={generationProgress?.progress || 0}
+            message={generationProgress?.message}
+            onRetry={resetError}
+          />
+        </div>
       )}
     </div>
   );
