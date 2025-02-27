@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { JobPosting, CoverLetter, User } from "@/lib/types";
@@ -87,9 +86,9 @@ export const useCoverLetterGeneration = (user: User | null) => {
       variant: "destructive" as const,
     },
     incompleteProfile: {
-      title: "Ufuldstændig profil",
+      title: "Bemærk",
       description: "Udfyld venligst din profil for at få en bedre ansøgning.",
-      variant: "warning" as const,
+      variant: "default" as const, // Changed from "warning" to "default"
     },
   }), []);
 
