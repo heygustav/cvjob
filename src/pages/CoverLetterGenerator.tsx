@@ -47,6 +47,8 @@ const CoverLetterGenerator: React.FC = () => {
   } = useCoverLetterGeneration(user);
 
   useEffect(() => {
+    let mounted = true;
+    
     const initializeGenerator = async () => {
       try {
         if (user) {
@@ -60,17 +62,25 @@ const CoverLetterGenerator: React.FC = () => {
         }
       } catch (error) {
         console.error("Error initializing generator:", error);
-        toast({
-          title: "Fejl ved indlæsning",
-          description: "Der opstod en fejl under indlæsning af data.",
-          variant: "destructive",
-        });
+        if (mounted) {
+          toast({
+            title: "Fejl ved indlæsning",
+            description: "Der opstod en fejl under indlæsning af data.",
+            variant: "destructive",
+          });
+        }
       } finally {
-        setIsInitialLoading(false);
+        if (mounted) {
+          setIsInitialLoading(false);
+        }
       }
     };
 
     initializeGenerator();
+    
+    return () => {
+      mounted = false;
+    };
   }, [user, jobId, letterId, fetchJob, fetchLetter, toast]);
 
   // Determine loading state - either initial loading or generation in progress
@@ -95,7 +105,7 @@ const CoverLetterGenerator: React.FC = () => {
 
   // Show loading state when initializing or generating
   if (showLoadingSpinner) {
-    return <LoadingSpinner message={getLoadingMessage()} />;
+    return <LoadingSpinner message={getLoadingMessage()} progress={generationProgress?.progress} />;
   }
 
   console.log("Rendering state:", { 

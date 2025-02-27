@@ -83,8 +83,8 @@ const GenerationProgressIndicator: React.FC<GenerationProgressProps> = ({
           </div>
         )}
         
-        <div className="mt-2 text-xs text-gray-500">
-          Tålmodighed er det bedste mod...
+        <div className="mt-2 text-xs text-gray-500 italic">
+          Tålmod er det bedste mod.
         </div>
       </div>
     </div>

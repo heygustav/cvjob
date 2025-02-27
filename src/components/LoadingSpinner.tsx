@@ -61,8 +61,8 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
           </div>
         )}
         
-        <p className="mt-4 text-sm text-gray-500 text-center">
-          Tålmodighed er det bedste mod...
+        <p className="mt-4 text-sm text-gray-500 text-center italic">
+          Tålmod er det bedste mod.
         </p>
       </div>
     </div>
