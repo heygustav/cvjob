@@ -130,6 +130,7 @@ export const useCoverLetterGeneration = (user: User | null) => {
       
       let jobId: string;
 
+      // Step 1: Save or update the job posting
       if (selectedJob?.id) {
         console.log("Updating existing job:", selectedJob.id);
         const { error } = await supabase
@@ -146,7 +147,7 @@ export const useCoverLetterGeneration = (user: User | null) => {
 
         if (error) {
           console.error("Error updating job:", error);
-          throw error;
+          throw new Error(`Fejl ved opdatering af job: ${error.message}`);
         }
         jobId = selectedJob.id;
       } else {
@@ -166,11 +167,15 @@ export const useCoverLetterGeneration = (user: User | null) => {
 
         if (error) {
           console.error("Error creating job:", error);
-          throw error;
+          throw new Error(`Fejl ved oprettelse af job: ${error.message}`);
+        }
+        if (!data) {
+          throw new Error("Intet job-id returneret fra serveren");
         }
         jobId = data.id;
       }
 
+      // Step 2: Fetch the updated job to ensure we have the latest data
       console.log("Job saved with ID:", jobId);
       const { data: updatedJob, error: jobError } = await supabase
         .from("job_postings")
@@ -180,13 +185,17 @@ export const useCoverLetterGeneration = (user: User | null) => {
 
       if (jobError) {
         console.error("Error fetching updated job:", jobError);
-        throw jobError;
+        throw new Error(`Fejl ved hentning af opdateret job: ${jobError.message}`);
+      }
+      if (!updatedJob) {
+        throw new Error("Intet job returneret fra serveren");
       }
 
       console.log("Retrieved updated job:", updatedJob);
       setSelectedJob(updatedJob);
 
-      // Fetch user profile data for the letter
+      // Step 3: Fetch user profile if available
+      console.log("Fetching user profile data");
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("*")
@@ -210,6 +219,7 @@ export const useCoverLetterGeneration = (user: User | null) => {
 
       console.log("User info for generation:", userInfo);
       
+      // Step 4: Prepare data for the edge function
       const generationData = {
         jobInfo: {
           title: updatedJob.title,
@@ -229,36 +239,41 @@ export const useCoverLetterGeneration = (user: User | null) => {
         }
       };
 
-      console.log("Sending data to generate-cover-letter:", JSON.stringify(generationData));
+      console.log("Calling edge function for letter generation");
 
+      // Step 5: Call the edge function with a timeout
       let letterContent = "";
       try {
-        console.log("Calling edge function...");
+        // Use a simple timeout to avoid waiting forever
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 seconds timeout
         
-        // Set a timeout to prevent infinite waiting
-        const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error("Function timeout after 15 seconds")), 15000);
+        const response = await fetch(`${supabase.functions.url}/generate-cover-letter`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${supabase.auth.getSession() ? (await supabase.auth.getSession()).data.session?.access_token : ''}`,
+          },
+          body: JSON.stringify(generationData),
+          signal: controller.signal
         });
         
-        const functionPromise = supabase.functions.invoke('generate-cover-letter', {
-          body: generationData
-        });
+        clearTimeout(timeoutId);
         
-        // Race between timeout and actual function call
-        const result = await Promise.race([functionPromise, timeoutPromise]);
-        const { data: functionData, error: functionError } = result as any;
-        
-        if (functionError) {
-          console.error("Edge function error:", functionError);
-          throw new Error(`Edge function error: ${functionError.message}`);
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error(`Edge function error (${response.status}):`, errorText);
+          throw new Error(`Edge function fejl: ${response.status}`);
         }
+        
+        const functionData = await response.json();
+        console.log("Received response from edge function:", functionData);
         
         if (!functionData || !functionData.content) {
-          console.error("Missing content in edge function response:", functionData);
-          throw new Error("Missing content in edge function response");
+          console.error("Missing content in edge function response");
+          throw new Error("Manglende indhold i svaret fra serveren");
         }
         
-        console.log("Received response from edge function");
         letterContent = functionData.content;
       } catch (fetchError) {
         console.error("Error calling edge function:", fetchError);
@@ -274,8 +289,9 @@ export const useCoverLetterGeneration = (user: User | null) => {
         letterContent = `${today}\n\nKære ${updatedJob.contact_person || 'Rekrutteringsansvarlig'},\n\nJeg skriver for at ansøge om stillingen som ${updatedJob.title} hos ${updatedJob.company}.\n\nJeg mener, at mine kvalifikationer og erfaringer gør mig til et godt match for denne rolle, og jeg ser frem til muligheden for at bidrage til jeres team.\n\nMed venlig hilsen,\n\n${userInfo.name || 'Dit navn'}${userInfo.phone ? '\n' + userInfo.phone : ''}\n${userInfo.email || 'Din e-mail'}${userInfo.address ? '\n' + userInfo.address : ''}`;
       }
       
-      console.log("Generated letter content, saving to database...");
+      console.log("Letter content generated, saving to database");
       
+      // Step 6: Save the generated letter to the database
       let letterId: string;
       const { data: existingLetters, error: letterCheckError } = await supabase
         .from("cover_letters")
@@ -284,7 +300,7 @@ export const useCoverLetterGeneration = (user: User | null) => {
 
       if (letterCheckError) {
         console.error("Error checking existing letters:", letterCheckError);
-        throw letterCheckError;
+        throw new Error(`Fejl ved kontrol af eksisterende ansøgninger: ${letterCheckError.message}`);
       }
 
       if (existingLetters && existingLetters.length > 0) {
@@ -299,7 +315,7 @@ export const useCoverLetterGeneration = (user: User | null) => {
 
         if (updateError) {
           console.error("Error updating letter:", updateError);
-          throw updateError;
+          throw new Error(`Fejl ved opdatering af ansøgning: ${updateError.message}`);
         }
         letterId = existingLetters[0].id;
       } else {
@@ -316,11 +332,15 @@ export const useCoverLetterGeneration = (user: User | null) => {
 
         if (createError) {
           console.error("Error creating letter:", createError);
-          throw createError;
+          throw new Error(`Fejl ved oprettelse af ansøgning: ${createError.message}`);
+        }
+        if (!newLetter) {
+          throw new Error("Ingen ansøgnings-id returneret fra serveren");
         }
         letterId = newLetter.id;
       }
 
+      // Step 7: Fetch the saved letter
       console.log("Letter saved with ID:", letterId);
       const { data: updatedLetter, error: fetchError } = await supabase
         .from("cover_letters")
@@ -330,7 +350,10 @@ export const useCoverLetterGeneration = (user: User | null) => {
 
       if (fetchError) {
         console.error("Error fetching updated letter:", fetchError);
-        throw fetchError;
+        throw new Error(`Fejl ved hentning af opdateret ansøgning: ${fetchError.message}`);
+      }
+      if (!updatedLetter) {
+        throw new Error("Ingen ansøgning returneret fra serveren");
       }
 
       console.log("Retrieved updated letter:", updatedLetter);
@@ -353,7 +376,7 @@ export const useCoverLetterGeneration = (user: User | null) => {
     } finally {
       setIsGenerating(false);
     }
-  }, [selectedJob, toast, user]);
+  }, [selectedJob, toast, user, supabase]);
 
   const handleEditLetter = useCallback(async (updatedContent: string) => {
     if (!generatedLetter || !user) return;
@@ -390,7 +413,7 @@ export const useCoverLetterGeneration = (user: User | null) => {
         variant: "destructive",
       });
     }
-  }, [generatedLetter, toast, user]);
+  }, [generatedLetter, toast, user, supabase]);
 
   const handleSaveLetter = useCallback(() => {
     navigate("/dashboard");
