@@ -74,5 +74,54 @@ button[type="submit"]:not(.bg-green-600):not([disabled]) {
 }
 
 button[type="submit"]:hover:not(.bg-green-600):not([disabled]) {
-  background-color: #054370 !important;
+  background-color: #054370 !important; /* primary-800 */
+}
+
+button[type="submit"]:active:not(.bg-green-600):not([disabled]) {
+  background-color: #072b4a !important; /* primary-950 */
+}
+
+/* Consistent blue colors for various elements */
+.bg-blue-500, .bg-blue-600, .bg-blue-700 {
+  background-color: hsl(var(--primary)) !important;
+}
+
+.text-blue-500, .text-blue-600, .text-blue-700 {
+  color: hsl(var(--primary)) !important;
+}
+
+.hover\:bg-blue-600:hover, .hover\:bg-blue-700:hover, .hover\:bg-blue-800:hover {
+  background-color: #054370 !important; /* primary-800 */
+}
+
+.hover\:text-blue-600:hover, .hover\:text-blue-700:hover, .hover\:text-blue-800:hover {
+  color: #054370 !important; /* primary-800 */
+}
+
+.active\:bg-blue-700:active, .active\:bg-blue-800:active {
+  background-color: #072b4a !important; /* primary-950 */
+}
+
+.active\:text-blue-700:active, .active\:text-blue-800:active {
+  color: #072b4a !important; /* primary-950 */
+}
+
+.border-blue-500, .border-blue-600, .border-blue-700 {
+  border-color: hsl(var(--primary)) !important;
+}
+
+.hover\:border-blue-600:hover, .hover\:border-blue-700:hover, .hover\:border-blue-800:hover {
+  border-color: #054370 !important; /* primary-800 */
+}
+
+.focus\:border-blue-500:focus, .focus\:border-blue-600:focus, .focus\:border-blue-700:focus {
+  border-color: hsl(var(--primary)) !important;
+}
+
+.ring-blue-500, .ring-blue-600, .ring-blue-700 {
+  --tw-ring-color: hsl(var(--primary)) !important;
+}
+
+.focus\:ring-blue-500:focus, .focus\:ring-blue-600:focus, .focus\:ring-blue-700:focus {
+  --tw-ring-color: hsl(var(--primary)) !important;
 }
