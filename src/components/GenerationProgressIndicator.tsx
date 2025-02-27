@@ -49,7 +49,7 @@ const GenerationProgressIndicator: React.FC<GenerationProgressProps> = ({
         >
           <div 
             className="bg-blue-600 h-3 rounded-full transition-all duration-500 ease-in-out" 
-            style={{ width: `${progress}%` }}
+            style={{ width: `${Math.max(5, progress)}%` }}
           ></div>
         </div>
         

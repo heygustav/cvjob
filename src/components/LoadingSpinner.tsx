@@ -52,7 +52,7 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
           <span className="text-sm font-medium text-gray-700">{formatTime(elapsed)}s</span>
         </div>
         
-        {progress !== undefined && (
+        {progress !== undefined && progress > 0 && (
           <div className="mt-4 w-full bg-gray-200 rounded-full h-2.5" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress} role="progressbar">
             <div 
               className="bg-blue-600 h-2.5 rounded-full transition-all duration-500 ease-in-out" 

@@ -105,7 +105,9 @@ const CoverLetterGenerator: React.FC = () => {
 
   // Show loading state when initializing or generating
   if (showLoadingSpinner) {
-    return <LoadingSpinner message={getLoadingMessage()} progress={generationProgress?.progress} />;
+    const progressValue = generationProgress?.progress || 0;
+    console.log("Showing loading spinner with progress:", progressValue);
+    return <LoadingSpinner message={getLoadingMessage()} progress={progressValue} />;
   }
 
   console.log("Rendering state:", { 
@@ -162,8 +164,8 @@ const CoverLetterGenerator: React.FC = () => {
               {isGenerating && (
                 <GenerationStatus 
                   phase={generationPhase || 'generation'} 
-                  progress={generationProgress.progress}
-                  message={generationProgress.message}
+                  progress={generationProgress?.progress || 0}
+                  message={generationProgress?.message}
                   onRetry={resetError}
                 />
               )}
