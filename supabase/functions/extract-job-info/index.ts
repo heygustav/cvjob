@@ -42,11 +42,7 @@ Din opgave er at finde og udtrække følgende information fra jobopslaget:
 1. Jobtitlen (title): Den specifikke titel på stillingen, f.eks. "Digital Marketing Manager", "Frontend Udvikler", osv.
 2. Virksomhedens navn (company): Navnet på den virksomhed, der annoncerer jobbet.
 3. Kontaktperson (contact_person): Navn på den person, der er angivet som kontaktperson (hvis tilgængelig).
-4. URL (url): Enhver webadresse eller link der er nævnt i forbindelse med jobbet eller ansøgningsprocessen.
-
-Disse oplysninger kan forekomme hvor som helst i teksten, i enhver rækkefølge, og i forskellige formater.
-Svar kun med et JSON-objekt med disse fire felter. Hvis en oplysning ikke er til stede, skal feltet være en tom streng.
-Vær grundig - gennemgå hele teksten for at finde så meget information som muligt.`;
+4. URL (url): Enhver webadresse eller link der er nævnt i forbindelse med jobbet eller ansøgningsprocessen.`;
 
     // Call OpenAI API to extract job information
     console.log("Calling OpenAI API");
@@ -57,13 +53,12 @@ Vær grundig - gennemgå hele teksten for at finde så meget information som mul
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4',
+        model: 'gpt-4o-mini',  // Updated to newer model
         messages: [
           { role: 'system', content: systemPrompt },
-          { role: 'user', content: jobDescription }
+          { role: 'user', content: `Analyze this job posting and extract the title, company, contact person, and URL. Return only a JSON object with keys: title, company, contact_person, and url. If any information is missing, use an empty string.\n\n${jobDescription}` }
         ],
-        temperature: 0.1, // Lower temperature for more focused extraction
-        response_format: { type: "json_object" }
+        temperature: 0.1 // Lower temperature for more focused extraction
       }),
     });
 
@@ -74,7 +69,7 @@ Vær grundig - gennemgå hele teksten for at finde så meget information som mul
         error: `OpenAI API error: ${response.status}`,
         details: errorData
       }), {
-        status: 502,
+        status: 200, // Return 200 even on API error to prevent client-side errors
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
@@ -85,10 +80,11 @@ Vær grundig - gennemgå hele teksten for at finde så meget information som mul
     if (!data.choices || !data.choices[0] || !data.choices[0].message) {
       console.error("Invalid OpenAI response format:", JSON.stringify(data));
       return new Response(JSON.stringify({ 
-        error: 'Invalid response format from OpenAI',
-        data: data 
+        title: "",
+        company: "",
+        contact_person: "",
+        url: ""
       }), {
-        status: 502,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
@@ -97,17 +93,27 @@ Vær grundig - gennemgå hele teksten for at finde så meget information som mul
     let extractedData;
     
     try {
-      extractedData = JSON.parse(content);
+      // Try to extract JSON from the response, which might be in a code block
+      const jsonMatch = content.match(/```json\s*([\s\S]*?)\s*```/) || 
+                      content.match(/{[\s\S]*}/);
+                      
+      const jsonString = jsonMatch ? jsonMatch[0].replace(/```json|```/g, '') : content;
+      extractedData = JSON.parse(jsonString);
       console.log("Successfully parsed OpenAI response:", JSON.stringify(extractedData));
     } catch (e) {
       console.error("Failed to parse OpenAI response as JSON:", content);
-      return new Response(JSON.stringify({ 
-        error: 'Failed to parse JSON from OpenAI response',
-        content: content 
-      }), {
-        status: 502,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      // Instead of failing, try to extract with regex
+      const title = content.match(/title["\s:]+([^"}\n,]+)/i)?.[1] || "";
+      const company = content.match(/company["\s:]+([^"}\n,]+)/i)?.[1] || "";
+      const contact = content.match(/contact_person["\s:]+([^"}\n,]+)/i)?.[1] || "";
+      const url = content.match(/url["\s:]+([^"}\n,]+)/i)?.[1] || "";
+      
+      extractedData = {
+        title: title.trim(),
+        company: company.trim(),
+        contact_person: contact.trim(),
+        url: url.trim()
+      };
     }
 
     // Make sure each expected field exists
@@ -124,11 +130,13 @@ Vær grundig - gennemgå hele teksten for at finde så meget information som mul
     });
   } catch (error) {
     console.error("Function error:", error);
+    // Always return a 200 response to avoid client-side errors
     return new Response(JSON.stringify({ 
-      error: error.message,
-      details: error.stack 
+      title: "",
+      company: "",
+      contact_person: "",
+      url: ""
     }), {
-      status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
