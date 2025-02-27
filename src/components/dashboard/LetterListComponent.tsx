@@ -58,10 +58,18 @@ const LetterListComponent: React.FC<LetterListComponentProps> = ({
 
   const formatDate = (dateString: string) => {
     try {
-      return formatDistanceToNow(new Date(dateString), {
+      // Get the formatted date string
+      let formattedDate = formatDistanceToNow(new Date(dateString), {
         addSuffix: true,
         locale: da,
       });
+      
+      // Capitalize "cirka" if it starts with it
+      if (formattedDate.toLowerCase().startsWith("cirka")) {
+        formattedDate = "Cirka" + formattedDate.substring(5);
+      }
+      
+      return formattedDate;
     } catch (error) {
       console.error("Error formatting date:", error);
       return "Ukendt dato";
