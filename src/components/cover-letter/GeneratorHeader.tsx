@@ -9,7 +9,7 @@ interface GeneratorHeaderProps {
 const GeneratorHeader: React.FC<GeneratorHeaderProps> = ({ step, setStep }) => {
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 md:mb-8 gap-4">
-      <div>
+      <div className="text-left">
         <h1 className="text-2xl sm:text-3xl font-bold leading-tight text-gray-900">
           {step === 1 ? "Copy/paste jobannonce" : "Din ansøgning"}
         </h1>

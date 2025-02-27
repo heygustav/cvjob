@@ -18,7 +18,7 @@ const SubmitButton: React.FC<SubmitButtonProps> = ({
       type="submit"
       disabled={isLoading}
       className={cn(
-        "px-4 py-2 rounded-md shadow-sm text-sm font-medium text-white disabled:opacity-80 disabled:cursor-not-allowed transition-colors",
+        "px-4 py-2 rounded-md shadow-sm text-sm font-bold text-white disabled:opacity-80 disabled:cursor-not-allowed transition-colors",
         className
       )}
       aria-label={isLoading ? "Genererer ansøgning..." : "Generer ansøgning"}
