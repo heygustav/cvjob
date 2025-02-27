@@ -124,12 +124,12 @@ const LetterListComponent: React.FC<LetterListComponentProps> = ({
                   <td className="px-6 py-4 whitespace-nowrap text-left">
                     <div className="flex items-center">
                       <div className="text-sm font-medium text-gray-900">
-                        {job?.company_name || "Ukendt virksomhed"}
+                        {job?.company || "Ukendt virksomhed"}
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-left">
-                    <div className="text-sm text-gray-900">{job?.job_title || "Ukendt stilling"}</div>
+                    <div className="text-sm text-gray-900">{job?.title || "Ukendt stilling"}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-left">
                     <div className="text-sm text-gray-500">{formatDate(letter.created_at)}</div>
@@ -139,7 +139,7 @@ const LetterListComponent: React.FC<LetterListComponentProps> = ({
                       <Link
                         to={`/generator?letterId=${letter.id}`}
                         className="text-primary hover:text-primary-700 transition-colors"
-                        aria-label={`Rediger ansøgning til ${job?.job_title || "Ukendt stilling"}`}
+                        aria-label={`Rediger ansøgning til ${job?.title || "Ukendt stilling"}`}
                       >
                         <span className="hidden sm:inline">Rediger</span>
                         <ExternalLink className="h-4 w-4 inline sm:hidden" />
