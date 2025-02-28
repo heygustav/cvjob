@@ -41,17 +41,22 @@ export const processPdfFile = async (file: File): Promise<ProcessResult> => {
     console.log("Invoking extract-resume-data function");
     
     try {
+      // Basic request payload with essential information - avoid sending the full base64 string in logs
+      console.log("Sending request with payload:", { 
+        fileName: file.name, 
+        fileSize: file.size, 
+        fileType: file.type,
+        base64Length: fileBase64.length
+      });
+
       const { data, error } = await Promise.race([
         supabase.functions.invoke('extract-resume-data', {
           body: { 
-            fileBase64,
+            fileBase64: fileBase64,
             fileName: file.name,
             fileType: file.type,
             fileSize: file.size 
-          },
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          }
         }),
         new Promise<never>((_, reject) => 
           setTimeout(() => reject(new Error('Tidsgrænse overskredet ved behandling af CV')), 60000)
