@@ -1,7 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createWorker } from "https://cdn.jsdelivr.net/npm/tesseract.js@4.0.3/+esm";
-import { DOMParser } from "https://deno.land/x/deno_dom@v0.1.38/deno-dom-wasm.ts";
 
 // Set up CORS headers for the function
 const corsHeaders = {
@@ -10,24 +9,16 @@ const corsHeaders = {
 };
 
 // Helper function to extract text from PDF using Tesseract.js
-async function extractTextFromPdf(pdfBytes: Uint8Array): Promise<string> {
+async function extractTextFromPdf(pdfBase64: string): Promise<string> {
   try {
     console.log("Starting Tesseract worker...");
     const worker = await createWorker('eng');
 
     console.log("Converting PDF to images for OCR processing...");
     
-    // Note: In a production environment, you would use a PDF to image converter here
-    // For Deno compatibility, we're using a workaround approach
-    
-    // Create a temporary data URL for the PDF
-    const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-    const dataUrl = URL.createObjectURL(blob);
-    
-    // Process first page only for demo purposes
-    // In production, you would loop through all pages
+    // Process with base64 data
     console.log("Running OCR on PDF content...");
-    const { data } = await worker.recognize(dataUrl);
+    const { data } = await worker.recognize(pdfBase64);
     
     console.log("OCR processing complete");
     await worker.terminate();
@@ -159,6 +150,20 @@ function analyzeCV(text: string) {
   return sections;
 }
 
+// Helper function to convert base64 data to a Uint8Array
+const base64ToUint8Array = (base64: string): Uint8Array => {
+  // Remove the data URL prefix if it exists
+  const base64Data = base64.includes(',') ? base64.split(',')[1] : base64;
+  // Convert base64 to binary string
+  const binaryString = atob(base64Data);
+  // Create a Uint8Array from the binary string
+  const bytes = new Uint8Array(binaryString.length);
+  for (let i = 0; i < binaryString.length; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+  return bytes;
+};
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
@@ -170,14 +175,14 @@ serve(async (req) => {
   try {
     console.log("Resume extraction function started");
     
-    // Get the PDF file from the request
-    const formData = await req.formData();
-    const file = formData.get("file");
+    // Get the request body as JSON instead of FormData
+    const requestData = await req.json();
+    const { fileBase64, fileName, fileType, fileSize } = requestData;
 
-    if (!file || !(file instanceof File)) {
-      console.error("No file provided or invalid file");
+    if (!fileBase64) {
+      console.error("No file data provided");
       return new Response(
-        JSON.stringify({ error: "No valid file provided" }),
+        JSON.stringify({ error: "No valid file data provided" }),
         {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -185,10 +190,10 @@ serve(async (req) => {
       );
     }
 
-    console.log(`Processing file: ${file.name}, size: ${file.size} bytes, type: ${file.type}`);
+    console.log(`Processing file: ${fileName}, size: ${fileSize} bytes, type: ${fileType}`);
 
     // Check if it's a PDF file
-    if (file.type !== "application/pdf") {
+    if (fileType !== "application/pdf") {
       return new Response(
         JSON.stringify({ error: "Uploaded file is not a PDF" }),
         {
@@ -199,13 +204,9 @@ serve(async (req) => {
     }
 
     try {
-      // Read the file as a buffer
-      const fileBuffer = await file.arrayBuffer();
-      const pdfBytes = new Uint8Array(fileBuffer);
-      
-      // Extract text from the PDF using Tesseract.js
+      // Extract text from the PDF using Tesseract.js with base64 data
       console.log("Extracting text from PDF using Tesseract...");
-      const extractedText = await extractTextFromPdf(pdfBytes);
+      const extractedText = await extractTextFromPdf(fileBase64);
       
       if (!extractedText || extractedText.trim().length === 0) {
         console.log("No text could be extracted from the PDF");

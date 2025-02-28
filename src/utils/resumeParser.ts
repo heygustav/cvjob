@@ -7,6 +7,16 @@ export interface ParsedResumeData {
   extractedFields: string[];
 }
 
+// Helper function to convert file to base64
+export const fileToBase64 = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = error => reject(error);
+  });
+};
+
 // Validate and sanitize the extracted data
 export const validateExtractedData = (data: any): Partial<PersonalInfoFormState> => {
   const validated: Partial<PersonalInfoFormState> = {};
@@ -81,18 +91,23 @@ export const processPdfFile = async (
   console.log(`Processing file: ${file.name}, size: ${file.size} bytes`);
 
   try {
-    // Create form data for the file upload
-    const formData = new FormData();
-    formData.append('file', file);
-
+    // Convert file to base64 instead of using FormData
+    console.log("Converting file to base64");
+    const fileBase64 = await fileToBase64(file);
+    
     console.log("Starting CV parsing process");
 
     // Call the Supabase Edge Function with more detailed logging
     console.log("Invoking extract-resume-data function");
     const { data, error } = await supabase.functions.invoke('extract-resume-data', {
-      body: formData,
+      body: { 
+        fileBase64,
+        fileName: file.name,
+        fileType: file.type,
+        fileSize: file.size 
+      },
       headers: {
-        'Accept': 'application/json',
+        'Content-Type': 'application/json',
       },
     });
 
