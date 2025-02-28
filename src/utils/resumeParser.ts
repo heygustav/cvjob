@@ -113,79 +113,117 @@ export const processPdfFile = async (
   }
 
   // Add additional logging
-  console.log(`Processing file: ${file.name}, size: ${file.size} bytes`);
+  console.log(`Processing file: ${file.name}, size: ${file.size} bytes, type: ${file.type}`);
 
   try {
     // Convert file to base64 instead of using FormData
     console.log("Converting file to base64");
     const fileBase64 = await fileToBase64(file);
+    console.log("Base64 conversion complete, length:", fileBase64.length);
+    
+    // Check if fileBase64 is valid
+    if (!fileBase64 || fileBase64.length < 100) {
+      console.error("Invalid base64 data generated");
+      return {
+        success: false,
+        error: "Kunne ikke konvertere fil til korrekt format"
+      };
+    }
     
     console.log("Starting CV parsing process");
 
-    // Call the Supabase Edge Function with more detailed logging
+    // Call the Supabase Edge Function with more detailed logging and timeout handling
     console.log("Invoking extract-resume-data function");
-    const { data, error } = await supabase.functions.invoke('extract-resume-data', {
-      body: { 
-        fileBase64,
-        fileName: file.name,
-        fileType: file.type,
-        fileSize: file.size 
-      },
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    
+    try {
+      const { data, error } = await Promise.race([
+        supabase.functions.invoke('extract-resume-data', {
+          body: { 
+            fileBase64,
+            fileName: file.name,
+            fileType: file.type,
+            fileSize: file.size 
+          },
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }),
+        new Promise<never>((_, reject) => 
+          setTimeout(() => reject(new Error('Tidsgrænse overskredet ved behandling af CV')), 60000)
+        )
+      ]);
 
-    console.log("Response from Edge Function:", data, error);
+      console.log("Response from Edge Function received:", 
+        data ? "Data present" : "No data", 
+        error ? `Error: ${error.message}` : "No error"
+      );
 
-    if (error) {
-      console.error("Supabase function error:", error);
-      
-      // Provide more specific error messages based on error status
-      let errorMessage = 'Der opstod en fejl under behandling af CV';
-      
-      if (error.message) {
-        if (error.message.includes('Failed to send a request')) {
-          errorMessage = 'Kunne ikke forbinde til CV-analyse tjenesten. Tjek din internetforbindelse og prøv igen senere.';
-        } else if (error.message.includes('non-2xx status code')) {
-          errorMessage = 'Serverfejl ved behandling af CV. Prøv igen senere.';
-        } else {
-          errorMessage = error.message;
+      if (error) {
+        console.error("Supabase function error:", error);
+        
+        // Provide more specific error messages based on error status
+        let errorMessage = 'Der opstod en fejl under behandling af CV';
+        
+        if (error.message) {
+          if (error.message.includes('Failed to send a request')) {
+            errorMessage = 'Kunne ikke forbinde til CV-analyse tjenesten. Tjek din internetforbindelse og prøv igen senere.';
+          } else if (error.message.includes('non-2xx status code')) {
+            errorMessage = 'Serverfejl ved behandling af CV. Prøv igen senere.';
+          } else {
+            errorMessage = error.message;
+          }
         }
+        
+        return { success: false, error: errorMessage };
+      }
+
+      if (!data) {
+        console.error("No data returned from Edge Function");
+        return { 
+          success: false, 
+          error: 'Ingen data returneret fra CV-analysen' 
+        };
+      }
+
+      if (!data.extractedData) {
+        console.error("No extracted data in response:", data);
+        return { 
+          success: false, 
+          error: 'Kunne ikke finde data i CV-analysen' 
+        };
+      }
+
+      // Validate and sanitize the extracted data
+      const validatedData = validateExtractedData(data.extractedData);
+      
+      // Log what was extracted vs. what was validated
+      console.log("Raw extracted data keys:", Object.keys(data.extractedData));
+      console.log("Validated data keys:", Object.keys(validatedData));
+      
+      // Only return success if we have some validated data
+      if (Object.keys(validatedData).length > 0) {
+        return { 
+          success: true, 
+          data: {
+            validatedData,
+            extractedFields: Object.keys(validatedData)
+          }
+        };
+      } else {
+        return { 
+          success: false, 
+          error: 'Begrænset information fundet i dit CV. Prøv venligst at udfylde oplysningerne manuelt.'
+        };
+      }
+    } catch (functionError: any) {
+      console.error("Error invoking Edge Function:", functionError);
+      let errorMessage = functionError.message || 'Fejl ved behandling af CV';
+      
+      if (errorMessage.includes('Tidsgrænse overskredet')) {
+        errorMessage = 'Tidsgrænse overskredet ved behandling af CV. Prøv med en mindre fil eller senere.';
       }
       
       return { success: false, error: errorMessage };
-    }
-
-    if (!data || !data.extractedData) {
-      console.error("Unexpected data format:", data);
-      return { 
-        success: false, 
-        error: 'Kunne ikke hente data fra CV' 
-      };
-    }
-
-    // Validate and sanitize the extracted data
-    const validatedData = validateExtractedData(data.extractedData);
-    
-    // Log what was extracted vs. what was validated
-    console.log("Raw extracted data:", data.extractedData);
-    console.log("Validated data being used:", validatedData);
-    
-    // Only return success if we have some validated data
-    if (Object.keys(validatedData).length > 0) {
-      return { 
-        success: true, 
-        data: {
-          validatedData,
-          extractedFields: Object.keys(validatedData)
-        }
-      };
-    } else {
-      return { 
-        success: false, 
-        error: 'Begrænset information fundet i dit CV. Prøv venligst at udfylde oplysningerne manuelt.'
-      };
     }
   } catch (error: any) {
     console.error('Error extracting resume data:', error);
