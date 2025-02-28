@@ -57,6 +57,31 @@ export const validateExtractedData = (data: any): Partial<PersonalInfoFormState>
     validated.email = data.email;
   }
   
+  // For phone, validate and standardize format
+  if (data.phone && 
+      typeof data.phone === 'string' && 
+      data.phone.trim().length >= 8) {
+    // Basic phone validation - just make sure it has at least 8 digits
+    const digitsOnly = data.phone.replace(/\D/g, '');
+    if (digitsOnly.length >= 8) {
+      validated.phone = data.phone;
+    }
+  }
+  
+  // For name, validate it's not just a few characters
+  if (data.name && 
+      typeof data.name === 'string' && 
+      data.name.trim().length > 3) {
+    validated.name = data.name;
+  }
+  
+  // For address, just check it's not empty
+  if (data.address && 
+      typeof data.address === 'string' && 
+      data.address.trim().length > 5) {
+    validated.address = data.address;
+  }
+  
   // Log what fields were extracted
   console.log("Validated fields:", Object.keys(validated));
   

@@ -30,124 +30,134 @@ async function extractTextFromPdf(pdfBase64: string): Promise<string> {
   }
 }
 
-// Helper function to analyze CV text and extract structured information
+// Improved helper function to analyze CV text and extract structured information
 function analyzeCV(text: string) {
   console.log("Analyzing CV text, length:", text.length);
   
-  const sections: Record<string, string> = {
+  const extractedData: Record<string, string> = {
     experience: "",
     education: "",
-    skills: ""
+    skills: "",
+    email: "",
+    phone: "",
+    name: ""
   };
   
-  // Convert text to lowercase for easier pattern matching
-  const lowerText = text.toLowerCase();
+  // More robust section detection with regex patterns
+  const experienceRegex = /(?:erfaring|erhvervserfaring|arbejdserfaring|job\s+erfaring|experience|work\s+experience|professional\s+experience)(?:\s*:|(\s+|$))/i;
+  const educationRegex = /(?:uddannelse|akademisk\s+baggrund|kurser|certificeringer|education|academic\s+background|qualifications|studies)(?:\s*:|(\s+|$))/i;
+  const skillsRegex = /(?:kompetencer|færdigheder|kvalifikationer|evner|tekniske\s+kompetencer|skills|competencies|technical\s+skills|core\s+skills)(?:\s*:|(\s+|$))/i;
   
-  // Extract Experience Section
-  const experienceKeywords = [
-    "erfaring", "erhvervserfaring", "arbejdserfaring", "job erfaring",
-    "experience", "work experience", "professional experience"
-  ];
-  
-  const educationKeywords = [
-    "uddannelse", "akademisk baggrund", "kurser", "certificeringer",
-    "education", "academic background", "qualifications", "studies"
-  ];
-  
-  const skillsKeywords = [
-    "kompetencer", "færdigheder", "kvalifikationer", "evner", "tekniske kompetencer",
-    "skills", "competencies", "technical skills", "qualifications", "core skills"
-  ];
-  
-  // Find starting positions of each section
-  let expStart = -1;
-  let eduStart = -1;
-  let skillsStart = -1;
-  
-  // Find starting position for each section with improved logging
-  for (const keyword of experienceKeywords) {
-    const pos = lowerText.indexOf(keyword);
-    if (pos !== -1 && (expStart === -1 || pos < expStart)) {
-      expStart = pos;
-      console.log(`Found experience section at position ${pos} with keyword "${keyword}"`);
-    }
+  // Extract email with regex
+  const emailRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/gi;
+  const emailMatches = text.match(emailRegex);
+  if (emailMatches && emailMatches.length > 0) {
+    extractedData.email = emailMatches[0];
+    console.log("Found email:", extractedData.email);
   }
   
-  for (const keyword of educationKeywords) {
-    const pos = lowerText.indexOf(keyword);
-    if (pos !== -1 && (eduStart === -1 || pos < eduStart)) {
-      eduStart = pos;
-      console.log(`Found education section at position ${pos} with keyword "${keyword}"`);
-    }
+  // Extract phone numbers with regex
+  const phoneRegex = /(?:\+\d{2}[\s-]?)?(?:\d{2}[\s-]?){4}\d{2}|\(\d{2}\)[\s-]?\d{2}[\s-]?\d{2}[\s-]?\d{2}[\s-]?\d{2}/g;
+  const phoneMatches = text.match(phoneRegex);
+  if (phoneMatches && phoneMatches.length > 0) {
+    extractedData.phone = phoneMatches[0].replace(/\s+/g, '');
+    console.log("Found phone:", extractedData.phone);
   }
   
-  for (const keyword of skillsKeywords) {
-    const pos = lowerText.indexOf(keyword);
-    if (pos !== -1 && (skillsStart === -1 || pos < skillsStart)) {
-      skillsStart = pos;
-      console.log(`Found skills section at position ${pos} with keyword "${keyword}"`);
-    }
+  // Try to extract name (often at the beginning of the CV)
+  // Look for potential names in the first few lines
+  const firstLines = text.split('\n').slice(0, 5).join(' ');
+  const nameRegex = /^([A-Z][a-zæøåÆØÅ]+(?:\s+[A-Z][a-zæøåÆØÅ]+){1,2})/m;
+  const nameMatch = firstLines.match(nameRegex);
+  if (nameMatch && nameMatch[0] && nameMatch[0].length > 4) {
+    extractedData.name = nameMatch[0].trim();
+    console.log("Found potential name:", extractedData.name);
   }
   
-  // Define section boundaries
-  const boundaries = [
-    { name: "experience", start: expStart },
-    { name: "education", start: eduStart },
-    { name: "skills", start: skillsStart }
-  ].filter(section => section.start !== -1)
-   .sort((a, b) => a.start - b.start);
+  // Find section boundaries with regex
+  let experienceMatch = experienceRegex.exec(text);
+  let educationMatch = educationRegex.exec(text);
+  let skillsMatch = skillsRegex.exec(text);
   
-  console.log("Identified sections:", boundaries.map(b => b.name).join(", "));
+  console.log("Section matches:", {
+    experience: experienceMatch ? experienceMatch.index : -1,
+    education: educationMatch ? educationMatch.index : -1, 
+    skills: skillsMatch ? skillsMatch.index : -1
+  });
   
-  // Extract section content based on boundaries
-  for (let i = 0; i < boundaries.length; i++) {
-    const currentSection = boundaries[i];
-    const nextSection = boundaries[i + 1];
+  // Build array of section positions
+  const sections = [
+    { name: "experience", pos: experienceMatch ? experienceMatch.index : -1 },
+    { name: "education", pos: educationMatch ? educationMatch.index : -1 },
+    { name: "skills", pos: skillsMatch ? skillsMatch.index : -1 }
+  ].filter(section => section.pos !== -1)
+   .sort((a, b) => a.pos - b.pos);
+  
+  // Extract content between sections
+  for (let i = 0; i < sections.length; i++) {
+    const currentSection = sections[i];
+    const nextSection = sections[i + 1];
     
-    const sectionStart = currentSection.start;
-    const sectionEnd = nextSection ? nextSection.start : undefined;
+    const sectionStart = currentSection.pos;
+    // If this is the last section, extract until the end
+    const sectionEnd = nextSection ? nextSection.pos : undefined;
     
+    // Extract the section content
     let sectionContent = sectionEnd 
       ? text.substring(sectionStart, sectionEnd).trim() 
       : text.substring(sectionStart).trim();
     
-    // Remove section title from the beginning of the content
-    const titleEndIndex = sectionContent.indexOf('\n');
-    if (titleEndIndex !== -1) {
-      sectionContent = sectionContent.substring(titleEndIndex).trim();
+    // Remove section title from the content
+    const firstNewlineIndex = sectionContent.indexOf('\n');
+    if (firstNewlineIndex !== -1) {
+      sectionContent = sectionContent.substring(firstNewlineIndex).trim();
     }
     
-    sections[currentSection.name] = sectionContent;
+    // Store the extracted content
+    extractedData[currentSection.name] = sectionContent;
     console.log(`Extracted ${currentSection.name} section, length: ${sectionContent.length} characters`);
   }
   
-  // Handle case where no sections were found
-  if (boundaries.length === 0) {
+  // Handle case where no clear sections were found with regex
+  if (sections.length === 0) {
     console.log("No clear sections found, attempting fallback method");
+    
+    // Split by double newlines to get paragraphs
     const paragraphs = text.split('\n\n').filter(p => p.trim().length > 0);
     
-    // If we have paragraphs, try to assign them intelligently
+    // If we have at least 3 paragraphs, assign them to the main sections
     if (paragraphs.length >= 3) {
-      sections.experience = paragraphs[0];
-      sections.education = paragraphs[1];
-      sections.skills = paragraphs[2];
+      extractedData.experience = paragraphs[0];
+      extractedData.education = paragraphs[1];
+      extractedData.skills = paragraphs[2];
       console.log("Applied fallback method using paragraphs");
     } else if (paragraphs.length > 0) {
       // Just use the content as experience
-      sections.experience = paragraphs.join('\n\n');
+      extractedData.experience = paragraphs.join('\n\n');
       console.log("Used all content as experience section");
     }
   }
   
   // Clean up sections
-  for (const [key, value] of Object.entries(sections)) {
-    if (!value || value.length < 10) {
-      sections[key] = `Kunne ikke identificere ${key} i dit CV. Venligst udfyld denne sektion manuelt.`;
+  for (const key of ["experience", "education", "skills"]) {
+    if (!extractedData[key] || extractedData[key].length < 10) {
+      extractedData[key] = `Kunne ikke identificere ${key} i dit CV. Venligst udfyld denne sektion manuelt.`;
       console.log(`Section ${key} was too short or not found`);
     }
   }
   
-  return sections;
+  // Additional post-processing to improve quality of extracted data
+  // Remove common artifacts from OCR
+  for (const key of Object.keys(extractedData)) {
+    if (typeof extractedData[key] === 'string') {
+      // Replace multiple spaces with a single space
+      extractedData[key] = extractedData[key].replace(/\s{2,}/g, ' ');
+      // Remove strange characters that might come from OCR errors
+      extractedData[key] = extractedData[key].replace(/[^\w\s.,;:()[\]{}@+-=/\\æøåÆØÅ]/g, '');
+    }
+  }
+  
+  return extractedData;
 }
 
 serve(async (req) => {
@@ -215,11 +225,11 @@ serve(async (req) => {
       
       console.log(`Extracted ${extractedText.length} characters of text from PDF`);
       
-      // Analyze the CV text to extract structured information
-      console.log("Analyzing CV text...");
+      // Analyze the CV text to extract structured information with improved analysis
+      console.log("Analyzing CV text with enhanced logic...");
       const extractedData = analyzeCV(extractedText);
       
-      console.log("Analysis complete, returning results");
+      console.log("Analysis complete, extracted data keys:", Object.keys(extractedData));
       
       return new Response(
         JSON.stringify({
