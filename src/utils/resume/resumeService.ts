@@ -35,7 +35,7 @@ export const processPdfFile = async (file: File): Promise<ProcessResult> => {
       };
     }
     
-    console.log("Starting CV parsing process");
+    console.log("Starting CVJob parsing process");
 
     // Call the Supabase Edge Function with timeout handling
     console.log("Invoking extract-resume-data function");
@@ -59,7 +59,7 @@ export const processPdfFile = async (file: File): Promise<ProcessResult> => {
           }
         }),
         new Promise<never>((_, reject) => 
-          setTimeout(() => reject(new Error('Tidsgrænse overskredet ved behandling af CV')), 60000)
+          setTimeout(() => reject(new Error('Tidsgrænse overskredet ved behandling af CVJob')), 60000)
         )
       ]);
 
@@ -76,7 +76,7 @@ export const processPdfFile = async (file: File): Promise<ProcessResult> => {
         console.error("No data returned from Edge Function");
         return { 
           success: false, 
-          error: 'Ingen data returneret fra CV-analysen' 
+          error: 'Ingen data returneret fra CVJob-analysen' 
         };
       }
 
@@ -84,7 +84,7 @@ export const processPdfFile = async (file: File): Promise<ProcessResult> => {
         console.error("No extracted data in response:", data);
         return { 
           success: false, 
-          error: 'Kunne ikke finde data i CV-analysen' 
+          error: 'Kunne ikke finde data i CVJob-analysen' 
         };
       }
 
@@ -107,7 +107,7 @@ export const processPdfFile = async (file: File): Promise<ProcessResult> => {
       } else {
         return { 
           success: false, 
-          error: 'Begrænset information fundet i dit CV. Prøv venligst at udfylde oplysningerne manuelt.'
+          error: 'Begrænset information fundet i dit CVJob. Prøv venligst at udfylde oplysningerne manuelt.'
         };
       }
     } catch (functionError: any) {
@@ -117,7 +117,7 @@ export const processPdfFile = async (file: File): Promise<ProcessResult> => {
     console.error('Error extracting resume data:', error);
     
     // More descriptive error message
-    let errorMessage = 'Der opstod en fejl under behandling af CV';
+    let errorMessage = 'Der opstod en fejl under behandling af CVJob';
     if (error.message) {
       errorMessage = error.message;
     }
@@ -132,13 +132,13 @@ export const processPdfFile = async (file: File): Promise<ProcessResult> => {
 function handleEdgeFunctionError(error: any): ProcessResult {
   console.error("Supabase function error:", error);
   
-  let errorMessage = 'Der opstod en fejl under behandling af CV';
+  let errorMessage = 'Der opstod en fejl under behandling af CVJob';
   
   if (error.message) {
     if (error.message.includes('Failed to send a request')) {
-      errorMessage = 'Kunne ikke forbinde til CV-analyse tjenesten. Tjek din internetforbindelse og prøv igen senere.';
+      errorMessage = 'Kunne ikke forbinde til CVJob-analyse tjenesten. Tjek din internetforbindelse og prøv igen senere.';
     } else if (error.message.includes('non-2xx status code')) {
-      errorMessage = 'Serverfejl ved behandling af CV. Prøv igen senere.';
+      errorMessage = 'Serverfejl ved behandling af CVJob. Prøv igen senere.';
     } else {
       errorMessage = error.message;
     }
@@ -152,10 +152,10 @@ function handleEdgeFunctionError(error: any): ProcessResult {
  */
 function handleFunctionTimeoutError(error: any): ProcessResult {
   console.error("Error invoking Edge Function:", error);
-  let errorMessage = error.message || 'Fejl ved behandling af CV';
+  let errorMessage = error.message || 'Fejl ved behandling af CVJob';
   
   if (errorMessage.includes('Tidsgrænse overskredet')) {
-    errorMessage = 'Tidsgrænse overskredet ved behandling af CV. Prøv med en mindre fil eller senere.';
+    errorMessage = 'Tidsgrænse overskredet ved behandling af CVJob. Prøv med en mindre fil eller senere.';
   }
   
   return { success: false, error: errorMessage };

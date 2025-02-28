@@ -32,7 +32,7 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
     
     toast({
       title: "Behandler PDF",
-      description: "Vi uploader og analyserer dit CV...",
+      description: "Vi uploader og analyserer dit CVJob...",
     });
 
     try {
@@ -48,10 +48,10 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
       });
       
       if (!result.success) {
-        setError(result.error || 'Ukendt fejl ved behandling af CV');
+        setError(result.error || 'Ukendt fejl ved behandling af CVJob');
         toast({
-          title: "Fejl ved analyse af CV",
-          description: result.error || 'Ukendt fejl ved behandling af CV',
+          title: "Fejl ved analyse af CVJob",
+          description: result.error || 'Ukendt fejl ved behandling af CVJob',
           variant: "destructive",
         });
         return;
@@ -64,16 +64,16 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
         // Show a more specific toast based on what was extracted
         const extractedFields = result.data.extractedFields.join(', ');
         toast({
-          title: "CV analyseret",
+          title: "CVJob analyseret",
           description: `Følgende oplysninger er blevet udfyldt: ${extractedFields}. Gennemgå og juster efter behov.`,
         });
       }
     } catch (error: any) {
-      console.error('Unexpected error in CV processing:', error);
-      const errorMessage = error.message || 'Uventet fejl under behandling af CV';
+      console.error('Unexpected error in CVJob processing:', error);
+      const errorMessage = error.message || 'Uventet fejl under behandling af CVJob';
       setError(errorMessage);
       toast({
-        title: "Fejl ved analyse af CV",
+        title: "Fejl ved analyse af CVJob",
         description: errorMessage,
         variant: "destructive",
       });
@@ -106,12 +106,12 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
       />
       
       <p className="text-xs text-gray-500 mt-2 mb-3 italic text-left">
-        OBS: Vi bruger forbedret teknologi til at analysere dit CV. Vi vil kun forsøge at udfylde din profil med information, der kan udtrækkes med høj sikkerhed.
+        OBS: Vi bruger forbedret teknologi til at analysere dit CVJob. Vi vil kun forsøge at udfylde din profil med information, der kan udtrækkes med høj sikkerhed.
       </p>
       
       {error && (
         <ErrorDisplay
-          title="Fejl ved analyse af CV"
+          title="Fejl ved analyse af CVJob"
           message={error}
           onRetry={retryUpload}
         />

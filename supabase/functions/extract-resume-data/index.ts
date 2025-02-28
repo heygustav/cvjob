@@ -13,11 +13,11 @@ function extractSimpleTextFromPdf(base64Data: string): string {
   // This is a simple mock implementation - in production use a real PDF library
   // For debugging purposes, we'll just return some mock text
   // The actual implementation would use a PDF parser library
-  return "This is a simple CV parser that extracts structured data from your PDF resume.";
+  return "This is a simple CVJob parser that extracts structured data from your PDF resume.";
 }
 
 function analyzeCV(text: string) {
-  console.log("Analyzing CV text, length:", text.length);
+  console.log("Analyzing CVJob text, length:", text.length);
   
   // Simple extraction logic - would be more sophisticated in production
   return {
@@ -39,7 +39,7 @@ serve(async (req) => {
   }
 
   try {
-    console.log("Resume extraction function started");
+    console.log("CVJob extraction function started");
     
     try {
       // Get the request body as JSON
@@ -57,7 +57,7 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({
           extractedData: analyzeCV("Sample text"),
-          message: "CV data mock processed successfully for debugging."
+          message: "CVJob data mock processed successfully for debugging."
         }),
         {
           status: 200,
