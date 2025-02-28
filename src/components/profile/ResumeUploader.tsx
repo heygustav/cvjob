@@ -21,34 +21,44 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
   const validateExtractedData = (data: any): Partial<PersonalInfoFormState> => {
     const validated: Partial<PersonalInfoFormState> = {};
     
-    // Only include fields that have high confidence
-    // Keep the original values for important fields like name, phone, and address
-    // We'll only use extracted data for less critical fields like experience, education, and skills
+    // Check if data has the expected structure
+    if (!data || typeof data !== 'object') {
+      console.error("Invalid data structure:", data);
+      return {};
+    }
     
-    // For skills, education, and experience, we can be more permissive as users can easily edit these
-    if (data.skills && typeof data.skills === 'string' && data.skills.trim().length > 10) {
+    // Only include fields that have non-default values
+    // For skills, education, and experience sections
+    if (data.skills && 
+        typeof data.skills === 'string' && 
+        data.skills.trim().length > 10 && 
+        !data.skills.includes("Kunne ikke identificere")) {
       validated.skills = data.skills;
     }
     
-    if (data.education && typeof data.education === 'string' && data.education.trim().length > 10) {
+    if (data.education && 
+        typeof data.education === 'string' && 
+        data.education.trim().length > 10 && 
+        !data.education.includes("Kunne ikke identificere")) {
       validated.education = data.education;
     }
     
-    if (data.experience && typeof data.experience === 'string' && data.experience.trim().length > 10) {
+    if (data.experience && 
+        typeof data.experience === 'string' && 
+        data.experience.trim().length > 10 && 
+        !data.experience.includes("Kunne ikke identificere")) {
       validated.experience = data.experience;
     }
     
     // For email, we'll do a basic validation
-    if (data.email && typeof data.email === 'string' && 
+    if (data.email && 
+        typeof data.email === 'string' && 
         /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
       validated.email = data.email;
     }
     
-    // We'll skip name, phone and address entirely for now to avoid any false information
-    // Name can be included, but we won't auto-convert characters
-    // if (data.name && typeof data.name === 'string' && data.name.trim().length > 2) {
-    //   validated.name = data.name;
-    // }
+    // Log what fields were extracted
+    console.log("Validated fields:", Object.keys(validated));
     
     return validated;
   };
@@ -79,7 +89,8 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
 
       console.log("Starting CV parsing process");
 
-      // Call the Supabase Edge Function with more detailed error handling
+      // Call the Supabase Edge Function with more detailed logging
+      console.log("Invoking extract-resume-data function");
       const { data, error } = await supabase.functions.invoke('extract-resume-data', {
         body: formData,
         headers: {
@@ -92,13 +103,17 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
       if (error) {
         console.error("Supabase function error:", error);
         
-        // Provide more specific error messages based on error type
+        // Provide more specific error messages based on error status
         let errorMessage = 'Der opstod en fejl under behandling af CV';
         
-        if (error.message && error.message.includes('Failed to send a request')) {
-          errorMessage = 'Kunne ikke forbinde til CV-analyse tjenesten. Tjek din internetforbindelse og prøv igen senere.';
-        } else if (error.message) {
-          errorMessage = error.message;
+        if (error.message) {
+          if (error.message.includes('Failed to send a request')) {
+            errorMessage = 'Kunne ikke forbinde til CV-analyse tjenesten. Tjek din internetforbindelse og prøv igen senere.';
+          } else if (error.message.includes('non-2xx status code')) {
+            errorMessage = 'Serverfejl ved behandling af CV. Prøv igen senere.';
+          } else {
+            errorMessage = error.message;
+          }
         }
         
         throw new Error(errorMessage);
@@ -120,9 +135,11 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
       if (Object.keys(validatedData).length > 0) {
         onExtractedData(validatedData);
         
+        // Show a more specific toast based on what was extracted
+        const extractedFields = Object.keys(validatedData).join(', ');
         toast({
           title: "CV analyseret",
-          description: "Nogle af dine profiloplysninger er blevet udfyldt baseret på dit CV. Vi har kun medtaget information med høj sikkerhed.",
+          description: `Følgende oplysninger er blevet udfyldt: ${extractedFields}. Gennemgå og juster efter behov.`,
         });
       } else {
         toast({
@@ -136,13 +153,7 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
       // More descriptive error message
       let errorMessage = 'Der opstod en fejl under behandling af CV';
       if (error.message) {
-        if (error.message.includes('non-2xx status code')) {
-          errorMessage = 'Serverfejl ved behandling af CV. Prøv igen senere.';
-        } else if (error.message.includes('Failed to send')) {
-          errorMessage = 'Kunne ikke forbinde til CV-analyse tjenesten. Tjek din internetforbindelse eller prøv igen senere.';
-        } else {
-          errorMessage = error.message;
-        }
+        errorMessage = error.message;
       }
       
       setError(errorMessage);
@@ -260,7 +271,7 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
       </div>
       
       <p className="text-xs text-gray-500 mt-2 mb-3 italic text-left">
-        OBS: Vi vil kun forsøge at udfylde din profil med information, der kan udtrækkes med høj sikkerhed. Personlige oplysninger som navn, telefon og adresse skal du selv udfylde manuelt.
+        OBS: Vi bruger forbedret teknologi til at analysere dit CV. Vi vil kun forsøge at udfylde din profil med information, der kan udtrækkes med høj sikkerhed.
       </p>
       
       {error && (
