@@ -23,6 +23,13 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
     setIsExtracting(true);
     setError(null);
     
+    // More comprehensive logging at the start of the process
+    console.log("Starting upload process", { 
+      fileName: file.name, 
+      fileSize: file.size,
+      fileType: file.type
+    });
+    
     toast({
       title: "Behandler PDF",
       description: "Vi uploader og analyserer dit CV...",
@@ -30,6 +37,15 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
 
     try {
       const result = await processPdfFile(file);
+      
+      // Comprehensive logging of the response
+      console.log("Response from processing", { 
+        success: result.success, 
+        error: result.error || null,
+        dataKeys: result.data ? Object.keys(result.data) : null,
+        extractedFields: result.data?.extractedFields || null,
+        validatedDataKeys: result.data?.validatedData ? Object.keys(result.data.validatedData) : null
+      });
       
       if (!result.success) {
         setError(result.error || 'Ukendt fejl ved behandling af CV');
@@ -42,6 +58,7 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
       }
       
       if (result.data) {
+        console.log("Data extracted successfully, updating form with:", result.data.validatedData);
         onExtractedData(result.data.validatedData);
         
         // Show a more specific toast based on what was extracted
@@ -61,6 +78,11 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
         variant: "destructive",
       });
     } finally {
+      console.log("Upload process completed", { 
+        status: error ? "error" : "success",
+        error: error
+      });
+      
       setIsExtracting(false);
       // Clear file input if it exists
       if (fileInputRef.current) {
@@ -70,6 +92,7 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
   };
 
   const retryUpload = () => {
+    console.log("Retrying upload, resetting error state");
     setError(null);
   };
 
