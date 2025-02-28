@@ -22,7 +22,7 @@ const Index = () => {
                 Ansøgninger skrevet med kunstig intelligens
               </h1>
               <p className="mt-6 text-lg leading-8 text-muted-foreground">
-                Winston AI hjælper dig med at generere personlige og overbevisende ansøgninger
+                CVJob hjælper dig med at generere personlige og overbevisende ansøgninger
                 til job, du er interesseret i. Kom i gang på få minutter.
               </p>
               <div className="mt-10 flex items-center justify-center gap-x-6">
@@ -197,7 +197,7 @@ const Index = () => {
             <figure className="mt-12">
               <blockquote className="text-center text-xl font-semibold leading-8 text-foreground sm:text-2xl sm:leading-9">
                 <p>
-                  "Efter at have brugt Winston AI fik jeg tre jobsamtaler på en uge.
+                  "Efter at have brugt CVJob fik jeg tre jobsamtaler på en uge.
                   Ansøgningerne var så personlige og relevante, at rekrutteringsansvarlige
                   troede, jeg havde brugt timer på at skrive dem."
                 </p>
@@ -226,7 +226,7 @@ const Index = () => {
               Klar til at skrive din næste jobansøgning?
             </h2>
             <p className="mx-auto mt-6 max-w-xl text-lg leading-8 text-primary-100">
-              Kom i gang med Winston AI i dag og lad vores AI hjælpe dig med at få dit drømmejob.
+              Kom i gang med CVJob i dag og lad vores AI hjælpe dig med at få dit drømmejob.
             </p>
             <div className="mt-10 flex items-center justify-center gap-x-6">
               <Link
@@ -272,7 +272,7 @@ const Index = () => {
             </div>
           </nav>
           <p className="mt-10 text-center text-xs leading-5 text-muted-foreground">
-            &copy; 2023 Winston AI. Alle rettigheder forbeholdes.
+            &copy; 2023 CVJob. Alle rettigheder forbeholdes.
           </p>
         </div>
       </footer>

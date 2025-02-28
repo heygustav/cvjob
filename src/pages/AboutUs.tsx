@@ -15,7 +15,7 @@ const AboutUs = () => {
       
       <div className="prose max-w-none">
         <p className="mb-4 text-muted-foreground text-lg">
-          Winston AI er en dansk virksomhed, der har specialiseret sig i at hjælpe jobsøgende med at skabe overbevisende jobansøgninger ved hjælp af kunstig intelligens.
+          CVJob er en dansk virksomhed, der har specialiseret sig i at hjælpe jobsøgende med at skabe overbevisende jobansøgninger ved hjælp af kunstig intelligens.
         </p>
         
         <h2 className="text-2xl font-semibold text-primary-800 mt-8 mb-4">Vores mission</h2>
@@ -25,7 +25,7 @@ const AboutUs = () => {
         
         <h2 className="text-2xl font-semibold text-primary-800 mt-8 mb-4">Vores team</h2>
         <p className="mb-4 text-muted-foreground">
-          Winston AI blev grundlagt i 2023 af en gruppe passionerede teknologientusiaster og HR-specialister, der så et behov for at forbedre jobsøgningsprocessen gennem avanceret teknologi. Vores team består af eksperter inden for kunstig intelligens, naturlig sprogbehandling og rekruttering.
+          CVJob blev grundlagt i 2023 af en gruppe passionerede teknologientusiaster og HR-specialister, der så et behov for at forbedre jobsøgningsprocessen gennem avanceret teknologi. Vores team består af eksperter inden for kunstig intelligens, naturlig sprogbehandling og rekruttering.
         </p>
         
         <h2 className="text-2xl font-semibold text-primary-800 mt-8 mb-4">Vores teknologi</h2>
@@ -35,7 +35,7 @@ const AboutUs = () => {
         
         <h2 className="text-2xl font-semibold text-primary-800 mt-8 mb-4">Kontakt os</h2>
         <p className="mb-8 text-muted-foreground">
-          Har du spørgsmål eller feedback til vores tjeneste? Vi hører gerne fra dig! Du kan kontakte os på <a href="mailto:kontakt@winstonai.dk" className="text-primary hover:underline">kontakt@winstonai.dk</a> eller besøge vores <Link to="/kontakt" className="text-primary hover:underline">kontaktside</Link>.
+          Har du spørgsmål eller feedback til vores tjeneste? Vi hører gerne fra dig! Du kan kontakte os på <a href="mailto:kontakt@cvjob.dk" className="text-primary hover:underline">kontakt@cvjob.dk</a> eller besøge vores <Link to="/kontakt" className="text-primary hover:underline">kontaktside</Link>.
         </p>
       </div>
     </div>
