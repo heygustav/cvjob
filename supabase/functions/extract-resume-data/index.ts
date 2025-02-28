@@ -150,20 +150,6 @@ function analyzeCV(text: string) {
   return sections;
 }
 
-// Helper function to convert base64 data to a Uint8Array
-const base64ToUint8Array = (base64: string): Uint8Array => {
-  // Remove the data URL prefix if it exists
-  const base64Data = base64.includes(',') ? base64.split(',')[1] : base64;
-  // Convert base64 to binary string
-  const binaryString = atob(base64Data);
-  // Create a Uint8Array from the binary string
-  const bytes = new Uint8Array(binaryString.length);
-  for (let i = 0; i < binaryString.length; i++) {
-    bytes[i] = binaryString.charCodeAt(i);
-  }
-  return bytes;
-};
-
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
@@ -175,7 +161,7 @@ serve(async (req) => {
   try {
     console.log("Resume extraction function started");
     
-    // Get the request body as JSON instead of FormData
+    // Get the request body as JSON
     const requestData = await req.json();
     const { fileBase64, fileName, fileType, fileSize } = requestData;
 
@@ -204,6 +190,12 @@ serve(async (req) => {
     }
 
     try {
+      // Extract the base64 data (remove the data URL prefix if it exists)
+      const base64Data = fileBase64.split(',')[1] || fileBase64;
+      
+      // For debugging: Check what we received
+      console.log("Base64 data length:", base64Data.length);
+      
       // Extract text from the PDF using Tesseract.js with base64 data
       console.log("Extracting text from PDF using Tesseract...");
       const extractedText = await extractTextFromPdf(fileBase64);
