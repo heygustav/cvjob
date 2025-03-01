@@ -40,7 +40,8 @@ Deno.serve(async (req) => {
     }
     
     // Load the PDF document
-    await pdfjs.GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js`;
+    // Set the worker path without using await (this was the error)
+    pdfjs.GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js`;
     
     const loadingTask = pdfjs.getDocument({ data: bytes });
     const pdfDocument = await loadingTask.promise;
