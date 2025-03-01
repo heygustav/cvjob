@@ -44,7 +44,7 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
         error: result.error || null,
         dataKeys: result.data ? Object.keys(result.data) : null,
         extractedFields: result.data?.extractedFields || null,
-        validatedDataKeys: result.data?.validatedData ? Object.keys(result.data.validatedData) : null
+        confidence: result.data?.confidence || null
       });
       
       if (!result.success) {
@@ -67,6 +67,23 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
           title: "CVJob analyseret",
           description: `Følgende oplysninger er blevet udfyldt: ${extractedFields}. Gennemgå og juster efter behov.`,
         });
+        
+        // Add additional toast with confidence information if available
+        if (result.data.confidence) {
+          const confidenceValues = Object.entries(result.data.confidence)
+            .map(([field, value]) => `${field}: ${Math.round(value * 100)}%`)
+            .join(', ');
+            
+          console.log("Confidence scores:", confidenceValues);
+          
+          // Only show confidence toast if we have confidence data
+          if (confidenceValues.length > 0) {
+            toast({
+              title: "Analyse-sikkerhed",
+              description: `Sikkerhed for udfyldte felter: ${confidenceValues}`,
+            });
+          }
+        }
       }
     } catch (error: any) {
       console.error('Unexpected error in CVJob processing:', error);
@@ -106,7 +123,8 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
       />
       
       <p className="text-xs text-gray-500 mt-2 mb-3 italic text-left">
-        OBS: Vi bruger forbedret teknologi til at analysere dit CVJob. Vi vil kun forsøge at udfylde din profil med information, der kan udtrækkes med høj sikkerhed.
+        OBS: Vi bruger kunstig intelligens til at analysere dit CVJob. Vi vil kun forsøge at udfylde 
+        din profil med information, der kan udtrækkes med høj sikkerhed.
       </p>
       
       {error && (

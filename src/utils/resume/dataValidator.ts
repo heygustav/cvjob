@@ -1,10 +1,11 @@
 
 import { PersonalInfoFormState } from '@/pages/Profile';
+import { RawResumeData } from './types';
 
 /**
  * Validates and sanitizes raw data extracted from a resume
  */
-export const validateExtractedData = (data: any): Partial<PersonalInfoFormState> => {
+export const validateExtractedData = (data: RawResumeData): Partial<PersonalInfoFormState> => {
   const validated: Partial<PersonalInfoFormState> = {};
   
   // Check if data has the expected structure
@@ -13,16 +14,45 @@ export const validateExtractedData = (data: any): Partial<PersonalInfoFormState>
     return {};
   }
   
-  // Validate sections
-  if (isValidTextSection(data.skills)) {
+  // Process skills sections
+  if (data.skills && Array.isArray(data.skills)) {
+    // Join skills sections with high confidence
+    const highConfidenceSkills = data.skills
+      .filter(section => section.confidence > 0.7)
+      .map(section => section.text);
+    
+    if (highConfidenceSkills.length > 0) {
+      validated.skills = highConfidenceSkills.join('\n\n');
+    }
+  } else if (isValidTextSection(data.skills)) {
     validated.skills = data.skills;
   }
   
-  if (isValidTextSection(data.education)) {
+  // Process education sections
+  if (data.education && Array.isArray(data.education)) {
+    // Join education sections with high confidence
+    const highConfidenceEducation = data.education
+      .filter(section => section.confidence > 0.7)
+      .map(section => section.text);
+    
+    if (highConfidenceEducation.length > 0) {
+      validated.education = highConfidenceEducation.join('\n\n');
+    }
+  } else if (isValidTextSection(data.education)) {
     validated.education = data.education;
   }
   
-  if (isValidTextSection(data.experience)) {
+  // Process experience sections
+  if (data.experience && Array.isArray(data.experience)) {
+    // Join experience sections with high confidence
+    const highConfidenceExperience = data.experience
+      .filter(section => section.confidence > 0.7)
+      .map(section => section.text);
+    
+    if (highConfidenceExperience.length > 0) {
+      validated.experience = highConfidenceExperience.join('\n\n');
+    }
+  } else if (isValidTextSection(data.experience)) {
     validated.experience = data.experience;
   }
   

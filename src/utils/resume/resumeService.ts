@@ -2,7 +2,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { fileToBase64, validateFile } from './fileUtils';
 import { validateExtractedData } from './dataValidator';
-import { ParsedResumeData, ProcessResult } from './types';
+import { ParsedResumeData, ProcessResult, RawResumeData } from './types';
 
 /**
  * Processes a PDF file by sending it to the Edge Function for analysis
@@ -88,12 +88,17 @@ export const processPdfFile = async (file: File): Promise<ProcessResult> => {
         };
       }
 
+      // Log the raw extracted data
+      console.log("Raw extracted data:", data.extractedData);
+
       // Validate the extracted data
-      const validatedData = validateExtractedData(data.extractedData);
+      const rawData: RawResumeData = data.extractedData;
+      const validatedData = validateExtractedData(rawData);
       
       // Log what was extracted vs. what was validated
       console.log("Raw extracted data keys:", Object.keys(data.extractedData));
       console.log("Validated data keys:", Object.keys(validatedData));
+      console.log("Confidence scores:", rawData.confidence || "Not available");
       
       // Only return success if we have some validated data
       if (Object.keys(validatedData).length > 0) {
@@ -101,7 +106,8 @@ export const processPdfFile = async (file: File): Promise<ProcessResult> => {
           success: true, 
           data: {
             validatedData,
-            extractedFields: Object.keys(validatedData)
+            extractedFields: Object.keys(validatedData),
+            confidence: rawData.confidence
           }
         };
       } else {
