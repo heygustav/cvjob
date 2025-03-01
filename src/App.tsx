@@ -1,6 +1,6 @@
 
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import Navbar from "./components/Navbar";
+import Navbar from "./components/navbar/Navbar"; // Updated import path
 import Dashboard from "./pages/Dashboard";
 import CoverLetterGenerator from "./pages/CoverLetterGenerator";
 import Profile from "./pages/Profile";
