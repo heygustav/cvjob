@@ -75,7 +75,7 @@ const FileDropArea: React.FC<FileDropAreaProps> = ({
           <ProcessingIndicator />
         ) : (
           <div className="text-xs text-gray-500">
-            Accepterer kun PDF-filer (max 10MB)
+            Accepterer kun PDF-filer (max 2MB)
           </div>
         )}
         

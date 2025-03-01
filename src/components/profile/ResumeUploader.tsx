@@ -5,6 +5,7 @@ import { PersonalInfoFormState } from '@/pages/Profile';
 import ErrorDisplay from '@/components/ErrorDisplay';
 import FileDropArea from './FileDropArea';
 import { processPdfFile } from '@/utils/resumeParser';
+import { validateFile } from '@/utils/resume/fileUtils';
 
 interface ResumeUploaderProps {
   onExtractedData: (data: Partial<PersonalInfoFormState>) => void;
@@ -22,6 +23,19 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
     
     setIsExtracting(true);
     setError(null);
+    
+    // Validate file before processing
+    const { isValid, error: validationError } = validateFile(file);
+    if (!isValid) {
+      setError(validationError || "Ukendt valideringsfejl");
+      setIsExtracting(false);
+      toast({
+        title: "Filvalideringsfejl",
+        description: validationError || "Filen kunne ikke valideres",
+        variant: "destructive",
+      });
+      return;
+    }
     
     // More comprehensive logging at the start of the process
     console.log("Starting upload process", { 
