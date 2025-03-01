@@ -1,6 +1,6 @@
 
 import { PersonalInfoFormState } from '@/pages/Profile';
-import { RawResumeData } from './types';
+import { ParsedSection, RawResumeData } from './types';
 
 /**
  * Validates and sanitizes raw data extracted from a resume
@@ -97,7 +97,7 @@ export const validateExtractedData = (data: RawResumeData): Partial<PersonalInfo
 /**
  * Helper function to check if a text section is valid
  */
-function isValidTextSection(text: any): boolean {
+function isValidTextSection(text: any): text is string {
   return text && 
     typeof text === 'string' && 
     text.trim().length > 10 && 

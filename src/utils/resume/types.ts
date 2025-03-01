@@ -11,9 +11,9 @@ export interface RawResumeData {
   email?: string;
   phone?: string;
   address?: string;
-  skills?: ParsedSection[];
-  education?: ParsedSection[];
-  experience?: ParsedSection[];
+  skills?: ParsedSection[] | string;
+  education?: ParsedSection[] | string;
+  experience?: ParsedSection[] | string;
   languages?: string[];
   confidence?: {
     [key: string]: number;
