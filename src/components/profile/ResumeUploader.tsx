@@ -46,13 +46,12 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
     
     toast({
       title: "Behandler PDF",
-      description: "Vi uploader og analyserer dit CVJob...",
+      description: "Vi uploader og analyserer dit CV...",
     });
 
     try {
       const result = await processPdfFile(file);
       
-      // Comprehensive logging of the response
       console.log("Response from processing", { 
         success: result.success, 
         error: result.error || null,
@@ -62,11 +61,11 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
       });
       
       if (!result.success) {
-        setError(result.error || 'Ukendt fejl ved behandling af CVJob');
+        setError(result.error || 'Ukendt fejl ved behandling af CV');
         toast({
-          title: "Fejl ved analyse af CVJob",
-          description: result.error || 'Ukendt fejl ved behandling af CVJob',
-          variant: "destructive",
+          title: "Bemærk",
+          description: result.error || 'Vi kunne ikke analysere dit CV. Venligst udfyld oplysningerne manuelt.',
+          variant: "default",
         });
         return;
       }
@@ -78,7 +77,7 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
         // Show a more specific toast based on what was extracted
         const extractedFields = result.data.extractedFields.join(', ');
         toast({
-          title: "CVJob analyseret",
+          title: "CV analyseret",
           description: `Følgende oplysninger er blevet udfyldt: ${extractedFields}. Gennemgå og juster efter behov.`,
         });
         
@@ -100,11 +99,11 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
         }
       }
     } catch (error: any) {
-      console.error('Unexpected error in CVJob processing:', error);
-      const errorMessage = error.message || 'Uventet fejl under behandling af CVJob';
+      console.error('Unexpected error in CV processing:', error);
+      const errorMessage = error.message || 'Uventet fejl under behandling af CV';
       setError(errorMessage);
       toast({
-        title: "Fejl ved analyse af CVJob",
+        title: "Fejl ved analyse af CV",
         description: errorMessage,
         variant: "destructive",
       });
@@ -137,13 +136,13 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
       />
       
       <p className="text-xs text-gray-500 mt-2 mb-3 italic text-left">
-        OBS: Vi bruger kunstig intelligens til at analysere dit CVJob. Vi vil kun forsøge at udfylde 
-        din profil med information, der kan udtrækkes med høj sikkerhed.
+        OBS: PDF-upload er under vedligeholdelse. Du kan stadig forsøge at uploade dit CV,
+        men du vil sandsynligvis blive bedt om at udfylde oplysningerne manuelt.
       </p>
       
       {error && (
         <ErrorDisplay
-          title="Fejl ved analyse af CVJob"
+          title="Information om CV-upload"
           message={error}
           onRetry={retryUpload}
           phase="cv-parsing"
