@@ -145,7 +145,26 @@ function handleEdgeFunctionError(error: any): ProcessResult {
     if (error.message.includes('Failed to send a request')) {
       errorMessage = 'Kunne ikke forbinde til CVJob-analyse tjenesten. Tjek din internetforbindelse og prøv igen senere.';
     } else if (error.message.includes('non-2xx status code')) {
-      errorMessage = 'CVJob-analyse tjenesten rapporterede en fejl. Det kan skyldes at filen er for stor eller i et forkert format. Prøv med en enklere PDF fil.';
+      // Check if error message includes HTTP status code
+      const statusMatch = error.message.match(/(\d{3})/);
+      if (statusMatch) {
+        const statusCode = parseInt(statusMatch[1]);
+        
+        // Provide specific messages based on status code
+        if (statusCode === 413) {
+          errorMessage = 'PDF-filen er for stor til at blive analyseret. Prøv med en mindre fil (max 2MB).';
+        } else if (statusCode === 415) {
+          errorMessage = 'Filformatet understøttes ikke. Sørg for at uploade en gyldig PDF-fil.';
+        } else if (statusCode === 429) {
+          errorMessage = 'For mange anmodninger. Vent venligst et øjeblik og prøv igen.';
+        } else if (statusCode >= 500) {
+          errorMessage = 'Serverfejl ved behandling af CVJob. Prøv igen senere.';
+        } else {
+          errorMessage = 'CVJob-analyse tjenesten rapporterede en fejl. Det kan skyldes at filen er for stor eller i et forkert format. Prøv med en enklere PDF fil.';
+        }
+      } else {
+        errorMessage = 'CVJob-analyse tjenesten rapporterede en fejl. Det kan skyldes at filen er for stor eller i et forkert format. Prøv med en enklere PDF fil.';
+      }
     } else if (error.message.includes('timeout')) {
       errorMessage = 'Tidsgrænse overskredet ved behandling af CVJob. Prøv med en mindre fil eller senere.';
     } else {
