@@ -35,13 +35,26 @@ export const useJobExtraction = (formData: JobFormData, setFormData: React.Dispa
           jobDescription: description,
           // For extraction, we can use a different model than GPT-4
           model: "gpt-4o-mini", 
-          temperature: 0.3
+          temperature: 0.3,
+          mode: "extract" // Adding mode for clarity
         }
       });
       
       if (error) {
         console.error("Edge function error:", error);
-        throw new Error(`Fejl ved analyse: ${error.message}`);
+        
+        let errorMessage = "Fejl ved analyse af jobopslag";
+        if (error.message.includes('non-2xx status code')) {
+          errorMessage = "Serveren kunne ikke behandle anmodningen. Tjek at jobbeskrivelsen ikke er for lang.";
+        } else if (error.message.includes('Failed to send')) {
+          errorMessage = "Kunne ikke forbinde til analysetjenesten. Tjek din internetforbindelse.";
+        } else if (error.message.includes('timeout')) {
+          errorMessage = "Analysen tog for lang tid. Prøv igen senere eller med en kortere jobbeskrivelse.";
+        } else {
+          errorMessage = `Fejl ved analyse: ${error.message}`;
+        }
+        
+        throw new Error(errorMessage);
       }
       
       if (!data) {

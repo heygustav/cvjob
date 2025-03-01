@@ -55,7 +55,8 @@ export const processPdfFile = async (file: File): Promise<ProcessResult> => {
             fileBase64: fileBase64,
             fileName: file.name,
             fileType: file.type,
-            fileSize: file.size 
+            fileSize: file.size,
+            mode: 'structured'  // Adding mode parameter for clarity
           }
         }),
         new Promise<never>((_, reject) => 
@@ -76,7 +77,7 @@ export const processPdfFile = async (file: File): Promise<ProcessResult> => {
         console.error("No data returned from Edge Function");
         return { 
           success: false, 
-          error: 'Ingen data returneret fra CVJob-analysen' 
+          error: 'Ingen data returneret fra CVJob-analysen. Tjek om filen er i et understøttet format.' 
         };
       }
 
@@ -84,7 +85,7 @@ export const processPdfFile = async (file: File): Promise<ProcessResult> => {
         console.error("No extracted data in response:", data);
         return { 
           success: false, 
-          error: 'Kunne ikke finde data i CVJob-analysen' 
+          error: 'Kunne ikke finde data i CVJob-analysen. Prøv med en anden fil eller udfyld oplysningerne manuelt.' 
         };
       }
 
@@ -144,7 +145,9 @@ function handleEdgeFunctionError(error: any): ProcessResult {
     if (error.message.includes('Failed to send a request')) {
       errorMessage = 'Kunne ikke forbinde til CVJob-analyse tjenesten. Tjek din internetforbindelse og prøv igen senere.';
     } else if (error.message.includes('non-2xx status code')) {
-      errorMessage = 'Serverfejl ved behandling af CVJob. Prøv igen senere.';
+      errorMessage = 'CVJob-analyse tjenesten rapporterede en fejl. Det kan skyldes at filen er for stor eller i et forkert format. Prøv med en enklere PDF fil.';
+    } else if (error.message.includes('timeout')) {
+      errorMessage = 'Tidsgrænse overskredet ved behandling af CVJob. Prøv med en mindre fil eller senere.';
     } else {
       errorMessage = error.message;
     }

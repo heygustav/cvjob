@@ -1,12 +1,13 @@
 
 import React from 'react';
 import { AlertCircle, RefreshCw } from 'lucide-react';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
 interface ErrorDisplayProps {
   title: string;
   message: string;
   onRetry?: () => void;
-  phase?: 'job-save' | 'user-fetch' | 'generation' | 'letter-save';
+  phase?: 'job-save' | 'user-fetch' | 'generation' | 'letter-save' | 'cv-parsing';
 }
 
 const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
@@ -26,6 +27,8 @@ const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
         return "AI-tjenesten er muligvis midlertidigt utilgængelig. Vent lidt og prøv igen.";
       case 'letter-save':
         return "Din ansøgning blev genereret, men kunne ikke gemmes. Prøv at kopiere teksten manuelt.";
+      case 'cv-parsing':
+        return "Der opstod en fejl ved analyse af dit CV. Kontroller at filen er i PDF-format og ikke er for stor (max 2MB). Prøv at uploade igen eller udfyld oplysningerne manuelt.";
       default:
         return "Hvis problemet fortsætter, prøv at genindlæse siden eller kontakt heygustav@icloud.com";
     }

@@ -132,6 +132,7 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
           title="Fejl ved analyse af CVJob"
           message={error}
           onRetry={retryUpload}
+          phase="cv-parsing"
         />
       )}
     </div>
