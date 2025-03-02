@@ -3,8 +3,6 @@ import React, { useState } from "react";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import DashboardActions from "@/components/dashboard/DashboardActions";
 import DashboardContent from "@/components/dashboard/DashboardContent";
-import { useAuth } from "@/components/AuthProvider";
-import { Navigate } from "react-router-dom";
 
 interface DashboardMainProps {
   jobPostings: any[];
@@ -28,16 +26,10 @@ const DashboardMain: React.FC<DashboardMainProps> = ({
   findJobForLetter
 }) => {
   const [activeTab, setActiveTab] = useState<"letters" | "jobs">("letters");
-  const { user } = useAuth();
 
   const handleTabChange = (tab: "letters" | "jobs") => {
     setActiveTab(tab);
   };
-
-  // Ensure user is authenticated
-  if (!user) {
-    return <Navigate to="/" />;
-  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10">

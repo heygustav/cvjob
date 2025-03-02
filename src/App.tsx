@@ -4,7 +4,10 @@ import {
   createBrowserRouter,
   RouterProvider,
   Navigate,
-  BrowserRouter,
+  Outlet,
+  Route,
+  Routes,
+  BrowserRouter
 } from "react-router-dom";
 import { AuthProvider, useAuth } from './components/AuthProvider';
 import Dashboard from './pages/Dashboard';
@@ -19,62 +22,58 @@ import Privacy from './pages/PrivacyPolicy';
 import NotFound from './pages/NotFound';
 import JobEdit from './pages/JobEdit';
 
-// Separate the routes configuration from the router setup
-const routes = [
-  {
-    path: "/",
-    element: <Home />,
-  },
-  {
-    path: "/dashboard",
-    element: <Dashboard />,
-  },
-  {
-    path: "/cover-letter",
-    element: <CoverLetter />,
-  },
-  {
-    path: "/profile",
-    element: <Profile />,
-  },
-  {
-    path: "/job/new",
-    element: <JobForm />,
-  },
-  {
-    path: "/contact",
-    element: <Contact />,
-  },
-  {
-    path: "/about",
-    element: <About />,
-  },
-  {
-    path: "/terms",
-    element: <Terms />,
-  },
-  {
-    path: "/privacy",
-    element: <Privacy />,
-  },
-  {
-    path: "/job/edit/:jobId",
-    element: <JobEdit />,
-  },
-  {
-    path: "*",
-    element: <NotFound />,
-  },
-];
-
-// Create the router without any auth logic initially
-const router = createBrowserRouter(routes);
+// Protected route component
+const ProtectedRoute = ({ children }) => {
+  const { user, isLoading } = useAuth();
+  
+  if (isLoading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
+  
+  if (!user) {
+    return <Navigate to="/" replace />;
+  }
+  
+  return children;
+};
 
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <RouterProvider router={router} />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/dashboard" element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/cover-letter" element={
+            <ProtectedRoute>
+              <CoverLetter />
+            </ProtectedRoute>
+          } />
+          <Route path="/profile" element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          } />
+          <Route path="/job/new" element={
+            <ProtectedRoute>
+              <JobForm />
+            </ProtectedRoute>
+          } />
+          <Route path="/job/edit/:jobId" element={
+            <ProtectedRoute>
+              <JobEdit />
+            </ProtectedRoute>
+          } />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
       </AuthProvider>
     </BrowserRouter>
   );
