@@ -7,14 +7,14 @@ import {
 } from "react-router-dom";
 import { useAuth } from './components/AuthProvider';
 import Dashboard from './pages/Dashboard';
-import Home from './pages/Index'; // Changed from './pages/Home'
-import CoverLetter from './pages/CoverLetterGenerator'; // Changed from './pages/CoverLetter'
+import Home from './pages/Index'; 
+import CoverLetter from './pages/CoverLetterGenerator';
 import Profile from './pages/Profile';
 import JobForm from './pages/JobForm';
 import Contact from './pages/Contact';
-import About from './pages/AboutUs'; // Changed from './pages/About'
-import Terms from './pages/TermsAndConditions'; // Changed from './pages/Terms'
-import Privacy from './pages/PrivacyPolicy'; // Changed from './pages/Privacy'
+import About from './pages/AboutUs';
+import Terms from './pages/TermsAndConditions';
+import Privacy from './pages/PrivacyPolicy';
 import NotFound from './pages/NotFound';
 import JobEdit from './pages/JobEdit';
 
