@@ -1,5 +1,5 @@
 
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, BrowserRouter } from "react-router-dom";
 import './App.css';
 import { Toaster } from "@/components/ui/toaster";
 import Index from "./pages/Index";
@@ -60,25 +60,27 @@ function App() {
 
   return (
     <AppErrorBoundary>
-      <AuthProvider>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/login" element={<Login onLogin={handleUserAuth} />} />
-          <Route path="/signup" element={<Signup onSignup={handleUserAuth} />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/job/new" element={<JobForm />} />
-          <Route path="/job/:id" element={<JobForm />} />
-          <Route path="/cover-letter" element={<CoverLetterGenerator />} />
-          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-          <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
-          <Route path="/about-us" element={<AboutUs />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-        <Toaster />
-      </AuthProvider>
+      <BrowserRouter>
+        <AuthProvider>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/login" element={<Login onLogin={handleUserAuth} />} />
+            <Route path="/signup" element={<Signup onSignup={handleUserAuth} />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/job/new" element={<JobForm />} />
+            <Route path="/job/:id" element={<JobForm />} />
+            <Route path="/cover-letter" element={<CoverLetterGenerator />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+            <Route path="/about-us" element={<AboutUs />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+          <Toaster />
+        </AuthProvider>
+      </BrowserRouter>
     </AppErrorBoundary>
   );
 }
