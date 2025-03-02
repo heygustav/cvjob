@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Clock, RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -31,9 +32,18 @@ const GenerationProgressIndicator: React.FC<GenerationProgressProps> = ({
   // Get a helpful tip based on the current phase
   const getHelpfulTip = () => {
     if (phase === 'generation' && elapsed > 1500) {
-      return "Generering af ansøgning kan tage lidt længere tid end normalt, især ved ufuldstændige data.";
+      return "Generering af ansøgning kan tage lidt længere tid end normalt, især ved ufuldstændige data. Hvis det tager mere end 60 sekunder, kan du prøve at trykke på 'Prøv igen'.";
     }
-    return "Tålmod er det bedste mod.";
+    if (phase === 'user-fetch' && elapsed > 1000) {
+      return "Hentning af din profil tager længere tid end normalt. Dette kan skyldes netværksforsinkelser.";
+    }
+    if (phase === 'job-save' && elapsed > 1000) {
+      return "Gemning af joboplysninger tager længere tid end normalt. Dette kan skyldes netværksforsinkelser.";
+    }
+    if (phase === 'letter-save' && elapsed > 1000) {
+      return "Gemning af ansøgning tager længere tid end normalt. Dette kan skyldes netværksforsinkelser.";
+    }
+    return "Tålmod er det bedste mod. Hvis processen tager for lang tid, kan du prøve at trykke på 'Prøv igen'.";
   };
   
   return (
@@ -87,7 +97,7 @@ const GenerationProgressIndicator: React.FC<GenerationProgressProps> = ({
         </div>
         
         {/* Show retry button if taking too long */}
-        {isTakingTooLong && onRetry && (
+        {(isTakingTooLong || elapsed > 2000) && onRetry && (
           <div className="flex justify-start mt-3">
             <Button 
               onClick={onRetry}

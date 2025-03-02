@@ -60,12 +60,12 @@ export const useLetterGeneration = (
       return;
     }
 
-    // Form validation
-    if (!validateJobFormData(jobData)) {
-      console.error("Form validation failed: Missing required fields");
-      toast(toastMessages.missingFields);
-      return;
-    }
+    // Skip validation for required fields - we'll use defaults instead
+    console.log("Form data for generation:", {
+      title: jobData.title || "(missing)",
+      company: jobData.company || "(missing)",
+      description: jobData.description?.length || 0
+    });
 
     // Cancel any in-progress generation
     const abortController = abortGeneration();
@@ -126,6 +126,7 @@ export const useLetterGeneration = (
       toast(toastMessages.letterGenerated);
       
     } catch (error) {
+      console.error("Generation failed with error:", error);
       handleGenerationError(error, currentAttempt, timeoutId);
     } finally {
       console.log(`Attempt #${currentAttempt}: Generation process completed`);

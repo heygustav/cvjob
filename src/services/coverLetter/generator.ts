@@ -22,10 +22,10 @@ export const generateCoverLetter = async (
   try {
     console.log("Preparing to call edge function for letter generation");
     
-    // Basic validation
-    if (!jobInfo.title || !jobInfo.company || !jobInfo.description) {
-      throw new Error('Manglende joboplysninger. Udfyld venligst alle påkrævede felter.');
-    }
+    // Ensure we have values for required fields
+    const title = jobInfo.title || "Untitled Position";
+    const company = jobInfo.company || "Unknown Company";
+    const description = jobInfo.description || "No description provided";
     
     // Call the edge function directly - no complex Promise racing
     console.log("Calling Supabase function with job info");
@@ -34,11 +34,11 @@ export const generateCoverLetter = async (
       {
         body: {
           jobInfo: {
-            title: jobInfo.title,
-            company: jobInfo.company,
-            description: jobInfo.description,
-            contactPerson: jobInfo.contact_person,
-            url: jobInfo.url
+            title: title,
+            company: company,
+            description: description,
+            contactPerson: jobInfo.contact_person || '',
+            url: jobInfo.url || ''
           },
           userInfo: {
             name: userInfo.name || '',
