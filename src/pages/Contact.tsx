@@ -157,22 +157,22 @@ const Contact = () => {
               <h3 className="text-lg font-medium text-gray-900 mb-4">Ofte stillede spørgsmål</h3>
               <div className="text-muted-foreground space-y-4">
                 <p>
-                  <a href="#" className="text-primary hover:underline">
+                  <a href="#" className="text-primary hover:underline block">
                     Hvordan fungerer jeres ansøgningsgenerator?
                   </a>
                 </p>
                 <p>
-                  <a href="#" className="text-primary hover:underline">
+                  <a href="#" className="text-primary hover:underline block">
                     Hvad koster jeres tjeneste?
                   </a>
                 </p>
                 <p>
-                  <a href="#" className="text-primary hover:underline">
+                  <a href="#" className="text-primary hover:underline block">
                     Kan jeg slette min konto igen?
                   </a>
                 </p>
                 <p>
-                  <a href="#" className="text-primary hover:underline">
+                  <a href="#" className="text-primary hover:underline block">
                     Hvor sikre er mine data hos jer?
                   </a>
                 </p>
