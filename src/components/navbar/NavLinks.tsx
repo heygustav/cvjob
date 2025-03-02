@@ -26,8 +26,8 @@ const NavLinks: React.FC<NavLinksProps> = ({
     : "flex items-center gap-2 px-3 py-2 rounded-md text-white hover:bg-primary-700 transition-colors";
 
   const buttonClass = isMobile
-    ? "w-full justify-start gap-2"
-    : "gap-2";
+    ? "w-full justify-start gap-2 text-white hover:bg-primary-700 hover:text-white"
+    : "gap-2 text-white hover:bg-primary-700 hover:text-white";
 
   return (
     <>
