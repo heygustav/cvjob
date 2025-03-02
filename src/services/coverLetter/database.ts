@@ -1,5 +1,16 @@
 
-// Re-exporting all database operations from their respective files
-export * from './jobOperations';
-export * from './letterOperations';
-export * from './userOperations';
+import { fetchJobById, saveOrUpdateJob } from './jobOperations';
+import { fetchLettersForJob, fetchLetterById, saveCoverLetter, updateLetterContent, editCoverLetter } from './letterOperations';
+import { fetchUserProfile } from './userOperations';
+
+// Re-export all functions
+export {
+  fetchJobById,
+  saveOrUpdateJob,
+  fetchLettersForJob,
+  fetchLetterById,
+  saveCoverLetter,
+  updateLetterContent,
+  editCoverLetter,
+  fetchUserProfile
+};

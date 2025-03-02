@@ -1,60 +1,60 @@
 
-import { useMemo } from "react";
 import { ToastMessagesType } from "./types";
 
-export const useToastMessages = (): ToastMessagesType => {
-  // Memoize toast configurations
-  return useMemo(() => ({
+export const useToastMessages = () => {
+  const messages: ToastMessagesType = {
     networkError: {
-      title: "Forbindelsesfejl",
-      description: "Kontroller din internetforbindelse og prøv igen.",
-      variant: "destructive" as const,
+      title: "Netværksfejl",
+      description: "Kunne ikke forbinde til serveren. Tjek din internetforbindelse og prøv igen.",
+      variant: "destructive",
     },
     jobNotFound: {
       title: "Job ikke fundet",
-      description: "Det valgte job kunne ikke findes.",
-      variant: "destructive" as const,
+      description: "Det angivne job blev ikke fundet. Prøv igen eller opret et nyt job.",
+      variant: "destructive",
     },
     letterNotFound: {
       title: "Ansøgning ikke fundet",
-      description: "Den valgte ansøgning kunne ikke findes.",
-      variant: "destructive" as const,
+      description: "Den angivne ansøgning blev ikke fundet. Prøv igen eller opret en ny ansøgning.",
+      variant: "destructive",
     },
     letterGenerated: {
       title: "Ansøgning genereret",
-      description: "Din ansøgning er blevet oprettet med succes.",
+      description: "Din ansøgning er blevet genereret. Du kan nu redigere og gemme den.",
     },
     letterUpdated: {
       title: "Ansøgning opdateret",
-      description: "Dine ændringer er blevet gemt.",
+      description: "Din ansøgning er blevet opdateret og gemt.",
     },
     letterSaved: {
       title: "Ansøgning gemt",
-      description: "Din ansøgning er blevet gemt til din konto.",
+      description: "Din ansøgning er blevet gemt.",
     },
     missingFields: {
-      title: "Manglende information",
-      description: "Udfyld venligst jobtitel, virksomhed og beskrivelse.",
-      variant: "destructive" as const,
+      title: "Manglende felter",
+      description: "Udfyld venligst alle påkrævede felter.",
+      variant: "destructive",
     },
     generationInProgress: {
-      title: "Generation i gang",
-      description: "Vent venligst mens din ansøgning genereres.",
+      title: "Generering i gang",
+      description: "En ansøgning er allerede ved at blive genereret. Vent venligst et øjeblik.",
     },
     loginRequired: {
-      title: "Log ind krævet",
-      description: "Du skal være logget ind for at generere en ansøgning.",
-      variant: "destructive" as const,
+      title: "Login påkrævet",
+      description: "Du skal være logget ind for at udføre denne handling.",
+      variant: "destructive",
     },
     incompleteProfile: {
-      title: "Bemærk",
-      description: "Udfyld venligst din profil for at få en bedre ansøgning.",
-      variant: "default" as const,
+      title: "Ufuldstændig profil",
+      description: "For at få bedre resultater, opdater venligst din profil med mere information.",
+      variant: "default",
     },
     generationTimeout: {
       title: "Generering tog for lang tid",
-      description: "Prøv igen senere eller kontakt support hvis problemet fortsætter.",
-      variant: "destructive" as const,
+      description: "Generering af ansøgningen tog for lang tid. Prøv igen senere.",
+      variant: "destructive",
     },
-  }), []);
+  };
+
+  return messages;
 };

@@ -1,12 +1,16 @@
+
 import { useState, useCallback, useRef, useEffect } from "react";
 import { JobPosting, CoverLetter, User } from "@/lib/types";
 import { JobFormData } from "@/services/coverLetter/types";
 import { useToastMessages } from "./coverLetter/useToastMessages";
 import { useJobFetching } from "./coverLetter/useJobFetching";
 import { useLetterFetching } from "./coverLetter/useLetterFetching";
-import { useLetterGeneration } from "./coverLetter/useLetterGeneration";
+import { useLetterGeneration } from "./coverLetter/letter-generation";
 import { useLetterEditing } from "./coverLetter/useLetterEditing";
 import { LoadingState, GenerationProgress } from "./coverLetter/types";
+import { useGenerationTracking } from "./coverLetter/generation-tracking";
+import { useGenerationErrorHandling } from "./coverLetter/generation-error-handling";
+import { useGenerationSteps } from "./coverLetter/useGenerationSteps";
 
 export const useCoverLetterGeneration = (user: User | null) => {
   const [step, setStep] = useState<1 | 2>(1);
@@ -63,6 +67,30 @@ export const useCoverLetterGeneration = (user: User | null) => {
     }
   }, []);
 
+  // Get tracking utilities
+  const generationTracking = useGenerationTracking({
+    isMountedRef,
+    safeSetState,
+    setGenerationPhase,
+    setGenerationProgress
+  });
+
+  // Get error handling utilities
+  const errorHandling = useGenerationErrorHandling({
+    isMountedRef,
+    safeSetState,
+    setGenerationError,
+    setLoadingState
+  });
+
+  // Get generation steps
+  const generationSteps = useGenerationSteps(
+    user,
+    isMountedRef,
+    generationTracking.updatePhase,
+    abortControllerRef
+  );
+
   // Initialize hooks for different functionalities
   const { fetchJob } = useJobFetching(
     user,
@@ -104,7 +132,10 @@ export const useCoverLetterGeneration = (user: User | null) => {
     setGenerationPhase,
     setGenerationProgress,
     selectedJob,
-    loadingState
+    loadingState,
+    generationSteps,
+    generationTracking,
+    errorHandling
   );
 
   const { handleEditLetter, handleSaveLetter, saveJobAsDraft, resetError } = useLetterEditing(
