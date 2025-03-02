@@ -6,7 +6,7 @@ import { GenerationProgress } from "./types";
 import { useGenerationTracking } from "./generation-tracking";
 import { useGenerationErrorHandling } from "./generation-error-handling";
 import { useGenerationSteps } from "./useGenerationSteps";
-import { useLetterGenerationHook } from "./letter-generation";
+import { useLetterGeneration as useLetterGenerationImpl } from "./letter-generation";
 
 // The main hook now acts as a facade that composes the more specialized hooks
 export const useLetterGeneration = (
@@ -70,7 +70,7 @@ export const useLetterGeneration = (
   };
 
   // Use the refactored letter generation hook
-  const { handleJobFormSubmit } = useLetterGenerationHook(
+  const { handleJobFormSubmit } = useLetterGenerationImpl(
     user,
     generationAttemptRef,
     abortControllerRef,
