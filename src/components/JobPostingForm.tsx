@@ -55,6 +55,7 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
           title={formData.title}
           company={formData.company}
           contactPerson={formData.contact_person}
+          deadline={formData.deadline}
           onChange={handleChange}
           disabled={isLoading}
           errors={errors}

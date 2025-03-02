@@ -17,6 +17,7 @@ export const useJobForm = ({ initialData, onSubmit }: UseJobFormProps) => {
     description: initialData?.description || "",
     contact_person: initialData?.contact_person || "",
     url: initialData?.url || "",
+    deadline: initialData?.deadline || "",
   });
   
   const [errors, setErrors] = useState<Record<string, string>>({});

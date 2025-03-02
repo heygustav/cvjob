@@ -5,6 +5,7 @@ interface JobInfoFieldsProps {
   title: string;
   company: string;
   contactPerson: string;
+  deadline?: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   disabled: boolean;
   errors: Record<string, string>;
@@ -14,6 +15,7 @@ const JobInfoFields: React.FC<JobInfoFieldsProps> = ({
   title,
   company,
   contactPerson,
+  deadline,
   onChange,
   disabled,
   errors,
@@ -84,7 +86,7 @@ const JobInfoFields: React.FC<JobInfoFieldsProps> = ({
         )}
       </div>
 
-      <div className="sm:col-span-2">
+      <div>
         <div className="flex justify-between items-center mb-1">
           <label
             htmlFor="contact_person"
@@ -105,6 +107,29 @@ const JobInfoFields: React.FC<JobInfoFieldsProps> = ({
         />
         <p className="mt-1 text-xs text-gray-400 italic">
           Navn på personen ansøgningen skal rettes til
+        </p>
+      </div>
+
+      <div>
+        <div className="flex justify-between items-center mb-1">
+          <label
+            htmlFor="deadline"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Ansøgningsfrist (Valgfri)
+          </label>
+        </div>
+        <input
+          type="date"
+          id="deadline"
+          name="deadline"
+          value={deadline || ''}
+          onChange={onChange}
+          disabled={disabled}
+          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm placeholder:text-gray-400"
+        />
+        <p className="mt-1 text-xs text-gray-400 italic">
+          Sidste frist for ansøgning
         </p>
       </div>
     </div>

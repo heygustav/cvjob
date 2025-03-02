@@ -18,6 +18,7 @@ export interface JobPosting {
   url?: string;
   created_at: string;
   updated_at?: string;
+  deadline?: string;
 }
 
 export interface CoverLetter {
@@ -66,7 +67,8 @@ export const mockJobPostings: JobPosting[] = [
     description: "Vi søger en dygtig UX designer med erfaring fra digitale projekter. Du vil indgå i vores kreative team og arbejde med spændende kunder i forskellige brancher.",
     contact_person: "Maria Hansen",
     url: "https://example.com/job/ux-designer",
-    created_at: new Date().toISOString()
+    created_at: new Date().toISOString(),
+    deadline: new Date(new Date().setDate(new Date().getDate() + 14)).toISOString()
   },
   {
     id: "2",
@@ -76,7 +78,8 @@ export const mockJobPostings: JobPosting[] = [
     description: "Er du passioneret omkring moderne frontend-teknologier? Vi søger en udvikler der kan hjælpe os med at bygge intuitive brugergrænseflader til vores produkter.",
     contact_person: "Lars Jensen",
     url: "https://example.com/job/frontend-developer",
-    created_at: new Date().toISOString()
+    created_at: new Date().toISOString(),
+    deadline: new Date(new Date().setDate(new Date().getDate() + 21)).toISOString()
   }
 ];
 

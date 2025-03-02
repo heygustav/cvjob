@@ -7,6 +7,7 @@ export interface JobFormData {
   description: string;
   contact_person?: string;
   url?: string;
+  deadline?: string;
 }
 
 export interface UserProfile {

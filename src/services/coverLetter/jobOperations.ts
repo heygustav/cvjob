@@ -40,6 +40,7 @@ export const saveOrUpdateJob = async (
         description: jobData.description,
         contact_person: jobData.contact_person,
         url: jobData.url,
+        deadline: jobData.deadline,
         updated_at: new Date().toISOString()
       })
       .eq("id", existingJobId);
@@ -62,7 +63,8 @@ export const saveOrUpdateJob = async (
       company: jobData.company || "",
       description: jobData.description || "",
       contact_person: jobData.contact_person,
-      url: jobData.url
+      url: jobData.url,
+      deadline: jobData.deadline
     })
     .select()
     .single();

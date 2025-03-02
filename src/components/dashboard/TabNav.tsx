@@ -1,5 +1,7 @@
 
 import React from "react";
+import { Button } from "@/components/ui/button";
+import { File, Briefcase } from "lucide-react";
 
 interface TabNavProps {
   activeTab: "letters" | "jobs";
@@ -9,22 +11,32 @@ interface TabNavProps {
 const TabNav: React.FC<TabNavProps> = ({ activeTab, onTabChange }) => {
   return (
     <div className="border-b border-gray-200">
-      <nav className="flex space-x-6 px-6" aria-label="Tabs">
-        <button
+      <div className="flex space-x-2 px-4 sm:px-6">
+        <Button
+          variant={activeTab === "letters" ? "default" : "ghost"}
+          className={`${
+            activeTab === "letters"
+              ? "bg-primary text-white"
+              : "text-gray-600 hover:text-gray-900"
+          } -mb-px border-b-2 border-transparent py-4 px-1 font-medium flex items-center`}
           onClick={() => onTabChange("letters")}
-          className={`
-            py-4 text-sm font-medium border-b-2 px-1 text-left
-            ${
-              activeTab === "letters"
-                ? "border-primary text-primary"
-                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-            }
-          `}
-          aria-current={activeTab === "letters" ? "page" : undefined}
         >
-          Ansøgninger
-        </button>
-      </nav>
+          <File className="mr-2 h-4 w-4" />
+          Mine ansøgninger
+        </Button>
+        <Button
+          variant={activeTab === "jobs" ? "default" : "ghost"}
+          className={`${
+            activeTab === "jobs"
+              ? "bg-primary text-white"
+              : "text-gray-600 hover:text-gray-900"
+          } -mb-px border-b-2 border-transparent py-4 px-1 font-medium flex items-center`}
+          onClick={() => onTabChange("jobs")}
+        >
+          <Briefcase className="mr-2 h-4 w-4" />
+          Mine jobopslag
+        </Button>
+      </div>
     </div>
   );
 };

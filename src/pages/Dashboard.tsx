@@ -7,11 +7,12 @@ import { useToast } from "@/hooks/use-toast";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import TabNav from "@/components/dashboard/TabNav";
 import LetterListComponent from "@/components/dashboard/LetterListComponent";
+import JobListComponent from "@/components/dashboard/JobListComponent";
 
 const Dashboard = () => {
   const [jobPostings, setJobPostings] = useState<JobPosting[]>([]);
   const [coverLetters, setCoverLetters] = useState<CoverLetter[]>([]);
-  const [activeTab] = useState<"letters">("letters");
+  const [activeTab, setActiveTab] = useState<"letters" | "jobs">("letters");
   const [isLoading, setIsLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
   const { user } = useAuth();
@@ -145,6 +146,10 @@ const Dashboard = () => {
     return jobPostings.find(job => job.id === jobPostingId);
   };
 
+  const handleTabChange = (tab: "letters" | "jobs") => {
+    setActiveTab(tab);
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 pt-20 flex justify-center items-center">
@@ -159,16 +164,24 @@ const Dashboard = () => {
         <DashboardHeader />
 
         <div className="bg-white shadow-sm rounded-lg overflow-hidden border border-gray-100">
-          <TabNav activeTab={activeTab} onTabChange={() => {}} />
+          <TabNav activeTab={activeTab} onTabChange={handleTabChange} />
 
           <div className="p-4 sm:p-6">
-            <LetterListComponent 
-              coverLetters={coverLetters}
-              jobPostings={jobPostings}
-              isDeleting={isDeleting}
-              onLetterDelete={deleteCoverLetter}
-              findJobForLetter={findJobForLetter}
-            />
+            {activeTab === "letters" ? (
+              <LetterListComponent 
+                coverLetters={coverLetters}
+                jobPostings={jobPostings}
+                isDeleting={isDeleting}
+                onLetterDelete={deleteCoverLetter}
+                findJobForLetter={findJobForLetter}
+              />
+            ) : (
+              <JobListComponent
+                jobPostings={jobPostings}
+                isDeleting={isDeleting}
+                onJobDelete={deleteJobPosting}
+              />
+            )}
           </div>
         </div>
       </div>
