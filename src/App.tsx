@@ -4,6 +4,7 @@ import {
   createBrowserRouter,
   RouterProvider,
   Navigate,
+  BrowserRouter,
 } from "react-router-dom";
 import { AuthProvider, useAuth } from './components/AuthProvider';
 import Dashboard from './pages/Dashboard';
@@ -18,95 +19,64 @@ import Privacy from './pages/PrivacyPolicy';
 import NotFound from './pages/NotFound';
 import JobEdit from './pages/JobEdit';
 
-function AppRoutes() {
-  const { user, isLoading } = useAuth();
-  const isAuthenticated = !!user; // Derive authentication status from user
+// Separate the routes configuration from the router setup
+const routes = [
+  {
+    path: "/",
+    element: <Home />,
+  },
+  {
+    path: "/dashboard",
+    element: <Dashboard />,
+  },
+  {
+    path: "/cover-letter",
+    element: <CoverLetter />,
+  },
+  {
+    path: "/profile",
+    element: <Profile />,
+  },
+  {
+    path: "/job/new",
+    element: <JobForm />,
+  },
+  {
+    path: "/contact",
+    element: <Contact />,
+  },
+  {
+    path: "/about",
+    element: <About />,
+  },
+  {
+    path: "/terms",
+    element: <Terms />,
+  },
+  {
+    path: "/privacy",
+    element: <Privacy />,
+  },
+  {
+    path: "/job/edit/:jobId",
+    element: <JobEdit />,
+  },
+  {
+    path: "*",
+    element: <NotFound />,
+  },
+];
 
-  const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-    if (isLoading) {
-      return <div>Loading...</div>; // Or a loading spinner
-    }
-    if (!isAuthenticated) {
-      return <Navigate to="/" replace />;
-    }
-    return <>{children}</>;
-  };
-
-  const router = createBrowserRouter([
-    {
-      path: "/",
-      element: <Home />,
-    },
-    {
-      path: "/dashboard",
-      element: (
-        <ProtectedRoute>
-          <Dashboard />
-        </ProtectedRoute>
-      ),
-    },
-    {
-      path: "/cover-letter",
-      element: (
-        <ProtectedRoute>
-          <CoverLetter />
-        </ProtectedRoute>
-      ),
-    },
-    {
-      path: "/profile",
-      element: (
-        <ProtectedRoute>
-          <Profile />
-        </ProtectedRoute>
-      ),
-    },
-    {
-      path: "/job/new",
-      element: (
-        <ProtectedRoute>
-          <JobForm />
-        </ProtectedRoute>
-      ),
-    },
-    {
-      path: "/contact",
-      element: <Contact />,
-    },
-    {
-      path: "/about",
-      element: <About />,
-    },
-    {
-      path: "/terms",
-      element: <Terms />,
-    },
-    {
-      path: "/privacy",
-      element: <Privacy />,
-    },
-    {
-      path: "/job/edit/:jobId",
-      element: (
-        <ProtectedRoute>
-          <JobEdit />
-        </ProtectedRoute>
-      ),
-    },
-    {
-      path: "*",
-      element: <NotFound />,
-    },
-  ]);
-
-  return <RouterProvider router={router} />;
-}
+// Create the router without any auth logic initially
+const router = createBrowserRouter(routes);
 
 function App() {
   return (
-    <AuthProvider>
-      <AppRoutes />
-    </AuthProvider>
+    <BrowserRouter>
+      <AuthProvider>
+        <RouterProvider router={router} />
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
 

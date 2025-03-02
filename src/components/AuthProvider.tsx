@@ -1,13 +1,14 @@
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 interface AuthContextType {
   session: Session | null;
   user: User | null;
   isLoading: boolean;
-  isAuthenticated?: boolean; // Added this property
+  isAuthenticated: boolean;
   signIn: (email: string, password: string) => Promise<{
     error: Error | null;
     data: { user: User | null; session: Session | null } | null;
@@ -25,7 +26,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const navigate = useNavigate();
+  
+  // Remove useNavigate from here to avoid the circular dependency
+  // We'll handle navigation separately in components
 
   useEffect(() => {
     // Check for active session
@@ -61,11 +64,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signOut = async () => {
     await supabase.auth.signOut();
-    navigate('/login');
+    // We'll handle navigation in the component that calls signOut
   };
 
+  const isAuthenticated = !!user;
+
   return (
-    <AuthContext.Provider value={{ session, user, isLoading, signIn, signUp, signOut }}>
+    <AuthContext.Provider 
+      value={{ 
+        session, 
+        user, 
+        isLoading, 
+        isAuthenticated,
+        signIn, 
+        signUp, 
+        signOut 
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
