@@ -29,29 +29,21 @@ const JobFormStep: React.FC<JobFormStepProps> = ({
   onSubmit,
   onSave
 }) => {
-  // Check if this is a saved job that has empty required fields
-  const isSavedEmptyJob = selectedJob !== null && 
-    (!selectedJob.title || !selectedJob.company || !selectedJob.description);
+  // Show notice if this is a saved job (currently not supporting generation for saved jobs)
+  const isSavedJob = selectedJob !== null;
 
   return (
     <div className="p-4 sm:p-6 md:p-8 text-left">
-      {isSavedEmptyJob ? (
+      {isSavedJob && (
         <Alert variant="default" className="mb-6 bg-blue-50 border-blue-200 text-left">
           <InfoIcon className="h-4 w-4 text-blue-700" />
-          <AlertTitle className="text-blue-800">Udfyld jobdetaljer</AlertTitle>
+          <AlertTitle className="text-blue-800">Bemærk</AlertTitle>
           <AlertDescription className="text-sm text-blue-700">
-            Dit gemte job mangler vigtige detaljer. Udfyld venligst jobtitel, virksomhed og beskrivelse for at generere en ansøgning.
+            Denne funktion understøtter i øjeblikket kun generering af ansøgninger for nye jobannoncer. 
+            Hvis du vil generere en ansøgning til dette job, skal du kopiere jobdetaljerne og starte en ny.
           </AlertDescription>
         </Alert>
-      ) : selectedJob !== null && selectedJob.title && selectedJob.company && selectedJob.description ? (
-        <Alert variant="default" className="mb-6 bg-blue-50 border-blue-200 text-left">
-          <InfoIcon className="h-4 w-4 text-blue-700" />
-          <AlertTitle className="text-blue-800">Gemt job indlæst</AlertTitle>
-          <AlertDescription className="text-sm text-blue-700">
-            Du kan redigere detaljerne eller generere en ansøgning direkte ved at klikke på "Generer ansøgning".
-          </AlertDescription>
-        </Alert>
-      ) : null}
+      )}
       
       <JobPostingForm
         onSubmit={onSubmit}

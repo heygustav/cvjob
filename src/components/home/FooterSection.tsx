@@ -8,11 +8,6 @@ const FooterSection: React.FC = () => {
       <div className="mx-auto max-w-7xl overflow-hidden px-4 sm:px-6 lg:px-8">
         <nav className="grid grid-cols-2 gap-4 sm:flex sm:justify-center sm:space-x-12" aria-label="Footer">
           <div className="pb-4 sm:pb-6">
-            <a href="https://cvjob.dk/blog" className="text-sm leading-6 text-muted-foreground hover:text-foreground transition-colors">
-              Blog
-            </a>
-          </div>
-          <div className="pb-4 sm:pb-6">
             <Link to="/about" className="text-sm leading-6 text-muted-foreground hover:text-foreground transition-colors">
               Om os
             </Link>
@@ -31,6 +26,11 @@ const FooterSection: React.FC = () => {
             <Link to="/contact" className="text-sm leading-6 text-muted-foreground hover:text-foreground transition-colors">
               Kontakt
             </Link>
+          </div>
+          <div className="pb-4 sm:pb-6">
+            <a href="https://cvjob.dk/blog" className="text-sm leading-6 text-muted-foreground hover:text-foreground transition-colors">
+              Blog
+            </a>
           </div>
         </nav>
         <p className="mt-8 text-center text-xs leading-5 text-muted-foreground">
