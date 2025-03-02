@@ -37,6 +37,8 @@ export const saveOrUpdateJob = async (
   
   if (existingJobId) {
     console.log("Updating existing job:", existingJobId);
+    console.log("Job data to update:", jobData);
+    
     const { error } = await supabase
       .from("job_postings")
       .update({
@@ -89,4 +91,3 @@ export const saveOrUpdateJob = async (
   console.log("Successfully created job", data.id);
   return data.id;
 };
-

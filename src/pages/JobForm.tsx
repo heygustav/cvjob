@@ -68,8 +68,12 @@ const JobForm = () => {
     try {
       setIsSubmitting(true);
       
+      // Pass the exact ID for updates
+      const jobId = isEditMode ? id : undefined;
+      console.log("Saving job with id:", jobId, "Form data:", formData);
+      
       // Save job to database
-      await saveOrUpdateJob(formData, user.id, isEditMode ? id : undefined);
+      await saveOrUpdateJob(formData, user.id, jobId);
       
       toast({
         title: isEditMode ? "Jobopslag opdateret" : "Jobopslag oprettet",
