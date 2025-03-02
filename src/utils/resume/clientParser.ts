@@ -1,17 +1,10 @@
 
 import * as mammoth from 'mammoth';
-import * as pdfjs from 'pdfjs-dist';
 import { PersonalInfoFormState } from '@/pages/Profile';
 import { ProcessResult } from './types';
 import { parseResumeText } from './textParser';
 import { calculateConfidence } from './confidenceCalculator';
-
-// Set the worker source to a static path relative to the base URL
-// This avoids CORS issues and external CDN dependencies
-pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-  'pdf.worker.mjs',
-  import.meta.url
-).toString();
+import { pdfjs } from '@/utils/pdfjs-setup';
 
 /**
  * Extract text from a PDF document
@@ -23,14 +16,17 @@ async function extractTextFromPdf(file: File): Promise<string> {
     // Read the file
     const arrayBuffer = await file.arrayBuffer();
     
+    console.log("Loading PDF document");
     // Load the PDF document
     const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
+    console.log("PDF loaded successfully, pages:", pdf.numPages);
     
     let extractedText = '';
     
     // Iterate through each page
     for (let i = 1; i <= pdf.numPages; i++) {
       try {
+        console.log(`Processing page ${i} of ${pdf.numPages}`);
         const page = await pdf.getPage(i);
         const textContent = await page.getTextContent();
         const pageText = textContent.items
@@ -43,6 +39,7 @@ async function extractTextFromPdf(file: File): Promise<string> {
       }
     }
     
+    console.log("Text extraction complete, length:", extractedText.length);
     return extractedText;
   } catch (error) {
     console.error("Error extracting text from PDF:", error);
