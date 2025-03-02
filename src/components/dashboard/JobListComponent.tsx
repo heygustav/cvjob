@@ -105,7 +105,7 @@ const JobListComponent: React.FC<JobListComponentProps> = ({
                       className="h-8 w-8 p-0"
                     >
                       <RouterLink
-                        to={`/cover-letter/new?job=${job.id}`}
+                        to={`/cover-letter?jobId=${job.id}`}
                         title="Opret ansøgning"
                       >
                         <FileText className="h-4 w-4" />
