@@ -34,7 +34,7 @@ const PreviewHeader: React.FC<PreviewHeaderProps> = ({
         {isEditing ? (
           <button
             onClick={onSaveChanges}
-            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-0 transition-colors"
             aria-label="Gem ændringer"
           >
             Gem ændringer
@@ -44,7 +44,7 @@ const PreviewHeader: React.FC<PreviewHeaderProps> = ({
             {isEditable && (
               <button
                 onClick={onEdit}
-                className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-0 transition-colors"
                 aria-label="Rediger ansøgning"
                 title="Rediger ansøgning"
               >
@@ -54,7 +54,7 @@ const PreviewHeader: React.FC<PreviewHeaderProps> = ({
             )}
             <button
               onClick={onCopy}
-              className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+              className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-0 transition-colors"
               title="Kopier til udklipsholder"
               aria-label="Kopier til udklipsholder"
             >
@@ -63,7 +63,7 @@ const PreviewHeader: React.FC<PreviewHeaderProps> = ({
             </button>
             <button
               onClick={onDownloadTxt}
-              className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+              className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-0 transition-colors"
               title="Download som tekstfil"
               aria-label="Download som tekstfil"
             >
@@ -72,7 +72,7 @@ const PreviewHeader: React.FC<PreviewHeaderProps> = ({
             </button>
             <button
               onClick={onDownloadDocx}
-              className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+              className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-0 transition-colors"
               title="Download som Word-dokument"
               aria-label="Download som Word-dokument"
             >
@@ -81,7 +81,7 @@ const PreviewHeader: React.FC<PreviewHeaderProps> = ({
             </button>
             <button
               onClick={onDownloadPdf}
-              className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+              className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-0 transition-colors"
               title="Download som PDF"
               aria-label="Download som PDF"
             >
