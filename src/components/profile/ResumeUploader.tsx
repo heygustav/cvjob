@@ -6,6 +6,8 @@ import ErrorDisplay from '@/components/ErrorDisplay';
 import FileDropArea from './FileDropArea';
 import { processPdfFile } from '@/utils/resumeParser';
 import { validateFile } from '@/utils/resume/fileUtils';
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
 interface ResumeUploaderProps {
   onExtractedData: (data: Partial<PersonalInfoFormState>) => void;
@@ -37,7 +39,7 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
       return;
     }
     
-    // More comprehensive logging at the start of the process
+    // Log file details
     console.log("Starting upload process", { 
       fileName: file.name, 
       fileSize: file.size,
@@ -45,11 +47,12 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
     });
     
     toast({
-      title: "Behandler PDF",
-      description: "Vi uploader og analyserer dit CV...",
+      title: "Behandler fil",
+      description: "Vi analyserer dit CV...",
     });
 
     try {
+      // Process file with our client-side parser
       const result = await processPdfFile(file);
       
       console.log("Response from processing", { 
@@ -128,17 +131,36 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
 
   return (
     <div className="mb-6">
+      <div className="mb-4">
+        <Label htmlFor="cv-upload" className="block text-sm font-medium text-gray-700 mb-1">
+          Upload CV (PDF eller DOCX)
+        </Label>
+        <div className="flex gap-2">
+          <Input
+            id="cv-upload"
+            type="file"
+            accept=".pdf,.docx"
+            ref={fileInputRef}
+            onChange={(e) => {
+              if (e.target.files && e.target.files[0]) {
+                handleFileSelected(e.target.files[0]);
+              }
+            }}
+            disabled={isExtracting}
+            className="flex-1"
+          />
+        </div>
+        <p className="text-xs text-gray-500 mt-1 italic">
+          Du kan uploade dit CV for at automatisk udfylde formularen. Understøttede formater: PDF, DOCX.
+        </p>
+      </div>
+      
       <FileDropArea 
         onFileSelected={handleFileSelected}
         isProcessing={isExtracting}
         isDragging={isDragging}
         setIsDragging={setIsDragging}
       />
-      
-      <p className="text-xs text-gray-500 mt-2 mb-3 italic text-left">
-        OBS: PDF-upload er under vedligeholdelse. Du kan stadig forsøge at uploade dit CV,
-        men du vil sandsynligvis blive bedt om at udfylde oplysningerne manuelt.
-      </p>
       
       {error && (
         <ErrorDisplay

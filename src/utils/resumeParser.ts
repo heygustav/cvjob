@@ -1,3 +1,3 @@
 
-// Re-export everything from the new modules
-export * from './resume/resumeService';
+// Export client-side CV parser
+export * from './resume/clientParser';
