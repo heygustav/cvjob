@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useRef, useEffect } from "react";
 import { JobPosting, CoverLetter, User } from "@/lib/types";
 import { JobFormData } from "@/services/coverLetter/types";
