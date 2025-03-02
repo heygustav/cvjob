@@ -65,6 +65,14 @@ const HowItWorksSection: React.FC<HowItWorksSectionProps> = ({ session }) => {
             >
               {session ? "Opret ansøgning" : "Opret konto og start"} <ChevronRight className="ml-2 h-4 w-4" />
             </Link>
+            <div className="mt-4">
+              <Link
+                to="/about"
+                className="text-primary-100 hover:text-white transition-colors"
+              >
+                Læs mere <ChevronRight className="inline h-3 w-3" />
+              </Link>
+            </div>
           </div>
         </div>
       </div>
