@@ -55,7 +55,7 @@ const JobListComponent: React.FC<JobListComponentProps> = ({
   };
 
   const handleCreateApplication = (job: JobPosting) => {
-    // Check if job is missing important information but don't block navigation
+    // Notify about incomplete job info but don't block navigation
     if (!job.title || !job.company || !job.description) {
       toast({
         title: "Bemærk",
@@ -64,12 +64,12 @@ const JobListComponent: React.FC<JobListComponentProps> = ({
       });
     }
     
-    // Force direct=true and step=1 parameters to ensure proper navigation
+    // Create URL with explicit parameters
     const url = `/cover-letter/generator?jobId=${job.id}&step=1&direct=true`;
-    console.log(`Navigating to: ${url}`);
+    console.log(`JobListComponent: Navigating to: ${url}`);
     
-    // Use navigate with replace:true to avoid history stacking
-    navigate(url, { replace: true });
+    // Use full URL construction rather than just navigate function
+    window.location.href = url;
   };
   
   const handleEditJob = (jobId: string) => {

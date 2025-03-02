@@ -32,19 +32,29 @@ export const useJobFetching = (
     }
     
     // Always reset states at the beginning
-    safeSetState(setLoadingState, "initializing");
+    safeSetState(setLoadingState, "idle"); // Start with idle instead of initializing
     safeSetState(setGenerationError, null);
     safeSetState(setGenerationPhase, null);
     safeSetState(setGenerationProgress, {
-      phase: 'job-save',
+      phase: 'job-fetch',
       progress: 0,
       message: 'Henter jobinformation...'
     });
+    
+    // Get URL parameters once for consistent use throughout
+    const urlParams = new URLSearchParams(window.location.search);
+    const isDirectAccess = urlParams.get('direct') === 'true' || urlParams.get('step') === '1';
+    console.log(`fetchJob: Direct access mode: ${isDirectAccess}`);
     
     let job = null;
     
     try {
       console.log("fetchJob: Starting fetch for job with ID:", id);
+      
+      // Only set loading state for non-direct access
+      if (!isDirectAccess) {
+        safeSetState(setLoadingState, "initializing");
+      }
       
       // Try direct fetch
       try {
@@ -77,15 +87,24 @@ export const useJobFetching = (
       
       // Update progress for letter fetching
       safeSetState(setGenerationProgress, {
-        phase: 'job-save',
+        phase: 'job-fetch',
         progress: 50,
         message: 'Søger efter eksisterende ansøgninger...'
       });
 
-      // Check for existing letters (if this fails, it's not critical)
+      // For direct access mode, we don't need to fetch letters - go straight to step 1
+      if (isDirectAccess) {
+        console.log("fetchJob: Direct access mode - skipping letter fetch and setting step to 1");
+        safeSetState(setStep, 1);
+        safeSetState(setLoadingState, "idle");
+        return job;
+      }
+
+      // Only check for existing letters if not in direct access mode
       try {
         let letters;
         try {
+          console.log("fetchJob: Fetching letters for job:", id);
           letters = await fetchLettersForJob(id);
         } catch (directError) {
           console.warn("Direct letters fetch failed, retrying with timeout:", directError);
@@ -101,21 +120,9 @@ export const useJobFetching = (
         if (letters && letters.length > 0) {
           console.log("fetchJob: Found existing letters for job:", letters[0]);
           safeSetState(setGeneratedLetter, letters[0]);
-          
-          // ONLY advance to step 2 if we're not explicitly in step 1 mode (direct=true or step=1)
-          const urlParams = new URLSearchParams(window.location.search);
-          const isDirectAccess = urlParams.get('direct') === 'true' || urlParams.get('step') === '1';
-          
-          if (!isDirectAccess) {
-            console.log("fetchJob: Setting to step 2 as it's not direct access mode");
-            safeSetState(setStep, 2);
-          } else {
-            console.log("fetchJob: Keeping step 1 because of direct=true or step=1 parameter");
-            safeSetState(setStep, 1);
-          }
+          safeSetState(setStep, 2);
         } else {
           console.log("fetchJob: No existing letters found, staying on step 1");
-          // Explicitly set step to 1 for job form
           safeSetState(setStep, 1);
         }
       } catch (letterError) {
@@ -129,7 +136,7 @@ export const useJobFetching = (
       // Mark job fetch as complete
       if (isMountedRef.current) {
         safeSetState(setGenerationProgress, {
-          phase: 'job-save',
+          phase: 'job-fetch',
           progress: 100,
           message: 'Indlæsning fuldført'
         });
@@ -167,6 +174,7 @@ export const useJobFetching = (
         navigate("/dashboard");
       }
       
+      safeSetState(setLoadingState, "idle");
       return null;
     } finally {
       // Always reset loadingState in finally block to ensure it happens
