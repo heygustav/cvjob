@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import CavalierDog from '../CavalierDog';
+import { FileText } from 'lucide-react';
 
 interface HeroSectionProps {
   session: any;
@@ -14,7 +14,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ session }) => {
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center">
             <div className="flex justify-center items-center mb-6">
-              <CavalierDog className="w-20 h-20 text-primary-700" />
+              <FileText className="w-20 h-20 text-primary-700" />
             </div>
             <h1 className="text-4xl font-bold tracking-tight text-primary-800 sm:text-6xl">
               Ansøgninger skrevet med kunstig intelligens
