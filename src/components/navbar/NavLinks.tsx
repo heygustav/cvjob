@@ -2,15 +2,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { Button } from "../ui/button";
-import {
-  Home,
-  LayoutDashboard,
-  PenTool,
-  Info,
-  Phone,
-  UserCircle,
-  LogOut
-} from "lucide-react";
 
 interface NavLinksProps {
   session: any;
@@ -24,48 +15,42 @@ const NavLinks: React.FC<NavLinksProps> = ({
   isMobile = false,
 }) => {
   const linkClass = isMobile
-    ? "flex items-center gap-2 py-2 px-3 rounded-md text-gray-200 hover:bg-primary-800 transition-colors w-full"
-    : "flex items-center gap-2 px-3 py-2 rounded-md text-white hover:bg-primary-800 transition-colors";
+    ? "flex items-center gap-2 py-2 px-3 rounded-md text-gray-700 hover:bg-primary-100 transition-colors w-full"
+    : "flex items-center gap-2 px-3 py-2 rounded-md text-gray-700 hover:bg-primary-100 transition-colors";
 
   const buttonClass = isMobile
-    ? "w-full justify-start gap-2 bg-transparent text-gray-200 hover:bg-primary-800 hover:text-white"
-    : "gap-2 bg-transparent text-white hover:bg-primary-800 hover:text-white";
+    ? "w-full justify-start gap-2 bg-transparent text-gray-700 hover:bg-primary-100 hover:text-gray-900"
+    : "gap-2 bg-transparent text-gray-700 hover:bg-primary-100 hover:text-gray-900";
 
   return (
     <>
       <Link to="/" className={linkClass}>
-        <Home className="h-4 w-4" />
         Home
       </Link>
       
       {session && (
         <Link to="/dashboard" className={linkClass}>
-          <LayoutDashboard className="h-4 w-4" />
           Dashboard
         </Link>
       )}
       
       {session && (
         <Link to="/cover-letter" className={linkClass}>
-          <PenTool className="h-4 w-4" />
           Create Cover Letter
         </Link>
       )}
       
       <Link to="/about" className={linkClass}>
-        <Info className="h-4 w-4" />
         About
       </Link>
       
       <Link to="/contact" className={linkClass}>
-        <Phone className="h-4 w-4" />
         Contact
       </Link>
       
       {session ? (
         <>
           <Link to="/profile" className={linkClass}>
-            <UserCircle className="h-4 w-4" />
             Profile
           </Link>
           
@@ -74,12 +59,11 @@ const NavLinks: React.FC<NavLinksProps> = ({
             onClick={handleLogout}
             className={buttonClass}
           >
-            <LogOut className="h-4 w-4" />
             Log out
           </Button>
         </>
       ) : (
-        <Link to="/auth" className={`${linkClass} font-medium hover:text-white`}>
+        <Link to="/auth" className={`${linkClass} font-medium text-primary-600 hover:text-primary-800`}>
           Log in
         </Link>
       )}
