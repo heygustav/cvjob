@@ -2,6 +2,7 @@
 import { JobPosting, CoverLetter, User } from "@/lib/types";
 
 export interface JobFormData {
+  id?: string;
   title: string;
   company: string;
   description: string;

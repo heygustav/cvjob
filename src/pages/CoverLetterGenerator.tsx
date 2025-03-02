@@ -105,6 +105,11 @@ const CoverLetterGenerator: React.FC = () => {
     };
   }, [fetchJob, fetchLetter, jobId, letterId, toast, user]);
 
+  // Wrapper for saveJobAsDraft to make it return Promise<void> instead of Promise<string | null>
+  const handleSaveJobAsDraft = async (jobData: any) => {
+    await saveJobAsDraft(jobData);
+  };
+
   // Render functions
   const renderContent = () => {
     // Show main loading state during initial data fetch
@@ -155,7 +160,7 @@ const CoverLetterGenerator: React.FC = () => {
                 generationProgress={generationProgress}
                 resetError={resetError}
                 onSubmit={handleJobFormSubmit}
-                onSave={saveJobAsDraft}
+                onSave={handleSaveJobAsDraft}
               />
             ) : (
               <>

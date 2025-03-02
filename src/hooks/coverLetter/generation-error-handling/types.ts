@@ -8,6 +8,8 @@ export interface GenerationErrorHandlingProps {
   setLoadingState: React.Dispatch<React.SetStateAction<string>>;
 }
 
+export interface GenerationErrorHandlers extends GenerationErrorHandlingProps {}
+
 export interface GenerationErrorResult {
   title: string;
   description: string;

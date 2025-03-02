@@ -48,8 +48,7 @@ export const useLetterEditing = (
       const updatedLetter = await saveCoverLetter(
         user.id,
         generatedLetter.job_posting_id,
-        editedContent,
-        generatedLetter.id
+        editedContent
       );
 
       if (isMountedRef.current) {
@@ -88,8 +87,7 @@ export const useLetterEditing = (
       const result = await saveCoverLetter(
         user.id,
         generatedLetter.job_posting_id,
-        generatedLetter.content,
-        generatedLetter.id
+        generatedLetter.content
       );
 
       if (isMountedRef.current) {
@@ -134,7 +132,7 @@ export const useLetterEditing = (
       const jobId = await saveOrUpdateJob(
         jobData,
         user.id,
-        jobData.id
+        jobData.id as string | undefined
       );
 
       if (isMountedRef.current) {
