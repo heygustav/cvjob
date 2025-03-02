@@ -29,7 +29,7 @@ const FooterSection: React.FC = () => {
           </div>
         </nav>
         <p className="mt-10 text-center text-xs leading-5 text-muted-foreground">
-          &copy; 2023 CVJob. Alle rettigheder forbeholdes.
+          &copy; 2023 CVJob.dk
         </p>
       </div>
     </footer>
