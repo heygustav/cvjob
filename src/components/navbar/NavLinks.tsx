@@ -2,15 +2,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { Button } from "../ui/button";
-import {
-  LayoutDashboard,
-  PenTool,
-  UserCircle,
-  LogOut,
-  Home,
-  Phone,
-  Info,
-} from "lucide-react";
 
 interface NavLinksProps {
   session: any;
@@ -34,39 +25,33 @@ const NavLinks: React.FC<NavLinksProps> = ({
   return (
     <>
       <Link to="/" className={linkClass}>
-        <Home className="h-4 w-4" />
-        Forsiden
+        Home
       </Link>
       
       {session && (
         <Link to="/dashboard" className={linkClass}>
-          <LayoutDashboard className="h-4 w-4" />
           Dashboard
         </Link>
       )}
       
       {session && (
         <Link to="/cover-letter" className={linkClass}>
-          <PenTool className="h-4 w-4" />
-          Opret ansøgning
+          Create Cover Letter
         </Link>
       )}
       
       <Link to="/about" className={linkClass}>
-        <Info className="h-4 w-4" />
-        Om os
+        About
       </Link>
       
       <Link to="/contact" className={linkClass}>
-        <Phone className="h-4 w-4" />
-        Kontakt
+        Contact
       </Link>
       
       {session ? (
         <>
           <Link to="/profile" className={linkClass}>
-            <UserCircle className="h-4 w-4" />
-            Profil
+            Profile
           </Link>
           
           <Button
@@ -74,13 +59,12 @@ const NavLinks: React.FC<NavLinksProps> = ({
             onClick={handleLogout}
             className={buttonClass}
           >
-            <LogOut className="h-4 w-4" />
-            Log ud
+            Log out
           </Button>
         </>
       ) : (
         <Link to="/auth" className={`${linkClass} font-medium text-primary-600 hover:text-primary-800`}>
-          Log ind
+          Log in
         </Link>
       )}
     </>
