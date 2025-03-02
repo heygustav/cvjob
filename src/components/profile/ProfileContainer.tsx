@@ -1,43 +1,78 @@
 
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ProfileHeader from "./ProfileHeader";
 import ProfilePersonalInfo from "./ProfilePersonalInfo";
 import ProfileAccountSettings from "./ProfileAccountSettings";
-import { PersonalInfoFormState } from "@/pages/Profile";
+import SubscriptionInfo from "./SubscriptionInfo";
+import { useAuth } from "@/components/AuthProvider";
+import { User } from "@/lib/types";
+import { useSearchParams } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
-interface ProfileContainerProps {
-  formData: PersonalInfoFormState;
-  handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
-  handleSubmit: (e: React.FormEvent) => void;
-  setFormData: React.Dispatch<React.SetStateAction<PersonalInfoFormState>>;
-  isLoading: boolean;
-}
+const ProfileContainer: React.FC = () => {
+  const { user } = useAuth();
+  const [searchParams] = useSearchParams();
+  const { toast } = useToast();
+  const [activeTab, setActiveTab] = useState("personal-info");
+  
+  // Check for subscription success in URL
+  useEffect(() => {
+    const subscriptionParam = searchParams.get("subscription");
+    if (subscriptionParam === "success") {
+      toast({
+        title: "Abonnement oprettet",
+        description: "Dit abonnement er blevet oprettet. Du har nu adgang til at generere ubegrænset ansøgninger.",
+      });
+      setActiveTab("subscription");
+    }
+  }, [searchParams, toast]);
 
-const ProfileContainer: React.FC<ProfileContainerProps> = ({
-  formData,
-  handleChange,
-  handleSubmit,
-  setFormData,
-  isLoading,
-}) => {
+  if (!user) {
+    return null;
+  }
+
+  // Convert from auth user to our app's User type
+  const appUser: User = {
+    id: user.id,
+    email: user.email || "",
+    name: user.user_metadata?.name || "",
+    profileComplete: false
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 pt-16 md:pt-20">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10">
-        <ProfileHeader
-          title="Min profil"
-          subtitle="Administrer dine personlige oplysninger"
-        />
+    <div className="container mx-auto p-4 max-w-4xl">
+      <ProfileHeader />
 
-        <ProfilePersonalInfo
-          formData={formData}
-          handleChange={handleChange}
-          handleSubmit={handleSubmit}
-          setFormData={setFormData}
-          isLoading={isLoading}
-        />
+      <Tabs 
+        defaultValue="personal-info" 
+        value={activeTab}
+        onValueChange={setActiveTab}
+        className="w-full mt-6"
+      >
+        <TabsList className="grid grid-cols-3 mb-6">
+          <TabsTrigger value="personal-info">Personlig information</TabsTrigger>
+          <TabsTrigger value="subscription">Abonnement</TabsTrigger>
+          <TabsTrigger value="account">Kontoindstillinger</TabsTrigger>
+        </TabsList>
 
-        <ProfileAccountSettings />
-      </div>
+        <Card>
+          <CardContent className="p-0">
+            <TabsContent value="personal-info" className="m-0">
+              <ProfilePersonalInfo />
+            </TabsContent>
+            
+            <TabsContent value="subscription" className="m-0 p-6">
+              <SubscriptionInfo user={appUser} />
+            </TabsContent>
+            
+            <TabsContent value="account" className="m-0">
+              <ProfileAccountSettings />
+            </TabsContent>
+          </CardContent>
+        </Card>
+      </Tabs>
     </div>
   );
 };

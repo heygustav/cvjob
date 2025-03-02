@@ -54,6 +54,24 @@ export const useToastMessages = () => {
       description: "Generering af ansøgningen tog for lang tid. Prøv igen senere.",
       variant: "destructive",
     },
+    subscriptionRequired: {
+      title: "Abonnement påkrævet",
+      description: "Du har brugt din gratis generering. Opret et abonnement for at fortsætte.",
+      variant: "default",
+    },
+    subscriptionSuccess: {
+      title: "Abonnement oprettet",
+      description: "Dit abonnement er blevet oprettet. Du har nu ubegrænset adgang.",
+    },
+    promoCodeApplied: {
+      title: "Rabatkode anvendt",
+      description: "Din rabatkode er blevet anvendt på dit abonnement.",
+    },
+    promoCodeInvalid: {
+      title: "Ugyldig rabatkode",
+      description: "Den angivne rabatkode er ugyldig eller udløbet.",
+      variant: "destructive",
+    },
   };
 
   return messages;
