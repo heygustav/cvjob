@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useAuth } from "@/components/AuthProvider";
@@ -16,6 +15,7 @@ const CoverLetterGenerator: React.FC = () => {
   const [searchParams] = useSearchParams();
   const jobId = searchParams.get("jobId");
   const letterId = searchParams.get("letterId");
+  const stepParam = searchParams.get("step");
   const { session } = useAuth();
   const [loading, setLoading] = React.useState(true);
   const { toast } = useToast();
@@ -64,12 +64,20 @@ const CoverLetterGenerator: React.FC = () => {
           return;
         }
         
-        console.log("Starting initialization with params:", { jobId, letterId });
+        console.log("Starting initialization with params:", { jobId, letterId, stepParam });
+
+        // Set initial step if provided in URL
+        if (stepParam === "1") {
+          setStep(1);
+        }
         
-        // For saved job viewing (no generation support for existing jobs)
+        // For saved job viewing
         if (jobId) {
           await fetchJob(jobId);
           console.log("Job fetched, any loading state should now be managed by the hook");
+          
+          // Ensure we're on step 1 when a job ID is provided
+          if (isMounted) setStep(1);
         } 
         // For viewing generated letters
         else if (letterId) {
@@ -103,7 +111,7 @@ const CoverLetterGenerator: React.FC = () => {
       isMounted = false;
       console.log("Generator component unmounting");
     };
-  }, [fetchJob, fetchLetter, jobId, letterId, toast, user]);
+  }, [fetchJob, fetchLetter, jobId, letterId, stepParam, toast, user, setStep]);
 
   // Wrapper for saveJobAsDraft to make it return Promise<void> instead of Promise<string | null>
   const handleSaveJobAsDraft = async (jobData: any) => {

@@ -64,8 +64,8 @@ const JobListComponent: React.FC<JobListComponentProps> = ({
       });
     }
     
-    // Navigate to the cover letter generator with the job ID
-    navigate(`/cover-letter/generator?jobId=${job.id}`);
+    // Navigate to the cover letter generator with the job ID and explicitly set step=1
+    navigate(`/cover-letter/generator?jobId=${job.id}&step=1`);
   };
   
   const handleEditJob = (jobId: string) => {
@@ -172,3 +172,4 @@ const JobListComponent: React.FC<JobListComponentProps> = ({
 };
 
 export default JobListComponent;
+
