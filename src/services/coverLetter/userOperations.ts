@@ -64,10 +64,17 @@ export const updateEmailPreferences = async (
 ): Promise<void> => {
   console.log("Updating email preferences for user:", userId);
   
+  // Convert EmailPreferences object to a plain object that satisfies the Json type
+  const jsonPreferences = {
+    jobAlerts: preferences.jobAlerts,
+    newsletters: preferences.newsletters,
+    accountUpdates: preferences.accountUpdates
+  };
+  
   const { error } = await supabase
     .from("profiles")
     .update({
-      email_preferences: preferences
+      email_preferences: jsonPreferences
     })
     .eq("id", userId);
 
