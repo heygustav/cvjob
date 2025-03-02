@@ -8,6 +8,7 @@ import JobInfoFields from "./job-form/JobInfoFields";
 import FormActions from "./job-form/FormActions";
 import { useJobExtraction } from "./job-form/useJobExtraction";
 import { useJobForm } from "./job-form/useJobForm";
+import { useTimer } from "./job-form/useTimer"; // Import useTimer hook
 
 interface JobPostingFormProps {
   onSubmit: (jobData: JobFormData) => void;
@@ -37,6 +38,7 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
   });
   
   const { isExtracting, extractInfoFromDescription } = useJobExtraction(formData, setFormData);
+  const { formattedTime } = useTimer(isLoading); // Use the timer hook to track elapsed time
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 text-left">
@@ -72,6 +74,7 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
         isSaving={isSaving}
         showSaveButton={!!onSave}
         onSave={handleSave}
+        elapsedTime={formattedTime} // Pass the formatted time to FormActions
       />
     </form>
   );
