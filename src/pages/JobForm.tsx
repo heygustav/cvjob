@@ -7,11 +7,12 @@ import { useToast } from "@/hooks/use-toast";
 import { fetchJobById, saveOrUpdateJob } from "@/services/coverLetter/jobOperations";
 import { JobFormData } from "@/services/coverLetter/types";
 import { ArrowLeft } from "lucide-react";
+import { JobPosting } from "@/lib/types";
 
 const JobForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [job, setJob] = useState<JobFormData | null>(null);
+  const [job, setJob] = useState<JobPosting | null>(null);
   const { id } = useParams();
   const { user } = useAuth();
   const { toast } = useToast();
