@@ -6,8 +6,12 @@ import { ProcessResult } from './types';
 import { parseResumeText } from './textParser';
 import { calculateConfidence } from './confidenceCalculator';
 
-// Set the PDF.js worker source
-const PDFJS_WORKER_SRC = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+// Set the worker source to a static path relative to the base URL
+// This avoids CORS issues and external CDN dependencies
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+  'pdf.worker.mjs',
+  import.meta.url
+).toString();
 
 /**
  * Extract text from a PDF document
@@ -16,11 +20,6 @@ const PDFJS_WORKER_SRC = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.
  */
 async function extractTextFromPdf(file: File): Promise<string> {
   try {
-    // Set worker source
-    if (!pdfjs.GlobalWorkerOptions.workerSrc) {
-      pdfjs.GlobalWorkerOptions.workerSrc = PDFJS_WORKER_SRC;
-    }
-
     // Read the file
     const arrayBuffer = await file.arrayBuffer();
     
@@ -31,12 +30,17 @@ async function extractTextFromPdf(file: File): Promise<string> {
     
     // Iterate through each page
     for (let i = 1; i <= pdf.numPages; i++) {
-      const page = await pdf.getPage(i);
-      const textContent = await page.getTextContent();
-      const pageText = textContent.items
-        .map((item: any) => item.str)
-        .join(' ');
-      extractedText += pageText + '\n';
+      try {
+        const page = await pdf.getPage(i);
+        const textContent = await page.getTextContent();
+        const pageText = textContent.items
+          .map((item: any) => item.str)
+          .join(' ');
+        extractedText += pageText + '\n';
+      } catch (pageError) {
+        console.error(`Error extracting text from page ${i}:`, pageError);
+        // Continue processing other pages even if one fails
+      }
     }
     
     return extractedText;
