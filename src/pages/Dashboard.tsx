@@ -21,10 +21,18 @@ const Dashboard = () => {
     return <DashboardLoading />;
   }
 
+  // Ensure job postings have default values for missing fields
+  const processedJobPostings = jobPostings.map(job => ({
+    ...job,
+    title: job.title || "Untitled Position",
+    company: job.company || "Unknown Company",
+    description: job.description || "No description provided"
+  }));
+
   return (
     <div className="min-h-screen bg-gray-50 pt-20">
       <DashboardMain
-        jobPostings={jobPostings}
+        jobPostings={processedJobPostings}
         coverLetters={coverLetters}
         isDeleting={isDeleting}
         isRefreshing={isRefreshing}

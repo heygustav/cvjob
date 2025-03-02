@@ -32,7 +32,7 @@ const DashboardActions: React.FC<DashboardActionsProps> = ({
         Opdater
       </Button>
       
-      {activeTab === "jobs" && (
+      {activeTab === "jobs" ? (
         <Button 
           variant="default" 
           size="sm" 
@@ -44,9 +44,7 @@ const DashboardActions: React.FC<DashboardActionsProps> = ({
             Tilføj jobopslag
           </Link>
         </Button>
-      )}
-      
-      {activeTab === "letters" && (
+      ) : (
         <Button 
           variant="default" 
           size="sm" 

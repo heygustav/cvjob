@@ -1,3 +1,4 @@
+
 import { useCallback } from "react";
 import { User, JobPosting, CoverLetter } from "@/lib/types";
 import { JobFormData } from "@/services/coverLetter/types";
@@ -27,7 +28,10 @@ export const useGenerationSteps = (
     
     try {
       const userInfo = await fetchUserProfile(user.id);
-      userInfo.email = user.email; // Ensure email is set from authenticated user
+      // Ensure email is always set from authenticated user
+      userInfo.email = user.email || userInfo.email || "";
+      // Set default values for missing fields to prevent errors
+      userInfo.name = userInfo.name || "Anonymous";
       
       console.log(`User profile fetched for ID: ${user.id}`, {
         hasName: !!userInfo.name,
