@@ -1,4 +1,3 @@
-
 import * as mammoth from 'mammoth';
 import { PersonalInfoFormState } from '@/pages/Profile';
 import { ProcessResult } from './types';
@@ -29,10 +28,9 @@ async function extractTextFromPdf(file: File): Promise<string> {
     // Load the PDF document with error handling
     const loadingTask = pdfjs.getDocument({ data: arrayBuffer });
     
-    // Add error handler to the loadingTask
-    loadingTask.onUnsupportedFeature = (featureId) => {
-      console.warn('Unsupported PDF feature:', featureId);
-    };
+    // The onUnsupportedFeature property was causing a TypeScript error
+    // Instead, we'll handle unsupported features differently
+    // Add event listeners for any other events if needed
     
     console.log("Awaiting PDF document loading");
     
