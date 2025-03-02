@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, Mail } from 'lucide-react';
@@ -138,18 +137,13 @@ const Contact = () => {
             <h2 className="text-2xl font-semibold text-primary-800 mb-6">Kontaktoplysninger</h2>
             
             <div className="space-y-6">
-              <div className="flex items-start">
-                <div className="flex-shrink-0 mt-1">
-                  <Mail className="h-5 w-5 text-primary" />
-                </div>
-                <div className="ml-3">
-                  <h3 className="text-lg font-medium text-gray-900">Email</h3>
-                  <p className="mt-1 text-muted-foreground">
-                    <a href="mailto:gustav@cvjob.dk" className="text-primary hover:underline">
-                      gustav@cvjob.dk
-                    </a>
-                  </p>
-                </div>
+              <div className="text-center">
+                <h3 className="text-lg font-medium text-gray-900">Email</h3>
+                <p className="mt-1 text-muted-foreground">
+                  <a href="mailto:gustav@cvjob.dk" className="text-primary hover:underline">
+                    gustav@cvjob.dk
+                  </a>
+                </p>
               </div>
             </div>
             
