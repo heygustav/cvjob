@@ -21,7 +21,7 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
       {/* Mobile menu button */}
       <button
         onClick={toggleMenu}
-        className="md:hidden flex items-center p-2 rounded-md text-primary hover:bg-gray-100 active:bg-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-white"
+        className="md:hidden flex items-center p-2 rounded-md text-white hover:bg-primary-800 active:bg-primary-900 transition-colors focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary"
         aria-expanded={isOpen}
         aria-label={isOpen ? "Close main menu" : "Open main menu"}
         aria-controls="mobile-menu"
@@ -44,7 +44,7 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
         }`}
         aria-hidden={!isOpen}
       >
-        <div className="space-y-1 px-4 py-6 bg-white border-t border-gray-200 shadow-lg">
+        <div className="space-y-1 px-4 py-6 bg-primary-800 border-t border-primary-700 shadow-lg">
           <NavLinks session={session} handleLogout={handleLogout} isMobile={true} />
         </div>
       </div>
