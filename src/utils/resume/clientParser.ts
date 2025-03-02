@@ -1,3 +1,4 @@
+
 import * as mammoth from 'mammoth';
 import { PersonalInfoFormState } from '@/pages/Profile';
 import { ProcessResult } from './types';
@@ -18,8 +19,9 @@ async function extractTextFromPdf(file: File): Promise<string> {
     const arrayBuffer = await file.arrayBuffer();
     console.log("File converted to ArrayBuffer successfully");
     
-    // Check if worker is configured
+    // Check if worker is configured properly
     if (!pdfjs.GlobalWorkerOptions.workerSrc) {
+      console.error("PDF.js worker source is not configured");
       throw new Error('PDF.js worker is not configured. Please refresh the page and try again.');
     }
     
@@ -65,16 +67,19 @@ async function extractTextFromPdf(file: File): Promise<string> {
   } catch (error) {
     console.error("Error extracting text from PDF:", error);
     
-    // Provide more specific error messages based on the error type
+    // Check for specific PDF.js worker errors
     if (error.message && error.message.includes('worker')) {
-      throw new Error('Kunne ikke indlæse PDF-læser komponenten. Prøv at genindlæse siden eller brug en anden browser.');
+      throw new Error('PDF-læser komponenten kunne ikke indlæses. Prøv en anden browser eller upload en DOCX-fil i stedet.');
+    } else if (error.message && error.message.includes('fetch')) {
+      throw new Error('PDF-læser komponenten kunne ikke indlæses. Tjek din internetforbindelse eller prøv en anden browser.');
     } else if (error.message && error.message.includes('password')) {
       throw new Error('PDF-filen er krypteret med en adgangskode. Fjern adgangskoden og prøv igen.');
     } else if (error.message && error.message.includes('corrupt')) {
       throw new Error('PDF-filen er beskadiget. Prøv at gemme den igen eller brug en anden fil.');
     }
     
-    throw new Error('Kunne ikke læse PDF-filen korrekt.');
+    // Generic error message
+    throw new Error('Kunne ikke læse PDF-filen. Prøv at uploade en DOCX-fil i stedet.');
   }
 }
 
