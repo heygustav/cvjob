@@ -5,6 +5,14 @@ import { formatDistanceToNow } from "date-fns";
 import { da } from "date-fns/locale";
 import { ExternalLink } from "lucide-react";
 import LetterActions from "./LetterActions";
+import { 
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
+} from "@/components/ui/table";
 
 interface LetterTableProps {
   coverLetters: CoverLetter[];
@@ -47,36 +55,28 @@ const LetterTable: React.FC<LetterTableProps> = ({
 
   return (
     <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
-          <tr>
-            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Virksomhed
-            </th>
-            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Stilling
-            </th>
-            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Oprettet
-            </th>
-            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Handlinger
-            </th>
-          </tr>
-        </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Virksomhed</TableHead>
+            <TableHead>Stilling</TableHead>
+            <TableHead>Oprettet</TableHead>
+            <TableHead>Handlinger</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {coverLetters.map((letter) => {
             const job = findJobForLetter(letter.job_posting_id);
             return (
-              <tr key={letter.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap text-left">
+              <TableRow key={letter.id}>
+                <TableCell>
                   <div className="flex items-center">
                     <div className="text-sm font-medium text-gray-900">
                       {job?.company || "Ukendt virksomhed"}
                     </div>
                   </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-left">
+                </TableCell>
+                <TableCell>
                   <div className="flex items-center">
                     <div className="text-sm text-gray-900">{job?.title || "Ukendt stilling"}</div>
                     {job?.url && (
@@ -91,11 +91,11 @@ const LetterTable: React.FC<LetterTableProps> = ({
                       </a>
                     )}
                   </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-left">
+                </TableCell>
+                <TableCell>
                   <div className="text-sm text-gray-500">{formatDate(letter.created_at)}</div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-left text-sm font-medium">
+                </TableCell>
+                <TableCell>
                   <LetterActions 
                     letter={letter}
                     job={job}
@@ -105,12 +105,12 @@ const LetterTable: React.FC<LetterTableProps> = ({
                     onDownloadTxt={onDownloadTxt}
                     isDownloading={isDownloading}
                   />
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             );
           })}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
     </div>
   );
 };
