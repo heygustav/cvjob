@@ -45,6 +45,7 @@ const CoverLetterGenerator: React.FC = () => {
     handleJobFormSubmit,
     handleEditLetter,
     handleSaveLetter,
+    saveJobAsDraft,
     resetError,
   } = useCoverLetterGeneration(user);
 
@@ -154,6 +155,7 @@ const CoverLetterGenerator: React.FC = () => {
                 generationProgress={generationProgress}
                 resetError={resetError}
                 onSubmit={handleJobFormSubmit}
+                onSave={saveJobAsDraft}
               />
             ) : (
               <>

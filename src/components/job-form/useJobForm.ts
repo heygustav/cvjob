@@ -10,7 +10,7 @@ interface UseJobFormProps {
   onSave?: (jobData: JobFormData) => Promise<void>;
 }
 
-export const useJobForm = ({ initialData, onSubmit }: UseJobFormProps) => {
+export const useJobForm = ({ initialData, onSubmit, onSave }: UseJobFormProps) => {
   const [formData, setFormData] = useState<JobFormData>({
     title: initialData?.title || "",
     company: initialData?.company || "",
@@ -21,6 +21,7 @@ export const useJobForm = ({ initialData, onSubmit }: UseJobFormProps) => {
   });
   
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isSaving, setIsSaving] = useState<boolean>(false);
   const { toast } = useToast();
 
   const handleChange = (
@@ -86,11 +87,44 @@ export const useJobForm = ({ initialData, onSubmit }: UseJobFormProps) => {
     }
   };
 
+  const handleSave = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    
+    if (!onSave) {
+      toast({
+        title: "Funktionen er ikke tilgængelig",
+        description: "Gem som kladde er ikke tilgængelig.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    try {
+      setIsSaving(true);
+      await onSave(formData);
+      toast({
+        title: "Gemt som kladde",
+        description: "Dit job er blevet gemt som kladde til senere brug.",
+      });
+    } catch (error) {
+      console.error("Error saving draft:", error);
+      toast({
+        title: "Fejl ved gem",
+        description: "Der opstod en fejl ved at gemme jobbet som kladde.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return {
     formData,
     setFormData,
     errors,
+    isSaving,
     handleChange,
-    handleSubmit
+    handleSubmit,
+    handleSave
   };
 };

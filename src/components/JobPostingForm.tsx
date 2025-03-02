@@ -11,12 +11,14 @@ import { useJobForm } from "./job-form/useJobForm";
 
 interface JobPostingFormProps {
   onSubmit: (jobData: JobFormData) => void;
+  onSave?: (jobData: JobFormData) => Promise<void>;
   initialData?: JobPosting;
   isLoading?: boolean;
 }
 
 const JobPostingForm: React.FC<JobPostingFormProps> = ({
   onSubmit,
+  onSave,
   initialData,
   isLoading = false,
 }) => {
@@ -24,11 +26,14 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
     formData,
     setFormData,
     errors,
+    isSaving,
     handleChange,
     handleSubmit,
+    handleSave
   } = useJobForm({
     initialData,
     onSubmit,
+    onSave,
   });
   
   const { isExtracting, extractInfoFromDescription } = useJobExtraction(formData, setFormData);
@@ -64,6 +69,9 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
 
       <FormActions
         isLoading={isLoading}
+        isSaving={isSaving}
+        showSaveButton={!!onSave}
+        onSave={handleSave}
       />
     </form>
   );

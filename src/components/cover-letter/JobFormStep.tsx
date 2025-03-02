@@ -17,6 +17,7 @@ interface JobFormStepProps {
   };
   resetError: () => void;
   onSubmit: (jobData: JobFormData) => Promise<void>;
+  onSave?: (jobData: JobFormData) => Promise<void>;
 }
 
 const JobFormStep: React.FC<JobFormStepProps> = ({
@@ -25,7 +26,8 @@ const JobFormStep: React.FC<JobFormStepProps> = ({
   generationPhase,
   generationProgress,
   resetError,
-  onSubmit
+  onSubmit,
+  onSave
 }) => {
   // Show notice if this is a saved job (currently not supporting generation for saved jobs)
   const isSavedJob = selectedJob !== null;
@@ -45,6 +47,7 @@ const JobFormStep: React.FC<JobFormStepProps> = ({
       
       <JobPostingForm
         onSubmit={onSubmit}
+        onSave={onSave}
         initialData={selectedJob || undefined}
         isLoading={isGenerating}
       />

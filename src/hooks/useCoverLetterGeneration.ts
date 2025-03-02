@@ -108,7 +108,7 @@ export const useCoverLetterGeneration = (user: User | null) => {
     loadingState
   );
 
-  const { handleEditLetter, handleSaveLetter, resetError } = useLetterEditing(
+  const { handleEditLetter, handleSaveLetter, saveJobAsDraft, resetError } = useLetterEditing(
     user,
     isMountedRef,
     safeSetState,
@@ -134,6 +134,7 @@ export const useCoverLetterGeneration = (user: User | null) => {
     handleJobFormSubmit,
     handleEditLetter,
     handleSaveLetter,
+    saveJobAsDraft,
     resetError,
   };
 };
