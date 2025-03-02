@@ -53,6 +53,21 @@ const LetterTable: React.FC<LetterTableProps> = ({
     }
   };
 
+  const formatDeadline = (deadline?: string) => {
+    if (!deadline) return "";
+    
+    try {
+      return new Date(deadline).toLocaleDateString('da-DK', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+    } catch (error) {
+      console.error("Error formatting deadline:", error);
+      return "";
+    }
+  };
+
   return (
     <div className="overflow-x-auto">
       <Table>
@@ -61,6 +76,7 @@ const LetterTable: React.FC<LetterTableProps> = ({
             <TableHead>Virksomhed</TableHead>
             <TableHead>Stilling</TableHead>
             <TableHead>Oprettet</TableHead>
+            <TableHead>Frist</TableHead>
             <TableHead>Handlinger</TableHead>
           </TableRow>
         </TableHeader>
@@ -94,6 +110,11 @@ const LetterTable: React.FC<LetterTableProps> = ({
                 </TableCell>
                 <TableCell>
                   <div className="text-sm text-gray-500">{formatDate(letter.created_at)}</div>
+                </TableCell>
+                <TableCell>
+                  <div className="text-sm text-gray-500">
+                    {job?.deadline ? formatDeadline(job.deadline) : ""}
+                  </div>
                 </TableCell>
                 <TableCell>
                   <LetterActions 

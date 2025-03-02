@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/table";
 import { Link as RouterLink } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
+import { da } from "date-fns/locale";
 
 interface JobListComponentProps {
   jobPostings: JobPosting[];
@@ -27,18 +28,25 @@ const JobListComponent: React.FC<JobListComponentProps> = ({
 }) => {
   const formatDate = (dateString: string) => {
     try {
-      return formatDistanceToNow(new Date(dateString), { addSuffix: true });
+      return formatDistanceToNow(new Date(dateString), { 
+        addSuffix: true,
+        locale: da 
+      });
     } catch (error) {
-      return "Unknown date";
+      return "Ukendt dato";
     }
   };
 
   const formatDeadline = (dateString?: string) => {
-    if (!dateString) return "No deadline";
+    if (!dateString) return "-";
     try {
-      return new Date(dateString).toLocaleDateString();
+      return new Date(dateString).toLocaleDateString('da-DK', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
     } catch (error) {
-      return "Invalid date";
+      return "-";
     }
   };
 
@@ -77,7 +85,7 @@ const JobListComponent: React.FC<JobListComponentProps> = ({
               <TableHead>Stilling</TableHead>
               <TableHead>Virksomhed</TableHead>
               <TableHead>Oprettet</TableHead>
-              <TableHead>Deadline</TableHead>
+              <TableHead>Frist</TableHead>
               <TableHead className="text-right">Handlinger</TableHead>
             </TableRow>
           </TableHeader>
