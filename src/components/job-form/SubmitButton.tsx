@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { Check } from "lucide-react";
+import { Check, Loader2 } from "lucide-react";
 
 interface SubmitButtonProps {
   isLoading: boolean;
@@ -39,16 +39,14 @@ const SubmitButton: React.FC<SubmitButtonProps> = ({
     }
   }, [isLoading, isSuccess, elapsedTime]);
 
-  console.log("Button state:", { isLoading, isSuccess, elapsedTime });
-
   return (
     <button
       type="submit"
       disabled={isLoading || isSuccess}
       className={cn(
-        "px-4 py-2 rounded-md shadow-sm text-sm font-medium text-white disabled:opacity-80 disabled:cursor-not-allowed transition-all duration-300",
+        "px-4 py-2 rounded-md shadow-sm text-sm font-medium text-white w-full sm:w-auto flex items-center justify-center gap-2 transition-all duration-300",
         isSuccess 
-          ? "bg-green-600 w-12" 
+          ? "bg-green-600 w-12 sm:w-12" 
           : "bg-primary hover:bg-primary/90 active:bg-primary-800",
         className
       )}
@@ -61,10 +59,10 @@ const SubmitButton: React.FC<SubmitButtonProps> = ({
       }
     >
       {isLoading ? (
-        <span className="flex items-center justify-center">
-          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-          <span>Genererer ansøgning... {elapsedTime}</span>
-        </span>
+        <>
+          <Loader2 className="h-4 w-4 animate-spin" />
+          <span className="whitespace-nowrap">Genererer ansøgning... {elapsedTime}</span>
+        </>
       ) : isSuccess ? (
         <Check className="h-5 w-5 mx-auto animate-scale-in text-white" />
       ) : (

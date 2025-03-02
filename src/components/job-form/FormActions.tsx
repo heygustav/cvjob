@@ -12,15 +12,14 @@ const FormActions: React.FC<FormActionsProps> = ({
   isLoading,
   className
 }) => {
-  console.log("FormActions isLoading:", isLoading);
   const { formattedTime } = useTimer(isLoading);
 
   return (
-    <div className={`flex flex-col sm:flex-row gap-4 pt-4 border-t border-gray-200 ${className || ''}`}>
+    <div className={`flex flex-col sm:flex-row justify-end gap-4 pt-6 border-t border-gray-200 mt-6 ${className || ''}`}>
       <SubmitButton 
         isLoading={isLoading} 
         elapsedTime={formattedTime}
-        className="w-full text-sm sm:text-base"
+        className="w-full sm:w-auto text-sm sm:text-base"
       />
     </div>
   );

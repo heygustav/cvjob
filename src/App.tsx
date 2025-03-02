@@ -12,6 +12,7 @@ import AboutUs from "./pages/AboutUs";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsAndConditions from "./pages/TermsAndConditions";
 import Contact from "./pages/Contact";
+import JobForm from "./pages/JobForm";
 import { Toaster } from "./components/ui/toaster";
 import "./App.css";
 import { AuthProvider, useAuth } from "./components/AuthProvider";
@@ -64,6 +65,14 @@ const AppRoutes = () => (
       element={
         <ProtectedRoute>
           <Profile />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/job/new"
+      element={
+        <ProtectedRoute>
+          <JobForm />
         </ProtectedRoute>
       }
     />
