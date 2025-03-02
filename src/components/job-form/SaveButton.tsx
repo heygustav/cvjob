@@ -45,7 +45,7 @@ const SaveButton: React.FC<SaveButtonProps> = ({ onClick, disabled, isLoading })
       ) : (
         <>
           <SaveIcon className="h-4 w-4 mr-2" />
-          Gem som kladde
+          Gem ændringer
         </>
       )}
     </Button>

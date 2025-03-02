@@ -11,6 +11,7 @@ import { JobPosting } from "@/lib/types";
 
 const JobForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [job, setJob] = useState<JobPosting | null>(null);
   const { id } = useParams();
@@ -70,7 +71,7 @@ const JobForm = () => {
       
       // Pass the exact ID for updates
       const jobId = isEditMode ? id : undefined;
-      console.log("Saving job with id:", jobId, "Form data:", formData);
+      console.log("Submitting job with id:", jobId, "Form data:", formData);
       
       // Save job to database
       await saveOrUpdateJob(formData, user.id, jobId);
@@ -93,6 +94,48 @@ const JobForm = () => {
       });
     } finally {
       setIsSubmitting(false);
+    }
+  };
+  
+  const handleSave = async (formData: JobFormData) => {
+    if (!user) {
+      toast({
+        title: "Ikke logget ind",
+        description: "Du skal være logget ind for at gemme et jobopslag.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setIsSaving(true);
+      
+      // Pass the exact ID for updates
+      const jobId = isEditMode ? id : undefined;
+      console.log("Saving job with id:", jobId, "Form data:", formData);
+      
+      // Save job to database
+      await saveOrUpdateJob(formData, user.id, jobId);
+      
+      toast({
+        title: "Jobopslag gemt",
+        description: "Dit jobopslag er blevet gemt.",
+      });
+      
+      // Reload job data if in edit mode to refresh the form with saved data
+      if (isEditMode && id) {
+        const updatedJob = await fetchJobById(id);
+        setJob(updatedJob);
+      }
+    } catch (error) {
+      console.error("Error saving job:", error);
+      toast({
+        title: "Fejl ved gem",
+        description: "Der opstod en fejl under gemning af jobopslaget.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -126,8 +169,10 @@ const JobForm = () => {
           ) : (
             <JobPostingForm 
               onSubmit={handleSubmit} 
+              onSave={handleSave}
               initialData={job} 
-              isLoading={isSubmitting} 
+              isLoading={isSubmitting}
+              isSaving={isSaving}
             />
           )}
         </div>
