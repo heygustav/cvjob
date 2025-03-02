@@ -73,7 +73,9 @@ function App() {
             <Route path="/profile" element={<Profile />} />
             <Route path="/job/new" element={<JobForm />} />
             <Route path="/job/:id" element={<JobForm />} />
-            <Route path="/cover-letter" element={<CoverLetterGenerator />} />
+            <Route path="/cover-letter/generator" element={<CoverLetterGenerator />} />
+            {/* Add a redirect from /generator to the correct path */}
+            <Route path="/generator" element={<CoverLetterGenerator />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
             <Route path="/about-us" element={<AboutUs />} />

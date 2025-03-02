@@ -19,17 +19,17 @@ const CTASection: React.FC<CTASectionProps> = ({ session }) => {
           </p>
           <div className="mt-10 flex items-center justify-center gap-x-6">
             <Link
-              to={session ? "/generator" : "/auth"}
+              to={session ? "/cover-letter/generator" : "/auth"}
               className="rounded-md bg-white px-3.5 py-2.5 text-sm font-semibold text-primary-800 shadow-sm hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             >
               {session ? "Lav din første ansøgning" : "Tilmeld dig gratis"}
             </Link>
-            <Link
-              to="#how-it-works"
+            <a
+              href="https://cvjob.dk/blog"
               className="text-sm font-semibold leading-6 text-primary-100 hover:text-white transition-colors"
             >
               Læs mere <span aria-hidden="true">→</span>
-            </Link>
+            </a>
           </div>
         </div>
       </div>
