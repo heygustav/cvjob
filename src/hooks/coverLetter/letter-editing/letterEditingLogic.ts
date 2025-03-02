@@ -1,78 +1,63 @@
 
 import { CoverLetter } from "@/lib/types";
-import { updateLetterContent } from "@/services/coverLetter/database";
+import { JobFormData } from "@/services/coverLetter/types";
 
-interface EditLetterParams {
-  updatedContent: string;
-  generatedLetter: CoverLetter | null;
-  user: any | null;
-  isMountedRef: React.MutableRefObject<boolean>;
-  safeSetState: <T>(stateSetter: React.Dispatch<React.SetStateAction<T>>, value: T) => void;
-  setGeneratedLetter: React.Dispatch<React.SetStateAction<CoverLetter | null>>;
-  setLoadingState: React.Dispatch<React.SetStateAction<string>>;
-  setGenerationProgress: React.Dispatch<React.SetStateAction<any>>;
-  fetchWithTimeout: <T>(promise: Promise<T>, timeoutMs?: number) => Promise<T>;
-  toastMessages: any;
-  toast: any;
-}
-
-export async function editLetterLogic({
-  updatedContent,
-  generatedLetter,
-  user,
-  isMountedRef,
-  safeSetState,
-  setGeneratedLetter,
-  setLoadingState,
-  setGenerationProgress,
-  fetchWithTimeout,
-  toastMessages,
-  toast
-}: EditLetterParams) {
-  if (!generatedLetter || !user || !isMountedRef.current) return;
-
+export const handleEditLetterLogic = async (
+  userId: string,
+  letterId: string,
+  updatedContent: string,
+  fetchWithTimeout: <T>(promise: Promise<T>) => Promise<T>,
+  editCoverLetter: (userId: string, letterId: string, content: string) => Promise<CoverLetter>
+): Promise<CoverLetter | null> => {
   try {
-    safeSetState(setLoadingState, "saving");
-    safeSetState(setGenerationProgress, {
-      phase: 'letter-save',
-      progress: 50,
-      message: 'Gemmer ændringer...'
-    });
+    console.log(`Editing letter ${letterId} for user ${userId}`);
     
-    await fetchWithTimeout(updateLetterContent(generatedLetter.id, updatedContent));
-
-    if (!isMountedRef.current) return;
+    // Try regular call first
+    let updatedLetter;
+    try {
+      updatedLetter = await editCoverLetter(userId, letterId, updatedContent);
+    } catch (directError) {
+      console.warn("Direct edit failed, retrying with timeout:", directError);
+      // Fallback to timeout version
+      updatedLetter = await fetchWithTimeout(editCoverLetter(userId, letterId, updatedContent));
+    }
     
-    safeSetState(setGeneratedLetter, {
-      ...generatedLetter,
-      content: updatedContent
-    });
-
-    safeSetState(setGenerationProgress, {
-      phase: 'letter-save',
-      progress: 100,
-      message: 'Ændringer gemt!'
-    });
-
-    toast(toastMessages.letterUpdated);
+    console.log("Letter updated successfully");
+    return updatedLetter;
   } catch (error) {
-    console.error('Error updating letter:', error);
-    
-    if (!isMountedRef.current) return;
-    
-    const isNetworkError = !navigator.onLine || 
-      (error instanceof Error && error.message.includes('forbindelse'));
+    console.error("Error in handleEditLetterLogic:", error);
+    throw error;
+  }
+};
+
+export const handleSaveLetterLogic = (
+  toast: any
+) => {
+  // Simply show a toast to confirm the letter is already saved
+  toast({
+    title: "Ansøgning gemt",
+    description: "Din ansøgning er allerede automatisk gemt.",
+  });
+};
+
+export const saveJobAsDraftLogic = async (
+  jobData: JobFormData,
+  userId: string,
+  toast: any,
+  saveOrUpdateJob: (jobData: JobFormData, userId: string, existingJobId?: string) => Promise<string>
+): Promise<string | null> => {
+  try {
+    console.log("Saving job as draft for user:", userId);
+    const jobId = await saveOrUpdateJob(jobData, userId);
     
     toast({
-      title: "Fejl ved opdatering",
-      description: isNetworkError 
-        ? "Kontroller din internetforbindelse og prøv igen."
-        : "Der opstod en fejl under opdatering af ansøgningen.",
-      variant: "destructive",
+      title: "Job gemt som kladde",
+      description: "Dit job er blevet gemt som kladde til senere brug.",
     });
-  } finally {
-    if (isMountedRef.current) {
-      safeSetState(setLoadingState, "idle");
-    }
+    
+    return jobId;
+  } catch (error) {
+    console.error("Error in saveJobAsDraftLogic:", error);
+    throw error;
   }
-}
+};
