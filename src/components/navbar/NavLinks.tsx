@@ -8,8 +8,6 @@ import {
   UserCircle,
   LogOut,
   Home,
-  InfoIcon,
-  Phone,
 } from "lucide-react";
 
 interface NavLinksProps {
@@ -51,16 +49,6 @@ const NavLinks: React.FC<NavLinksProps> = ({
           Opret ansøgning
         </Link>
       )}
-      
-      <Link to="/about" className={linkClass}>
-        <InfoIcon className="h-4 w-4" />
-        Om os
-      </Link>
-      
-      <Link to="/contact" className={linkClass}>
-        <Phone className="h-4 w-4" />
-        Kontakt
-      </Link>
       
       {session ? (
         <>
