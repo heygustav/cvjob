@@ -19,9 +19,21 @@ async function extractTextFromPdf(file: File): Promise<string> {
     const arrayBuffer = await file.arrayBuffer();
     console.log("File converted to ArrayBuffer successfully");
     
-    console.log("Creating PDF document loading task");
-    // Load the PDF document
+    // Check if worker is configured
+    if (!pdfjs.GlobalWorkerOptions.workerSrc) {
+      throw new Error('PDF.js worker is not configured. Please refresh the page and try again.');
+    }
+    
+    console.log("Creating PDF document loading task with worker at:", pdfjs.GlobalWorkerOptions.workerSrc);
+    
+    // Load the PDF document with error handling
     const loadingTask = pdfjs.getDocument({ data: arrayBuffer });
+    
+    // Add error handler to the loadingTask
+    loadingTask.onUnsupportedFeature = (featureId) => {
+      console.warn('Unsupported PDF feature:', featureId);
+    };
+    
     console.log("Awaiting PDF document loading");
     
     const pdf = await loadingTask.promise;
@@ -54,6 +66,16 @@ async function extractTextFromPdf(file: File): Promise<string> {
     return extractedText;
   } catch (error) {
     console.error("Error extracting text from PDF:", error);
+    
+    // Provide more specific error messages based on the error type
+    if (error.message && error.message.includes('worker')) {
+      throw new Error('Kunne ikke indlæse PDF-læser komponenten. Prøv at genindlæse siden eller brug en anden browser.');
+    } else if (error.message && error.message.includes('password')) {
+      throw new Error('PDF-filen er krypteret med en adgangskode. Fjern adgangskoden og prøv igen.');
+    } else if (error.message && error.message.includes('corrupt')) {
+      throw new Error('PDF-filen er beskadiget. Prøv at gemme den igen eller brug en anden fil.');
+    }
+    
     throw new Error('Kunne ikke læse PDF-filen korrekt.');
   }
 }
@@ -78,7 +100,7 @@ export const processPdfFile = async (file: File): Promise<ProcessResult> => {
         console.error("Error processing PDF:", error);
         return {
           success: false,
-          error: 'Kunne ikke læse PDF-filen. Kontrollér filen eller udfyld oplysningerne manuelt.'
+          error: error.message || 'Kunne ikke læse PDF-filen. Kontrollér filen eller udfyld oplysningerne manuelt.'
         };
       }
     } else if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || 

@@ -8,6 +8,8 @@ import { processPdfFile } from '@/utils/resumeParser';
 import { validateFile } from '@/utils/resume/fileUtils';
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { AlertCircle, RefreshCw } from 'lucide-react';
 
 interface ResumeUploaderProps {
   onExtractedData: (data: Partial<PersonalInfoFormState>) => void;
@@ -52,6 +54,25 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
     });
 
     try {
+      // Verify PDF.js worker is available
+      if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
+        const workerSrc = '/pdf.worker.js';
+        try {
+          const workerCheck = await fetch(workerSrc, { method: 'HEAD' });
+          if (!workerCheck.ok) {
+            console.error(`PDF worker file check failed with status: ${workerCheck.status}`);
+            throw new Error('PDF-læser komponenten kunne ikke indlæses. Prøv at genindlæse siden eller prøv med en DOCX-fil i stedet.');
+          }
+        } catch (workerError) {
+          console.error('Error checking PDF worker:', workerError);
+          toast({
+            title: "Problem med PDF-læser",
+            description: "Vi havde problemer med at indlæse PDF-læser komponenten. Prøv at genindlæse siden eller upload en DOCX-fil i stedet.",
+            variant: "destructive",
+          });
+        }
+      }
+      
       // Process file with our client-side parser
       const result = await processPdfFile(file);
       
@@ -127,6 +148,26 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
   const retryUpload = () => {
     console.log("Retrying upload, resetting error state");
     setError(null);
+    
+    // Refresh the page to reload the PDF.js worker
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+    
+    // Check if PDF.js worker is available after a short delay
+    setTimeout(async () => {
+      try {
+        const workerCheck = await fetch('/pdf.worker.js', { method: 'HEAD' });
+        if (workerCheck.ok) {
+          toast({
+            title: "PDF-læser klar",
+            description: "PDF-læser komponenten er nu klar. Du kan prøve at uploade din fil igen.",
+          });
+        }
+      } catch (error) {
+        console.error("Error checking PDF worker availability:", error);
+      }
+    }, 1000);
   };
 
   return (
