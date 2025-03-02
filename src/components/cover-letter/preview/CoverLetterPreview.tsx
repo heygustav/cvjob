@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import PreviewHeader from "./PreviewHeader";
@@ -11,6 +10,7 @@ interface CoverLetterPreviewProps {
   content: string;
   jobTitle?: string;
   company?: string;
+  contactPerson?: string; // Add contactPerson prop
   onEdit?: (content: string) => void;
   isEditable?: boolean;
 }
@@ -19,6 +19,7 @@ const CoverLetterPreview: React.FC<CoverLetterPreviewProps> = ({
   content,
   jobTitle,
   company,
+  contactPerson, // Use the contactPerson prop
   onEdit,
   isEditable = true,
 }) => {
@@ -91,6 +92,7 @@ const CoverLetterPreview: React.FC<CoverLetterPreviewProps> = ({
           onTextChange={handleTextChange}
           company={company}
           jobTitle={jobTitle}
+          contactPerson={contactPerson}
           formattedDate={formattedDate}
         />
       </div>

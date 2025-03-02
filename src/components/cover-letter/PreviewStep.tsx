@@ -20,6 +20,7 @@ const PreviewStep: React.FC<PreviewStepProps> = ({
         content={generatedLetter.content}
         jobTitle={selectedJob.title}
         company={selectedJob.company}
+        contactPerson={selectedJob.contact_person}
         onEdit={onEdit}
       />
     </div>
