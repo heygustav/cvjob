@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/components/AuthProvider';
@@ -18,6 +19,7 @@ const Auth = () => {
     const storedRedirect = localStorage.getItem('redirectAfterLogin');
     if (storedRedirect) {
       setRedirectUrl(storedRedirect);
+      console.log("Auth: Found redirectUrl:", storedRedirect);
     }
   }, []);
 

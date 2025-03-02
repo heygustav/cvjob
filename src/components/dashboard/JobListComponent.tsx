@@ -57,12 +57,12 @@ const JobListComponent: React.FC<JobListComponentProps> = ({
   };
 
   const handleCreateApplication = (job: JobPosting) => {
-    // If user is not authenticated, redirect directly to login
+    // If user is not authenticated, redirect directly to auth page
     if (!isAuthenticated) {
-      console.log("User not authenticated - redirecting to login");
+      console.log("User not authenticated - redirecting to authentication");
       // Store intended destination in localStorage for potential redirect after login
       localStorage.setItem('redirectAfterLogin', `/cover-letter/generator?jobId=${job.id}&step=1&direct=true`);
-      window.location.href = '/login';
+      window.location.href = '/auth';
       return;
     }
 
