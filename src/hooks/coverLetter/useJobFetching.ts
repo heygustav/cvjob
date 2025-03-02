@@ -26,21 +26,27 @@ export const useJobFetching = (
   const { fetchWithTimeout } = useNetworkUtils();
 
   const fetchJob = useCallback(async (id: string) => {
-    if (!isMountedRef.current) return null;
+    if (!isMountedRef.current) {
+      console.log("Component not mounted, aborting fetchJob");
+      return null;
+    }
+    
+    // Always reset states at the beginning
+    safeSetState(setLoadingState, "initializing");
+    safeSetState(setGenerationError, null);
+    safeSetState(setGenerationPhase, null);
+    safeSetState(setGenerationProgress, {
+      phase: 'job-save',
+      progress: 0,
+      message: 'Henter jobinformation...'
+    });
+    
+    let job = null;
     
     try {
       console.log("fetchJob: Starting fetch for job with ID:", id);
-      safeSetState(setLoadingState, "initializing");
-      safeSetState(setGenerationError, null);
-      safeSetState(setGenerationPhase, null);
-      safeSetState(setGenerationProgress, {
-        phase: 'job-save',
-        progress: 0,
-        message: 'Henter jobinformation...'
-      });
       
-      // Try without timeout first to avoid unnecessary delays
-      let job;
+      // Try direct fetch first
       try {
         job = await fetchJobById(id);
       } catch (directError) {
@@ -49,29 +55,33 @@ export const useJobFetching = (
         job = await fetchWithTimeout(fetchJobById(id));
       }
       
+      // Check if component unmounted during fetch
       if (!isMountedRef.current) {
         console.log("fetchJob: Component unmounted during job fetch");
         return null;
       }
       
+      // Handle job not found
       if (!job) {
         console.log("fetchJob: Job not found");
         toast(toastMessages.jobNotFound);
+        safeSetState(setLoadingState, "idle");
         navigate("/dashboard");
         return null;
       }
 
       console.log("fetchJob: Successfully fetched job:", job);
       safeSetState(setSelectedJob, job);
-
+      
+      // Update progress for letter fetching
       safeSetState(setGenerationProgress, {
         phase: 'job-save',
         progress: 50,
         message: 'Søger efter eksisterende ansøgninger...'
       });
 
+      // Check for existing letters (if this fails, it's not critical)
       try {
-        // Try without timeout first
         let letters;
         try {
           letters = await fetchLettersForJob(id);
@@ -80,6 +90,7 @@ export const useJobFetching = (
           letters = await fetchWithTimeout(fetchLettersForJob(id));
         }
         
+        // Check if component unmounted during letter fetch
         if (!isMountedRef.current) {
           console.log("fetchJob: Component unmounted during letters fetch");
           return null;
@@ -91,24 +102,24 @@ export const useJobFetching = (
           safeSetState(setStep, 2);
         } else {
           console.log("fetchJob: No existing letters found, staying on step 1");
+          // Explicitly set step to 1 for job form
           safeSetState(setStep, 1);
         }
       } catch (letterError) {
         console.error("fetchJob: Error fetching letters:", letterError);
-        // Non-critical error, continue on step 1
+        // Non-critical error, ensure we stay on step 1
         if (isMountedRef.current) {
           safeSetState(setStep, 1);
         }
       }
       
+      // Mark job fetch as complete
       if (isMountedRef.current) {
         safeSetState(setGenerationProgress, {
           phase: 'job-save',
           progress: 100,
           message: 'Indlæsning fuldført'
         });
-        
-        // Ensure we always exit initializing state
         console.log("fetchJob: Setting loadingState to idle");
         safeSetState(setLoadingState, "idle");
       }
@@ -117,11 +128,13 @@ export const useJobFetching = (
     } catch (error) {
       console.error("fetchJob: Error in fetchJob:", error);
       
+      // Check if component unmounted during error handling
       if (!isMountedRef.current) {
         console.log("fetchJob: Component unmounted during error handling");
         return null;
       }
       
+      // Determine if this is a network error
       const isNetworkError = !navigator.onLine || 
         (error instanceof Error && (
           error.message.includes('forbindelse') ||
@@ -129,21 +142,21 @@ export const useJobFetching = (
           error.message.includes('network')
         ));
       
+      // Show appropriate toast
       toast(isNetworkError ? toastMessages.networkError : {
         title: "Fejl ved indlæsning",
         description: error instanceof Error ? error.message : "Der opstod en fejl under indlæsning. Prøv igen senere.",
         variant: "destructive",
       });
       
-      // Only navigate to dashboard if it's a fatal error
+      // Only navigate for fatal network errors
       if (isNetworkError) {
         navigate("/dashboard");
       }
       
-      // Ensure error state is properly set
-      safeSetState(setLoadingState, "idle");
       return null;
     } finally {
+      // Always reset loadingState in finally block to ensure it happens
       if (isMountedRef.current) {
         console.log("fetchJob: Finalizing, setting loadingState to idle");
         safeSetState(setLoadingState, "idle");

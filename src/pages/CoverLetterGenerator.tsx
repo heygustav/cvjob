@@ -18,10 +18,12 @@ const CoverLetterGenerator: React.FC = () => {
   const jobId = searchParams.get("jobId");
   const letterId = searchParams.get("letterId");
   const stepParam = searchParams.get("step");
+  const isDirect = searchParams.get("direct") === "true";
   const { session } = useAuth();
   const [initialLoading, setInitialLoading] = useState(true);
   const { toast } = useToast();
   const initStarted = useRef(false);
+  const initTimeoutRef = useRef<number | null>(null);
   
   // Convert Supabase user to our app's User type
   const user: User | null = session?.user ? {
@@ -51,6 +53,23 @@ const CoverLetterGenerator: React.FC = () => {
     resetError,
   } = useCoverLetterGeneration(user);
 
+  // Safety timeout to prevent infinite loading
+  useEffect(() => {
+    if (initialLoading) {
+      initTimeoutRef.current = window.setTimeout(() => {
+        console.log("Safety timeout: Forcing initialLoading to false after 5 seconds");
+        setInitialLoading(false);
+      }, 5000);
+    }
+    
+    return () => {
+      if (initTimeoutRef.current !== null) {
+        clearTimeout(initTimeoutRef.current);
+        initTimeoutRef.current = null;
+      }
+    };
+  }, [initialLoading]);
+
   // One-time initialization
   useEffect(() => {
     let isMounted = true;
@@ -66,10 +85,10 @@ const CoverLetterGenerator: React.FC = () => {
           return;
         }
         
-        console.log("Starting initialization with params:", { jobId, letterId, stepParam });
+        console.log("Starting initialization with params:", { jobId, letterId, stepParam, isDirect });
 
-        // Set initial step if provided in URL
-        if (stepParam === "1") {
+        // For direct access (from dashboard button) or when step=1 is specified, ensure we go to step 1
+        if (isDirect || stepParam === "1") {
           setStep(1);
         }
         
@@ -79,8 +98,11 @@ const CoverLetterGenerator: React.FC = () => {
             await fetchJob(jobId);
             console.log("Job fetched successfully");
             
-            // Always ensure we're on step 1 when a job ID is provided
-            if (isMounted) setStep(1);
+            // Always ensure we're on step 1 when a job ID is provided with direct=true
+            if (isMounted && (isDirect || stepParam === "1")) {
+              console.log("Explicitly setting to step 1 due to isDirect or stepParam");
+              setStep(1);
+            }
           } catch (error) {
             console.error("Error fetching job:", error);
             toast({
@@ -90,7 +112,10 @@ const CoverLetterGenerator: React.FC = () => {
             });
           } finally {
             // Always set loading to false when job fetch completes (success or error)
-            if (isMounted) setInitialLoading(false);
+            if (isMounted) {
+              console.log("Marking initialization as complete after job fetch");
+              setInitialLoading(false);
+            }
           }
         } 
         // For viewing generated letters
@@ -106,13 +131,19 @@ const CoverLetterGenerator: React.FC = () => {
               variant: "destructive",
             });
           } finally {
-            if (isMounted) setInitialLoading(false);
+            if (isMounted) {
+              console.log("Marking initialization as complete after letter fetch");
+              setInitialLoading(false);
+            }
           }
         } 
         // Default - for new job submissions
         else {
           console.log("No job or letter ID provided - new submission mode");
-          if (isMounted) setInitialLoading(false);
+          if (isMounted) {
+            console.log("Marking initialization as complete for new submission");
+            setInitialLoading(false);
+          }
         }
       } catch (error) {
         console.error("Initialization error:", error);
@@ -122,6 +153,7 @@ const CoverLetterGenerator: React.FC = () => {
             description: "Der opstod en fejl under indlæsning af data.",
             variant: "destructive",
           });
+          console.log("Marking initialization as complete after error");
           setInitialLoading(false);
         }
       }
@@ -132,8 +164,12 @@ const CoverLetterGenerator: React.FC = () => {
     return () => {
       isMounted = false;
       console.log("Generator component unmounting");
+      if (initTimeoutRef.current !== null) {
+        clearTimeout(initTimeoutRef.current);
+        initTimeoutRef.current = null;
+      }
     };
-  }, [fetchJob, fetchLetter, jobId, letterId, stepParam, toast, user, setStep]);
+  }, [fetchJob, fetchLetter, jobId, letterId, stepParam, isDirect, toast, user, setStep]);
 
   // Wrapper for saveJobAsDraft to make it return Promise<void> instead of Promise<string | null>
   const handleSaveJobAsDraft = async (jobData: any) => {
