@@ -3,9 +3,9 @@ import { useState, useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { da } from "date-fns/locale";
-import { createPdfDocument, generatePdfFilename } from "../factories/pdfDocumentFactory";
-import { createDocxDocument, generateDocxFilename, saveDocxDocument } from "../factories/docxDocumentFactory";
-import { createTextDocument, generateTextFilename } from "../factories/textDocumentFactory";
+import { createPdfDocument, generatePdfFilename, PdfDocumentOptions } from "../factories/pdfDocumentFactory";
+import { createDocxDocument, generateDocxFilename, saveDocxDocument, DocxDocumentOptions } from "../factories/docxDocumentFactory";
+import { createTextDocument, generateTextFilename, TextDocumentOptions } from "../factories/textDocumentFactory";
 
 export const useCoverLetterDocuments = (
   content: string,
@@ -20,13 +20,14 @@ export const useCoverLetterDocuments = (
   // Function to download as text file
   const handleDownloadTxt = useCallback(() => {
     try {
-      const documentText = createTextDocument({
+      const documentOptions: TextDocumentOptions = {
         content,
         company,
         jobTitle,
         formattedDate
-      });
+      };
       
+      const documentText = createTextDocument(documentOptions);
       const filename = generateTextFilename(company, jobTitle);
       
       const element = document.createElement("a");
@@ -54,13 +55,14 @@ export const useCoverLetterDocuments = (
   // Function to download as PDF
   const handleDownloadPdf = useCallback(() => {
     try {
-      const doc = createPdfDocument({
+      const documentOptions: PdfDocumentOptions = {
         content,
         company,
         jobTitle,
         formattedDate
-      });
+      };
       
+      const doc = createPdfDocument(documentOptions);
       const filename = generatePdfFilename(company, jobTitle);
       doc.save(filename);
       
@@ -81,13 +83,14 @@ export const useCoverLetterDocuments = (
   // Function to download as Word document
   const handleDownloadDocx = useCallback(() => {
     try {
-      const doc = createDocxDocument({
+      const documentOptions: DocxDocumentOptions = {
         content,
         company,
         jobTitle,
         formattedDate
-      });
+      };
       
+      const doc = createDocxDocument(documentOptions);
       const filename = generateDocxFilename(company, jobTitle);
       
       saveDocxDocument(doc, filename).then(() => {
