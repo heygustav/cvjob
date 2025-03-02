@@ -68,14 +68,14 @@ const FileDropArea: React.FC<FileDropAreaProps> = ({
         <p className="text-xs text-gray-500 mb-4 italic">
           {isDragging 
             ? "Slip filen for at uploade..." 
-            : "Træk og slip din PDF-fil her, eller klik for at vælge"}
+            : "Træk og slip din CV-fil her, eller klik for at vælge"}
         </p>
         
         {isProcessing ? (
           <ProcessingIndicator />
         ) : (
           <div className="text-xs text-gray-500">
-            Accepterer kun PDF-filer (max 2MB)
+            Accepterer PDF og DOCX filer (max 2MB)
           </div>
         )}
         
@@ -83,7 +83,7 @@ const FileDropArea: React.FC<FileDropAreaProps> = ({
           ref={fileInputRef}
           type="file"
           className="hidden"
-          accept=".pdf"
+          accept=".pdf,.docx"
           onChange={handleFileChange}
           disabled={isProcessing}
         />
@@ -114,7 +114,7 @@ const ProcessingIndicator: React.FC = () => (
         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
       ></path>
     </svg>
-    Behandler PDF...
+    Behandler fil...
   </div>
 );
 

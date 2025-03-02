@@ -1,9 +1,50 @@
 
 import * as mammoth from 'mammoth';
+import * as pdfjs from 'pdfjs-dist';
 import { PersonalInfoFormState } from '@/pages/Profile';
 import { ProcessResult } from './types';
 import { parseResumeText } from './textParser';
 import { calculateConfidence } from './confidenceCalculator';
+
+// Set the PDF.js worker source
+const PDFJS_WORKER_SRC = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+
+/**
+ * Extract text from a PDF document
+ * @param file The PDF file to process
+ * @returns Extracted text from the PDF
+ */
+async function extractTextFromPdf(file: File): Promise<string> {
+  try {
+    // Set worker source
+    if (!pdfjs.GlobalWorkerOptions.workerSrc) {
+      pdfjs.GlobalWorkerOptions.workerSrc = PDFJS_WORKER_SRC;
+    }
+
+    // Read the file
+    const arrayBuffer = await file.arrayBuffer();
+    
+    // Load the PDF document
+    const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
+    
+    let extractedText = '';
+    
+    // Iterate through each page
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const textContent = await page.getTextContent();
+      const pageText = textContent.items
+        .map((item: any) => item.str)
+        .join(' ');
+      extractedText += pageText + '\n';
+    }
+    
+    return extractedText;
+  } catch (error) {
+    console.error("Error extracting text from PDF:", error);
+    throw new Error('Kunne ikke læse PDF-filen korrekt.');
+  }
+}
 
 /**
  * Process a resume file on the client side
@@ -17,13 +58,19 @@ export const processPdfFile = async (file: File): Promise<ProcessResult> => {
     let extractedText = '';
     
     // Handle different file types
-    if (file.type === 'application/pdf') {
-      // For PDF, we currently have limited support
-      return {
-        success: false, 
-        error: 'PDF-analyse er midlertidigt begrænset. Vi arbejder på at forbedre denne funktion. Venligst udfyld oplysningerne manuelt.'
-      };
-    } else if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+    if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
+      try {
+        extractedText = await extractTextFromPdf(file);
+        console.log("Extracted text from PDF:", extractedText.substring(0, 200) + "...");
+      } catch (error) {
+        console.error("Error processing PDF:", error);
+        return {
+          success: false,
+          error: 'Kunne ikke læse PDF-filen. Kontrollér filen eller udfyld oplysningerne manuelt.'
+        };
+      }
+    } else if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || 
+               file.name.toLowerCase().endsWith('.docx')) {
       // Process DOCX files using mammoth
       try {
         const arrayBuffer = await file.arrayBuffer();
