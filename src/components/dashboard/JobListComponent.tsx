@@ -1,3 +1,4 @@
+
 import React from "react";
 import { JobPosting } from "@/lib/types";
 import { Button } from "@/components/ui/button";
@@ -56,12 +57,24 @@ const JobListComponent: React.FC<JobListComponentProps> = ({
   };
 
   const handleCreateApplication = (job: JobPosting) => {
-    // Simply navigate to the application creation page with the job ID
-    const url = `/cover-letter/generator?jobId=${job.id}&step=1&direct=true`;
-    console.log(`JobListComponent: Navigating directly to: ${url}`);
+    // Navigate to the application creation page with all job data
+    // We'll use the jobId to fetch the job data on the cover letter page
+    // but we need to make sure we're already logged in to avoid the login loop
     
-    // Use direct navigation to avoid any loading states
-    window.location.href = url;
+    if (!isAuthenticated || !session) {
+      // Store the redirect URL and show a toast message
+      localStorage.setItem('redirectAfterLogin', `/cover-letter/generator?jobId=${job.id}&step=1&direct=true`);
+      toast({
+        title: "Log ind kræves",
+        description: "Du skal være logget ind for at oprette en ansøgning.",
+        variant: "destructive",
+      });
+      navigate('/auth');
+      return;
+    }
+    
+    // If authenticated, navigate directly to the generator
+    navigate(`/cover-letter/generator?jobId=${job.id}&step=1&direct=true`);
   };
   
   const handleEditJob = (jobId: string) => {

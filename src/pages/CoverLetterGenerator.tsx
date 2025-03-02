@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/components/AuthProvider";
@@ -18,11 +19,12 @@ const CoverLetterGenerator: React.FC = () => {
   const letterId = searchParams.get("letterId");
   const stepParam = searchParams.get("step");
   const isDirect = searchParams.get("direct") === "true";
-  const { session, isAuthenticated } = useAuth();
+  const { session, isAuthenticated, user: authUser } = useAuth();
   const [initialLoading, setInitialLoading] = useState(true);
   const { toast } = useToast();
   const initStarted = useRef(false);
   const initTimeoutRef = useRef<number | null>(null);
+  const redirectChecked = useRef(false);
   
   // Convert Supabase user to our app's User type
   const user: User | null = session?.user ? {
@@ -69,12 +71,31 @@ const CoverLetterGenerator: React.FC = () => {
     };
   }, [initialLoading]);
 
+  // Check auth state and redirect if necessary
+  useEffect(() => {
+    // Skip if we've already checked or component isn't mounted
+    if (redirectChecked.current) return;
+    
+    // Mark as checked so we only do this once
+    redirectChecked.current = true;
+    
+    if (!isAuthenticated) {
+      console.log("User not authenticated, redirecting to auth");
+      if (jobId) {
+        localStorage.setItem('redirectAfterLogin', `/cover-letter/generator?jobId=${jobId}&step=1&direct=true`);
+      }
+      navigate('/auth');
+    } else {
+      console.log("User is authenticated:", authUser?.id);
+    }
+  }, [isAuthenticated, jobId, navigate, authUser]);
+
   // One-time initialization
   useEffect(() => {
     let isMounted = true;
     
     const initialize = async () => {
-      if (initStarted.current) return;
+      if (initStarted.current || !isAuthenticated) return;
       initStarted.current = true;
       
       try {
@@ -86,15 +107,6 @@ const CoverLetterGenerator: React.FC = () => {
           isAuthenticated
         });
         
-        if (!isAuthenticated) {
-          console.log("User not authenticated, redirecting to auth");
-          if (jobId) {
-            localStorage.setItem('redirectAfterLogin', `/cover-letter/generator?jobId=${jobId}&step=1&direct=true`);
-          }
-          navigate('/auth');
-          return;
-        }
-
         if (!user) {
           console.log("No user found, can't initialize");
           if (isMounted) setInitialLoading(false);
@@ -189,13 +201,6 @@ const CoverLetterGenerator: React.FC = () => {
   const handleSaveJobAsDraft = async (jobData: any) => {
     await saveJobAsDraft(jobData);
   };
-
-  // If no user is found, redirect to login
-  useEffect(() => {
-    if (!initialLoading && !user) {
-      navigate("/login");
-    }
-  }, [initialLoading, user, navigate]);
 
   // Render functions
   const renderContent = () => {
