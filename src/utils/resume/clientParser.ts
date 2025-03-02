@@ -13,13 +13,19 @@ import { pdfjs } from '@/utils/pdfjs-setup';
  */
 async function extractTextFromPdf(file: File): Promise<string> {
   try {
+    console.log(`Starting PDF extraction for file: ${file.name}, size: ${file.size}`);
+    
     // Read the file
     const arrayBuffer = await file.arrayBuffer();
+    console.log("File converted to ArrayBuffer successfully");
     
-    console.log("Loading PDF document");
+    console.log("Creating PDF document loading task");
     // Load the PDF document
-    const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
-    console.log("PDF loaded successfully, pages:", pdf.numPages);
+    const loadingTask = pdfjs.getDocument({ data: arrayBuffer });
+    console.log("Awaiting PDF document loading");
+    
+    const pdf = await loadingTask.promise;
+    console.log(`PDF loaded successfully with ${pdf.numPages} pages`);
     
     let extractedText = '';
     
@@ -28,18 +34,23 @@ async function extractTextFromPdf(file: File): Promise<string> {
       try {
         console.log(`Processing page ${i} of ${pdf.numPages}`);
         const page = await pdf.getPage(i);
+        console.log(`Page ${i} retrieved successfully`);
+        
         const textContent = await page.getTextContent();
+        console.log(`Text content extracted from page ${i}`);
+        
         const pageText = textContent.items
           .map((item: any) => item.str)
           .join(' ');
         extractedText += pageText + '\n';
+        console.log(`Added ${pageText.length} characters from page ${i}`);
       } catch (pageError) {
         console.error(`Error extracting text from page ${i}:`, pageError);
         // Continue processing other pages even if one fails
       }
     }
     
-    console.log("Text extraction complete, length:", extractedText.length);
+    console.log(`Text extraction complete. Total characters extracted: ${extractedText.length}`);
     return extractedText;
   } catch (error) {
     console.error("Error extracting text from PDF:", error);
