@@ -27,6 +27,11 @@ const FooterSection: React.FC = () => {
               Kontakt
             </Link>
           </div>
+          <div className="pb-4 sm:pb-6">
+            <a href="https://cvjob.dk/blog" className="text-sm leading-6 text-muted-foreground hover:text-foreground transition-colors">
+              Blog
+            </a>
+          </div>
         </nav>
         <p className="mt-8 text-center text-xs leading-5 text-muted-foreground">
           &copy; {new Date().getFullYear()} CVJob.dk
