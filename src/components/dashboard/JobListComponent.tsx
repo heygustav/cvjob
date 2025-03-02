@@ -107,6 +107,7 @@ const JobListComponent: React.FC<JobListComponentProps> = ({
                       <RouterLink
                         to={`/cover-letter?jobId=${job.id}`}
                         title="Opret ansøgning"
+                        aria-label="Opret ansøgning for dette job"
                       >
                         <FileText className="h-4 w-4" />
                       </RouterLink>

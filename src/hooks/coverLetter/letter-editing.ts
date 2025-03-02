@@ -1,8 +1,9 @@
-import { useState } from "react";
+
+import { useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { CoverLetter, User } from "@/lib/types";
 import { JobFormData } from "@/services/coverLetter/types";
-import { updateLetterContent } from "@/services/coverLetter/letterOperations";
+import { updateLetterContent, editCoverLetter } from "@/services/coverLetter/letterOperations";
 import { saveOrUpdateJob } from "@/services/coverLetter/jobOperations";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -16,9 +17,8 @@ export const useLetterEditing = (
   generatedLetter: CoverLetter | null
 ) => {
   const { toast } = useToast();
-  const [isEditing, setIsEditing] = useState(false);
-
-  const handleEditLetter = async (updatedContent: string) => {
+  
+  const handleEditLetter = useCallback(async (updatedContent: string) => {
     if (!user) {
       toast({
         title: "Ikke logget ind",
@@ -39,16 +39,12 @@ export const useLetterEditing = (
 
     try {
       safeSetState(setLoadingState, "saving");
-      setIsEditing(true);
       
-      await updateLetterContent(generatedLetter.id, updatedContent);
+      // Use the editCoverLetter function from letterOperations
+      const updatedLetter = await editCoverLetter(user.id, generatedLetter.id, updatedContent);
       
       if (isMountedRef.current) {
-        safeSetState(setGeneratedLetter, {
-          ...generatedLetter,
-          content: updatedContent,
-          updated_at: new Date().toISOString(),
-        });
+        safeSetState(setGeneratedLetter, updatedLetter);
         
         toast({
           title: "Ansøgning opdateret",
@@ -68,19 +64,20 @@ export const useLetterEditing = (
     } finally {
       if (isMountedRef.current) {
         safeSetState(setLoadingState, "idle");
-        setIsEditing(false);
       }
     }
-  };
+  }, [generatedLetter, isMountedRef, safeSetState, setGeneratedLetter, setLoadingState, toast, user]);
 
-  const handleSaveLetter = async () => {
+  const handleSaveLetter = useCallback(() => {
     // This function is kept for backward compatibility
-    // It was previously used to save letters but that functionality
-    // has been moved elsewhere in the application
     console.log("handleSaveLetter called - this is a no-op function now");
-  };
+    toast({
+      title: "Ansøgning gemt",
+      description: "Din ansøgning er allerede automatisk gemt.",
+    });
+  }, [toast]);
 
-  const saveJobAsDraft = async (jobData: JobFormData): Promise<void> => {
+  const saveJobAsDraft = useCallback(async (jobData: JobFormData): Promise<void> => {
     if (!user) {
       throw new Error("Du skal være logget ind for at gemme jobbet som kladde.");
     }
@@ -99,9 +96,9 @@ export const useLetterEditing = (
       console.error("Error saving job as draft:", error);
       throw new Error("Der opstod en fejl ved at gemme jobbet som kladde.");
     }
-  };
+  }, [user]);
 
-  const resetError = () => {
+  const resetError = useCallback(() => {
     if (isMountedRef.current) {
       safeSetState(setGenerationProgress, {
         phase: 'job-save',
@@ -109,7 +106,7 @@ export const useLetterEditing = (
         message: 'Forbereder...'
       });
     }
-  };
+  }, [isMountedRef, safeSetState, setGenerationProgress]);
 
   return {
     handleEditLetter,
