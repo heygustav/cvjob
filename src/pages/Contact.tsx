@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronLeft, Mail, MapPin, Phone } from 'lucide-react';
+import { ChevronLeft, Mail } from 'lucide-react';
 import FooterSection from '@/components/home/FooterSection';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -145,40 +145,9 @@ const Contact = () => {
                 <div className="ml-3">
                   <h3 className="text-lg font-medium text-gray-900">Email</h3>
                   <p className="mt-1 text-muted-foreground">
-                    <a href="mailto:kontakt@cvjob.dk" className="text-primary hover:underline">
-                      kontakt@cvjob.dk
+                    <a href="mailto:gustav@cvjob.dk" className="text-primary hover:underline">
+                      gustav@cvjob.dk
                     </a>
-                  </p>
-                </div>
-              </div>
-              
-              <div className="flex items-start">
-                <div className="flex-shrink-0 mt-1">
-                  <Phone className="h-5 w-5 text-primary" />
-                </div>
-                <div className="ml-3">
-                  <h3 className="text-lg font-medium text-gray-900">Telefon</h3>
-                  <p className="mt-1 text-muted-foreground">
-                    <a href="tel:+4512345678" className="text-primary hover:underline">
-                      +45 12 34 56 78
-                    </a>
-                  </p>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    Mandag-Fredag, 9:00-16:00
-                  </p>
-                </div>
-              </div>
-              
-              <div className="flex items-start">
-                <div className="flex-shrink-0 mt-1">
-                  <MapPin className="h-5 w-5 text-primary" />
-                </div>
-                <div className="ml-3">
-                  <h3 className="text-lg font-medium text-gray-900">Adresse</h3>
-                  <p className="mt-1 text-muted-foreground">
-                    Nørregade 7B, 2. sal<br />
-                    1165 København K<br />
-                    Danmark
                   </p>
                 </div>
               </div>
@@ -186,28 +155,28 @@ const Contact = () => {
             
             <div className="mt-10">
               <h3 className="text-lg font-medium text-gray-900 mb-4">Ofte stillede spørgsmål</h3>
-              <ul className="list-disc pl-5 text-muted-foreground space-y-2">
-                <li>
+              <div className="text-muted-foreground space-y-4">
+                <p>
                   <a href="#" className="text-primary hover:underline">
                     Hvordan fungerer jeres ansøgningsgenerator?
                   </a>
-                </li>
-                <li>
+                </p>
+                <p>
                   <a href="#" className="text-primary hover:underline">
                     Hvad koster jeres tjeneste?
                   </a>
-                </li>
-                <li>
+                </p>
+                <p>
                   <a href="#" className="text-primary hover:underline">
                     Kan jeg slette min konto igen?
                   </a>
-                </li>
-                <li>
+                </p>
+                <p>
                   <a href="#" className="text-primary hover:underline">
                     Hvor sikre er mine data hos jer?
                   </a>
-                </li>
-              </ul>
+                </p>
+              </div>
             </div>
           </div>
         </div>
