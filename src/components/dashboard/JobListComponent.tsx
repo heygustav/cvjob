@@ -1,4 +1,3 @@
-
 import React from "react";
 import { JobPosting } from "@/lib/types";
 import { Button } from "@/components/ui/button";
@@ -30,7 +29,7 @@ const JobListComponent: React.FC<JobListComponentProps> = ({
 }) => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, session, user } = useAuth();
 
   const formatDate = (dateString: string) => {
     try {
@@ -57,23 +56,11 @@ const JobListComponent: React.FC<JobListComponentProps> = ({
   };
 
   const handleCreateApplication = (job: JobPosting) => {
-    // If user is not authenticated, redirect directly to auth page
-    if (!isAuthenticated) {
-      console.log("User not authenticated - redirecting to authentication");
-      // Store intended destination in localStorage for potential redirect after login
-      localStorage.setItem('redirectAfterLogin', `/cover-letter/generator?jobId=${job.id}&step=1&direct=true`);
-      window.location.href = '/auth';
-      return;
-    }
-
-    // Notify about incomplete job info but don't block navigation
-    if (!job.title || !job.company || !job.description) {
-      toast({
-        title: "Bemærk",
-        description: "Dette job mangler nogle detaljer. Du kan fortsætte, men det anbefales at opdatere joboplysningerne.",
-        variant: "default",
-      });
-    }
+    console.log("Create application clicked. Auth state:", { 
+      isAuthenticated, 
+      hasSession: !!session,
+      hasUser: !!user
+    });
     
     // For authenticated users, create the URL with explicit parameters
     const url = `/cover-letter/generator?jobId=${job.id}&step=1&direct=true`;

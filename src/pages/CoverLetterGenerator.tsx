@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/components/AuthProvider";
@@ -19,7 +18,7 @@ const CoverLetterGenerator: React.FC = () => {
   const letterId = searchParams.get("letterId");
   const stepParam = searchParams.get("step");
   const isDirect = searchParams.get("direct") === "true";
-  const { session } = useAuth();
+  const { session, isAuthenticated } = useAuth();
   const [initialLoading, setInitialLoading] = useState(true);
   const { toast } = useToast();
   const initStarted = useRef(false);
@@ -79,13 +78,28 @@ const CoverLetterGenerator: React.FC = () => {
       initStarted.current = true;
       
       try {
+        console.log("Starting initialization with params:", { 
+          jobId, 
+          letterId, 
+          stepParam, 
+          isDirect,
+          isAuthenticated
+        });
+        
+        if (!isAuthenticated) {
+          console.log("User not authenticated, redirecting to auth");
+          if (jobId) {
+            localStorage.setItem('redirectAfterLogin', `/cover-letter/generator?jobId=${jobId}&step=1&direct=true`);
+          }
+          navigate('/auth');
+          return;
+        }
+
         if (!user) {
           console.log("No user found, can't initialize");
           if (isMounted) setInitialLoading(false);
           return;
         }
-        
-        console.log("Starting initialization with params:", { jobId, letterId, stepParam, isDirect });
 
         // For direct access (from dashboard button) or when step=1 is specified, ensure we go to step 1
         if (isDirect || stepParam === "1") {
@@ -169,7 +183,7 @@ const CoverLetterGenerator: React.FC = () => {
         initTimeoutRef.current = null;
       }
     };
-  }, [fetchJob, fetchLetter, jobId, letterId, stepParam, isDirect, toast, user, setStep]);
+  }, [fetchJob, fetchLetter, jobId, letterId, stepParam, isDirect, toast, user, setStep, navigate, isAuthenticated]);
 
   // Wrapper for saveJobAsDraft to make it return Promise<void> instead of Promise<string | null>
   const handleSaveJobAsDraft = async (jobData: any) => {
