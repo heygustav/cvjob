@@ -1,8 +1,9 @@
 
 import * as mammoth from 'mammoth';
-import { ParsedResumeData, ProcessResult } from './types';
+import { PersonalInfoFormState } from '@/pages/Profile';
+import { ProcessResult } from './types';
 
-// Function to parse a PDF file using client-side logic
+// Function to parse a file using client-side logic
 export const processPdfFile = async (file: File): Promise<ProcessResult> => {
   try {
     console.log(`Processing file: ${file.name}, size: ${file.size} bytes, type: ${file.type}`);
@@ -67,8 +68,8 @@ export const processPdfFile = async (file: File): Promise<ProcessResult> => {
 };
 
 // Function to parse text and extract structured information
-function parseResumeText(text: string): Partial<ParsedResumeData> {
-  const extractedData: Partial<ParsedResumeData> = {};
+function parseResumeText(text: string): Partial<PersonalInfoFormState> {
+  const extractedData: Partial<PersonalInfoFormState> = {};
   
   // Extract name (assuming it's in the first few lines)
   const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
@@ -160,10 +161,10 @@ function extractSection(text: string, sectionNames: string[]): string | undefine
 }
 
 // Calculate confidence scores for each extracted field
-function calculateConfidence(data: Partial<ParsedResumeData>, fullText: string): Record<string, number> {
+function calculateConfidence(data: Partial<PersonalInfoFormState>, fullText: string): Record<string, number> {
   const confidence: Record<string, number> = {};
   
-  // Simplified confidence calculation
+  // Calculate confidence for each field
   for (const field in data) {
     if (Object.prototype.hasOwnProperty.call(data, field)) {
       const value = (data as any)[field];
