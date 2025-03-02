@@ -17,6 +17,7 @@ import Contact from "./pages/Contact";
 import CoverLetterGenerator from "./pages/CoverLetterGenerator";
 import Auth from "./pages/Auth";
 import React from 'react';
+import Navbar from "./components/navbar/Navbar";
 
 // Simple error boundary component
 class AppErrorBoundary extends React.Component<{ children: React.ReactNode }> {
@@ -62,6 +63,7 @@ function App() {
     <AppErrorBoundary>
       <BrowserRouter>
         <AuthProvider>
+          <Navbar />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login onLogin={handleUserAuth} />} />
