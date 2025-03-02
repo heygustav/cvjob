@@ -25,7 +25,7 @@ const UrlField: React.FC<UrlFieldProps> = ({ value, onChange, disabled }) => {
           name="url"
           value={value}
           onChange={onChange}
-          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm placeholder:text-gray-400"
+          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm placeholder:text-gray-400 text-ellipsis"
           placeholder="F.eks. https://eksempel.dk/jobs/marketingansvarlig"
           disabled={disabled}
           aria-describedby="url-description"

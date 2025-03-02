@@ -106,12 +106,16 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     scroll-behavior: smooth;
+    touch-action: manipulation; /* Improves touch behavior on mobile */
+    -webkit-tap-highlight-color: transparent; /* Removes tap highlight on iOS */
   }
   
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-sans);
     line-height: 1.5;
+    overflow-x: hidden; /* Prevent horizontal overflow on mobile */
+    width: 100%;
   }
 
   /* Improved focus styles for accessibility */
@@ -134,6 +138,13 @@
 
   .text-balance {
     text-wrap: balance;
+  }
+
+  /* Mobile optimized inputs to prevent zoom */
+  @media (max-width: 640px) {
+    input, select, textarea, button {
+      font-size: 16px;
+    }
   }
 
   /* Accessibility-friendly subtle animations */

@@ -125,3 +125,57 @@ button[type="submit"]:active:not(.bg-green-600):not([disabled]) {
 .focus\:ring-blue-500:focus, .focus\:ring-blue-600:focus, .focus\:ring-blue-700:focus {
   --tw-ring-color: hsl(var(--primary)) !important;
 }
+
+/* Mobile Specific Styling */
+@media (max-width: 640px) {
+  #root {
+    padding: 1rem;
+  }
+  
+  /* Make form controls more touch-friendly */
+  input, 
+  select, 
+  textarea, 
+  button {
+    font-size: 16px !important; /* Prevents iOS zoom on focus */
+  }
+
+  /* Increase touch targets */
+  button, 
+  .button,
+  [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Better spacing for mobile forms */
+  .form-group,
+  .form-field,
+  .input-group {
+    margin-bottom: 1.25rem;
+  }
+  
+  /* Adjust padding for mobile devices */
+  .px-4 {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  /* Ensure inputs don't overflow */
+  input {
+    max-width: 100%;
+  }
+}
+
+/* Fix iOS inertial scrolling */
+.overflow-y-auto,
+.overflow-x-auto {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Prevent text overflow */
+.text-ellipsis {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}

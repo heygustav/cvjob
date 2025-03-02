@@ -57,6 +57,15 @@ const Navbar: React.FC = () => {
           />
         </div>
       </div>
+      
+      {/* Overlay to close menu when clicking outside */}
+      {isOpen && (
+        <div 
+          className="md:hidden fixed inset-0 bg-black/20 backdrop-blur-sm z-30"
+          onClick={() => setIsOpen(false)}
+          aria-hidden="true"
+        />
+      )}
     </header>
   );
 };

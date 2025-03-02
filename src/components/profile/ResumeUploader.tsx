@@ -53,7 +53,7 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
   };
 
   return (
-    <div className="mb-6">
+    <div className="mb-6 w-full">
       <p className="sm:col-span-3">
         Upload CV (PDF eller DOCX)
       </p>

@@ -20,7 +20,7 @@ const FormActions: React.FC<FormActionsProps> = ({
       <SubmitButton 
         isLoading={isLoading} 
         elapsedTime={formattedTime}
-        className="w-full"
+        className="w-full text-sm sm:text-base"
       />
     </div>
   );

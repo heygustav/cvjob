@@ -20,7 +20,7 @@ const JobDescriptionField: React.FC<JobDescriptionFieldProps> = ({
 }) => {
   return (
     <div>
-      <div className="flex justify-between items-center mb-1">
+      <div className="flex flex-wrap justify-between items-center mb-1 gap-2">
         <label htmlFor="description" className="block text-sm font-medium text-gray-700">
           Jobbeskrivelse <span className="text-rose-500">*</span>
         </label>
@@ -64,7 +64,7 @@ const JobDescriptionField: React.FC<JobDescriptionFieldProps> = ({
         <textarea
           id="description"
           name="description"
-          rows={10}
+          rows={8}
           value={value}
           onChange={onChange}
           disabled={disabled}

@@ -1,6 +1,6 @@
 
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import Navbar from "./components/navbar/Navbar"; // Updated import path
+import Navbar from "./components/navbar/Navbar"; 
 import Dashboard from "./pages/Dashboard";
 import CoverLetterGenerator from "./pages/CoverLetterGenerator";
 import Profile from "./pages/Profile";
@@ -83,7 +83,7 @@ function App() {
           
           <Navbar />
           
-          <main id="main-content" className="flex-grow pt-16" tabIndex={-1}>
+          <main id="main-content" className="flex-grow pt-16 w-full max-w-[100vw] overflow-x-hidden" tabIndex={-1}>
             <AppRoutes />
           </main>
           
