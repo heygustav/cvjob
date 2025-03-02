@@ -87,3 +87,24 @@ export const updateLetterContent = async (
   
   console.log("Letter content updated successfully");
 };
+
+// Add the missing editCoverLetter function
+export const editCoverLetter = async (
+  userId: string,
+  letterId: string,
+  content: string
+): Promise<CoverLetter> => {
+  console.log(`Editing letter ${letterId} for user ${userId}`);
+  
+  // First update the content
+  await updateLetterContent(letterId, content);
+  
+  // Then fetch the updated letter to return it
+  const updatedLetter = await fetchLetterById(letterId);
+  
+  if (!updatedLetter) {
+    throw new Error("Failed to retrieve updated letter after editing");
+  }
+  
+  return updatedLetter;
+};
