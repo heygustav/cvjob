@@ -19,9 +19,11 @@ const TestimonialsSection: React.FC = () => {
             </blockquote>
             <figcaption className="mt-10">
               <div className="mx-auto flex items-center justify-center space-x-3">
-                <div className="h-12 w-12 rounded-full bg-primary-700 flex items-center justify-center">
-                  <span className="text-lg font-semibold text-white">ML</span>
-                </div>
+                <img 
+                  src="/lovable-uploads/0abc60a6-733d-464f-9670-262c71b58d8c.png" 
+                  alt="Portrait of Mette L."
+                  className="h-12 w-12 rounded-full object-cover"
+                />
                 <div className="text-left">
                   <div className="text-base font-semibold text-primary-800">Mette L.</div>
                   <div className="text-sm text-muted-foreground">Digital Marketing Manager</div>
