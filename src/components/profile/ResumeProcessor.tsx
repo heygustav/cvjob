@@ -11,11 +11,12 @@ interface ResumeProcessorProps {
   onProcessingEnd: (error?: string) => void;
 }
 
-const ResumeProcessor: React.FC<ResumeProcessorProps> = ({ 
+// Changed from FC to a custom hook
+const ResumeProcessor = ({ 
   onExtractedData, 
   onProcessingStart, 
   onProcessingEnd 
-}) => {
+}: ResumeProcessorProps) => {
   const { toast } = useToast();
 
   const processFile = async (file: File) => {

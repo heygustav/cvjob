@@ -17,6 +17,7 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
   const [error, setError] = useState<string | null>(null);
 
   // Setup the processor with all necessary callbacks
+  // Changed from JSX component usage to hook usage
   const { processFile } = ResumeProcessor({
     onExtractedData,
     onProcessingStart: () => {
