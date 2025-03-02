@@ -46,13 +46,15 @@ export const useJobFetching = (
     try {
       console.log("fetchJob: Starting fetch for job with ID:", id);
       
-      // Try direct fetch first
+      // Try direct fetch
       try {
         job = await fetchJobById(id);
+        console.log("fetchJob: Job fetched successfully on first attempt:", job?.id);
       } catch (directError) {
         console.warn("Direct fetch failed, retrying with timeout:", directError);
         // Fallback to timeout version if direct fetch fails
         job = await fetchWithTimeout(fetchJobById(id));
+        console.log("fetchJob: Job fetched successfully on second attempt:", job?.id);
       }
       
       // Check if component unmounted during fetch
@@ -99,7 +101,18 @@ export const useJobFetching = (
         if (letters && letters.length > 0) {
           console.log("fetchJob: Found existing letters for job:", letters[0]);
           safeSetState(setGeneratedLetter, letters[0]);
-          safeSetState(setStep, 2);
+          
+          // ONLY advance to step 2 if we're not explicitly in step 1 mode (direct=true or step=1)
+          const urlParams = new URLSearchParams(window.location.search);
+          const isDirectAccess = urlParams.get('direct') === 'true' || urlParams.get('step') === '1';
+          
+          if (!isDirectAccess) {
+            console.log("fetchJob: Setting to step 2 as it's not direct access mode");
+            safeSetState(setStep, 2);
+          } else {
+            console.log("fetchJob: Keeping step 1 because of direct=true or step=1 parameter");
+            safeSetState(setStep, 1);
+          }
         } else {
           console.log("fetchJob: No existing letters found, staying on step 1");
           // Explicitly set step to 1 for job form
