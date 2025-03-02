@@ -1,5 +1,5 @@
 
-import { Route, Routes, BrowserRouter } from "react-router-dom";
+import { Route, Routes, BrowserRouter, Navigate } from "react-router-dom";
 import './App.css';
 import { Toaster } from "@/components/ui/toaster";
 import Index from "./pages/Index";
@@ -74,8 +74,11 @@ function App() {
             <Route path="/job/new" element={<JobForm />} />
             <Route path="/job/:id" element={<JobForm />} />
             <Route path="/cover-letter/generator" element={<CoverLetterGenerator />} />
-            {/* Add a redirect from /generator to the correct path */}
-            <Route path="/generator" element={<CoverLetterGenerator />} />
+            
+            {/* Add redirects for any old paths */}
+            <Route path="/generator" element={<Navigate to="/cover-letter/generator" replace />} />
+            <Route path="/cover-letter" element={<Navigate to="/cover-letter/generator" replace />} />
+            
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
             <Route path="/about-us" element={<AboutUs />} />

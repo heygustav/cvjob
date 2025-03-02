@@ -1,4 +1,3 @@
-
 import React from "react";
 import { JobPosting } from "@/lib/types";
 import { Button } from "@/components/ui/button";
@@ -55,16 +54,7 @@ const JobListComponent: React.FC<JobListComponentProps> = ({
   };
 
   const handleCreateApplication = (job: JobPosting) => {
-    // Check if job is missing important information
-    if (!job.title || !job.company || !job.description) {
-      toast({
-        title: "Bemærk",
-        description: "Dette job mangler nogle detaljer. Du kan fortsætte, men det anbefales at opdatere joboplysningerne.",
-        variant: "default",
-      });
-    }
-    
-    // Simply navigate to the cover letter generator page with the job ID as a parameter
+    // Instead of trying to generate on the fly, just copy the job data to the generator
     navigate(`/cover-letter/generator?jobId=${job.id}`);
   };
   
