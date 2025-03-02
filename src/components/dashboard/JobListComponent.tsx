@@ -55,7 +55,7 @@ const JobListComponent: React.FC<JobListComponentProps> = ({
   };
 
   const handleCreateApplication = (job: JobPosting) => {
-    // Check if job is missing important information but don't block navigation
+    // Check if job is missing important information
     if (!job.title || !job.company || !job.description) {
       toast({
         title: "Bemærk",
@@ -64,8 +64,8 @@ const JobListComponent: React.FC<JobListComponentProps> = ({
       });
     }
     
-    // Always navigate to the cover letter generator with the job ID
-    navigate(`/cover-letter?jobId=${job.id}`);
+    // Simply navigate to the cover letter generator page with the job ID as a parameter
+    navigate(`/cover-letter/generator?jobId=${job.id}`);
   };
   
   const handleEditJob = (jobId: string) => {
