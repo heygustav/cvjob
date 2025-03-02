@@ -16,17 +16,17 @@ import AboutUs from "./pages/AboutUs";
 import Contact from "./pages/Contact";
 import CoverLetterGenerator from "./pages/CoverLetterGenerator";
 import Auth from "./pages/Auth";
-import React, { ErrorBoundary } from 'react';
+import React from 'react';
 
 // Simple error boundary component
-class AppErrorBoundary extends React.Component {
+class AppErrorBoundary extends React.Component<{ children: React.ReactNode }> {
   state = { hasError: false, error: null };
   
-  static getDerivedStateFromError(error) {
+  static getDerivedStateFromError(error: any) {
     return { hasError: true, error };
   }
   
-  componentDidCatch(error, errorInfo) {
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error("App error:", error, errorInfo);
   }
   
