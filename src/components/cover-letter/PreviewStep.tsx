@@ -1,6 +1,6 @@
 
 import React from "react";
-import CoverLetterPreview from "../CoverLetterPreview";
+import CoverLetterPreview from "./preview";
 import { CoverLetter, JobPosting } from "@/lib/types";
 
 interface PreviewStepProps {
