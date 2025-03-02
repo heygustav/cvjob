@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useAuth } from "@/components/AuthProvider";
@@ -73,20 +74,36 @@ const CoverLetterGenerator: React.FC = () => {
         
         // For saved job viewing
         if (jobId) {
-          await fetchJob(jobId);
-          console.log("Job fetched, any loading state should now be managed by the hook");
-          
-          // Ensure we're on step 1 when a job ID is provided
-          if (isMounted) setStep(1);
+          try {
+            await fetchJob(jobId);
+            console.log("Job fetched, any loading state should now be managed by the hook");
+            
+            // Ensure we're on step 1 when a job ID is provided
+            if (isMounted) {
+              setStep(1);
+              // Explicitly set loading to false after job is fetched
+              setLoading(false);
+            }
+          } catch (error) {
+            console.error("Error fetching job:", error);
+            if (isMounted) setLoading(false);
+          }
         } 
         // For viewing generated letters
         else if (letterId) {
-          await fetchLetter(letterId);
-          console.log("Letter fetched, any loading state should now be managed by the hook");
+          try {
+            await fetchLetter(letterId);
+            console.log("Letter fetched, any loading state should now be managed by the hook");
+            if (isMounted) setLoading(false);
+          } catch (error) {
+            console.error("Error fetching letter:", error);
+            if (isMounted) setLoading(false);
+          }
         } 
         // Default - for new job submissions
         else {
           console.log("No job or letter ID provided - new submission mode");
+          if (isMounted) setLoading(false);
         }
       } catch (error) {
         console.error("Initialization error:", error);
@@ -96,11 +113,7 @@ const CoverLetterGenerator: React.FC = () => {
             description: "Der opstod en fejl under indlæsning af data.",
             variant: "destructive",
           });
-        }
-      } finally {
-        if (isMounted) {
           setLoading(false);
-          console.log("Initialization complete, loading set to false");
         }
       }
     };
