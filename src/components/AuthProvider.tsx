@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -8,6 +7,7 @@ interface AuthContextType {
   session: Session | null;
   user: User | null;
   isLoading: boolean;
+  isAuthenticated?: boolean; // Added this property
   signIn: (email: string, password: string) => Promise<{
     error: Error | null;
     data: { user: User | null; session: Session | null } | null;

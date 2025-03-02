@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   createBrowserRouter,
@@ -6,19 +7,20 @@ import {
 } from "react-router-dom";
 import { useAuth } from './components/AuthProvider';
 import Dashboard from './pages/Dashboard';
-import Home from './pages/Home';
-import CoverLetter from './pages/CoverLetter';
+import Home from './pages/Index'; // Changed from './pages/Home'
+import CoverLetter from './pages/CoverLetterGenerator'; // Changed from './pages/CoverLetter'
 import Profile from './pages/Profile';
 import JobForm from './pages/JobForm';
 import Contact from './pages/Contact';
-import About from './pages/About';
-import Terms from './pages/Terms';
-import Privacy from './pages/Privacy';
+import About from './pages/AboutUs'; // Changed from './pages/About'
+import Terms from './pages/TermsAndConditions'; // Changed from './pages/Terms'
+import Privacy from './pages/PrivacyPolicy'; // Changed from './pages/Privacy'
 import NotFound from './pages/NotFound';
 import JobEdit from './pages/JobEdit';
 
 function App() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { user, isLoading } = useAuth();
+  const isAuthenticated = !!user; // Derive authentication status from user
 
   const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     if (isLoading) {
