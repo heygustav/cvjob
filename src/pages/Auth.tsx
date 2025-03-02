@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/components/AuthProvider';
@@ -9,15 +8,31 @@ const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
+  const [redirectUrl, setRedirectUrl] = useState<string | null>(null);
   const { signIn, signUp, session, isLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  // Check for stored redirect URL on mount
+  useEffect(() => {
+    const storedRedirect = localStorage.getItem('redirectAfterLogin');
+    if (storedRedirect) {
+      setRedirectUrl(storedRedirect);
+    }
+  }, []);
+
   useEffect(() => {
     if (session) {
-      navigate('/dashboard');
+      // Redirect to stored URL if available, otherwise to dashboard
+      if (redirectUrl) {
+        console.log("Auth: Redirecting to:", redirectUrl);
+        localStorage.removeItem('redirectAfterLogin');
+        window.location.href = redirectUrl;
+      } else {
+        navigate('/dashboard');
+      }
     }
-  }, [session, navigate]);
+  }, [session, navigate, redirectUrl]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,7 +63,8 @@ const Auth = () => {
           title: 'Logget ind',
           description: 'Du er nu logget ind',
         });
-        navigate('/dashboard');
+        
+        // Redirect will happen automatically via the useEffect, no need to duplicate it here
       }
     } catch (error: any) {
       console.error('Authentication error:', error);
@@ -78,7 +94,16 @@ const Auth = () => {
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
             {isSignUp ? 'Opret konto' : 'Log ind på din konto'}
           </h2>
+          
+          {redirectUrl && (
+            <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-md">
+              <p className="text-sm text-amber-800">
+                Log ind for at fortsætte til ansøgningsgeneratoren
+              </p>
+            </div>
+          )}
         </div>
+        
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm -space-y-px">
             <div>

@@ -15,6 +15,7 @@ import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { da } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/components/AuthProvider";
 
 interface JobListComponentProps {
   jobPostings: JobPosting[];
@@ -29,6 +30,7 @@ const JobListComponent: React.FC<JobListComponentProps> = ({
 }) => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { isAuthenticated } = useAuth();
 
   const formatDate = (dateString: string) => {
     try {
@@ -55,6 +57,15 @@ const JobListComponent: React.FC<JobListComponentProps> = ({
   };
 
   const handleCreateApplication = (job: JobPosting) => {
+    // If user is not authenticated, redirect directly to login
+    if (!isAuthenticated) {
+      console.log("User not authenticated - redirecting to login");
+      // Store intended destination in localStorage for potential redirect after login
+      localStorage.setItem('redirectAfterLogin', `/cover-letter/generator?jobId=${job.id}&step=1&direct=true`);
+      window.location.href = '/login';
+      return;
+    }
+
     // Notify about incomplete job info but don't block navigation
     if (!job.title || !job.company || !job.description) {
       toast({
@@ -64,11 +75,11 @@ const JobListComponent: React.FC<JobListComponentProps> = ({
       });
     }
     
-    // Create URL with explicit parameters
+    // For authenticated users, create the URL with explicit parameters
     const url = `/cover-letter/generator?jobId=${job.id}&step=1&direct=true`;
     console.log(`JobListComponent: Navigating to: ${url}`);
     
-    // Use full URL construction rather than just navigate function
+    // Use direct navigation to avoid any loading states
     window.location.href = url;
   };
   

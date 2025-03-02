@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, ArrowRight } from "lucide-react";
 import { mockUsers } from "../lib/types";
@@ -22,8 +22,19 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [redirectUrl, setRedirectUrl] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Check for stored redirect URL on mount
+  useEffect(() => {
+    const storedRedirect = localStorage.getItem('redirectAfterLogin');
+    if (storedRedirect) {
+      setRedirectUrl(storedRedirect);
+      // Clear it immediately to avoid unwanted redirects later
+      localStorage.removeItem('redirectAfterLogin');
+    }
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -54,7 +65,14 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             title: "Login succesfuldt",
             description: `Velkommen tilbage, ${user.name}!`,
           });
-          navigate("/dashboard");
+          
+          // Redirect to stored URL if available, otherwise to dashboard
+          if (redirectUrl) {
+            console.log("Redirecting to:", redirectUrl);
+            window.location.href = redirectUrl;
+          } else {
+            navigate("/dashboard");
+          }
         } else {
           toast({
             title: "Login mislykkedes",
@@ -91,6 +109,14 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                 Opret konto
               </Link>
             </p>
+            
+            {redirectUrl && (
+              <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-md">
+                <p className="text-sm text-amber-800">
+                  Log ind for at fortsætte til ansøgningsgeneratoren
+                </p>
+              </div>
+            )}
           </div>
 
           <form className="space-y-6" onSubmit={handleSubmit}>
