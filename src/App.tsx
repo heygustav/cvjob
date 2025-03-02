@@ -18,12 +18,19 @@ import CoverLetterGenerator from "./pages/CoverLetterGenerator";
 import Auth from "./pages/Auth";
 
 function App() {
+  // Handler for login/signup that can be passed to components
+  const handleUserAuth = (userId: string) => {
+    console.log("User authenticated:", userId);
+    // This function would typically set the user's auth state
+    // But that's likely handled in AuthProvider now
+  };
+
   return (
     <AuthProvider>
       <Routes>
         <Route path="/" element={<Index />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
+        <Route path="/login" element={<Login onLogin={handleUserAuth} />} />
+        <Route path="/signup" element={<Signup onSignup={handleUserAuth} />} />
         <Route path="/auth" element={<Auth />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/profile" element={<Profile />} />
