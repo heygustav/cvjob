@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Copy, Edit, FileText, File, FileIcon } from "lucide-react";
@@ -155,7 +156,8 @@ const CoverLetterPreview: React.FC<CoverLetterPreviewProps> = ({
       // Split content by new lines and add line by line to handle word wrapping
       const contentLines = editedContent.split("\n");
       let yPosition = 50;
-      const lineHeight = 7;
+      // Reduced line height from 7 to 5 for more compact paragraphs
+      const lineHeight = 5;
       
       contentLines.forEach(line => {
         // Use splitTextToSize to handle word wrapping (limit line width to 170 mm)
@@ -164,15 +166,15 @@ const CoverLetterPreview: React.FC<CoverLetterPreviewProps> = ({
           doc.text(wrappedLine, 20, yPosition);
           yPosition += lineHeight;
           
-          // Add a new page if we're near the bottom
-          if (yPosition > 280) {
+          // Add a new page if we're near the bottom - increased max height to use more of the page
+          if (yPosition > 285) {
             doc.addPage();
             yPosition = 20;
           }
         });
         
-        // Add space between paragraphs
-        yPosition += 3;
+        // Reduced paragraph spacing from 3 to 1
+        yPosition += 1;
       });
       
       // Save the PDF
@@ -231,12 +233,13 @@ const CoverLetterPreview: React.FC<CoverLetterPreviewProps> = ({
                 },
               }),
               
-              // Content - split by paragraphs
+              // Content - split by paragraphs with reduced spacing
               ...editedContent.split("\n\n").map(paragraph => 
                 new Paragraph({
                   text: paragraph,
                   spacing: {
-                    after: 200,
+                    // Reduced spacing from 200 to 100
+                    after: 100,
                   },
                 })
               ),
