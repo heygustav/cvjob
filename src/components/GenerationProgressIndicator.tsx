@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Clock, RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -28,6 +27,14 @@ const GenerationProgressIndicator: React.FC<GenerationProgressProps> = ({
   
   // Determine if generation is taking too long (more than 30 seconds)
   const isTakingTooLong = elapsed > 3000;
+  
+  // Get a helpful tip based on the current phase
+  const getHelpfulTip = () => {
+    if (phase === 'generation' && elapsed > 1500) {
+      return "Generering af ansøgning kan tage lidt længere tid end normalt, især ved ufuldstændige data.";
+    }
+    return "Tålmod er det bedste mod.";
+  };
   
   return (
     <div 
@@ -95,7 +102,7 @@ const GenerationProgressIndicator: React.FC<GenerationProgressProps> = ({
         )}
         
         <div className="mt-2 text-xs text-muted-foreground italic">
-          Tålmod er det bedste mod.
+          {getHelpfulTip()}
         </div>
       </div>
     </div>

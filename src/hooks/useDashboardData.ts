@@ -159,7 +159,7 @@ export const useDashboardData = () => {
   };
 
   const findJobForLetter = (jobPostingId: string) => {
-    return jobPostings.find(job => job.id === jobPostingId);
+    return jobPostings.find(job => job.id === jobPostingId) || null;
   };
 
   return {

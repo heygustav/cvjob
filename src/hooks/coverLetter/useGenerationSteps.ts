@@ -1,4 +1,3 @@
-
 import { useCallback } from "react";
 import { User, JobPosting, CoverLetter } from "@/lib/types";
 import { JobFormData } from "@/services/coverLetter/types";
@@ -43,7 +42,7 @@ export const useGenerationSteps = (
     }
   }, [user, isMountedRef, updatePhase, createError]);
 
-  // Step 2: Save job details
+  // Step 2: Save job details - ensure we handle incomplete data
   const saveJobStep = useCallback(async (jobData: JobFormData, userId: string, existingJobId?: string) => {
     if (!isMountedRef.current) {
       console.warn("Component unmounted before saving job");
@@ -51,10 +50,18 @@ export const useGenerationSteps = (
     }
     
     updatePhase('job-save', 40, 'Gemmer jobdetaljer...');
-    console.log("Step 2: Saving job posting");
+    console.log("Step 2: Saving job posting", jobData);
+    
+    // Provide default values for missing fields to prevent errors
+    const safeJobData = {
+      ...jobData,
+      title: jobData.title || "Untitled Position",
+      company: jobData.company || "Unknown Company",
+      description: jobData.description || "No description provided",
+    };
     
     try {
-      const jobId = await saveOrUpdateJob(jobData, userId, existingJobId);
+      const jobId = await saveOrUpdateJob(safeJobData, userId, existingJobId);
       console.log(`Job saved with ID: ${jobId}`);
       return jobId;
     } catch (error) {
@@ -63,7 +70,7 @@ export const useGenerationSteps = (
     }
   }, [isMountedRef, updatePhase, createError]);
 
-  // Step 3: Generate letter content
+  // Step 3: Generate letter content - handle incomplete data
   const generateLetterStep = useCallback(async (jobData: JobFormData, userInfo: any) => {
     if (!isMountedRef.current) {
       console.warn("Component unmounted before generating letter");
@@ -73,9 +80,17 @@ export const useGenerationSteps = (
     updatePhase('generation', 60, 'Genererer ansøgning...');
     console.log("Step 3: Generating letter content");
     
+    // Provide safe defaults for the AI generation
+    const safeJobData = {
+      ...jobData,
+      title: jobData.title || "Untitled Position",
+      company: jobData.company || "Unknown Company",
+      description: jobData.description || "No description provided",
+    };
+    
     try {
       console.log("Calling generateCoverLetter with job data and user info");
-      const content = await generateCoverLetter(jobData, userInfo);
+      const content = await generateCoverLetter(safeJobData, userInfo);
       console.log("Cover letter generation successful, content length:", content?.length);
       return content;
     } catch (error) {

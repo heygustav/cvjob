@@ -55,16 +55,16 @@ const JobListComponent: React.FC<JobListComponentProps> = ({
   };
 
   const handleCreateApplication = (job: JobPosting) => {
-    // Check if job has required fields
+    // Check if job is missing important information but don't block navigation
     if (!job.title || !job.company || !job.description) {
       toast({
-        title: "Joboplysninger mangler",
-        description: "Dette job mangler vigtige detaljer. Rediger jobbet først og tilføj de nødvendige oplysninger.",
-        variant: "destructive",
+        title: "Bemærk",
+        description: "Dette job mangler nogle detaljer. Du kan fortsætte, men det anbefales at opdatere joboplysningerne.",
+        variant: "default",
       });
-      return;
     }
     
+    // Always navigate to the cover letter generator with the job ID
     navigate(`/cover-letter?jobId=${job.id}`);
   };
   
