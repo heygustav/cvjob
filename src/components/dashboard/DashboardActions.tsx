@@ -51,7 +51,7 @@ const DashboardActions: React.FC<DashboardActionsProps> = ({
           asChild 
           className="flex items-center gap-2 whitespace-nowrap"
         >
-          <Link to="/generator">
+          <Link to="/cover-letter/generator">
             <FilePlus className="h-4 w-4" />
             Opret ny ansøgning
           </Link>
