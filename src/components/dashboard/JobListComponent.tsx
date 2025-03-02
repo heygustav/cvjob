@@ -2,7 +2,7 @@
 import React from "react";
 import { JobPosting } from "@/lib/types";
 import { Button } from "@/components/ui/button";
-import { Calendar, Trash2, FileText, Link, Briefcase } from "lucide-react";
+import { Calendar, Trash2, FileText, Link, Briefcase, Pencil } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -67,6 +67,10 @@ const JobListComponent: React.FC<JobListComponentProps> = ({
     
     navigate(`/cover-letter?jobId=${job.id}`);
   };
+  
+  const handleEditJob = (jobId: string) => {
+    navigate(`/job/${jobId}`);
+  };
 
   if (jobPostings.length === 0) {
     return (
@@ -125,6 +129,15 @@ const JobListComponent: React.FC<JobListComponentProps> = ({
                       aria-label="Opret ansøgning for dette job"
                     >
                       <FileText className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 w-8 p-0"
+                      onClick={() => handleEditJob(job.id)}
+                      title="Rediger jobopslag"
+                    >
+                      <Pencil className="h-4 w-4" />
                     </Button>
                     {job.url && (
                       <Button
