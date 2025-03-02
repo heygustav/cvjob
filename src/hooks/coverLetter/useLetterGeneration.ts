@@ -4,6 +4,9 @@ import { JobPosting, CoverLetter, User } from "@/lib/types";
 import { JobFormData } from "@/services/coverLetter/types";
 import { useLetterGeneration as useLetterGenerationHook } from "./letter-generation";
 import { GenerationProgress } from "./types";
+import { useGenerationTracking } from "./useGenerationTracking";
+import { useGenerationErrorHandling } from "./useGenerationErrorHandling";
+import { useGenerationSteps } from "./useGenerationSteps";
 
 // The main hook now acts as a facade that composes the more specialized hooks
 export const useLetterGeneration = (
@@ -22,21 +25,7 @@ export const useLetterGeneration = (
   selectedJob: JobPosting | null,
   loadingState: string
 ) => {
-  // Get generation steps
-  const { 
-    fetchUserStep,
-    saveJobStep,
-    generateLetterStep,
-    saveLetterStep,
-    fetchUpdatedJobStep
-  } = useGenerationSteps(
-    user, 
-    isMountedRef, 
-    updatePhase, 
-    abortControllerRef
-  );
-
-  // Get tracking utilities
+  // Get tracking utilities first
   const { 
     incrementAttempt, 
     abortGeneration, 
@@ -56,6 +45,20 @@ export const useLetterGeneration = (
     safeSetState, 
     setGenerationError, 
     setLoadingState
+  );
+
+  // Get generation steps (now using updatePhase that's already defined)
+  const { 
+    fetchUserStep,
+    saveJobStep,
+    generateLetterStep,
+    saveLetterStep,
+    fetchUpdatedJobStep
+  } = useGenerationSteps(
+    user, 
+    isMountedRef, 
+    updatePhase, 
+    abortControllerRef
   );
 
   // Collect generation steps into an object
@@ -102,8 +105,3 @@ export const useLetterGeneration = (
 
   return { handleJobFormSubmit };
 };
-
-// Import here to avoid circular dependencies
-import { useGenerationTracking } from "./useGenerationTracking";
-import { useGenerationErrorHandling } from "./useGenerationErrorHandling";
-import { useGenerationSteps } from "./useGenerationSteps";
