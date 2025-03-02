@@ -1,6 +1,6 @@
 
-import React, { useEffect, useRef } from "react";
-import { useSearchParams } from "react-router-dom";
+import React, { useEffect, useRef, useState } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/components/AuthProvider";
 import { useCoverLetterGeneration } from "@/hooks/useCoverLetterGeneration";
 import { User } from "@/lib/types";
@@ -14,11 +14,12 @@ import { LoadingSpinner } from "@/components/LoadingSpinner";
 
 const CoverLetterGenerator: React.FC = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const jobId = searchParams.get("jobId");
   const letterId = searchParams.get("letterId");
   const stepParam = searchParams.get("step");
   const { session } = useAuth();
-  const [loading, setLoading] = React.useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
   const { toast } = useToast();
   const initStarted = useRef(false);
   
@@ -61,7 +62,7 @@ const CoverLetterGenerator: React.FC = () => {
       try {
         if (!user) {
           console.log("No user found, can't initialize");
-          if (isMounted) setLoading(false);
+          if (isMounted) setInitialLoading(false);
           return;
         }
         
@@ -76,34 +77,42 @@ const CoverLetterGenerator: React.FC = () => {
         if (jobId) {
           try {
             await fetchJob(jobId);
-            console.log("Job fetched, any loading state should now be managed by the hook");
+            console.log("Job fetched successfully");
             
-            // Ensure we're on step 1 when a job ID is provided
-            if (isMounted) {
-              setStep(1);
-              // Explicitly set loading to false after job is fetched
-              setLoading(false);
-            }
+            // Always ensure we're on step 1 when a job ID is provided
+            if (isMounted) setStep(1);
           } catch (error) {
             console.error("Error fetching job:", error);
-            if (isMounted) setLoading(false);
+            toast({
+              title: "Fejl ved indlæsning",
+              description: "Der opstod en fejl under indlæsning af jobdata.",
+              variant: "destructive",
+            });
+          } finally {
+            // Always set loading to false when job fetch completes (success or error)
+            if (isMounted) setInitialLoading(false);
           }
         } 
         // For viewing generated letters
         else if (letterId) {
           try {
             await fetchLetter(letterId);
-            console.log("Letter fetched, any loading state should now be managed by the hook");
-            if (isMounted) setLoading(false);
+            console.log("Letter fetched successfully");
           } catch (error) {
             console.error("Error fetching letter:", error);
-            if (isMounted) setLoading(false);
+            toast({
+              title: "Fejl ved indlæsning",
+              description: "Der opstod en fejl under indlæsning af ansøgningen.",
+              variant: "destructive",
+            });
+          } finally {
+            if (isMounted) setInitialLoading(false);
           }
         } 
         // Default - for new job submissions
         else {
           console.log("No job or letter ID provided - new submission mode");
-          if (isMounted) setLoading(false);
+          if (isMounted) setInitialLoading(false);
         }
       } catch (error) {
         console.error("Initialization error:", error);
@@ -113,7 +122,7 @@ const CoverLetterGenerator: React.FC = () => {
             description: "Der opstod en fejl under indlæsning af data.",
             variant: "destructive",
           });
-          setLoading(false);
+          setInitialLoading(false);
         }
       }
     };
@@ -131,10 +140,17 @@ const CoverLetterGenerator: React.FC = () => {
     await saveJobAsDraft(jobData);
   };
 
+  // If no user is found, redirect to login
+  useEffect(() => {
+    if (!initialLoading && !user) {
+      navigate("/login");
+    }
+  }, [initialLoading, user, navigate]);
+
   // Render functions
   const renderContent = () => {
     // Show main loading state during initial data fetch
-    if (loading) {
+    if (initialLoading) {
       return <LoadingSpinner message="Indlæser data..." progress={20} />;
     }
     

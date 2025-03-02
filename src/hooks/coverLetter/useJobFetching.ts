@@ -135,7 +135,13 @@ export const useJobFetching = (
         variant: "destructive",
       });
       
-      navigate("/dashboard");
+      // Only navigate to dashboard if it's a fatal error
+      if (isNetworkError) {
+        navigate("/dashboard");
+      }
+      
+      // Ensure error state is properly set
+      safeSetState(setLoadingState, "idle");
       return null;
     } finally {
       if (isMountedRef.current) {

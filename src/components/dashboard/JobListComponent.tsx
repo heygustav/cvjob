@@ -65,6 +65,7 @@ const JobListComponent: React.FC<JobListComponentProps> = ({
     }
     
     // Navigate to the cover letter generator with the job ID and explicitly set step=1
+    // This ensures we go straight to the job form with pre-filled data
     navigate(`/cover-letter/generator?jobId=${job.id}&step=1`);
   };
   
@@ -172,4 +173,3 @@ const JobListComponent: React.FC<JobListComponentProps> = ({
 };
 
 export default JobListComponent;
-
