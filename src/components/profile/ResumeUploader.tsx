@@ -1,15 +1,11 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { PersonalInfoFormState } from '@/pages/Profile';
 import ErrorDisplay from '@/components/ErrorDisplay';
 import FileDropArea from './FileDropArea';
 import { processPdfFile } from '@/utils/resumeParser';
 import { validateFile } from '@/utils/resume/fileUtils';
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { AlertCircle, RefreshCw } from 'lucide-react';
 
 interface ResumeUploaderProps {
   onExtractedData: (data: Partial<PersonalInfoFormState>) => void;
@@ -20,7 +16,6 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileSelected = async (file: File) => {
     if (isExtracting) return;
@@ -138,21 +133,12 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
       });
       
       setIsExtracting(false);
-      // Clear file input if it exists
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
     }
   };
 
   const retryUpload = () => {
     console.log("Retrying upload, resetting error state");
     setError(null);
-    
-    // Refresh the page to reload the PDF.js worker
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
     
     // Check if PDF.js worker is available after a short delay
     setTimeout(async () => {
@@ -172,29 +158,9 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
 
   return (
     <div className="mb-6">
-      <div className="mb-4">
-        <Label htmlFor="cv-upload" className="block text-sm font-medium text-gray-700 mb-1">
-          Upload CV (PDF eller DOCX)
-        </Label>
-        <div className="flex gap-2">
-          <Input
-            id="cv-upload"
-            type="file"
-            accept=".pdf,.docx"
-            ref={fileInputRef}
-            onChange={(e) => {
-              if (e.target.files && e.target.files[0]) {
-                handleFileSelected(e.target.files[0]);
-              }
-            }}
-            disabled={isExtracting}
-            className="flex-1"
-          />
-        </div>
-        <p className="text-xs text-gray-500 mt-1 italic">
-          Du kan uploade dit CV for at automatisk udfylde formularen. Understøttede formater: PDF, DOCX.
-        </p>
-      </div>
+      <p className="text-sm font-medium text-gray-700 mb-2">
+        Upload CV (PDF eller DOCX)
+      </p>
       
       <FileDropArea 
         onFileSelected={handleFileSelected}
@@ -202,6 +168,10 @@ const ResumeUploader: React.FC<ResumeUploaderProps> = ({ onExtractedData }) => {
         isDragging={isDragging}
         setIsDragging={setIsDragging}
       />
+      
+      <p className="text-xs text-gray-500 mt-1 italic">
+        Du kan uploade dit CV for at automatisk udfylde formularen. Understøttede formater: PDF, DOCX.
+      </p>
       
       {error && (
         <ErrorDisplay

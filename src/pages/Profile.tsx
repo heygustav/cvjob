@@ -88,7 +88,7 @@ const Profile: React.FC = () => {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault(); // Ensure this is properly preventing default form submission
     setIsLoading(true);
 
     try {

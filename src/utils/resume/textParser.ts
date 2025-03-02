@@ -1,3 +1,4 @@
+
 import { PersonalInfoFormState } from '@/pages/Profile';
 
 /**
@@ -158,6 +159,147 @@ function extractContactInfo(text: string): { email?: string, phone?: string, add
 }
 
 /**
+ * Validate and clean education section
+ * @param text The extracted education text
+ * @returns Validated education text
+ */
+function validateEducation(text: string): string {
+  if (!text) return '';
+  
+  // Check if text is too large or likely contains other sections
+  if (text.length > 1500) {
+    // Try to find common patterns that indicate education entries
+    const educationPatterns = [
+      /\b(20\d{2}|19\d{2})\s*-\s*(20\d{2}|19\d{2}|\bnu\b|\bpresent\b)/gi, // Year ranges
+      /\b(bachelor|master|kandidat|phd|ph\.d\.|diplomuddannelse|akademiuddannelse|erhvervsuddannelse)\b/gi, // Degree types
+      /\b(universitet|university|uddannelse|skole|school|college|academy|akademi|institut)\b/gi, // Educational institutions
+    ];
+    
+    // Try to extract only the relevant parts using the patterns
+    let cleanedText = '';
+    const lines = text.split('\n');
+    
+    for (const line of lines) {
+      if (line.trim().length === 0) continue;
+      
+      for (const pattern of educationPatterns) {
+        if (pattern.test(line)) {
+          cleanedText += line + '\n';
+          break;
+        }
+      }
+    }
+    
+    // If we found education-related content, use it; otherwise, truncate the original
+    return cleanedText.length > 0 ? cleanedText.trim() : text.substring(0, 1000) + '...';
+  }
+  
+  return text;
+}
+
+/**
+ * Validate and clean experience section
+ * @param text The extracted experience text
+ * @returns Validated experience text
+ */
+function validateExperience(text: string): string {
+  if (!text) return '';
+  
+  // Check if text is too large or likely contains other sections
+  if (text.length > 1500) {
+    // Try to find common patterns that indicate experience entries
+    const experiencePatterns = [
+      /\b(20\d{2}|19\d{2})\s*-\s*(20\d{2}|19\d{2}|\bnu\b|\bpresent\b)/gi, // Year ranges
+      /\b(stilling|position|title|ansvarlig|specialist|manager|director|chef|konsulent|consultant|medarbejder)\b/gi, // Position titles
+      /\b(virksomhed|company|firma|organisation|organization|arbejdsgiver|employer)\b/gi, // Organizations
+    ];
+    
+    // Try to extract only the relevant parts using the patterns
+    let cleanedText = '';
+    const lines = text.split('\n');
+    
+    for (const line of lines) {
+      if (line.trim().length === 0) continue;
+      
+      for (const pattern of experiencePatterns) {
+        if (pattern.test(line)) {
+          cleanedText += line + '\n';
+          break;
+        }
+      }
+    }
+    
+    // If we found experience-related content, use it; otherwise, truncate the original
+    return cleanedText.length > 0 ? cleanedText.trim() : text.substring(0, 1000) + '...';
+  }
+  
+  return text;
+}
+
+/**
+ * Validate and clean skills section
+ * @param text The extracted skills text
+ * @returns Validated skills text
+ */
+function validateSkills(text: string): string {
+  if (!text) return '';
+  
+  // Check if text is too large or likely contains other sections
+  if (text.length > 1000) {
+    // Try to find common patterns that indicate skill listings
+    const skillIndicators = [
+      /\b(programmering|programming|udvikling|development|design|analyse|analysis)\b/gi,
+      /\b(tekniske|technical|personlige|personal|faglige|professional)\b/gi,
+      /\b(værktøjer|tools|software|hardware|teknologier|technologies)\b/gi,
+    ];
+    
+    // Try to extract only lines that are likely skills
+    let cleanedText = '';
+    const lines = text.split('\n');
+    
+    // Look for bullet points, commas, and other list indicators
+    const listPatterns = [
+      /^[•●■○◦-]\s*.+/, // Bullet points
+      /^\s*[\w\s-]+(,\s*[\w\s-]+)+$/, // Comma-separated lists
+      /^\s*[A-Za-z-]+(\s+[A-Za-z-]+){0,3}\s*$/ // Short skill terms
+    ];
+    
+    for (const line of lines) {
+      const trimmedLine = line.trim();
+      if (trimmedLine.length === 0) continue;
+      
+      // Check if the line matches skill indicators or list patterns
+      let isSkill = false;
+      
+      for (const pattern of skillIndicators) {
+        if (pattern.test(trimmedLine)) {
+          isSkill = true;
+          break;
+        }
+      }
+      
+      if (!isSkill) {
+        for (const pattern of listPatterns) {
+          if (pattern.test(trimmedLine)) {
+            isSkill = true;
+            break;
+          }
+        }
+      }
+      
+      if (isSkill) {
+        cleanedText += trimmedLine + '\n';
+      }
+    }
+    
+    // If we found skill-related content, use it; otherwise, truncate the original
+    return cleanedText.length > 0 ? cleanedText.trim() : text.substring(0, 500) + '...';
+  }
+  
+  return text;
+}
+
+/**
  * Parse resume text to extract structured information
  * @param text The full text of the resume
  * @returns Structured data extracted from the resume
@@ -177,30 +319,105 @@ export function parseResumeText(text: string): Partial<PersonalInfoFormState> {
   console.log("Extracted contact info:", contactInfo);
   
   // Extract education (improved with multilingual support)
-  const educationSection = extractSection(text, ['education', 'uddannelse', 'uddannelser', 'education history', 'academic background']);
+  const educationSection = extractSection(text, [
+    'education', 'uddannelse', 'uddannelser', 'education history', 'academic background',
+    'educational background', 'uddannelsesmæssig baggrund', 'akademisk baggrund'
+  ]);
+  
   if (educationSection) {
-    extractedData.education = educationSection;
+    // Validate and clean up the education section
+    extractedData.education = validateEducation(educationSection);
     console.log("Extracted education section of length:", educationSection.length);
+  } else {
+    // Fallback: Try to identify education information from the general text
+    const educationKeywords = [
+      'bachelor', 'master', 'kandidat', 'phd', 'ph.d.', 
+      'universitet', 'university', 'college', 'diploma', 'diplom'
+    ];
+    
+    let foundEducation = false;
+    for (const keyword of educationKeywords) {
+      const pattern = new RegExp(`\\b${keyword}\\b.*?\\n+`, 'ig');
+      const matches = [...text.matchAll(pattern)];
+      
+      if (matches.length > 0) {
+        const educationText = matches.map(match => match[0]).join('\n');
+        extractedData.education = validateEducation(educationText);
+        foundEducation = true;
+        console.log("Found education using keyword matching:", keyword);
+        break;
+      }
+    }
+    
+    if (!foundEducation) {
+      console.log("Could not extract education section");
+    }
   }
   
   // Extract experience (improved with multilingual support)
   const experienceSection = extractSection(text, [
     'experience', 'work experience', 'employment', 'professional experience',
-    'erfaring', 'arbejdserfaring', 'erhvervserfaring', 'ansættelser', 'professionel erfaring'
+    'erfaring', 'arbejdserfaring', 'erhvervserfaring', 'ansættelser', 'professionel erfaring',
+    'arbejde', 'career', 'karriere'
   ]);
+  
   if (experienceSection) {
-    extractedData.experience = experienceSection;
+    // Validate and clean up the experience section
+    extractedData.experience = validateExperience(experienceSection);
     console.log("Extracted experience section of length:", experienceSection.length);
+  } else {
+    // Fallback: Try to identify experience information from the general text
+    const experienceKeywords = [
+      'stilling', 'position', 'job', 'arbejde', 'ansvarlig', 
+      'ansvar', 'responsibilities', 'company', 'virksomhed'
+    ];
+    
+    let foundExperience = false;
+    for (const keyword of experienceKeywords) {
+      const pattern = new RegExp(`\\b${keyword}\\b.*?\\n+`, 'ig');
+      const matches = [...text.matchAll(pattern)];
+      
+      if (matches.length > 0) {
+        const experienceText = matches.map(match => match[0]).join('\n');
+        extractedData.experience = validateExperience(experienceText);
+        foundExperience = true;
+        console.log("Found experience using keyword matching:", keyword);
+        break;
+      }
+    }
+    
+    if (!foundExperience) {
+      console.log("Could not extract experience section");
+    }
   }
   
   // Extract skills (improved with multilingual support)
   const skillsSection = extractSection(text, [
     'skills', 'kompetencer', 'færdigheder', 'qualifications', 'kvalifikationer',
-    'technical skills', 'tekniske kompetencer', 'core competencies', 'kernekompetencer'
+    'technical skills', 'tekniske kompetencer', 'core competencies', 'kernekompetencer',
+    'evner', 'abilities', 'expertises', 'ekspertiser'
   ]);
+  
   if (skillsSection) {
-    extractedData.skills = skillsSection;
+    // Validate and clean up the skills section
+    extractedData.skills = validateSkills(skillsSection);
     console.log("Extracted skills section of length:", skillsSection.length);
+  } else {
+    // Fallback: Try to identify skills from lists or bullet points
+    const listPattern = /^[•●■○◦-]\s*.+|^\s*[\w\s-]+(,\s*[\w\s-]+)+$/gm;
+    const matches = [...text.matchAll(listPattern)];
+    
+    if (matches.length > 0) {
+      // Only use list items that are likely skills (shorter phrases)
+      const skillCandidates = matches
+        .map(match => match[0].trim())
+        .filter(item => item.length < 100); // Skill descriptions are usually short
+      
+      if (skillCandidates.length > 0) {
+        extractedData.skills = skillCandidates.join('\n');
+        console.log("Found skills using list pattern matching");
+      }
+    }
   }
   
   // Log what we found
