@@ -30,6 +30,11 @@ export const saveOrUpdateJob = async (
   userId: string, 
   existingJobId?: string
 ): Promise<string> => {
+  // Process deadline - convert empty string to null
+  const deadlineValue = jobData.deadline && jobData.deadline.trim() !== '' 
+    ? jobData.deadline 
+    : null;
+  
   if (existingJobId) {
     console.log("Updating existing job:", existingJobId);
     const { error } = await supabase
@@ -40,7 +45,7 @@ export const saveOrUpdateJob = async (
         description: jobData.description,
         contact_person: jobData.contact_person,
         url: jobData.url,
-        deadline: jobData.deadline,
+        deadline: deadlineValue,
         updated_at: new Date().toISOString()
       })
       .eq("id", existingJobId);
@@ -55,6 +60,8 @@ export const saveOrUpdateJob = async (
   } 
   
   console.log("Creating new job for user:", userId);
+  console.log("Using deadline value:", deadlineValue);
+  
   const { data, error } = await supabase
     .from("job_postings")
     .insert({
@@ -64,7 +71,7 @@ export const saveOrUpdateJob = async (
       description: jobData.description || "",
       contact_person: jobData.contact_person,
       url: jobData.url,
-      deadline: jobData.deadline
+      deadline: deadlineValue
     })
     .select()
     .single();
@@ -82,3 +89,4 @@ export const saveOrUpdateJob = async (
   console.log("Successfully created job", data.id);
   return data.id;
 };
+
