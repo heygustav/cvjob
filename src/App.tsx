@@ -21,6 +21,7 @@ import Terms from './pages/TermsAndConditions';
 import Privacy from './pages/PrivacyPolicy';
 import NotFound from './pages/NotFound';
 import JobEdit from './pages/JobEdit';
+import Navbar from './components/navbar/Navbar';
 
 // Protected route component
 const ProtectedRoute = ({ children }) => {
@@ -37,42 +38,54 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
+// Layout component to include Navbar on all pages
+const MainLayout = () => {
+  return (
+    <>
+      <Navbar />
+      <Outlet />
+    </>
+  );
+};
+
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/dashboard" element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          } />
-          <Route path="/cover-letter" element={
-            <ProtectedRoute>
-              <CoverLetter />
-            </ProtectedRoute>
-          } />
-          <Route path="/profile" element={
-            <ProtectedRoute>
-              <Profile />
-            </ProtectedRoute>
-          } />
-          <Route path="/job/new" element={
-            <ProtectedRoute>
-              <JobForm />
-            </ProtectedRoute>
-          } />
-          <Route path="/job/edit/:jobId" element={
-            <ProtectedRoute>
-              <JobEdit />
-            </ProtectedRoute>
-          } />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/terms" element={<Terms />} />
-          <Route path="/privacy" element={<Privacy />} />
-          <Route path="*" element={<NotFound />} />
+          <Route element={<MainLayout />}>
+            <Route path="/" element={<Home />} />
+            <Route path="/dashboard" element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/cover-letter" element={
+              <ProtectedRoute>
+                <CoverLetter />
+              </ProtectedRoute>
+            } />
+            <Route path="/profile" element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            } />
+            <Route path="/job/new" element={
+              <ProtectedRoute>
+                <JobForm />
+              </ProtectedRoute>
+            } />
+            <Route path="/job/edit/:jobId" element={
+              <ProtectedRoute>
+                <JobEdit />
+              </ProtectedRoute>
+            } />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="*" element={<NotFound />} />
+          </Route>
         </Routes>
       </AuthProvider>
     </BrowserRouter>

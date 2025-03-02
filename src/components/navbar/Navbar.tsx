@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthProvider";
 import NavbarLogo from "./NavbarLogo";
 import DesktopNavigation from "./DesktopNavigation";
@@ -10,6 +10,7 @@ const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const { session, signOut } = useAuth();
 
   useEffect(() => {
@@ -36,15 +37,16 @@ const Navbar: React.FC = () => {
     setIsOpen(!isOpen);
   };
 
-  const handleLogout = () => {
-    signOut();
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/');
     setIsOpen(false);
   };
 
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-200 ${
-      scrolled ? "shadow-md" : "backdrop-blur-sm"
-    } gradient-header border-b border-primary/20`}>
+      scrolled ? "shadow-md bg-white" : "backdrop-blur-sm bg-white/80"
+    } border-b border-primary/20`}>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <NavbarLogo />

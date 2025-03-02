@@ -8,6 +8,8 @@ import {
   UserCircle,
   LogOut,
   Home,
+  Phone,
+  Info,
 } from "lucide-react";
 
 interface NavLinksProps {
@@ -22,12 +24,12 @@ const NavLinks: React.FC<NavLinksProps> = ({
   isMobile = false,
 }) => {
   const linkClass = isMobile
-    ? "flex items-center gap-2 py-2 px-3 rounded-md text-white hover:bg-primary-700 transition-colors w-full"
-    : "flex items-center gap-2 px-3 py-2 rounded-md text-white hover:bg-primary-700 transition-colors";
+    ? "flex items-center gap-2 py-2 px-3 rounded-md text-gray-700 hover:bg-primary-100 transition-colors w-full"
+    : "flex items-center gap-2 px-3 py-2 rounded-md text-gray-700 hover:bg-primary-100 transition-colors";
 
   const buttonClass = isMobile
-    ? "w-full justify-start gap-2 text-white hover:bg-primary-700 hover:text-white"
-    : "gap-2 text-white hover:bg-primary-700 hover:text-white";
+    ? "w-full justify-start gap-2 bg-transparent text-gray-700 hover:bg-primary-100 hover:text-gray-900"
+    : "gap-2 bg-transparent text-gray-700 hover:bg-primary-100 hover:text-gray-900";
 
   return (
     <>
@@ -44,11 +46,21 @@ const NavLinks: React.FC<NavLinksProps> = ({
       )}
       
       {session && (
-        <Link to="/generator" className={linkClass}>
+        <Link to="/cover-letter" className={linkClass}>
           <PenTool className="h-4 w-4" />
           Opret ansøgning
         </Link>
       )}
+      
+      <Link to="/about" className={linkClass}>
+        <Info className="h-4 w-4" />
+        Om os
+      </Link>
+      
+      <Link to="/contact" className={linkClass}>
+        <Phone className="h-4 w-4" />
+        Kontakt
+      </Link>
       
       {session ? (
         <>
@@ -67,7 +79,7 @@ const NavLinks: React.FC<NavLinksProps> = ({
           </Button>
         </>
       ) : (
-        <Link to="/auth" className={linkClass}>
+        <Link to="/auth" className={`${linkClass} font-medium text-primary-600 hover:text-primary-800`}>
           Log ind
         </Link>
       )}
