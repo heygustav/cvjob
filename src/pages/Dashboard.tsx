@@ -4,13 +4,10 @@ import { JobPosting, CoverLetter } from "@/lib/types";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/AuthProvider";
 import { useToast } from "@/hooks/use-toast";
-import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
-import { Briefcase, FilePlus, Plus, Trash2, RefreshCw, Loader2 } from "lucide-react";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
-import TabNav from "@/components/dashboard/TabNav";
-import LetterListComponent from "@/components/dashboard/LetterListComponent";
-import JobListComponent from "@/components/dashboard/JobListComponent";
+import DashboardActions from "@/components/dashboard/DashboardActions";
+import DashboardContent from "@/components/dashboard/DashboardContent";
+import DashboardLoading from "@/components/dashboard/DashboardLoading";
 
 const Dashboard = () => {
   const [jobPostings, setJobPostings] = useState<JobPosting[]>([]);
@@ -175,14 +172,7 @@ const Dashboard = () => {
   };
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 pt-20 flex justify-center items-center">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-12 w-12 animate-spin text-primary" />
-          <p className="text-gray-500">Indlæser dashboard...</p>
-        </div>
-      </div>
-    );
+    return <DashboardLoading />;
   }
 
   return (
@@ -193,100 +183,23 @@ const Dashboard = () => {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
           <h2 className="text-2xl font-bold text-gray-800">Dit dashboard</h2>
           
-          <div className="flex flex-wrap gap-3">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={refreshData} 
-              disabled={isRefreshing}
-              className="flex items-center gap-2 whitespace-nowrap"
-            >
-              {isRefreshing ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <RefreshCw className="h-4 w-4" />
-              )}
-              Opdater
-            </Button>
-            
-            {activeTab === "jobs" && (
-              <Button 
-                variant="default" 
-                size="sm" 
-                asChild 
-                className="flex items-center gap-2 whitespace-nowrap"
-              >
-                <Link to="/job/new">
-                  <Plus className="h-4 w-4" />
-                  Tilføj jobopslag
-                </Link>
-              </Button>
-            )}
-            
-            {activeTab === "letters" && (
-              <Button 
-                variant="default" 
-                size="sm" 
-                asChild 
-                className="flex items-center gap-2 whitespace-nowrap"
-              >
-                <Link to="/generator">
-                  <FilePlus className="h-4 w-4" />
-                  Opret ny ansøgning
-                </Link>
-              </Button>
-            )}
-          </div>
+          <DashboardActions 
+            activeTab={activeTab}
+            isRefreshing={isRefreshing}
+            onRefresh={refreshData}
+          />
         </div>
 
-        <div className="bg-white shadow-sm rounded-lg overflow-hidden border border-gray-100">
-          <TabNav activeTab={activeTab} onTabChange={handleTabChange} />
-
-          <div className="p-4 sm:p-6">
-            {activeTab === "letters" ? (
-              <LetterListComponent 
-                coverLetters={coverLetters}
-                jobPostings={jobPostings}
-                isDeleting={isDeleting}
-                onLetterDelete={deleteCoverLetter}
-                findJobForLetter={findJobForLetter}
-              />
-            ) : (
-              <JobListComponent
-                jobPostings={jobPostings}
-                isDeleting={isDeleting}
-                onJobDelete={deleteJobPosting}
-              />
-            )}
-            
-            {((activeTab === "letters" && coverLetters.length === 0) || 
-               (activeTab === "jobs" && jobPostings.length === 0)) && (
-              <div className="flex flex-col items-center justify-center py-10 px-4 text-center">
-                <div className="rounded-full bg-gray-100 p-4 mb-4">
-                  {activeTab === "letters" ? (
-                    <FilePlus className="h-8 w-8 text-gray-400" />
-                  ) : (
-                    <Briefcase className="h-8 w-8 text-gray-400" />
-                  )}
-                </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-1">
-                  {activeTab === "letters" ? "Ingen ansøgninger endnu" : "Ingen jobopslag endnu"}
-                </h3>
-                <p className="text-gray-500 max-w-md mb-6">
-                  {activeTab === "letters" 
-                    ? "Du har ikke oprettet nogen ansøgninger endnu. Kom i gang med at skabe din første ansøgning nu."
-                    : "Du har ikke tilføjet nogen jobopslag endnu. Tilføj dit første jobopslag for at komme i gang."}
-                </p>
-                <Button asChild>
-                  <Link to={activeTab === "letters" ? "/generator" : "/job/new"}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    {activeTab === "letters" ? "Opret din første ansøgning" : "Tilføj dit første jobopslag"}
-                  </Link>
-                </Button>
-              </div>
-            )}
-          </div>
-        </div>
+        <DashboardContent 
+          activeTab={activeTab}
+          onTabChange={handleTabChange}
+          jobPostings={jobPostings}
+          coverLetters={coverLetters}
+          isDeleting={isDeleting}
+          onJobDelete={deleteJobPosting}
+          onLetterDelete={deleteCoverLetter}
+          findJobForLetter={findJobForLetter}
+        />
       </div>
     </div>
   );
