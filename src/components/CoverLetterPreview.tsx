@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Copy, Edit, FileText, File, FileIcon } from "lucide-react";
@@ -140,17 +139,19 @@ const CoverLetterPreview: React.FC<CoverLetterPreviewProps> = ({
       // Set font for the entire document
       doc.setFont("helvetica", "normal");
       
-      // Add company and job title
+      // Add company and job title in bold
       doc.setFontSize(12);
+      doc.setFont("helvetica", "bold");
       doc.text(companyName, 20, 20);
       doc.text(`Att.: Ansøgning til ${jobTitleText}`, 20, 30);
       
-      // Add date on the right
+      // Add date on the right in bold
       const dateText = formattedDate;
       const dateWidth = doc.getStringUnitWidth(dateText) * 12 / doc.internal.scaleFactor;
       doc.text(dateText, doc.internal.pageSize.width - 20 - dateWidth, 30);
       
-      // Add the content
+      // Reset to normal font for the content
+      doc.setFont("helvetica", "normal");
       doc.setFontSize(11);
       
       // Split content by new lines and add line by line to handle word wrapping
@@ -206,26 +207,36 @@ const CoverLetterPreview: React.FC<CoverLetterPreviewProps> = ({
           {
             properties: {},
             children: [
-              // Company name
+              // Company name - bold
               new Paragraph({
-                text: companyName,
-                heading: HeadingLevel.HEADING_3,
+                children: [
+                  new TextRun({
+                    text: companyName,
+                    bold: true,
+                  }),
+                ],
               }),
               
-              // Job title
+              // Job title - bold
               new Paragraph({
-                text: `Att.: Ansøgning til ${jobTitleText}`,
+                children: [
+                  new TextRun({
+                    text: `Att.: Ansøgning til ${jobTitleText}`,
+                    bold: true,
+                  }),
+                ],
                 spacing: {
                   after: 200,
                 },
               }),
               
-              // Date - right-aligned
+              // Date - right-aligned and bold
               new Paragraph({
                 alignment: AlignmentType.RIGHT,
                 children: [
                   new TextRun({
                     text: formattedDate,
+                    bold: true,
                   }),
                 ],
                 spacing: {
@@ -350,11 +361,11 @@ const CoverLetterPreview: React.FC<CoverLetterPreviewProps> = ({
           <div className="flex flex-col h-96 border border-gray-200 rounded-md p-6">
             <div className="flex justify-between mb-8">
               <div className="font-serif text-left">
-                <p className="font-semibold">{company || "Virksomhed"}</p>
-                <p>Att.: Ansøgning til {jobTitle || "stillingen"}</p>
+                <p className="font-bold">{company || "Virksomhed"}</p>
+                <p className="font-bold">Att.: Ansøgning til {jobTitle || "stillingen"}</p>
               </div>
               <div className="font-serif text-right">
-                <p>{formattedDate}</p>
+                <p className="font-bold">{formattedDate}</p>
               </div>
             </div>
             <div 
