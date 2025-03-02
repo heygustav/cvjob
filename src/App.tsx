@@ -5,7 +5,7 @@ import {
   RouterProvider,
   Navigate,
 } from "react-router-dom";
-import { useAuth } from './components/AuthProvider';
+import { AuthProvider, useAuth } from './components/AuthProvider';
 import Dashboard from './pages/Dashboard';
 import Home from './pages/Index'; 
 import CoverLetter from './pages/CoverLetterGenerator';
@@ -18,7 +18,7 @@ import Privacy from './pages/PrivacyPolicy';
 import NotFound from './pages/NotFound';
 import JobEdit from './pages/JobEdit';
 
-function App() {
+function AppRoutes() {
   const { user, isLoading } = useAuth();
   const isAuthenticated = !!user; // Derive authentication status from user
 
@@ -99,8 +99,14 @@ function App() {
     },
   ]);
 
+  return <RouterProvider router={router} />;
+}
+
+function App() {
   return (
-    <RouterProvider router={router} />
+    <AuthProvider>
+      <AppRoutes />
+    </AuthProvider>
   );
 }
 
