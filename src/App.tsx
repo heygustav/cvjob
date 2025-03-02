@@ -9,6 +9,7 @@ import NotFound from "./pages/NotFound";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import JobForm from "./pages/JobForm";
+import JobEdit from "./pages/JobEdit";
 import { AuthProvider } from "./components/AuthProvider";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsAndConditions from "./pages/TermsAndConditions";
@@ -72,6 +73,7 @@ function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/job/new" element={<JobForm />} />
+            <Route path="/job/edit/:jobId" element={<JobEdit />} />
             <Route path="/job/:id" element={<JobForm />} />
             <Route path="/cover-letter" element={<CoverLetterGenerator />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />

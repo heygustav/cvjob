@@ -2,7 +2,7 @@
 import React from "react";
 import { JobPosting } from "@/lib/types";
 import { Button } from "@/components/ui/button";
-import { Calendar, Trash2, FileText, Link, Briefcase } from "lucide-react";
+import { Calendar, Trash2, FileText, Link, Briefcase, Pencil } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -11,9 +11,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Link as RouterLink } from "react-router-dom";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { da } from "date-fns/locale";
+import { useToast } from "@/hooks/use-toast";
 
 interface JobListComponentProps {
   jobPostings: JobPosting[];
@@ -26,6 +27,9 @@ const JobListComponent: React.FC<JobListComponentProps> = ({
   isDeleting,
   onJobDelete,
 }) => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
   const formatDate = (dateString: string) => {
     try {
       return formatDistanceToNow(new Date(dateString), { 
@@ -48,6 +52,24 @@ const JobListComponent: React.FC<JobListComponentProps> = ({
     } catch (error) {
       return "-";
     }
+  };
+
+  const handleCreateApplication = (job: JobPosting) => {
+    // Check if job has required fields
+    if (!job.title || !job.company || !job.description) {
+      toast({
+        title: "Joboplysninger mangler",
+        description: "Dette job mangler vigtige detaljer. Rediger jobbet først og tilføj de nødvendige oplysninger.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    navigate(`/cover-letter?jobId=${job.id}`);
+  };
+
+  const handleEditJob = (jobId: string) => {
+    navigate(`/job/edit/${jobId}`);
   };
 
   if (jobPostings.length === 0) {
@@ -101,15 +123,22 @@ const JobListComponent: React.FC<JobListComponentProps> = ({
                     <Button
                       variant="outline"
                       size="sm"
-                      asChild
                       className="h-8 w-8 p-0"
+                      onClick={() => handleCreateApplication(job)}
+                      title="Opret ansøgning"
+                      aria-label="Opret ansøgning for dette job"
                     >
-                      <RouterLink
-                        to={`/cover-letter?jobId=${job.id}`}
-                        title="Opret ansøgning"
-                      >
-                        <FileText className="h-4 w-4" />
-                      </RouterLink>
+                      <FileText className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 w-8 p-0"
+                      onClick={() => handleEditJob(job.id)}
+                      title="Rediger joboplysninger"
+                      aria-label="Rediger joboplysninger"
+                    >
+                      <Pencil className="h-4 w-4" />
                     </Button>
                     {job.url && (
                       <Button
