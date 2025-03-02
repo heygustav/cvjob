@@ -56,15 +56,9 @@ const JobListComponent: React.FC<JobListComponentProps> = ({
   };
 
   const handleCreateApplication = (job: JobPosting) => {
-    console.log("Create application clicked. Auth state:", { 
-      isAuthenticated, 
-      hasSession: !!session,
-      hasUser: !!user
-    });
-    
-    // For authenticated users, create the URL with explicit parameters
+    // Simply navigate to the application creation page with the job ID
     const url = `/cover-letter/generator?jobId=${job.id}&step=1&direct=true`;
-    console.log(`JobListComponent: Navigating to: ${url}`);
+    console.log(`JobListComponent: Navigating directly to: ${url}`);
     
     // Use direct navigation to avoid any loading states
     window.location.href = url;
