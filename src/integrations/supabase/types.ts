@@ -164,6 +164,45 @@ export type Database = {
         }
         Relationships: []
       }
+      subscription_plans: {
+        Row: {
+          active: boolean
+          amount: number
+          created_at: string | null
+          currency: string
+          description: string | null
+          id: string
+          interval: string
+          name: string
+          stripe_price_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          active?: boolean
+          amount: number
+          created_at?: string | null
+          currency?: string
+          description?: string | null
+          id?: string
+          interval?: string
+          name: string
+          stripe_price_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          active?: boolean
+          amount?: number
+          created_at?: string | null
+          currency?: string
+          description?: string | null
+          id?: string
+          interval?: string
+          name?: string
+          stripe_price_id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       subscriptions: {
         Row: {
           canceled_at: string | null
@@ -244,6 +283,12 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_promo_code_usage: {
+        Args: {
+          code_to_increment: string
+        }
+        Returns: undefined
+      }
       increment_user_generation_count: {
         Args: {
           user_id: string
@@ -256,6 +301,17 @@ export type Database = {
           preferences: Json
         }
         Returns: undefined
+      }
+      validate_promo_code: {
+        Args: {
+          code_to_validate: string
+        }
+        Returns: {
+          is_valid: boolean
+          message: string
+          discount_percent: number
+          discount_amount: number
+        }[]
       }
     }
     Enums: {
