@@ -39,7 +39,33 @@ export const GeneratorContent: React.FC<GeneratorProps> = ({ existingLetterId })
   const [selectedJob, setSelectedJob] = useState<JobPosting | null>(null);
   
   const toastMessages = useToastMessages();
-  const { fetchLetter } = useLetterFetching();
+  
+  // Create refs and safe setState function needed by the hooks
+  const isMountedRef = React.useRef(true);
+  const safeSetState = <T,>(stateSetter: React.Dispatch<React.SetStateAction<T>>, value: T) => {
+    if (isMountedRef.current) {
+      stateSetter(value);
+    }
+  };
+  
+  // Initialize hook with required arguments
+  const { fetchLetter } = useLetterFetching(
+    user,
+    isMountedRef,
+    safeSetState,
+    setSelectedJob,
+    setGeneratedLetter,
+    setStep,
+    setLoadingState,
+    setError,
+    setGenerationPhase,
+    {
+      phase: 'letter-fetch',
+      progress: 0,
+      message: 'Loading letter...'
+    }
+  );
+  
   const { subscriptionStatus, fetchSubscriptionStatus } = useSubscription();
 
   // Ensure user has all required properties by creating a complete User object
