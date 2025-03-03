@@ -66,7 +66,7 @@ function App() {
   const handleUserAuth = (userId: string) => {
     console.log("User authenticated:", userId);
     // This function would typically set the user's auth state
-    // But that's likely handled in AuthProvider now
+    // But that's now handled in AuthProvider
   };
 
   return (

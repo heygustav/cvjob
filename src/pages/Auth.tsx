@@ -1,18 +1,25 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import AuthForm from '@/components/auth/AuthForm';
 import AuthLayout from '@/components/auth/AuthLayout';
-import { useAuthHandler } from '@/hooks/useAuthHandler';
+import { useAuth } from '@/components/AuthProvider';
 
 const Auth = () => {
+  const [isSignUp, setIsSignUp] = useState(false);
   const { 
-    isSignUp,
     redirectUrl, 
     isLoading,
     attemptCount,
-    toggleMode,
     handleAuthentication
-  } = useAuthHandler();
+  } = useAuth();
+
+  const toggleMode = () => {
+    setIsSignUp(!isSignUp);
+  };
+
+  const handleSubmit = async (email: string, password: string) => {
+    await handleAuthentication(email, password, isSignUp);
+  };
 
   const pageTitle = isSignUp ? 'Opret konto' : 'Log ind på din konto';
 
@@ -20,7 +27,7 @@ const Auth = () => {
     <AuthLayout title={pageTitle} redirectUrl={redirectUrl}>
       <AuthForm
         isSignUp={isSignUp}
-        onSubmit={handleAuthentication}
+        onSubmit={handleSubmit}
         isLoading={isLoading}
         attemptCount={attemptCount}
         toggleMode={toggleMode}
