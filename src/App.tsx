@@ -1,23 +1,34 @@
 
+import React, { lazy, Suspense } from 'react';
 import { Route, Routes, BrowserRouter, Navigate } from "react-router-dom";
 import './App.css';
 import { Toaster } from "@/components/ui/toaster";
+import Navbar from "./components/navbar/Navbar";
+import { AuthProvider } from "./components/AuthProvider";
+
+// Eagerly load critical routes
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-import NotFound from "./pages/NotFound";
-import Dashboard from "./pages/Dashboard";
-import Profile from "./pages/Profile";
-import JobForm from "./pages/JobForm";
-import { AuthProvider } from "./components/AuthProvider";
-import PrivacyPolicy from "./pages/PrivacyPolicy";
-import TermsAndConditions from "./pages/TermsAndConditions";
-import AboutUs from "./pages/AboutUs";
-import Contact from "./pages/Contact";
-import CoverLetterGenerator from "./pages/CoverLetterGenerator";
 import Auth from "./pages/Auth";
-import React from 'react';
-import Navbar from "./components/navbar/Navbar";
+
+// Lazy load non-critical routes
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Profile = lazy(() => import("./pages/Profile"));
+const JobForm = lazy(() => import("./pages/JobForm"));
+const CoverLetterGenerator = lazy(() => import("./pages/CoverLetterGenerator"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const TermsAndConditions = lazy(() => import("./pages/TermsAndConditions"));
+const AboutUs = lazy(() => import("./pages/AboutUs"));
+const Contact = lazy(() => import("./pages/Contact"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+
+// Loading component for routes
+const RouteLoading = () => (
+  <div className="flex items-center justify-center min-h-screen p-8">
+    <div className="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div>
+  </div>
+);
 
 // Simple error boundary component
 class AppErrorBoundary extends React.Component<{ children: React.ReactNode }> {
@@ -65,25 +76,68 @@ function App() {
         <AuthProvider>
           <Navbar />
           <Routes>
+            {/* Eagerly loaded routes */}
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login onLogin={handleUserAuth} />} />
             <Route path="/signup" element={<Signup onSignup={handleUserAuth} />} />
             <Route path="/auth" element={<Auth />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/job/new" element={<JobForm />} />
-            <Route path="/job/:id" element={<JobForm />} />
-            <Route path="/cover-letter/generator" element={<CoverLetterGenerator />} />
+            
+            {/* Lazily loaded routes */}
+            <Route path="/dashboard" element={
+              <Suspense fallback={<RouteLoading />}>
+                <Dashboard />
+              </Suspense>
+            } />
+            <Route path="/profile" element={
+              <Suspense fallback={<RouteLoading />}>
+                <Profile />
+              </Suspense>
+            } />
+            <Route path="/job/new" element={
+              <Suspense fallback={<RouteLoading />}>
+                <JobForm />
+              </Suspense>
+            } />
+            <Route path="/job/:id" element={
+              <Suspense fallback={<RouteLoading />}>
+                <JobForm />
+              </Suspense>
+            } />
+            <Route path="/cover-letter/generator" element={
+              <Suspense fallback={<RouteLoading />}>
+                <CoverLetterGenerator />
+              </Suspense>
+            } />
             
             {/* Add redirects for any old paths */}
             <Route path="/generator" element={<Navigate to="/cover-letter/generator" replace />} />
             <Route path="/cover-letter" element={<Navigate to="/cover-letter/generator" replace />} />
             
-            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-            <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
-            <Route path="/about-us" element={<AboutUs />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="*" element={<NotFound />} />
+            <Route path="/privacy-policy" element={
+              <Suspense fallback={<RouteLoading />}>
+                <PrivacyPolicy />
+              </Suspense>
+            } />
+            <Route path="/terms-and-conditions" element={
+              <Suspense fallback={<RouteLoading />}>
+                <TermsAndConditions />
+              </Suspense>
+            } />
+            <Route path="/about-us" element={
+              <Suspense fallback={<RouteLoading />}>
+                <AboutUs />
+              </Suspense>
+            } />
+            <Route path="/contact" element={
+              <Suspense fallback={<RouteLoading />}>
+                <Contact />
+              </Suspense>
+            } />
+            <Route path="*" element={
+              <Suspense fallback={<RouteLoading />}>
+                <NotFound />
+              </Suspense>
+            } />
           </Routes>
           <Toaster />
         </AuthProvider>
