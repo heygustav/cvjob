@@ -24,7 +24,7 @@ interface LetterTableProps {
   onDownloadPdf: (letter: CoverLetter) => void;
   onDownloadDocx: (letter: CoverLetter) => void;
   onDownloadTxt: (letter: CoverLetter) => void;
-  isDownloading: Record<string, boolean>;
+  isDownloading: boolean;
 }
 
 const LetterTable: React.FC<LetterTableProps> = ({
@@ -68,7 +68,7 @@ const LetterTable: React.FC<LetterTableProps> = ({
             return (
               <TableRow key={letter.id} className="border-b-0">
                 <TableCell>{job?.company || "-"}</TableCell>
-                <TableCell className="font-medium">{job?.title || letter.title || "Untitled"}</TableCell>
+                <TableCell className="font-medium">{job?.title || "Untitled"}</TableCell>
                 <TableCell>{formatDate(letter.created_at)}</TableCell>
                 <TableCell>{job?.deadline ? formatDate(job.deadline) : "-"}</TableCell>
                 <TableCell>
@@ -90,7 +90,7 @@ const LetterTable: React.FC<LetterTableProps> = ({
                           size="sm"
                           icon={<Download className="h-4 w-4" />}
                           title="Download"
-                          disabled={isDownloading[letter.id]}
+                          disabled={isDownloading}
                         />
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">

@@ -44,9 +44,9 @@ const LetterListComponent: React.FC<LetterListComponentProps> = ({
         coverLetters={coverLetters}
         findJobForLetter={findJobForLetter}
         onLetterDelete={handleDeleteClick}
-        onDownloadPdf={handleDownloadPdf}
-        onDownloadDocx={handleDownloadDocx}
-        onDownloadTxt={handleDownloadTxt}
+        onDownloadPdf={(letter) => handleDownloadPdf(letter, findJobForLetter(letter.job_posting_id))}
+        onDownloadDocx={(letter) => handleDownloadDocx(letter, findJobForLetter(letter.job_posting_id))}
+        onDownloadTxt={(letter) => handleDownloadTxt(letter, findJobForLetter(letter.job_posting_id))}
         isDownloading={isDownloading}
       />
 

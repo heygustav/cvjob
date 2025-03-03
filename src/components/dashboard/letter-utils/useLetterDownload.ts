@@ -179,7 +179,7 @@ export function useLetterDownload() {
   return {
     isDownloading,
     handleDownloadPdf,
-    handleDownloadTxt,
-    handleDownloadDocx
+    handleDownloadDocx,
+    handleDownloadTxt
   };
 }
