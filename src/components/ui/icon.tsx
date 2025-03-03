@@ -26,7 +26,7 @@ interface IconProps extends Omit<LucideProps, 'ref'> {
 }
 
 // Pre-define and memoize the static icon map to improve performance
-const staticIcons = memo(() => {
+const staticIcons = useMemo(() => {
   const icons: Record<string, React.FC<LucideProps>> = {
     LayoutDashboard, User, FileText, Settings, 
     Plus, Pencil, Trash2, Search, Download,
@@ -54,7 +54,7 @@ const staticIcons = memo(() => {
     help: HelpCircle
   };
   return icons;
-})();
+}, []);
 
 /**
  * Optimized Icon component that supports both static and dynamic loading
