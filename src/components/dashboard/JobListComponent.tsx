@@ -1,3 +1,4 @@
+
 import React from "react";
 import { JobPosting } from "@/lib/types";
 import { Button } from "@/components/ui/button";
@@ -101,7 +102,6 @@ const JobListComponent: React.FC<JobListComponentProps> = ({
 
   return (
     <div>
-      {/* Remove the duplicate button and title heading here */}
       <div className="border rounded-md overflow-x-auto">
         <Table>
           <TableHeader>
