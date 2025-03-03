@@ -1,6 +1,7 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
+import IconButton from "@/components/ui/icon-button";
 import { Link } from "react-router-dom";
 import { Plus, RefreshCw, Loader2 } from "lucide-react";
 
@@ -17,45 +18,39 @@ const DashboardActions: React.FC<DashboardActionsProps> = ({
 }) => {
   return (
     <div className="flex flex-wrap gap-3 justify-start">
-      <Button 
+      <IconButton 
         variant="outline" 
         size="sm" 
         onClick={onRefresh} 
         disabled={isRefreshing}
-        className="flex items-center gap-2 whitespace-nowrap"
-      >
-        {isRefreshing ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
-        ) : (
-          <RefreshCw className="h-4 w-4" />
-        )}
-        Opdater
-      </Button>
+        icon={isRefreshing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+        label="Opdater"
+      />
       
       {activeTab === "jobs" ? (
-        <Button 
+        <IconButton 
           variant="default" 
           size="sm" 
-          asChild 
-          className="flex items-center gap-2 whitespace-nowrap"
+          asChild
+          icon={<Plus className="h-4 w-4" />}
+          label="Tilføj jobopslag"
         >
           <Link to="/job/new">
-            <Plus className="h-4 w-4" />
             Tilføj jobopslag
           </Link>
-        </Button>
+        </IconButton>
       ) : (
-        <Button 
+        <IconButton 
           variant="default" 
           size="sm" 
-          asChild 
-          className="flex items-center gap-2 whitespace-nowrap"
+          asChild
+          icon={<Plus className="h-4 w-4" />}
+          label="Opret ny ansøgning"
         >
           <Link to="/ansoegning">
-            <Plus className="h-4 w-4" />
             Opret ny ansøgning
           </Link>
-        </Button>
+        </IconButton>
       )}
     </div>
   );

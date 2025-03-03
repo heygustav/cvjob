@@ -2,7 +2,8 @@
 import React from "react";
 import { JobPosting } from "@/lib/types";
 import { Button } from "@/components/ui/button";
-import { Calendar, Trash2, FileText, Link, Pencil } from "lucide-react";
+import IconButton from "@/components/ui/icon-button";
+import { Calendar, Trash2, FileText, Link as LinkIcon, Pencil } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -100,46 +101,38 @@ const JobListComponent: React.FC<JobListComponentProps> = ({
               <TableCell>{formatDeadline(job.deadline)}</TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-end space-x-2">
-                  <Button
+                  <IconButton
                     variant="outline"
                     size="sm"
-                    className="h-8 w-8 p-0"
+                    icon={<FileText className="h-4 w-4" />}
                     onClick={() => handleCreateApplication(job)}
                     title="Opret ansøgning"
                     aria-label="Opret ansøgning for dette job"
-                  >
-                    <FileText className="h-4 w-4" />
-                  </Button>
-                  <Button
+                  />
+                  <IconButton
                     variant="outline"
                     size="sm"
-                    className="h-8 w-8 p-0"
+                    icon={<Pencil className="h-4 w-4" />}
                     onClick={() => handleEditJob(job.id)}
                     title="Rediger jobopslag"
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Button>
+                  />
                   {job.url && (
-                    <Button
+                    <IconButton
                       variant="outline"
                       size="sm"
-                      className="h-8 w-8 p-0"
+                      icon={<LinkIcon className="h-4 w-4" />}
                       onClick={() => window.open(job.url, "_blank")}
                       title="Åbn jobopslag"
-                    >
-                      <Link className="h-4 w-4" />
-                    </Button>
+                    />
                   )}
-                  <Button
+                  <IconButton
                     variant="outline"
                     size="sm"
-                    className="h-8 w-8 p-0"
+                    icon={<Trash2 className="h-4 w-4 text-red-500" />}
                     onClick={() => onJobDelete(job.id)}
                     disabled={isDeleting}
                     title="Slet jobopslag"
-                  >
-                    <Trash2 className="h-4 w-4 text-red-500" />
-                  </Button>
+                  />
                 </div>
               </TableCell>
             </TableRow>

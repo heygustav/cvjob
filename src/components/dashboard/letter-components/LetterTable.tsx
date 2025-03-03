@@ -1,6 +1,8 @@
+
 import React from "react";
 import { CoverLetter } from "@/lib/types";
 import { Button } from "@/components/ui/button";
+import IconButton from "@/components/ui/icon-button";
 import { Download, Trash2, ExternalLink, FileText } from "lucide-react";
 import {
   Table,
@@ -71,29 +73,25 @@ const LetterTable: React.FC<LetterTableProps> = ({
                 <TableCell>{job?.deadline ? formatDate(job.deadline) : "-"}</TableCell>
                 <TableCell>
                   <div className="flex justify-end space-x-2">
-                    <Button
+                    <IconButton
                       variant="outline"
                       size="sm"
-                      className="h-8 w-8 p-0"
+                      icon={<FileText className="h-4 w-4" />}
                       title="Se ansøgning"
                       asChild
                     >
-                      <Link to={`/cover-letter/${letter.id}`}>
-                        <FileText className="h-4 w-4" />
-                      </Link>
-                    </Button>
+                      <Link to={`/cover-letter/${letter.id}`} />
+                    </IconButton>
                     
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button
+                        <IconButton
                           variant="outline"
                           size="sm"
-                          className="h-8 w-8 p-0"
+                          icon={<Download className="h-4 w-4" />}
                           title="Download"
                           disabled={isDownloading[letter.id]}
-                        >
-                          <Download className="h-4 w-4" />
-                        </Button>
+                        />
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem onClick={() => onDownloadPdf(letter)}>
@@ -108,15 +106,13 @@ const LetterTable: React.FC<LetterTableProps> = ({
                       </DropdownMenuContent>
                     </DropdownMenu>
                     
-                    <Button
+                    <IconButton
                       variant="outline"
                       size="sm"
-                      className="h-8 w-8 p-0"
+                      icon={<Trash2 className="h-4 w-4 text-red-500" />}
                       onClick={() => onLetterDelete(letter.id)}
                       title="Slet ansøgning"
-                    >
-                      <Trash2 className="h-4 w-4 text-red-500" />
-                    </Button>
+                    />
                   </div>
                 </TableCell>
               </TableRow>

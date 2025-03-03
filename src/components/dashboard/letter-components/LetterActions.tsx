@@ -1,6 +1,7 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
+import IconButton from "@/components/ui/icon-button";
 import { CoverLetter, JobPosting } from "@/lib/types";
 import { Link } from "react-router-dom";
 import { Download, FileEdit, Trash2 } from "lucide-react";
@@ -32,27 +33,23 @@ const LetterActions: React.FC<LetterActionsProps> = ({
 }) => {
   return (
     <div className="flex justify-end space-x-2">
-      <Button
+      <IconButton
         variant="outline"
         size="sm"
-        className="h-8 w-8 p-0"
+        icon={<FileEdit className="h-4 w-4" />}
         asChild
       >
-        <Link to={`/cover-letter/generator?letterId=${letter.id}&step=2`}>
-          <FileEdit className="h-4 w-4" />
-        </Link>
-      </Button>
+        <Link to={`/cover-letter/generator?letterId=${letter.id}&step=2`} />
+      </IconButton>
       
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button
+          <IconButton
             variant="outline"
             size="sm"
-            className="h-8 w-8 p-0"
+            icon={<Download className="h-4 w-4" />}
             disabled={isDownloading}
-          >
-            <Download className="h-4 w-4" />
-          </Button>
+          />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem 
@@ -76,14 +73,12 @@ const LetterActions: React.FC<LetterActionsProps> = ({
         </DropdownMenuContent>
       </DropdownMenu>
       
-      <Button
+      <IconButton
         variant="outline"
         size="sm"
-        className="h-8 w-8 p-0"
+        icon={<Trash2 className="h-4 w-4 text-red-500" />}
         onClick={() => onDelete(letter.id)}
-      >
-        <Trash2 className="h-4 w-4 text-red-500" />
-      </Button>
+      />
     </div>
   );
 };
