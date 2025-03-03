@@ -29,13 +29,13 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   const navigate = useNavigate();
 
   return (
-    <div className="mb-8 space-y-6">
-      <div className="text-left">
+   <div className="mb-8 space-y-6">
+      <div className="text-left"> {/* Already correct */}
         <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
         <p className="text-muted-foreground mt-1">
-          Administrer dine jobopslag og ansøgninger
-        </p>
-      </div>
+      Administrer dine jobopslag og ansøgninger
+      </p>
+  </div>
 
       {subscriptionStatus && subscriptionStatus.freeGenerationsUsed >= subscriptionStatus.freeGenerationsAllowed && !subscriptionStatus.canGenerate && (
         <Alert variant="destructive" className="mt-4 bg-amber-50 border-amber-200 text-amber-800">
