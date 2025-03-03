@@ -25,19 +25,19 @@ const IconDemo: React.FC = () => {
       
       <h2 className="col-span-full text-xl font-semibold mb-4 mt-6">Dynamic Icons (Lazy Loaded)</h2>
       <div className="flex flex-col items-center p-2 border rounded">
-        <Icon name="GitBranch" dynamic size={32} className="text-primary" />
-        <span className="mt-2 text-sm">GitBranch</span>
+        <Icon name="git-branch" dynamic size={32} className="text-primary" />
+        <span className="mt-2 text-sm">Git Branch</span>
       </div>
       <div className="flex flex-col items-center p-2 border rounded">
-        <Icon name="Database" dynamic size={32} className="text-primary" />
+        <Icon name="database" dynamic size={32} className="text-primary" />
         <span className="mt-2 text-sm">Database</span>
       </div>
       <div className="flex flex-col items-center p-2 border rounded">
-        <Icon name="Wifi" dynamic size={32} className="text-primary" />
+        <Icon name="wifi" dynamic size={32} className="text-primary" />
         <span className="mt-2 text-sm">Wifi</span>
       </div>
       <div className="flex flex-col items-center p-2 border rounded">
-        <Icon name="Zap" dynamic size={32} className="text-primary" />
+        <Icon name="zap" dynamic size={32} className="text-primary" />
         <span className="mt-2 text-sm">Zap</span>
       </div>
     </div>
