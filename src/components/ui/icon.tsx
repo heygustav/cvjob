@@ -1,4 +1,3 @@
-
 import React, { lazy, Suspense, useMemo, memo } from 'react';
 import { LucideProps } from 'lucide-react';
 import dynamicIconImports from 'lucide-react/dynamicIconImports';
@@ -21,40 +20,37 @@ const IconFallback = memo(() => (
 export type IconName = keyof typeof dynamicIconImports;
 
 interface IconProps extends Omit<LucideProps, 'ref'> {
-  name: IconName;
+  name: IconName | string;
   dynamic?: boolean;
 }
 
-// Pre-define and memoize the static icon map to improve performance
-const staticIcons = useMemo(() => {
-  const icons: Record<string, React.FC<LucideProps>> = {
-    LayoutDashboard, User, FileText, Settings, 
-    Plus, Pencil, Trash2, Search, Download,
-    CheckCircle, AlertTriangle, XCircle, Info,
-    ChevronRight, ChevronLeft, ChevronUp, ChevronDown,
-    X, Menu, Calendar, Mail, HelpCircle,
-    // Add aliases for common icons to support both pascal case and kebab case
-    dashboard: LayoutDashboard,
-    user: User,
-    document: FileText,
-    settings: Settings,
-    plus: Plus,
-    edit: Pencil,
-    delete: Trash2,
-    search: Search,
-    download: Download,
-    success: CheckCircle,
-    warning: AlertTriangle,
-    error: XCircle,
-    info: Info,
-    close: X,
-    menu: Menu,
-    calendar: Calendar,
-    mail: Mail,
-    help: HelpCircle
-  };
-  return icons;
-}, []);
+// Pre-define static icons for immediate use without dynamic imports
+const staticIconsMap = {
+  LayoutDashboard, User, FileText, Settings, 
+  Plus, Pencil, Trash2, Search, Download,
+  CheckCircle, AlertTriangle, XCircle, Info,
+  ChevronRight, ChevronLeft, ChevronUp, ChevronDown,
+  X, Menu, Calendar, Mail, HelpCircle,
+  // Add aliases for common icons to support both pascal case and kebab case
+  dashboard: LayoutDashboard,
+  user: User,
+  document: FileText,
+  settings: Settings,
+  plus: Plus,
+  edit: Pencil,
+  delete: Trash2,
+  search: Search,
+  download: Download,
+  success: CheckCircle,
+  warning: AlertTriangle,
+  error: XCircle,
+  info: Info,
+  close: X,
+  menu: Menu,
+  calendar: Calendar,
+  mail: Mail,
+  help: HelpCircle
+};
 
 /**
  * Optimized Icon component that supports both static and dynamic loading
@@ -91,8 +87,8 @@ const Icon = memo(({ name, dynamic = false, size = 24, ...props }: IconProps) =>
     );
   }
 
-  // For static imports, use the pre-memoized icon map
-  const StaticIcon = staticIcons[name] || staticIcons[name.toLowerCase()] || HelpCircle;
+  // For static imports, use the pre-defined icon map
+  const StaticIcon = staticIconsMap[name] || staticIconsMap[normalizedName] || HelpCircle;
   
   return <StaticIcon size={size} {...props} />;
 });
