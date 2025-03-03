@@ -1,10 +1,10 @@
-
 import { useEffect, useState } from "react";
 import { User } from "@/lib/types";
 import { checkSubscriptionStatus, incrementGenerationCount } from "@/services/subscription/subscriptionService";
 import { SubscriptionStatus } from "@/services/subscription/types";
 import { useToast } from "@/hooks/use-toast";
 
+// Update the hook to accept either our custom User type, null, or the Supabase User type
 export const useSubscription = (user: User | null) => {
   const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus | null>(null);
   const [isLoading, setIsLoading] = useState(true);

@@ -4,6 +4,7 @@ import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import DashboardActions from "@/components/dashboard/DashboardActions";
 import DashboardContent from "@/components/dashboard/DashboardContent";
 import TabNav from "@/components/dashboard/TabNav";
+import { SubscriptionStatus } from "@/services/subscription/types";
 
 interface DashboardMainProps {
   jobPostings: any[];
@@ -14,6 +15,7 @@ interface DashboardMainProps {
   onLetterDelete: (id: string) => void;
   onRefresh: () => void;
   findJobForLetter: (jobPostingId: string) => any | undefined;
+  subscriptionStatus?: SubscriptionStatus;
 }
 
 const DashboardMain: React.FC<DashboardMainProps> = ({
@@ -24,7 +26,8 @@ const DashboardMain: React.FC<DashboardMainProps> = ({
   onJobDelete,
   onLetterDelete,
   onRefresh,
-  findJobForLetter
+  findJobForLetter,
+  subscriptionStatus
 }) => {
   const [activeTab, setActiveTab] = useState<"letters" | "jobs">("letters");
 
@@ -40,6 +43,7 @@ const DashboardMain: React.FC<DashboardMainProps> = ({
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         isLoading={isRefreshing}
+        subscriptionStatus={subscriptionStatus}
       />
 
       <div className="mb-6">

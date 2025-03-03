@@ -5,10 +5,12 @@ import DashboardLoading from "@/components/dashboard/DashboardLoading";
 import DashboardMain from "@/components/dashboard/DashboardMain";
 import { useAuth } from "@/components/AuthProvider";
 import { useSubscription } from "@/hooks/useSubscription";
+import { SubscriptionStatus } from "@/services/subscription/types";
 
 const Dashboard = () => {
   const { user } = useAuth();
-  const { subscriptionStatus, isLoading: isSubLoading } = useSubscription(user);
+  // Pass undefined instead of user directly if user is null
+  const { subscriptionStatus, isLoading: isSubLoading } = useSubscription(user?.id ? user : null);
   
   const {
     jobPostings,
