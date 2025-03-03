@@ -2,7 +2,6 @@
 import React, { useState } from "react";
 import { CoverLetter, JobPosting } from "@/lib/types";
 import { useLetterDownload } from "./letter-utils/useLetterDownload";
-import EmptyLetterState from "./letter-components/EmptyLetterState";
 import LetterTable from "./letter-components/LetterTable";
 import DeleteLetterDialog from "./letter-components/DeleteLetterDialog";
 
@@ -39,19 +38,8 @@ const LetterListComponent: React.FC<LetterListComponentProps> = ({
     setLetterToDelete(null);
   };
 
-  if (coverLetters.length === 0) {
-    return <EmptyLetterState />;
-  }
-
   return (
     <div className="overflow-hidden">
-      <div className="text-left mb-4">
-        <h2 className="text-lg font-medium text-gray-900">Dine ansøgninger</h2>
-        <p className="text-sm text-gray-500">
-          Se og administrer dine gemte ansøgninger.
-        </p>
-      </div>
-
       <LetterTable 
         coverLetters={coverLetters}
         findJobForLetter={findJobForLetter}

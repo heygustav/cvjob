@@ -2,7 +2,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Plus, RefreshCw, Loader2, FilePlus } from "lucide-react";
+import { Plus, RefreshCw, Loader2 } from "lucide-react";
 
 interface DashboardActionsProps {
   activeTab: "letters" | "jobs";
@@ -51,8 +51,8 @@ const DashboardActions: React.FC<DashboardActionsProps> = ({
           asChild 
           className="flex items-center gap-2 whitespace-nowrap"
         >
-          <Link to="/cover-letter/generator?direct=true">
-            <FilePlus className="h-4 w-4" />
+          <Link to="/ansoegning">
+            <Plus className="h-4 w-4" />
             Opret ny ansøgning
           </Link>
         </Button>

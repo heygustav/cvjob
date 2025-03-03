@@ -1,10 +1,7 @@
 
 import React from "react";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertTriangleIcon, Plus } from "lucide-react";
+import { AlertTriangleIcon } from "lucide-react";
 
 interface DashboardHeaderProps {
   jobCount: number;
@@ -27,37 +24,13 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   isLoading,
   subscriptionStatus,
 }) => {
-  const navigate = useNavigate();
-  const { toast } = useToast();
-
-  const handleCreateNew = () => {
-    if (subscriptionStatus && !subscriptionStatus.canGenerate) {
-      toast({
-        title: "Abonnement påkrævet",
-        description: "Du har brugt dit frie forsøg. Opret et abonnement for at fortsætte.",
-        variant: "destructive",
-      });
-      navigate("/profile");
-      return;
-    }
-    navigate("/ansoegning");
-  };
-
   return (
     <div className="mb-8 space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div className="text-left">
-          <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-          <p className="text-muted-foreground mt-1">
-            Administrer dine jobopslag og ansøgninger
-          </p>
-        </div>
-        <div>
-          <Button onClick={handleCreateNew}>
-            <Plus className="h-4 w-4 mr-2" />
-            Opret ny ansøgning
-          </Button>
-        </div>
+      <div className="text-left">
+        <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
+        <p className="text-muted-foreground mt-1">
+          Administrer dine jobopslag og ansøgninger
+        </p>
       </div>
 
       {subscriptionStatus && subscriptionStatus.freeGenerationsUsed >= subscriptionStatus.freeGenerationsAllowed && !subscriptionStatus.canGenerate && (
