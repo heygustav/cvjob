@@ -44,7 +44,7 @@ const NavLinks: React.FC<NavLinksProps> = ({
       )}
       
       {session && (
-        <Link to="/cover-letter/generator" className={linkClass}>
+        <Link to="/ansoegning" className={linkClass}>
           <PenTool className="h-4 w-4" />
           Opret ansøgning
         </Link>

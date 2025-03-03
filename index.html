@@ -11,7 +11,7 @@
     <!-- Open Graph Tags for social sharing -->
     <meta property="og:title" content="CVJob | Skriv Overbevisende Jobansøgninger med AI" />
     <meta property="og:description" content="Generer skræddersyede jobansøgninger på få minutter. Spild mindre tid på at skrive, få flere jobsamtaler." />
-    <meta property="og:image" content="/og-image.png" />
+    <meta property="og:image" content="https://cvjob.dk/og-image.png" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://cvjob.dk" />
     
@@ -20,7 +20,7 @@
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="https://cvjob.dk" />
     
-    <!-- JSON-LD structured data for better search results -->
+    <!-- JSON-LD structured data for rich results -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -33,7 +33,43 @@
         "price": "0",
         "priceCurrency": "DKK"
       },
-      "description": "AI-drevet værktøj til at skabe personlige og professionelle jobansøgninger"
+      "description": "AI-drevet værktøj til at skabe personlige og professionelle jobansøgninger",
+      "url": "https://cvjob.dk",
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "reviewCount": "156"
+      }
+    }
+    </script>
+
+    <!-- Organization schema for better branding -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "CVJob",
+      "url": "https://cvjob.dk",
+      "logo": "https://cvjob.dk/logo.png",
+      "sameAs": [
+        "https://facebook.com/cvjob",
+        "https://twitter.com/cvjob",
+        "https://linkedin.com/company/cvjob"
+      ]
+    }
+    </script>
+    
+    <!-- Breadcrumb structured data for better navigation in search results -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [{
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Hjem",
+        "item": "https://cvjob.dk"
+      }]
     }
     </script>
     

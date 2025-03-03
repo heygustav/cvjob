@@ -1,4 +1,3 @@
-
 import React, { lazy, Suspense } from 'react';
 import { Route, Routes, BrowserRouter, Navigate } from "react-router-dom";
 import './App.css';
@@ -61,7 +60,7 @@ class AppErrorBoundary extends React.Component<{ children: React.ReactNode }> {
     return this.props.children;
   }
 }
-
+  
 function App() {
   // Handler for login/signup that can be passed to components
   const handleUserAuth = (userId: string) => {
@@ -103,36 +102,43 @@ function App() {
                 <JobForm />
               </Suspense>
             } />
-            <Route path="/cover-letter/generator" element={
+            <Route path="/ansoegning" element={
               <Suspense fallback={<RouteLoading />}>
                 <CoverLetterGenerator />
               </Suspense>
             } />
             
-            {/* Add redirects for any old paths */}
-            <Route path="/generator" element={<Navigate to="/cover-letter/generator" replace />} />
-            <Route path="/cover-letter" element={<Navigate to="/cover-letter/generator" replace />} />
-            
-            <Route path="/privacy-policy" element={
-              <Suspense fallback={<RouteLoading />}>
-                <PrivacyPolicy />
-              </Suspense>
-            } />
-            <Route path="/terms-and-conditions" element={
-              <Suspense fallback={<RouteLoading />}>
-                <TermsAndConditions />
-              </Suspense>
-            } />
-            <Route path="/about-us" element={
+            {/* Standardized legal and informational pages */}
+            <Route path="/om-os" element={
               <Suspense fallback={<RouteLoading />}>
                 <AboutUs />
               </Suspense>
             } />
-            <Route path="/contact" element={
+            <Route path="/kontakt" element={
               <Suspense fallback={<RouteLoading />}>
                 <Contact />
               </Suspense>
             } />
+            <Route path="/privatlivspolitik" element={
+              <Suspense fallback={<RouteLoading />}>
+                <PrivacyPolicy />
+              </Suspense>
+            } />
+            <Route path="/vilkaar-og-betingelser" element={
+              <Suspense fallback={<RouteLoading />}>
+                <TermsAndConditions />
+              </Suspense>
+            } />
+            
+            {/* Add redirects for any old paths */}
+            <Route path="/about-us" element={<Navigate to="/om-os" replace />} />
+            <Route path="/privacy-policy" element={<Navigate to="/privatlivspolitik" replace />} />
+            <Route path="/terms-and-conditions" element={<Navigate to="/vilkaar-og-betingelser" replace />} />
+            <Route path="/contact" element={<Navigate to="/kontakt" replace />} />
+            <Route path="/generator" element={<Navigate to="/ansoegning" replace />} />
+            <Route path="/cover-letter" element={<Navigate to="/ansoegning" replace />} />
+            <Route path="/cover-letter/generator" element={<Navigate to="/ansoegning" replace />} />
+            
             <Route path="*" element={
               <Suspense fallback={<RouteLoading />}>
                 <NotFound />

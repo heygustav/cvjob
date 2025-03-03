@@ -66,7 +66,7 @@ const LazyFooterSection = createLazyComponent(FooterSection);
 const Index = () => {
   const { session } = useAuth();
 
-  // Set document title and meta description for SEO
+  // Set document title, meta description and canonical for SEO
   useEffect(() => {
     document.title = "CVJob | AI-Drevet Jobansøgningsgenerator til Personlige Ansøgninger";
     
@@ -74,6 +74,31 @@ const Index = () => {
     const metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) {
       metaDescription.setAttribute('content', 'Skab professionelle, personlige jobansøgninger på få minutter med CVJob\'s AI-drevne værktøj. Få flere jobsamtaler med mindre indsats.');
+    }
+    
+    // Add canonical link to prevent duplicate content issues
+    let canonicalLink = document.querySelector('link[rel="canonical"]');
+    if (!canonicalLink) {
+      canonicalLink = document.createElement('link');
+      canonicalLink.setAttribute('rel', 'canonical');
+      document.head.appendChild(canonicalLink);
+    }
+    canonicalLink.setAttribute('href', 'https://cvjob.dk');
+    
+    // Update open graph tags to match current content
+    const ogTitle = document.querySelector('meta[property="og:title"]');
+    if (ogTitle) {
+      ogTitle.setAttribute('content', 'CVJob | AI-Drevet Jobansøgningsgenerator til Personlige Ansøgninger');
+    }
+    
+    const ogDescription = document.querySelector('meta[property="og:description"]');
+    if (ogDescription) {
+      ogDescription.setAttribute('content', 'Skab professionelle, personlige jobansøgninger på få minutter med CVJob\'s AI-drevne værktøj. Spild mindre tid på ansøgninger, få flere jobsamtaler.');
+    }
+    
+    const ogUrl = document.querySelector('meta[property="og:url"]');
+    if (ogUrl) {
+      ogUrl.setAttribute('content', 'https://cvjob.dk');
     }
   }, []);
 

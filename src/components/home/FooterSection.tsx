@@ -13,22 +13,22 @@ const FooterSection: React.FC = () => {
             </a>
           </div>
           <div className="pb-4 sm:pb-6">
-            <Link to="/about" className="text-sm leading-6 text-muted-foreground hover:text-foreground transition-colors">
+            <Link to="/om-os" className="text-sm leading-6 text-muted-foreground hover:text-foreground transition-colors">
               Om os
             </Link>
           </div>
           <div className="pb-4 sm:pb-6">
-            <Link to="/privacy" className="text-sm leading-6 text-muted-foreground hover:text-foreground transition-colors">
+            <Link to="/privatlivspolitik" className="text-sm leading-6 text-muted-foreground hover:text-foreground transition-colors">
               Privatlivspolitik
             </Link>
           </div>
           <div className="pb-4 sm:pb-6">
-            <Link to="/terms" className="text-sm leading-6 text-muted-foreground hover:text-foreground transition-colors">
+            <Link to="/vilkaar-og-betingelser" className="text-sm leading-6 text-muted-foreground hover:text-foreground transition-colors">
               Vilkår og betingelser
             </Link>
           </div>
           <div className="pb-4 sm:pb-6">
-            <Link to="/contact" className="text-sm leading-6 text-muted-foreground hover:text-foreground transition-colors">
+            <Link to="/kontakt" className="text-sm leading-6 text-muted-foreground hover:text-foreground transition-colors">
               Kontakt
             </Link>
           </div>

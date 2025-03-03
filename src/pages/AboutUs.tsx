@@ -5,7 +5,7 @@ import { ChevronLeft } from 'lucide-react';
 import FooterSection from '@/components/home/FooterSection';
 
 const AboutUs = () => {
-  // Set document title for SEO
+  // Set document title and meta tags for SEO
   useEffect(() => {
     document.title = "Om CVJob | Vores Mission og Team | AI-Drevet Jobansøgningsgenerator";
     
@@ -14,6 +14,15 @@ const AboutUs = () => {
     if (metaDescription) {
       metaDescription.setAttribute('content', 'Lær mere om CVJob\'s mission, team og teknologi. Vi hjælper jobsøgende med at skabe overbevisende ansøgninger med kunstig intelligens.');
     }
+    
+    // Add canonical link to prevent duplicate content issues
+    let canonicalLink = document.querySelector('link[rel="canonical"]');
+    if (!canonicalLink) {
+      canonicalLink = document.createElement('link');
+      canonicalLink.setAttribute('rel', 'canonical');
+      document.head.appendChild(canonicalLink);
+    }
+    canonicalLink.setAttribute('href', 'https://cvjob.dk/om-os');
   }, []);
 
   return (
@@ -61,7 +70,7 @@ const AboutUs = () => {
           <section className="mb-10" aria-labelledby="contact-heading">
             <h2 id="contact-heading" className="text-2xl font-semibold text-primary-800 mb-4">Kontakt os</h2>
             <p className="text-muted-foreground">
-              Har du spørgsmål eller feedback til vores tjeneste? Vi hører gerne fra dig! Du kan kontakte os på <a href="mailto:kontakt@cvjob.dk" className="text-primary hover:underline">kontakt@cvjob.dk</a> eller besøge vores <Link to="/contact" className="text-primary hover:underline">kontaktside</Link>.
+              Har du spørgsmål eller feedback til vores tjeneste? Vi hører gerne fra dig! Du kan kontakte os på <a href="mailto:kontakt@cvjob.dk" className="text-primary hover:underline">kontakt@cvjob.dk</a> eller besøge vores <Link to="/kontakt" className="text-primary hover:underline">kontaktside</Link>.
             </p>
           </section>
         </article>
