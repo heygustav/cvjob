@@ -1,6 +1,7 @@
 
 import React, { useState, useMemo } from 'react';
 import Icon, { commonIcons } from '@/components/ui/icon';
+import type { IconName } from '@/components/ui/icon';
 
 // Predefined icon lists for better organization
 const STATIC_ICONS = [
@@ -10,11 +11,12 @@ const STATIC_ICONS = [
   { name: 'settings', label: 'Settings', component: commonIcons.Settings },
 ];
 
+// Define dynamic icons with properly typed names
 const DYNAMIC_ICONS = [
-  { name: 'git-branch', label: 'Git Branch' },
-  { name: 'database', label: 'Database' },
-  { name: 'wifi', label: 'Wifi' },
-  { name: 'zap', label: 'Zap' },
+  { name: 'git-branch' as IconName, label: 'Git Branch' },
+  { name: 'database' as IconName, label: 'Database' },
+  { name: 'wifi' as IconName, label: 'Wifi' },
+  { name: 'zap' as IconName, label: 'Zap' },
 ];
 
 const IconDemo: React.FC = () => {

@@ -17,7 +17,8 @@ const IconFallback = React.memo(() => (
   <div className="w-6 h-6 bg-gray-200 rounded animate-pulse" />
 ));
 
-type IconName = keyof typeof dynamicIconImports;
+// Export the IconName type for use in other components
+export type IconName = keyof typeof dynamicIconImports;
 
 interface IconProps extends Omit<LucideProps, 'ref'> {
   name: IconName;
