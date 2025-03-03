@@ -88,7 +88,7 @@ const JobListComponent: React.FC<JobListComponentProps> = ({
             <TableHead className="text-left">Virksomhed</TableHead>
             <TableHead className="text-left">Oprettet</TableHead>
             <TableHead className="text-left">Frist</TableHead>
-            <TableHead className="text-right">Handlinger</TableHead>
+            <TableHead className="text-left">Handlinger</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
