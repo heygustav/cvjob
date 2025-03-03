@@ -1,7 +1,6 @@
 
-import React, { useState, useMemo } from 'react';
-import Icon, { commonIcons } from '@/components/ui/icon';
-import type { IconName } from '@/components/ui/icon';
+import React, { useState, useMemo, useCallback } from 'react';
+import Icon, { commonIcons, IconName } from '@/components/ui/icon';
 
 // Predefined icon lists for better organization
 const STATIC_ICONS = [
@@ -19,46 +18,89 @@ const DYNAMIC_ICONS = [
   { name: 'zap' as IconName, label: 'Zap' },
 ];
 
+// Create optimized card component to avoid repeated JSX
+const IconCard = React.memo(({ 
+  name, 
+  label, 
+  component: IconComponent, 
+  isHovered, 
+  onMouseEnter, 
+  onMouseLeave,
+  isDynamic = false
+}: {
+  name: string;
+  label: string;
+  component?: React.FC<any>;
+  isHovered: boolean;
+  onMouseEnter: () => void;
+  onMouseLeave: () => void;
+  isDynamic?: boolean;
+}) => (
+  <div 
+    className="flex flex-col items-center p-2 border rounded hover:bg-gray-50 transition-colors hover:border-primary"
+    onMouseEnter={onMouseEnter}
+    onMouseLeave={onMouseLeave}
+  >
+    {isDynamic ? (
+      <Icon 
+        name={name as IconName} 
+        dynamic 
+        size={32} 
+        className={`${isHovered ? 'text-primary' : 'text-gray-700'} transition-colors`} 
+      />
+    ) : IconComponent && (
+      <IconComponent 
+        className={`h-8 w-8 ${isHovered ? 'text-primary' : 'text-gray-700'} transition-colors`} 
+      />
+    )}
+    <span className="mt-2 text-sm font-medium">{label}</span>
+  </div>
+));
+
+IconCard.displayName = 'IconCard';
+
 const IconDemo: React.FC = () => {
   // Use lazy initialization to avoid work during render
   const [hoveredIcon, setHoveredIcon] = useState<string | null>(null);
   
-  // Memorize static icons to prevent unnecessary rerenders
+  // Create callback handlers to reduce function creation on renders
+  const handleMouseEnter = useCallback((name: string) => {
+    setHoveredIcon(name);
+  }, []);
+  
+  const handleMouseLeave = useCallback(() => {
+    setHoveredIcon(null);
+  }, []);
+  
+  // Memoize static icons to prevent unnecessary re-renders
   const staticIconItems = useMemo(() => {
     return STATIC_ICONS.map(icon => (
-      <div 
+      <IconCard
         key={icon.name}
-        className="flex flex-col items-center p-2 border rounded hover:border-primary transition-colors"
-        onMouseEnter={() => setHoveredIcon(icon.name)}
-        onMouseLeave={() => setHoveredIcon(null)}
-      >
-        <icon.component 
-          className={`h-8 w-8 ${hoveredIcon === icon.name ? 'text-primary-foreground' : 'text-primary'} transition-colors`} 
-        />
-        <span className="mt-2 text-sm">{icon.label}</span>
-      </div>
+        name={icon.name}
+        label={icon.label}
+        component={icon.component}
+        isHovered={hoveredIcon === icon.name}
+        onMouseEnter={() => handleMouseEnter(icon.name)}
+        onMouseLeave={handleMouseLeave}
+      />
     ));
-  }, [hoveredIcon]);
+  }, [hoveredIcon, handleMouseEnter, handleMouseLeave]);
 
-  // Memorize dynamic icons to prevent unnecessary rerenders
+  // Memoize dynamic icons to prevent unnecessary re-renders
   const dynamicIconItems = useMemo(() => {
     return DYNAMIC_ICONS.map(icon => (
-      <div 
+      <IconCard
         key={icon.name}
-        className="flex flex-col items-center p-2 border rounded hover:border-primary transition-colors"
-        onMouseEnter={() => setHoveredIcon(icon.name)}
-        onMouseLeave={() => setHoveredIcon(null)}
-      >
-        <Icon 
-          name={icon.name} 
-          dynamic 
-          size={32} 
-          className={`${hoveredIcon === icon.name ? 'text-primary-foreground' : 'text-primary'} transition-colors`} 
-        />
-        <span className="mt-2 text-sm">{icon.label}</span>
-      </div>
+        name={icon.name}
+        label={icon.label}
+        isHovered={hoveredIcon === icon.name}
+        onMouseEnter={() => handleMouseEnter(icon.name)}
+        onMouseLeave={handleMouseLeave}
+        isDynamic
+      />
     ));
-  }, [hoveredIcon]);
+  }, [hoveredIcon, handleMouseEnter, handleMouseLeave]);
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 p-4">

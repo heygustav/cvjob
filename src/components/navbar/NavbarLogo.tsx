@@ -3,16 +3,23 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { FileText } from "lucide-react"; // Direct import for critical components
 
-// Using React.memo to prevent unnecessary re-renders
-const NavbarLogo: React.FC = React.memo(() => {
+interface NavbarLogoProps {
+  className?: string;
+}
+
+// Using React.memo to prevent unnecessary re-renders with optimized implementation
+const NavbarLogo = React.memo(({ className = "" }: NavbarLogoProps) => {
   return (
     <Link 
       to="/" 
-      className="text-xl font-medium tracking-tight text-white flex items-center gap-2"
+      className={`text-xl font-medium tracking-tight text-white flex items-center gap-2 transition-opacity hover:opacity-90 ${className}`}
       aria-label="CVJob homepage"
+      prefetch="intent" // This will be picked up by frameworks that support it
     >
-      <FileText className="h-5 w-5" />
-      <span className="text-xl sm:text-2xl font-semibold truncate max-w-[180px] sm:max-w-none">CVJob</span>
+      <FileText className="h-5 w-5" aria-hidden="true" />
+      <span className="text-xl sm:text-2xl font-semibold truncate max-w-[180px] sm:max-w-none">
+        CVJob
+      </span>
     </Link>
   );
 });

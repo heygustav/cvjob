@@ -1,5 +1,5 @@
 
-import React, { lazy, Suspense, useMemo } from 'react';
+import React, { lazy, Suspense, useMemo, memo } from 'react';
 import { LucideProps } from 'lucide-react';
 import dynamicIconImports from 'lucide-react/dynamicIconImports';
 
@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 
 // Create a more performant loading fallback with memo
-const IconFallback = React.memo(() => (
+const IconFallback = memo(() => (
   <div className="w-6 h-6 bg-gray-200 rounded animate-pulse" />
 ));
 
@@ -25,39 +25,9 @@ interface IconProps extends Omit<LucideProps, 'ref'> {
   dynamic?: boolean;
 }
 
-/**
- * Optimized Icon component that supports both static and dynamic loading
- * - Static loading: imports icons at build time (better for frequently used icons)
- * - Dynamic loading: imports icons at runtime (better for rarely used icons)
- */
-const Icon = React.memo(({ name, dynamic = false, size = 24, ...props }: IconProps) => {
-  // Use dynamic import for on-demand loading
-  if (dynamic) {
-    // Memoize the dynamic icon component to prevent unnecessary re-renders
-    const DynamicIcon = useMemo(() => {
-      return lazy(() => {
-        // Handle both kebab case and PascalCase icon names for better developer experience
-        const iconName = (typeof name === 'string' ? 
-          name.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase() : 
-          name) as IconName;
-          
-        return dynamicIconImports[iconName]()
-          .catch((error) => {
-            console.error(`Failed to load icon "${iconName}":`, error);
-            return { default: HelpCircle };
-          });
-      });
-    }, [name]);
-
-    return (
-      <Suspense fallback={<IconFallback />}>
-        <DynamicIcon size={size} {...props} />
-      </Suspense>
-    );
-  }
-
-  // For static imports, we need to manually map the icon name to the imported component
-  const staticIcons: Record<string, React.FC<LucideProps>> = {
+// Pre-define and memoize the static icon map to improve performance
+const staticIcons = memo(() => {
+  const icons: Record<string, React.FC<LucideProps>> = {
     LayoutDashboard, User, FileText, Settings, 
     Plus, Pencil, Trash2, Search, Download,
     CheckCircle, AlertTriangle, XCircle, Info,
@@ -83,8 +53,45 @@ const Icon = React.memo(({ name, dynamic = false, size = 24, ...props }: IconPro
     mail: Mail,
     help: HelpCircle
   };
+  return icons;
+})();
 
-  // Find icon by name (try both the direct name and lowercase version)
+/**
+ * Optimized Icon component that supports both static and dynamic loading
+ * - Static loading: imports icons at build time (better for frequently used icons)
+ * - Dynamic loading: imports icons at runtime (better for rarely used icons)
+ */
+const Icon = memo(({ name, dynamic = false, size = 24, ...props }: IconProps) => {
+  // Convert PascalCase to kebab-case for consistent name handling
+  const normalizedName = useMemo(() => {
+    return typeof name === 'string' 
+      ? name.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase() 
+      : name;
+  }, [name]);
+
+  // Use dynamic import for on-demand loading
+  if (dynamic) {
+    // Memoize the dynamic icon component to prevent unnecessary re-renders
+    const DynamicIcon = useMemo(() => {
+      return lazy(() => {
+        const iconName = normalizedName as IconName;
+          
+        return dynamicIconImports[iconName]()
+          .catch((error) => {
+            console.error(`Failed to load icon "${iconName}":`, error);
+            return { default: HelpCircle };
+          });
+      });
+    }, [normalizedName]);
+
+    return (
+      <Suspense fallback={<IconFallback />}>
+        <DynamicIcon size={size} {...props} />
+      </Suspense>
+    );
+  }
+
+  // For static imports, use the pre-memoized icon map
   const StaticIcon = staticIcons[name] || staticIcons[name.toLowerCase()] || HelpCircle;
   
   return <StaticIcon size={size} {...props} />;

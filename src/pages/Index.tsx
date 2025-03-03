@@ -1,5 +1,5 @@
 
-import React, { lazy, Suspense } from 'react';
+import React, { lazy, Suspense, useState, useEffect } from 'react';
 import { useAuth } from '../components/AuthProvider';
 import HeroSection from '../components/home/HeroSection';
 import FeaturesSection from '../components/home/FeaturesSection';
@@ -11,12 +11,59 @@ const CTASection = lazy(() => import('../components/home/CTASection'));
 const FooterSection = lazy(() => import('../components/home/FooterSection'));
 const IconDemo = lazy(() => import('../components/IconDemo'));
 
-// Simple loading placeholder for lazy-loaded components
+// Better loading placeholder with clear visual feedback
 const SectionPlaceholder = () => (
   <div className="w-full py-16 bg-muted/30 animate-pulse flex justify-center items-center">
     <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div>
   </div>
 );
+
+// Factory function for Intersection Observer based lazy loading
+const createLazyComponent = (Component: React.LazyExoticComponent<any>, placeholder = <SectionPlaceholder />) => {
+  return ({ ...props }) => {
+    const [isVisible, setIsVisible] = useState(false);
+    const ref = React.useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          if (entries[0].isIntersecting) {
+            setIsVisible(true);
+            observer.disconnect();
+          }
+        },
+        { threshold: 0.1 } // Start loading when 10% of the element is visible
+      );
+
+      if (ref.current) {
+        observer.observe(ref.current);
+      }
+
+      return () => {
+        if (ref.current) {
+          observer.disconnect();
+        }
+      };
+    }, []);
+
+    return (
+      <div ref={ref} className="min-h-[100px]">
+        {isVisible ? (
+          <Suspense fallback={placeholder}>
+            <Component {...props} />
+          </Suspense>
+        ) : placeholder}
+      </div>
+    );
+  };
+};
+
+// Create optimized lazy components
+const LazyHowItWorksSection = createLazyComponent(HowItWorksSection);
+const LazyTestimonialsSection = createLazyComponent(TestimonialsSection);
+const LazyCTASection = createLazyComponent(CTASection);
+const LazyFooterSection = createLazyComponent(FooterSection);
+const LazyIconDemo = createLazyComponent(IconDemo);
 
 const Index = () => {
   const { session } = useAuth();
@@ -27,32 +74,19 @@ const Index = () => {
       <HeroSection session={session} />
       <FeaturesSection />
       
-      {/* Non-critical components loaded lazily */}
+      {/* Non-critical components loaded lazily with intersection observer */}
       <div className="container mx-auto px-4 py-12">
         <h2 className="text-3xl font-bold text-center mb-8">Our Optimized Icon System</h2>
         <p className="text-center text-muted-foreground mb-8">
           We use a highly efficient icon loading system with both static and dynamic loading strategies for optimal performance.
         </p>
-        <Suspense fallback={<SectionPlaceholder />}>
-          <IconDemo />
-        </Suspense>
+        <LazyIconDemo />
       </div>
       
-      <Suspense fallback={<SectionPlaceholder />}>
-        <HowItWorksSection session={session} />
-      </Suspense>
-      
-      <Suspense fallback={<SectionPlaceholder />}>
-        <TestimonialsSection />
-      </Suspense>
-      
-      <Suspense fallback={<SectionPlaceholder />}>
-        <CTASection session={session} />
-      </Suspense>
-      
-      <Suspense fallback={<SectionPlaceholder />}>
-        <FooterSection />
-      </Suspense>
+      <LazyHowItWorksSection session={session} />
+      <LazyTestimonialsSection />
+      <LazyCTASection session={session} />
+      <LazyFooterSection />
     </div>
   );
 };
