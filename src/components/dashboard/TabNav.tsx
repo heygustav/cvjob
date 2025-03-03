@@ -32,7 +32,7 @@ const TabNav: React.FC<TabNavProps> = ({ activeTab, onTabChange }) => {
             activeTab === "jobs"
               ? "border-b-2 border-primary text-primary"
               : "text-gray-600 hover:text-gray-900"
-          } flex-1 rounded-none px-6 py-4 h-auto font-medium flex items-center justify-center focus:outline-none`}
+          } flex-1 rounded-none px-6 py-4 h-auto font-medium flex items-center justify-start focus:outline-none`}
           onClick={() => onTabChange("jobs")}
         >
           <Briefcase className="mr-2 h-5 w-5" />
