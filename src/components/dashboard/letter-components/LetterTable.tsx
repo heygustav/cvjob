@@ -1,27 +1,28 @@
-
 import React from "react";
-import { CoverLetter, JobPosting } from "@/lib/types";
-import { formatDistanceToNow } from "date-fns";
-import { da } from "date-fns/locale";
-import { ExternalLink } from "lucide-react";
-import LetterActions from "./LetterActions";
-import { 
+import { CoverLetter } from "@/lib/types";
+import { Button } from "@/components/ui/button";
+import { Download, Trash2, ExternalLink, FileText } from "lucide-react";
+import {
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
-  TableRow
+  TableRow,
 } from "@/components/ui/table";
+import { Link } from "react-router-dom";
+import { formatDistanceToNow } from "date-fns";
+import { da } from "date-fns/locale";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 interface LetterTableProps {
   coverLetters: CoverLetter[];
-  findJobForLetter: (jobPostingId: string) => JobPosting | undefined;
+  findJobForLetter: (jobPostingId: string) => any;
   onLetterDelete: (id: string) => void;
-  onDownloadPdf: (letter: CoverLetter, job?: JobPosting) => void;
-  onDownloadDocx: (letter: CoverLetter, job?: JobPosting) => void;
-  onDownloadTxt: (letter: CoverLetter, job?: JobPosting) => void;
-  isDownloading: boolean;
+  onDownloadPdf: (letter: CoverLetter) => void;
+  onDownloadDocx: (letter: CoverLetter) => void;
+  onDownloadTxt: (letter: CoverLetter) => void;
+  isDownloading: Record<string, boolean>;
 }
 
 const LetterTable: React.FC<LetterTableProps> = ({
@@ -31,40 +32,16 @@ const LetterTable: React.FC<LetterTableProps> = ({
   onDownloadPdf,
   onDownloadDocx,
   onDownloadTxt,
-  isDownloading
+  isDownloading,
 }) => {
   const formatDate = (dateString: string) => {
     try {
-      // Get the formatted date string
-      let formattedDate = formatDistanceToNow(new Date(dateString), {
+      return formatDistanceToNow(new Date(dateString), {
         addSuffix: true,
         locale: da,
       });
-      
-      // Capitalize "cirka" if it starts with it
-      if (formattedDate.toLowerCase().startsWith("cirka")) {
-        formattedDate = "Cirka" + formattedDate.substring(5);
-      }
-      
-      return formattedDate;
     } catch (error) {
-      console.error("Error formatting date:", error);
       return "Ukendt dato";
-    }
-  };
-
-  const formatDeadline = (deadline?: string) => {
-    if (!deadline) return "";
-    
-    try {
-      return new Date(deadline).toLocaleDateString('da-DK', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-      });
-    } catch (error) {
-      console.error("Error formatting deadline:", error);
-      return "";
     }
   };
 
@@ -73,59 +50,74 @@ const LetterTable: React.FC<LetterTableProps> = ({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Virksomhed</TableHead>
-            <TableHead>Stilling</TableHead>
-            <TableHead>Oprettet</TableHead>
-            <TableHead>Frist</TableHead>
-            <TableHead>Handlinger</TableHead>
+            <TableHead className="text-left">Virksomhed</TableHead>
+            <TableHead className="text-left">Stilling</TableHead>
+            <TableHead className="text-left">Oprettet</TableHead>
+            <TableHead className="text-left">Frist</TableHead>
+            <TableHead className="text-left">Handlinger</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {coverLetters.map((letter) => {
-            const job = findJobForLetter(letter.job_posting_id);
+            const job = letter.job_posting_id
+              ? findJobForLetter(letter.job_posting_id)
+              : null;
+            
             return (
-              <TableRow key={letter.id}>
+              <TableRow key={letter.id} className="border-b-0">
+                <TableCell>{job?.company || "-"}</TableCell>
+                <TableCell className="font-medium">{job?.title || letter.title || "Untitled"}</TableCell>
+                <TableCell>{formatDate(letter.created_at)}</TableCell>
+                <TableCell>{job?.deadline ? formatDate(job.deadline) : "-"}</TableCell>
                 <TableCell>
-                  <div className="flex items-center">
-                    <div className="text-sm font-medium text-gray-900">
-                      {job?.company || "Ukendt virksomhed"}
-                    </div>
+                  <div className="flex justify-end space-x-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 w-8 p-0"
+                      title="Se ansøgning"
+                      asChild
+                    >
+                      <Link to={`/cover-letter/${letter.id}`}>
+                        <FileText className="h-4 w-4" />
+                      </Link>
+                    </Button>
+                    
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-8 w-8 p-0"
+                          title="Download"
+                          disabled={isDownloading[letter.id]}
+                        >
+                          <Download className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => onDownloadPdf(letter)}>
+                          Download PDF
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => onDownloadDocx(letter)}>
+                          Download DOCX
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => onDownloadTxt(letter)}>
+                          Download TXT
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                    
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 w-8 p-0"
+                      onClick={() => onLetterDelete(letter.id)}
+                      title="Slet ansøgning"
+                    >
+                      <Trash2 className="h-4 w-4 text-red-500" />
+                    </Button>
                   </div>
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center">
-                    <div className="text-sm text-gray-900">{job?.title || "Ukendt stilling"}</div>
-                    {job?.url && (
-                      <a 
-                        href={job.url} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="ml-2 text-primary hover:text-primary-700"
-                        aria-label="Åbn jobopslag"
-                      >
-                        <ExternalLink className="h-4 w-4" />
-                      </a>
-                    )}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div className="text-sm text-gray-500">{formatDate(letter.created_at)}</div>
-                </TableCell>
-                <TableCell>
-                  <div className="text-sm text-gray-500">
-                    {job?.deadline ? formatDeadline(job.deadline) : ""}
-                  </div>
-                </TableCell>
-                <TableCell className="text-right">
-                  <LetterActions 
-                    letter={letter}
-                    job={job}
-                    onDelete={onLetterDelete}
-                    onDownloadPdf={onDownloadPdf}
-                    onDownloadDocx={onDownloadDocx}
-                    onDownloadTxt={onDownloadTxt}
-                    isDownloading={isDownloading}
-                  />
                 </TableCell>
               </TableRow>
             );
