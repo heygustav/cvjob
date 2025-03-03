@@ -45,7 +45,7 @@ const JobListComponent: React.FC<JobListComponentProps> = ({
   };
 
   const formatDeadline = (dateString?: string) => {
-    if (!dateString) return "-";
+    if (!dateString) return "";
     try {
       return new Date(dateString).toLocaleDateString('da-DK', {
         year: 'numeric',
@@ -53,7 +53,7 @@ const JobListComponent: React.FC<JobListComponentProps> = ({
         day: 'numeric'
       });
     } catch (error) {
-      return "-";
+      return "";
     }
   };
 
@@ -89,7 +89,7 @@ const JobListComponent: React.FC<JobListComponentProps> = ({
             <TableHead className="text-left">Virksomhed</TableHead>
             <TableHead className="text-left">Oprettet</TableHead>
             <TableHead className="text-left">Frist</TableHead>
-            <TableHead className="text-left">Handlinger</TableHead>
+            <TableHead className="text-right">Handlinger</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -98,7 +98,7 @@ const JobListComponent: React.FC<JobListComponentProps> = ({
               <TableCell className="font-medium">{job.title}</TableCell>
               <TableCell>{job.company}</TableCell>
               <TableCell>{formatDate(job.created_at)}</TableCell>
-              <TableCell>{formatDeadline(job.deadline)}</TableCell>
+              <TableCell>{job.deadline ? formatDeadline(job.deadline) : ""}</TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-end space-x-2">
                   <IconButton

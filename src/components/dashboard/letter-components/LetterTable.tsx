@@ -52,11 +52,11 @@ const LetterTable: React.FC<LetterTableProps> = ({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="text-left">Virksomhed</TableHead>
             <TableHead className="text-left">Stilling</TableHead>
+            <TableHead className="text-left">Virksomhed</TableHead>
             <TableHead className="text-left">Oprettet</TableHead>
             <TableHead className="text-left">Frist</TableHead>
-            <TableHead className="text-left">Handlinger</TableHead>
+            <TableHead className="text-right">Handlinger</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -67,11 +67,11 @@ const LetterTable: React.FC<LetterTableProps> = ({
             
             return (
               <TableRow key={letter.id} className="border-b-0">
-                <TableCell>{job?.company || "-"}</TableCell>
                 <TableCell className="font-medium">{job?.title || "Untitled"}</TableCell>
+                <TableCell>{job?.company || "-"}</TableCell>
                 <TableCell>{formatDate(letter.created_at)}</TableCell>
-                <TableCell>{job?.deadline ? formatDate(job.deadline) : "-"}</TableCell>
-                <TableCell>
+                <TableCell>{job?.deadline ? formatDate(job.deadline) : ""}</TableCell>
+                <TableCell className="text-right">
                   <div className="flex justify-end space-x-2">
                     <IconButton
                       variant="outline"
