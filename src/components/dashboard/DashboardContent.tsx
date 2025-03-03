@@ -70,17 +70,17 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
               onJobDelete={onJobDelete}
             />
           ) : (
-            <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-              <div className="rounded-full bg-gray-100 p-5 mb-5">
-                <Briefcase className="h-8 w-8 text-gray-400" />
-              </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                Ingen jobopslag endnu
-              </h3>
-              <p className="text-gray-500 max-w-md mb-6">
-                Du har ikke tilføjet nogen jobopslag endnu. Tilføj dit første jobopslag for at komme i gang.
-              </p>
-            </div>
+            <div className="flex flex-col items-start py-12 px-4 text-left">
+  <div className="rounded-full bg-gray-100 p-5 mb-5">
+    <Briefcase className="h-8 w-8 text-gray-400" />
+  </div>
+  <h3 className="text-lg font-medium text-gray-900 mb-2">
+    Ingen jobopslag endnu
+  </h3>
+  <p className="text-gray-500 max-w-md mb-6">
+    Du har ikke tilføjet nogen jobopslag endnu. Tilføj dit første jobopslag for at komme i gang.
+  </p>
+</div>
           )
         )}
       </div>
