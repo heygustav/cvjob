@@ -2,7 +2,7 @@
 import React from "react";
 import { JobPosting } from "@/lib/types";
 import { Button } from "@/components/ui/button";
-import { Calendar, Trash2, FileText, Link, Briefcase, Pencil } from "lucide-react";
+import { Calendar, Trash2, FileText, Link, Briefcase, Pencil, Plus } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -102,6 +102,14 @@ const JobListComponent: React.FC<JobListComponentProps> = ({
 
   return (
     <div>
+      <div className="flex justify-end mb-4">
+        <Button asChild>
+          <RouterLink to="/job/new">
+            <Plus className="h-4 w-4 mr-2" />
+            Tilføj jobopslag
+          </RouterLink>
+        </Button>
+      </div>
       <div className="border rounded-md overflow-x-auto">
         <Table>
           <TableHeader>
