@@ -3,7 +3,7 @@ import React from "react";
 import { CoverLetter } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import IconButton from "@/components/ui/icon-button";
-import { Download, Trash2, ExternalLink, FileText } from "lucide-react";
+import { Download, Trash2, ExternalLink, FileText, Pencil } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -76,8 +76,8 @@ const LetterTable: React.FC<LetterTableProps> = ({
                     <IconButton
                       variant="outline"
                       size="sm"
-                      icon={<FileText className="h-4 w-4" />}
-                      title="Se ansøgning"
+                      icon={<Pencil className="h-4 w-4" />}
+                      title="Rediger ansøgning"
                       asChild
                     >
                       <Link to={`/cover-letter/${letter.id}`} />
