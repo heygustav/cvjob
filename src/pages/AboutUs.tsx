@@ -18,20 +18,23 @@ const AboutUs = () => {
 
   return (
     <div className="w-full">
-      <div className="gradient-header text-white py-12 sm:py-16">
+      {/* Semantic header with proper heading hierarchy */}
+      <header className="gradient-header text-white py-12 sm:py-16">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4">Om os</h1>
           <p className="text-lg sm:text-xl max-w-3xl">
             Lær mere om vores mission og hvordan vi hjælper jobsøgende med at skabe overbevisende ansøgninger
           </p>
         </div>
-      </div>
+      </header>
       
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 max-w-4xl">
-        <Link to="/" className="inline-flex items-center text-primary hover:text-primary-700 mb-6 transition-colors">
-          <ChevronLeft className="mr-1 h-4 w-4" aria-hidden="true" />
-          Tilbage til forsiden
-        </Link>
+        <nav aria-label="Brødkrummesti" className="mb-6">
+          <Link to="/" className="inline-flex items-center text-primary hover:text-primary-700 transition-colors">
+            <ChevronLeft className="mr-1 h-4 w-4" aria-hidden="true" />
+            <span>Tilbage til forsiden</span>
+          </Link>
+        </nav>
         
         <article className="prose prose-lg max-w-none">
           <section className="mb-10" aria-labelledby="mission-heading">

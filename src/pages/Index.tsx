@@ -14,7 +14,7 @@ const IconDemo = lazy(() => import('../components/IconDemo'));
 // Better loading placeholder with clear visual feedback
 const SectionPlaceholder = () => (
   <div className="w-full py-16 bg-muted/30 animate-pulse flex justify-center items-center" aria-hidden="true">
-    <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div>
+    <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" aria-label="Indlæser indhold"></div>
   </div>
 );
 
@@ -68,9 +68,15 @@ const LazyIconDemo = createLazyComponent(IconDemo);
 const Index = () => {
   const { session } = useAuth();
 
-  // Set document title for SEO
+  // Set document title and meta description for SEO
   useEffect(() => {
     document.title = "CVJob | AI-Drevet Jobansøgningsgenerator til Personlige Ansøgninger";
+    
+    // Add meta description
+    const metaDescription = document.querySelector('meta[name="description"]');
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Skab professionelle, personlige jobansøgninger på få minutter med CVJob\'s AI-drevne værktøj. Få flere jobsamtaler med mindre indsats.');
+    }
   }, []);
 
   return (
