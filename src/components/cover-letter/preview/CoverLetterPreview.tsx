@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import PreviewHeader from "./PreviewHeader";
@@ -10,8 +11,8 @@ interface CoverLetterPreviewProps {
   content: string;
   jobTitle?: string;
   company?: string;
-  contactPerson?: string; // Add contactPerson prop
-  onEdit?: (content: string) => void;
+  contactPerson?: string;
+  onEdit?: (content: string) => Promise<void> | void;
   isEditable?: boolean;
 }
 

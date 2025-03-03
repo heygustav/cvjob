@@ -1,140 +1,78 @@
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import JobFormStep from "./JobFormStep";
-import { PreviewStep } from "./PreviewStep";
-import { GeneratorHeader } from "./GeneratorHeader";
-import { GeneratorLoadingState } from "./GeneratorLoadingState";
-import { GeneratorErrorState } from "./GeneratorErrorState";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { useLetterGeneration } from "@/hooks/coverLetter/useLetterGeneration";
-import { useLetterFetching } from "@/hooks/coverLetter/useLetterFetching";
-import { useAuth } from "@/components/AuthProvider";
-import { useSubscription } from "@/hooks/useSubscription";
-import SubscriptionRequired from "../subscription/SubscriptionRequired";
-import { useToastMessages } from "@/hooks/coverLetter/useToastMessages";
-import { CoverLetter, JobPosting, User } from "@/lib/types";
-import { JobFormData } from "@/services/coverLetter/types";
-import { GenerationProgress } from "@/hooks/coverLetter/types";
+import { GeneratorLayout } from "./generator/GeneratorLayout";
+import { GeneratorStates } from "./generator/GeneratorStates";
+import { LetterPreviewStep } from "./LetterPreviewStep";
+import { useGeneratorSetup } from "./generator/useGeneratorSetup";
+import { useLetterGeneration } from "./generator/useLetterGeneration";
 
 interface GeneratorProps {
   existingLetterId?: string;
 }
 
 export const GeneratorContent: React.FC<GeneratorProps> = ({ existingLetterId }) => {
-  const { user: authUser } = useAuth();
-  const navigate = useNavigate();
-  const { jobId } = useParams();
-  const [searchParams] = useSearchParams();
-  const [step, setStep] = useState<1 | 2>(1);
-  const [jobData, setJobData] = useState<JobFormData>({
-    title: "",
-    company: "",
-    description: "",
-  });
-  const [generatedLetter, setGeneratedLetter] = useState<CoverLetter | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [generationPhase, setGenerationPhase] = useState<string | null>(null);
-  const [loadingState, setLoadingState] = useState("idle");
-  const [selectedJob, setSelectedJob] = useState<JobPosting | null>(null);
-  const [generationProgress, setGenerationProgress] = useState<GenerationProgress>({
-    phase: 'letter-save', // Changed from 'letter-fetch' to a valid phase
-    progress: 0,
-    message: 'Loading letter...'
-  });
-  
-  const toastMessages = useToastMessages();
-  
-  // Create refs and safe setState function needed by the hooks
-  const isMountedRef = React.useRef(true);
-  const safeSetState = <T,>(stateSetter: React.Dispatch<React.SetStateAction<T>>, value: T) => {
-    if (isMountedRef.current) {
-      stateSetter(value);
-    }
-  };
-  
-  // Ensure user has all required properties by creating a complete User object
-  const completeUser: User | null = authUser ? {
-    id: authUser.id || "",
-    email: authUser.email || "",
-    name: authUser.user_metadata?.name || "",
-    phone: authUser.user_metadata?.phone || "",
-    address: authUser.user_metadata?.address || "",
-    profileComplete: !!authUser.user_metadata?.profileComplete
-  } : null;
-  
-  // Initialize hook with required arguments
-  const { fetchLetter } = useLetterFetching(
+  // Use our custom hooks to separate logic
+  const {
+    step,
+    jobData,
+    generatedLetter,
+    isLoading,
+    error,
+    isGenerating,
+    generationPhase,
+    loadingState,
+    selectedJob,
+    generationProgress,
     completeUser,
-    isMountedRef,
-    safeSetState,
-    setSelectedJob,
+    subscriptionStatus,
+    setStep,
+    setJobData,
+    setGeneratedLetter,
+    resetError,
+  } = useGeneratorSetup(existingLetterId);
+
+  // Use the letter generation hook
+  const { handleGenerateLetter, handleEditContent } = useLetterGeneration({
+    completeUser,
+    setIsGenerating: (value) => {
+      if (value !== isGenerating) {
+        setStep(value ? 1 : 2);
+      }
+    },
+    setLoadingState: () => {}, // This is handled in useGeneratorSetup
+    setJobData,
+    setSelectedJob: () => {}, // This is handled in useGeneratorSetup
     setGeneratedLetter,
     setStep,
-    setLoadingState,
-    setError,
-    setGenerationPhase,
-    setGenerationProgress
+    setError: () => {} // This is handled in useGeneratorSetup
+  });
+
+  // Conditional rendering for different states
+  const generatorStates = (
+    <GeneratorStates 
+      isGenerating={isGenerating}
+      error={error}
+      loadingState={loadingState}
+      generationPhase={generationPhase}
+      user={completeUser}
+      subscriptionStatus={subscriptionStatus}
+      hasGeneratedLetter={!!generatedLetter}
+      resetError={resetError}
+    />
   );
-  
-  // Fix: Pass the completeUser object to useSubscription
-  const { subscriptionStatus, fetchSubscriptionStatus } = useSubscription(completeUser);
 
-  // Fetch subscription status on mount - pass the user ID to the function
-  useEffect(() => {
-    if (completeUser?.id) {
-      fetchSubscriptionStatus(completeUser.id);
-    }
-  }, [completeUser?.id, fetchSubscriptionStatus]);
-
-  // Handle job form submission
-  const handleGenerateLetter = async (data: JobFormData) => {
-    setIsGenerating(true);
-    setLoadingState("generating");
-    setJobData(data);
-    
-    try {
-      // Simulation of letter generation process
-      // In a real app, you would call an API here
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Update job data
-      if (data.id) {
-        setSelectedJob({
-          ...data,
-          id: data.id,
-          user_id: completeUser?.id || "",
-          created_at: new Date().toISOString()
-        } as JobPosting);
-      }
-      
-      // Create a mock letter
-      const letter: CoverLetter = {
-        id: Math.random().toString(36).substring(2, 15),
-        user_id: completeUser?.id || "",
-        job_posting_id: data.id || Math.random().toString(36).substring(2, 15),
-        content: `Kære HR,\n\nJeg ansøger hermed om stillingen som ${data.title} hos ${data.company}.\n\nMed venlig hilsen,\n${completeUser?.name || ""}`,
-        created_at: new Date().toISOString()
-      };
-      
-      setGeneratedLetter(letter);
-      setStep(2);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Der opstod en fejl");
-    } finally {
-      setIsGenerating(false);
-      setLoadingState("idle");
-    }
-  };
+  // If any state component is shown, return that
+  if (generatorStates) {
+    return generatorStates;
+  }
 
   // Handle letter content edit
-  const handleEditContent = async (content: string) => {
+  const onEditContent = async (content: string) => {
     if (!generatedLetter) return;
     
-    setIsLoading(true);
     try {
-      // Update letter content
+      await handleEditContent(content);
       setGeneratedLetter({
         ...generatedLetter,
         content,
@@ -142,87 +80,15 @@ export const GeneratorContent: React.FC<GeneratorProps> = ({ existingLetterId })
       });
     } catch (err) {
       console.error("Error updating letter:", err);
-    } finally {
-      setIsLoading(false);
     }
   };
-
-  // Reset any error
-  const resetError = () => {
-    setError(null);
-    setIsGenerating(false);
-    setLoadingState("idle");
-  };
-
-  // Handle existing letter
-  useEffect(() => {
-    const loadExistingLetter = async () => {
-      if (existingLetterId && completeUser?.id) {
-        try {
-          const letter = await fetchLetter(existingLetterId);
-          if (letter) {
-            setGeneratedLetter(letter);
-            setStep(2);
-          }
-        } catch (error) {
-          console.error("Error fetching letter:", error);
-        }
-      }
-    };
-
-    loadExistingLetter();
-  }, [existingLetterId, completeUser?.id, fetchLetter]);
-
-  // Handle job ID from URL
-  useEffect(() => {
-    if (jobId && !existingLetterId) {
-      navigate(`/generator?jobId=${jobId}`);
-    }
-  }, [jobId, existingLetterId, navigate]);
-
-  // If subscription check is complete and user can't generate
-  if (subscriptionStatus && !subscriptionStatus.canGenerate && !generatedLetter) {
-    return (
-      <div className="container py-8">
-        <SubscriptionRequired 
-          user={completeUser}
-          freeGenerationsUsed={subscriptionStatus.freeGenerationsUsed}
-          freeGenerationsAllowed={subscriptionStatus.freeGenerationsAllowed}
-        />
-      </div>
-    );
-  }
-
-  // Show loading screen
-  if (isGenerating) {
-    return (
-      <GeneratorLoadingState 
-        isGenerating={isGenerating}
-        loadingState={loadingState}
-        generationPhase={generationPhase}
-        resetError={resetError}
-      />
-    );
-  }
-
-  // Show error screen
-  if (error) {
-    return (
-      <GeneratorErrorState 
-        message={error} 
-        onRetry={resetError} 
-      />
-    );
-  }
 
   return (
-    <div className="container py-8">
-      <GeneratorHeader 
-        step={step} 
-        setStep={setStep} 
-        hasGeneratedLetter={!!generatedLetter}
-      />
-
+    <GeneratorLayout
+      step={step}
+      setStep={setStep}
+      hasGeneratedLetter={!!generatedLetter}
+    >
       {step === 1 && (
         <JobFormStep
           jobData={jobData}
@@ -230,19 +96,21 @@ export const GeneratorContent: React.FC<GeneratorProps> = ({ existingLetterId })
           onSubmit={handleGenerateLetter}
           isLoading={isLoading}
           user={completeUser}
-          initialJobId={searchParams.get("jobId") || undefined}
+          initialJobId={new URLSearchParams(window.location.search).get("jobId") || undefined}
           selectedJob={selectedJob}
           isGenerating={isGenerating}
           generationPhase={generationPhase}
+          generationProgress={generationProgress}
+          resetError={resetError}
         />
       )}
 
       {step === 2 && generatedLetter && (
-        <PreviewStep 
+        <LetterPreviewStep 
           generatedLetter={generatedLetter} 
-          onEdit={handleEditContent}
+          onEdit={onEditContent}
         />
       )}
-    </div>
+    </GeneratorLayout>
   );
 };
