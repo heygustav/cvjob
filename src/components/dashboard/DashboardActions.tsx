@@ -24,8 +24,10 @@ const DashboardActions: React.FC<DashboardActionsProps> = ({
         onClick={onRefresh} 
         disabled={isRefreshing}
         icon={isRefreshing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-        label="Opdater"
-      />
+        title="Opdater"
+      >
+        Opdater
+      </IconButton>
       
       {activeTab === "jobs" ? (
         <IconButton 
@@ -33,7 +35,7 @@ const DashboardActions: React.FC<DashboardActionsProps> = ({
           size="sm" 
           asChild
           icon={<Plus className="h-4 w-4" />}
-          label="Tilføj jobopslag"
+          title="Tilføj jobopslag"
         >
           <Link to="/job/new">
             Tilføj jobopslag
@@ -45,7 +47,7 @@ const DashboardActions: React.FC<DashboardActionsProps> = ({
           size="sm" 
           asChild
           icon={<Plus className="h-4 w-4" />}
-          label="Opret ny ansøgning"
+          title="Opret ny ansøgning"
         >
           <Link to="/ansoegning">
             Opret ny ansøgning
