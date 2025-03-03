@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2 } from "lucide-react";
-import { createCheckoutSession, validatePromoCode } from "@/services/coverLetter/database";
+import { createCheckoutSession, validatePromoCode } from "@/services/subscription/subscriptionService";
 import { User } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 

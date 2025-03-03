@@ -3,8 +3,13 @@ import React from "react";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import DashboardLoading from "@/components/dashboard/DashboardLoading";
 import DashboardMain from "@/components/dashboard/DashboardMain";
+import { useAuth } from "@/components/AuthProvider";
+import { useSubscription } from "@/hooks/useSubscription";
 
 const Dashboard = () => {
+  const { user } = useAuth();
+  const { subscriptionStatus, isLoading: isSubLoading } = useSubscription(user);
+  
   const {
     jobPostings,
     coverLetters,
@@ -17,7 +22,7 @@ const Dashboard = () => {
     findJobForLetter
   } = useDashboardData();
 
-  if (isLoading) {
+  if (isLoading || isSubLoading) {
     return <DashboardLoading />;
   }
 
@@ -40,6 +45,7 @@ const Dashboard = () => {
         onLetterDelete={deleteCoverLetter}
         onRefresh={refreshData}
         findJobForLetter={findJobForLetter}
+        subscriptionStatus={subscriptionStatus || undefined}
       />
     </div>
   );

@@ -49,7 +49,14 @@ export const incrementGenerationCount = async (userId: string): Promise<void> =>
 // Validate a promo code
 export const validatePromoCode = async (code: string): Promise<PromoCodeValidation> => {
   try {
-    const { data, error } = await supabase.rpc('validate_promo_code', { code_to_validate: code });
+    // Use a direct query instead of rpc since the rpc is not in the TypeScript types
+    const { data, error } = await supabase
+      .from('promo_codes')
+      .select('*')
+      .eq('code', code)
+      .lte('valid_from', new Date().toISOString())
+      .gte('valid_until', new Date().toISOString())
+      .maybeSingle();
     
     if (error) {
       console.error('Error validating promo code:', error);
@@ -59,19 +66,19 @@ export const validatePromoCode = async (code: string): Promise<PromoCodeValidati
       };
     }
     
-    if (data && data.length > 0) {
-      const result = data[0];
-      if (result.is_valid) {
-        return {
-          isValid: true,
-          discountPercent: result.discount_percent
-        };
-      } else {
+    if (data) {
+      // Check if max_uses is defined and if current uses has exceeded it
+      if (data.max_uses !== null && data.current_uses >= data.max_uses) {
         return {
           isValid: false,
-          message: result.message || 'Ugyldig kampagnekode'
+          message: 'Kampagnekoden er blevet anvendt for mange gange'
         };
       }
+      
+      return {
+        isValid: true,
+        discountPercent: data.discount_percent
+      };
     }
     
     return { 

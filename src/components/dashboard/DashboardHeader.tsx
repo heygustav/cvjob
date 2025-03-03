@@ -38,7 +38,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
       </div>
 
       {subscriptionStatus && subscriptionStatus.freeGenerationsUsed >= subscriptionStatus.freeGenerationsAllowed && !subscriptionStatus.canGenerate && (
-        <Alert variant="warning" className="mt-4 bg-amber-50 border-amber-200 text-amber-800">
+        <Alert variant="destructive" className="mt-4 bg-amber-50 border-amber-200 text-amber-800">
           <AlertCircle className="h-4 w-4 mr-2 text-amber-800" />
           <AlertDescription className="flex justify-between items-center">
             <span>Du har brugt dit gratis forsøg. Opret et abonnement for at generere flere ansøgninger.</span>

@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from "react";
 import { User } from "@/lib/types";
-import { checkSubscriptionStatus, incrementGenerationCount } from "@/services/coverLetter/database";
+import { checkSubscriptionStatus, incrementGenerationCount } from "@/services/subscription/subscriptionService";
 import { SubscriptionStatus } from "@/services/subscription/types";
 import { useToast } from "@/hooks/use-toast";
 
