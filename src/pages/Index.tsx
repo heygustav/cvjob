@@ -64,7 +64,8 @@ const LazyCTASection = createLazyComponent(CTASection);
 const LazyFooterSection = createLazyComponent(FooterSection);
 
 const Index = () => {
-  const { session } = useAuth();
+  // Use optional chaining with session to prevent errors
+  const { session } = useAuth() || {};
 
   // Set document title, meta description and canonical for SEO
   useEffect(() => {

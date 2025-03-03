@@ -1,9 +1,10 @@
-import React, { lazy, Suspense } from 'react';
-import { Route, Routes, BrowserRouter, Navigate } from "react-router-dom";
+
+import React, { lazy, Suspense, useEffect } from 'react';
+import { Route, Routes, BrowserRouter, Navigate, useLocation, useNavigate } from "react-router-dom";
 import './App.css';
 import { Toaster } from "@/components/ui/toaster";
 import Navbar from "./components/navbar/Navbar";
-import { AuthProvider } from "./components/AuthProvider";
+import { AuthProvider, useAuth } from "./components/AuthProvider";
 
 // Eagerly load critical routes
 import Index from "./pages/Index";
@@ -28,6 +29,27 @@ const RouteLoading = () => (
     <div className="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div>
   </div>
 );
+
+// Protected route component
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { isAuthenticated, isLoading } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      // Store the path they were trying to access
+      localStorage.setItem('redirectAfterLogin', location.pathname + location.search);
+      navigate('/auth');
+    }
+  }, [isAuthenticated, isLoading, navigate, location]);
+
+  if (isLoading) {
+    return <RouteLoading />;
+  }
+
+  return isAuthenticated ? <>{children}</> : <RouteLoading />;
+};
 
 // Simple error boundary component
 class AppErrorBoundary extends React.Component<{ children: React.ReactNode }> {
@@ -60,55 +82,20 @@ class AppErrorBoundary extends React.Component<{ children: React.ReactNode }> {
     return this.props.children;
   }
 }
-  
-function App() {
-  // Handler for login/signup that can be passed to components
-  const handleUserAuth = (userId: string) => {
-    console.log("User authenticated:", userId);
-    // This function would typically set the user's auth state
-    // But that's now handled in AuthProvider
-  };
 
+// Main App component
+function App() {
   return (
     <AppErrorBoundary>
       <BrowserRouter>
         <AuthProvider>
           <Navbar />
           <Routes>
-            {/* Eagerly loaded routes */}
+            {/* Eagerly loaded routes - public */}
             <Route path="/" element={<Index />} />
-            <Route path="/login" element={<Login onLogin={handleUserAuth} />} />
-            <Route path="/signup" element={<Signup onSignup={handleUserAuth} />} />
+            <Route path="/login" element={<Login onLogin={() => {}} />} />
+            <Route path="/signup" element={<Signup onSignup={() => {}} />} />
             <Route path="/auth" element={<Auth />} />
-            
-            {/* Lazily loaded routes */}
-            <Route path="/dashboard" element={
-              <Suspense fallback={<RouteLoading />}>
-                <Dashboard />
-              </Suspense>
-            } />
-            <Route path="/profile" element={
-              <Suspense fallback={<RouteLoading />}>
-                <Profile />
-              </Suspense>
-            } />
-            <Route path="/job/new" element={
-              <Suspense fallback={<RouteLoading />}>
-                <JobForm />
-              </Suspense>
-            } />
-            <Route path="/job/:id" element={
-              <Suspense fallback={<RouteLoading />}>
-                <JobForm />
-              </Suspense>
-            } />
-            <Route path="/ansoegning" element={
-              <Suspense fallback={<RouteLoading />}>
-                <CoverLetterGenerator />
-              </Suspense>
-            } />
-            
-            {/* Standardized legal and informational pages */}
             <Route path="/om-os" element={
               <Suspense fallback={<RouteLoading />}>
                 <AboutUs />
@@ -127,6 +114,43 @@ function App() {
             <Route path="/vilkaar-og-betingelser" element={
               <Suspense fallback={<RouteLoading />}>
                 <TermsAndConditions />
+              </Suspense>
+            } />
+            
+            {/* Protected routes */}
+            <Route path="/dashboard" element={
+              <Suspense fallback={<RouteLoading />}>
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              </Suspense>
+            } />
+            <Route path="/profile" element={
+              <Suspense fallback={<RouteLoading />}>
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              </Suspense>
+            } />
+            <Route path="/job/new" element={
+              <Suspense fallback={<RouteLoading />}>
+                <ProtectedRoute>
+                  <JobForm />
+                </ProtectedRoute>
+              </Suspense>
+            } />
+            <Route path="/job/:id" element={
+              <Suspense fallback={<RouteLoading />}>
+                <ProtectedRoute>
+                  <JobForm />
+                </ProtectedRoute>
+              </Suspense>
+            } />
+            <Route path="/ansoegning" element={
+              <Suspense fallback={<RouteLoading />}>
+                <ProtectedRoute>
+                  <CoverLetterGenerator />
+                </ProtectedRoute>
               </Suspense>
             } />
             

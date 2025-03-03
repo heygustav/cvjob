@@ -80,74 +80,72 @@ const JobListComponent: React.FC<JobListComponentProps> = ({
   }
 
   return (
-    <div>
-      <div className="border rounded-md overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Stilling</TableHead>
-              <TableHead>Virksomhed</TableHead>
-              <TableHead>Oprettet</TableHead>
-              <TableHead>Frist</TableHead>
-              <TableHead className="text-right">Handlinger</TableHead>
+    <div className="overflow-x-auto">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Stilling</TableHead>
+            <TableHead>Virksomhed</TableHead>
+            <TableHead>Oprettet</TableHead>
+            <TableHead>Frist</TableHead>
+            <TableHead className="text-right">Handlinger</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {jobPostings.map((job) => (
+            <TableRow key={job.id}>
+              <TableCell className="font-medium">{job.title}</TableCell>
+              <TableCell>{job.company}</TableCell>
+              <TableCell>{formatDate(job.created_at)}</TableCell>
+              <TableCell>{formatDeadline(job.deadline)}</TableCell>
+              <TableCell className="text-right">
+                <div className="flex justify-end space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 w-8 p-0"
+                    onClick={() => handleCreateApplication(job)}
+                    title="Opret ansøgning"
+                    aria-label="Opret ansøgning for dette job"
+                  >
+                    <FileText className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 w-8 p-0"
+                    onClick={() => handleEditJob(job.id)}
+                    title="Rediger jobopslag"
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  {job.url && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 w-8 p-0"
+                      onClick={() => window.open(job.url, "_blank")}
+                      title="Åbn jobopslag"
+                    >
+                      <Link className="h-4 w-4" />
+                    </Button>
+                  )}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 w-8 p-0"
+                    onClick={() => onJobDelete(job.id)}
+                    disabled={isDeleting}
+                    title="Slet jobopslag"
+                  >
+                    <Trash2 className="h-4 w-4 text-red-500" />
+                  </Button>
+                </div>
+              </TableCell>
             </TableRow>
-          </TableHeader>
-          <TableBody>
-            {jobPostings.map((job) => (
-              <TableRow key={job.id}>
-                <TableCell className="font-medium">{job.title}</TableCell>
-                <TableCell>{job.company}</TableCell>
-                <TableCell>{formatDate(job.created_at)}</TableCell>
-                <TableCell>{formatDeadline(job.deadline)}</TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end space-x-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-8 w-8 p-0"
-                      onClick={() => handleCreateApplication(job)}
-                      title="Opret ansøgning"
-                      aria-label="Opret ansøgning for dette job"
-                    >
-                      <FileText className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-8 w-8 p-0"
-                      onClick={() => handleEditJob(job.id)}
-                      title="Rediger jobopslag"
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    {job.url && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-8 w-8 p-0"
-                        onClick={() => window.open(job.url, "_blank")}
-                        title="Åbn jobopslag"
-                      >
-                        <Link className="h-4 w-4" />
-                      </Button>
-                    )}
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-8 w-8 p-0"
-                      onClick={() => onJobDelete(job.id)}
-                      disabled={isDeleting}
-                      title="Slet jobopslag"
-                    >
-                      <Trash2 className="h-4 w-4 text-red-500" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+          ))}
+        </TableBody>
+      </Table>
     </div>
   );
 };
