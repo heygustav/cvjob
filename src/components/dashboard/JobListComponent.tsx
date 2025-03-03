@@ -84,16 +84,16 @@ const JobListComponent: React.FC<JobListComponentProps> = ({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Stilling</TableHead>
-            <TableHead>Virksomhed</TableHead>
-            <TableHead>Oprettet</TableHead>
-            <TableHead>Frist</TableHead>
+            <TableHead className="text-left">Stilling</TableHead>
+            <TableHead className="text-left">Virksomhed</TableHead>
+            <TableHead className="text-left">Oprettet</TableHead>
+            <TableHead className="text-left">Frist</TableHead>
             <TableHead className="text-right">Handlinger</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {jobPostings.map((job) => (
-            <TableRow key={job.id}>
+            <TableRow key={job.id} className="border-b-0">
               <TableCell className="font-medium">{job.title}</TableCell>
               <TableCell>{job.company}</TableCell>
               <TableCell>{formatDate(job.created_at)}</TableCell>

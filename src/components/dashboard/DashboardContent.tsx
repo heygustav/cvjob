@@ -28,7 +28,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
   findJobForLetter,
 }) => {
   return (
-    <div className="bg-white shadow-sm rounded-lg overflow-hidden border border-gray-100">
+    <div className="bg-white shadow-sm rounded-lg overflow-hidden border-0">
       <div className="p-6">
         {activeTab === "letters" ? (
           coverLetters.length > 0 ? (
