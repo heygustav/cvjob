@@ -1,79 +1,61 @@
 
 import { useToast } from "../use-toast";
-
-type ToastMessagesType = {
-  generationStarted: () => void;
-  generationSuccess: () => void;
-  generationError: (errorMessage: string) => void;
-  letterSaved: () => void;
-  letterSaveError: (errorMessage: string) => void;
-  letterUpdated: () => void;
-  letterUpdateError: (errorMessage: string) => void;
-  subscriptionRequired: () => void;
-};
+import { ToastMessagesType } from "./types";
 
 export const useToastMessages = (): ToastMessagesType => {
   const { toast } = useToast();
 
   const messages: ToastMessagesType = {
-    generationStarted: () => {
-      toast({
-        title: "Generering startet",
-        description: "Vi genererer nu din ansøgning. Det kan tage op til et minut.",
-      });
+    networkError: {
+      title: "Netværksfejl",
+      description: "Der opstod en fejl med forbindelsen. Kontrollér din internetforbindelse og prøv igen.",
+      variant: "destructive",
     },
-    
-    generationSuccess: () => {
-      toast({
-        title: "Ansøgning genereret",
-        description: "Din ansøgning er nu klar. Du kan redigere og downloade den.",
-      });
+    jobNotFound: {
+      title: "Job ikke fundet",
+      description: "Det angivne job kunne ikke findes.",
+      variant: "destructive",
     },
-    
-    generationError: (errorMessage: string) => {
-      toast({
-        title: "Fejl ved generering",
-        description: errorMessage || "Der opstod en fejl under generering af ansøgningen.",
-        variant: "destructive",
-      });
+    letterNotFound: {
+      title: "Ansøgning ikke fundet",
+      description: "Den angivne ansøgning kunne ikke findes.",
+      variant: "destructive",
     },
-    
-    letterSaved: () => {
-      toast({
-        title: "Ansøgning gemt",
-        description: "Din ansøgning er blevet gemt i din profil.",
-      });
+    letterGenerated: {
+      title: "Ansøgning genereret",
+      description: "Din ansøgning er nu klar. Du kan redigere og downloade den.",
     },
-    
-    letterSaveError: (errorMessage: string) => {
-      toast({
-        title: "Fejl ved gemning",
-        description: errorMessage || "Der opstod en fejl under gemning af ansøgningen.",
-        variant: "destructive",
-      });
+    letterUpdated: {
+      title: "Ansøgning opdateret",
+      description: "Dine ændringer er blevet gemt.",
     },
-    
-    letterUpdated: () => {
-      toast({
-        title: "Ansøgning opdateret",
-        description: "Dine ændringer er blevet gemt.",
-      });
+    letterSaved: {
+      title: "Ansøgning gemt",
+      description: "Din ansøgning er blevet gemt i din profil.",
     },
-    
-    letterUpdateError: (errorMessage: string) => {
-      toast({
-        title: "Fejl ved opdatering",
-        description: errorMessage || "Der opstod en fejl under opdatering af ansøgningen.",
-        variant: "destructive",
-      });
+    missingFields: {
+      title: "Manglende felter",
+      description: "Udfyld venligst alle påkrævede felter.",
+      variant: "destructive",
     },
-    
-    subscriptionRequired: () => {
-      toast({
-        title: "Abonnement påkrævet",
-        description: "Du har brugt din gratis generering. Opret et abonnement for at fortsætte.",
-        variant: "default",
-      });
+    generationInProgress: {
+      title: "Generering i gang",
+      description: "Vi arbejder allerede på din ansøgning. Vent venligst et øjeblik.",
+    },
+    loginRequired: {
+      title: "Login påkrævet",
+      description: "Du skal være logget ind for at generere en ansøgning.",
+      variant: "destructive",
+    },
+    incompleteProfile: {
+      title: "Ufuldstændig profil",
+      description: "Din profil mangler vigtige oplysninger. Opdater venligst din profil for bedre resultater.",
+      variant: "default",
+    },
+    generationTimeout: {
+      title: "Timeout ved generering",
+      description: "Generering tog for lang tid. Prøv venligst igen senere.",
+      variant: "destructive",
     }
   };
 

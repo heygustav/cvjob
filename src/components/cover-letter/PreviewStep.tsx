@@ -1,7 +1,7 @@
 
 import React from "react";
 import { CoverLetter } from "@/lib/types";
-import { CoverLetterPreview } from "./preview";
+import { CoverLetterPreview } from "./preview/index";
 
 export interface PreviewStepProps {
   generatedLetter: CoverLetter;

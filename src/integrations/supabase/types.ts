@@ -125,11 +125,131 @@ export type Database = {
         }
         Relationships: []
       }
+      promo_codes: {
+        Row: {
+          code: string
+          created_at: string
+          current_uses: number
+          discount_amount: number | null
+          discount_percent: number
+          id: string
+          max_uses: number | null
+          updated_at: string
+          valid_from: string
+          valid_until: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          current_uses?: number
+          discount_amount?: number | null
+          discount_percent: number
+          id?: string
+          max_uses?: number | null
+          updated_at?: string
+          valid_from?: string
+          valid_until?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          current_uses?: number
+          discount_amount?: number | null
+          discount_percent?: number
+          id?: string
+          max_uses?: number | null
+          updated_at?: string
+          valid_from?: string
+          valid_until?: string | null
+        }
+        Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          canceled_at: string | null
+          created_at: string
+          currency: string | null
+          current_period_end: string | null
+          current_period_start: string | null
+          id: string
+          payment_method: string
+          plan_price: number | null
+          status: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          canceled_at?: string | null
+          created_at?: string
+          currency?: string | null
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          payment_method?: string
+          plan_price?: number | null
+          status: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          canceled_at?: string | null
+          created_at?: string
+          currency?: string | null
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          payment_method?: string
+          plan_price?: number | null
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_generation_counts: {
+        Row: {
+          created_at: string
+          free_generations_used: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          free_generations_used?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          free_generations_used?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      can_generate_letter: {
+        Args: {
+          user_id: string
+        }
+        Returns: boolean
+      }
+      increment_user_generation_count: {
+        Args: {
+          user_id: string
+        }
+        Returns: undefined
+      }
       update_email_preferences: {
         Args: {
           user_id: string

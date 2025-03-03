@@ -1,6 +1,7 @@
 
 import React, { ChangeEvent, FormEvent, Dispatch, SetStateAction } from "react";
 import { PersonalInfoFormState } from "@/pages/Profile";
+import { PersonalInfoForm } from "@/components/PersonalInfoForm";
 
 export interface ProfilePersonalInfoProps {
   formData: PersonalInfoFormState;
@@ -18,7 +19,7 @@ const ProfilePersonalInfo: React.FC<ProfilePersonalInfoProps> = ({
   isLoading 
 }) => {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6">
       <div>
         <h3 className="text-lg font-medium">Personlige oplysninger</h3>
         <p className="text-sm text-muted-foreground">
@@ -26,7 +27,13 @@ const ProfilePersonalInfo: React.FC<ProfilePersonalInfoProps> = ({
         </p>
       </div>
       
-      {/* Render PersonalInfoForm with props */}
+      <PersonalInfoForm
+        formData={formData}
+        handleChange={handleChange}
+        handleSubmit={handleSubmit}
+        setFormData={setFormData}
+        isLoading={isLoading}
+      />
     </div>
   );
 };

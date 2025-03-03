@@ -10,8 +10,23 @@ import { useAuth } from "@/components/AuthProvider";
 import { User } from "@/lib/types";
 import { useSearchParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { PersonalInfoFormState } from "@/pages/Profile";
 
-const ProfileContainer: React.FC = () => {
+interface ProfileContainerProps {
+  formData: PersonalInfoFormState;
+  handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  handleSubmit: (e: React.FormEvent<HTMLFormElement>) => Promise<void>;
+  setFormData: React.Dispatch<React.SetStateAction<PersonalInfoFormState>>;
+  isLoading: boolean;
+}
+
+const ProfileContainer: React.FC<ProfileContainerProps> = ({
+  formData,
+  handleChange,
+  handleSubmit,
+  setFormData,
+  isLoading
+}) => {
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
@@ -43,7 +58,10 @@ const ProfileContainer: React.FC = () => {
 
   return (
     <div className="container mx-auto p-4 max-w-4xl">
-      <ProfileHeader />
+      <ProfileHeader 
+        title="Min Profil" 
+        subtitle="Administrer dine personoplysninger og indstillinger" 
+      />
 
       <Tabs 
         defaultValue="personal-info" 
@@ -60,7 +78,13 @@ const ProfileContainer: React.FC = () => {
         <Card>
           <CardContent className="p-0">
             <TabsContent value="personal-info" className="m-0">
-              <ProfilePersonalInfo />
+              <ProfilePersonalInfo 
+                formData={formData}
+                handleChange={handleChange}
+                handleSubmit={handleSubmit}
+                setFormData={setFormData}
+                isLoading={isLoading}
+              />
             </TabsContent>
             
             <TabsContent value="subscription" className="m-0 p-6">

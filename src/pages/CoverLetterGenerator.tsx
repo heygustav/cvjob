@@ -6,7 +6,7 @@ import { useCoverLetterGeneration } from "@/hooks/useCoverLetterGeneration";
 import { User } from "@/lib/types";
 import { JobFormData } from "@/services/coverLetter/types";
 import { useGeneratorInitialization } from "@/hooks/coverLetter/useGeneratorInitialization";
-import GeneratorContent from "@/components/cover-letter/GeneratorContent";
+import { GeneratorContent } from "@/components/cover-letter/GeneratorContent";
 
 const CoverLetterGenerator: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -69,23 +69,7 @@ const CoverLetterGenerator: React.FC = () => {
   };
 
   return (
-    <GeneratorContent
-      initialLoading={initialLoading}
-      isLoading={isLoading}
-      isGenerating={isGenerating}
-      loadingState={loadingState}
-      step={step}
-      generationPhase={generationPhase}
-      generationProgress={generationProgress}
-      generationError={generationError}
-      selectedJob={selectedJob}
-      generatedLetter={generatedLetter}
-      setStep={setStep}
-      resetError={resetError}
-      handleJobFormSubmit={handleJobFormSubmit}
-      handleEditLetter={handleEditLetter}
-      handleSaveJobAsDraft={handleSaveJobAsDraft}
-    />
+    <GeneratorContent existingLetterId={letterId || undefined} />
   );
 };
 

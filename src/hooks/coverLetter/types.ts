@@ -11,6 +11,9 @@ export interface GenerationError extends Error {
 // Loading state type
 export type LoadingState = "idle" | "initializing" | "generating" | "saving";
 
+// Generation phase type
+export type GenerationPhase = 'job-save' | 'user-fetch' | 'generation' | 'letter-save' | null;
+
 // Progress tracking interface
 export interface GenerationProgress {
   phase: 'job-save' | 'user-fetch' | 'generation' | 'letter-save';

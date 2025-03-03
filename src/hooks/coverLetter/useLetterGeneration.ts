@@ -1,94 +1,87 @@
 
-import { useCallback } from "react";
-import { JobPosting, CoverLetter, User } from "@/lib/types";
+import { useState, useCallback } from "react";
 import { JobFormData } from "@/services/coverLetter/types";
-import { GenerationProgress } from "./types";
-import { useGenerationTracking } from "./generation-tracking";
-import { useGenerationErrorHandling } from "./generation-error-handling";
-import { useGenerationSteps } from "./useGenerationSteps";
-import { useLetterGeneration as useLetterGenerationImpl } from "./letter-generation";
+import { CoverLetter, JobPosting } from "@/lib/types";
 
-// The main hook now acts as a facade that composes the more specialized hooks
-export const useLetterGeneration = (
-  user: User | null,
-  generationAttemptRef: React.MutableRefObject<number>,
-  abortControllerRef: React.MutableRefObject<AbortController | null>,
-  isMountedRef: React.MutableRefObject<boolean>,
-  safeSetState: <T>(stateSetter: React.Dispatch<React.SetStateAction<T>>, value: T) => void,
-  setSelectedJob: React.Dispatch<React.SetStateAction<JobPosting | null>>,
-  setGeneratedLetter: React.Dispatch<React.SetStateAction<CoverLetter | null>>,
-  setStep: React.Dispatch<React.SetStateAction<1 | 2>>,
-  setLoadingState: React.Dispatch<React.SetStateAction<string>>,
-  setGenerationError: React.Dispatch<React.SetStateAction<string | null>>,
-  setGenerationPhase: React.Dispatch<React.SetStateAction<string | null>>,
-  setGenerationProgress: React.Dispatch<React.SetStateAction<GenerationProgress>>,
-  selectedJob: JobPosting | null,
-  loadingState: string
-) => {
-  // Get tracking utilities first
-  const tracking = useGenerationTracking({
-    isMountedRef, 
-    safeSetState, 
-    setGenerationPhase, 
-    setGenerationProgress
+export const useLetterGeneration = () => {
+  const [jobData, setJobData] = useState<JobFormData>({
+    title: "",
+    company: "",
+    description: ""
   });
-  
-  const { 
-    incrementAttempt, 
-    abortGeneration, 
-    updatePhase 
-  } = tracking;
+  const [generatedLetter, setGeneratedLetter] = useState<CoverLetter | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generationPhase, setGenerationPhase] = useState<string | null>(null);
+  const [loadingState, setLoadingState] = useState("idle");
 
-  // Get error handling utilities
-  const { 
-    handleGenerationError 
-  } = useGenerationErrorHandling({
-    isMountedRef, 
-    safeSetState, 
-    setGenerationError, 
-    setLoadingState
-  });
+  // Handle job form submission
+  const handleGenerateLetter = useCallback(async (data: JobFormData) => {
+    setIsGenerating(true);
+    setLoadingState("generating");
+    setJobData(data);
+    
+    try {
+      // Simulation of letter generation process
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Create a mock letter
+      const letter: CoverLetter = {
+        id: Math.random().toString(36).substring(2, 15),
+        user_id: "user123", // This would come from the authenticated user
+        job_posting_id: data.id || Math.random().toString(36).substring(2, 15),
+        content: `Kære HR,\n\nJeg ansøger hermed om stillingen som ${data.title} hos ${data.company}.\n\nMed venlig hilsen,\nAnsøger`,
+        created_at: new Date().toISOString()
+      };
+      
+      setGeneratedLetter(letter);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Der opstod en fejl");
+    } finally {
+      setIsGenerating(false);
+      setLoadingState("idle");
+    }
+  }, []);
 
-  // Get generation steps (now using updatePhase that's already defined)
-  const generationSteps = useGenerationSteps(
-    user, 
-    isMountedRef, 
-    updatePhase, 
-    abortControllerRef
-  );
-
-  // Collect tracking methods into an object
-  const generationTracking = {
-    incrementAttempt,
-    abortGeneration,
-    updatePhase
+  // Handle letter content edit
+  const handleEditContent = async (content: string) => {
+    if (!generatedLetter) return;
+    
+    setIsLoading(true);
+    try {
+      // Update letter content
+      setGeneratedLetter({
+        ...generatedLetter,
+        content,
+        updated_at: new Date().toISOString()
+      });
+    } catch (err) {
+      console.error("Error updating letter:", err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  // Collect error handling into an object
-  const errorHandling = {
-    handleGenerationError
+  // Reset any error
+  const resetError = () => {
+    setError(null);
+    setIsGenerating(false);
+    setLoadingState("idle");
   };
 
-  // Use the refactored letter generation hook
-  const { handleJobFormSubmit } = useLetterGenerationImpl(
-    user,
-    generationAttemptRef,
-    abortControllerRef,
-    isMountedRef,
-    safeSetState,
-    setSelectedJob,
+  return {
+    jobData,
+    setJobData,
+    generatedLetter,
     setGeneratedLetter,
-    setStep,
-    setLoadingState,
-    setGenerationError,
-    setGenerationPhase,
-    setGenerationProgress,
-    selectedJob,
+    isLoading,
+    error,
+    handleGenerateLetter,
+    resetError,
+    isGenerating,
+    generationPhase,
     loadingState,
-    generationSteps,
-    generationTracking,
-    errorHandling
-  );
-
-  return { handleJobFormSubmit };
+    handleEditContent
+  };
 };

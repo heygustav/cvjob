@@ -1,32 +1,40 @@
 
 import React from "react";
-import JobPostingForm from "../JobPostingForm";
-import { GenerationStatus } from "../GenerationStatus";
-import { JobPosting } from "@/lib/types";
+import { User, JobPosting } from "@/lib/types";
 import { JobFormData } from "@/services/coverLetter/types";
+import JobPostingForm from "../JobPostingForm";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { InfoIcon } from "lucide-react";
+import { GenerationProgress } from "@/hooks/coverLetter/types";
+import GenerationProgressIndicator from "../GenerationProgressIndicator";
 
-interface JobFormStepProps {
-  selectedJob: JobPosting | null;
-  isGenerating: boolean;
-  generationPhase: string | null;
-  generationProgress?: {
-    progress?: number;
-    message?: string;
-  };
-  resetError: () => void;
+export interface JobFormStepProps {
+  jobData?: JobFormData;
+  setJobData?: (data: JobFormData) => void;
   onSubmit: (jobData: JobFormData) => Promise<void>;
+  isLoading: boolean;
+  user?: User | null;
+  initialJobId?: string;
+  selectedJob?: JobPosting | null;
+  isGenerating?: boolean;
+  generationPhase?: string | null;
+  generationProgress?: GenerationProgress;
+  resetError?: () => void;
   onSave?: (jobData: JobFormData) => Promise<void>;
 }
 
 const JobFormStep: React.FC<JobFormStepProps> = ({
-  selectedJob,
-  isGenerating,
-  generationPhase,
-  generationProgress,
-  resetError,
+  jobData,
+  setJobData,
   onSubmit,
+  isLoading,
+  user,
+  initialJobId,
+  selectedJob = null,
+  isGenerating = false,
+  generationPhase = null,
+  generationProgress,
+  resetError = () => {},
   onSave
 }) => {
   // Check if this is a saved job that has empty required fields
@@ -57,12 +65,13 @@ const JobFormStep: React.FC<JobFormStepProps> = ({
         onSubmit={onSubmit}
         onSave={onSave}
         initialData={selectedJob || undefined}
-        isLoading={isGenerating}
+        isLoading={isLoading}
       />
       
       {isGenerating && (
         <div className="mt-8 border-t border-gray-200 pt-6">
-          <GenerationStatus 
+          <GenerationProgressIndicator 
+            loading={isGenerating}
             phase={generationPhase || 'generation'} 
             progress={generationProgress?.progress || 0}
             message={generationProgress?.message}

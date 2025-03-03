@@ -1,12 +1,12 @@
 
 import React from "react";
-import { GenerationPhase, LoadingState } from "@/hooks/coverLetter/types";
-import { GenerationProgressIndicator } from "@/components/GenerationProgressIndicator";
+import { LoadingState } from "@/hooks/coverLetter/types";
+import GenerationProgressIndicator from "@/components/GenerationProgressIndicator";
 
 export interface GeneratorLoadingStateProps {
   isGenerating: boolean;
-  loadingState: LoadingState;
-  generationPhase: GenerationPhase;
+  loadingState: string;
+  generationPhase: string | null;
   resetError: () => void;
 }
 
