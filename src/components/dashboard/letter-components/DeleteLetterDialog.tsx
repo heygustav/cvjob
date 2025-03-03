@@ -10,6 +10,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 
 interface DeleteLetterDialogProps {
   isOpen: boolean;
@@ -22,28 +23,37 @@ const DeleteLetterDialog: React.FC<DeleteLetterDialogProps> = ({
   isOpen,
   isDeleting,
   onConfirm,
-  onCancel
+  onCancel,
 }) => {
   return (
-    <AlertDialog open={isOpen} onOpenChange={() => !isDeleting && onCancel()}>
+    <AlertDialog open={isOpen} onOpenChange={(open) => !open && onCancel()}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Er du sikker?</AlertDialogTitle>
-          <AlertDialogDescription>
-            Denne handling kan ikke fortrydes. Dette vil permanent slette din
-            ansøgning.
+          <AlertDialogTitle className="text-left">
+            Slet ansøgning
+          </AlertDialogTitle>
+          <AlertDialogDescription className="text-left">
+            Er du sikker på, at du vil slette denne ansøgning? 
+            Denne handling kan ikke fortrydes.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isDeleting} onClick={onCancel}>
+          <AlertDialogCancel disabled={isDeleting}>
             Annuller
           </AlertDialogCancel>
           <AlertDialogAction
-            disabled={isDeleting}
             onClick={onConfirm}
-            className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+            disabled={isDeleting}
+            className="bg-red-600 hover:bg-red-700 text-white"
           >
-            {isDeleting ? "Sletter..." : "Slet"}
+            {isDeleting ? (
+              <>
+                <LoadingSpinner className="mr-2" />
+                Sletter...
+              </>
+            ) : (
+              "Slet"
+            )}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

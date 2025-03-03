@@ -1,15 +1,14 @@
 
 import React from "react";
+import { Button } from "@/components/ui/button";
 import { CoverLetter, JobPosting } from "@/lib/types";
-import { 
-  Download, FileText, Trash2, MoreHorizontal, ExternalLink, File, FileIcon 
-} from "lucide-react";
-import { 
-  DropdownMenu, 
-  DropdownMenuTrigger, 
-  DropdownMenuContent, 
+import { Link } from "react-router-dom";
+import { Download, FileEdit, Trash2 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator
+  DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 
 interface LetterActionsProps {
@@ -32,64 +31,59 @@ const LetterActions: React.FC<LetterActionsProps> = ({
   isDownloading
 }) => {
   return (
-    <div className="flex items-center space-x-3">
+    <div className="flex justify-end space-x-2">
+      <Button
+        variant="outline"
+        size="sm"
+        className="h-8 w-8 p-0"
+        asChild
+      >
+        <Link to={`/cover-letter/generator?letterId=${letter.id}&step=2`}>
+          <FileEdit className="h-4 w-4" />
+        </Link>
+      </Button>
+      
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <button 
-            className="p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none" 
-            aria-label="Handlinger"
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 w-8 p-0"
+            disabled={isDownloading}
           >
-            <MoreHorizontal className="h-5 w-5" />
-          </button>
+            <Download className="h-4 w-4" />
+          </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-48">
+        <DropdownMenuContent align="end">
           <DropdownMenuItem 
             onClick={() => onDownloadPdf(letter, job)}
             disabled={isDownloading}
-            className="flex items-center cursor-pointer"
           >
-            <FileIcon className="mr-2 h-4 w-4" />
-            <span>{isDownloading ? "Downloader..." : "Download PDF"}</span>
+            Download som PDF
           </DropdownMenuItem>
           <DropdownMenuItem 
             onClick={() => onDownloadDocx(letter, job)}
             disabled={isDownloading}
-            className="flex items-center cursor-pointer"
           >
-            <File className="mr-2 h-4 w-4" />
-            <span>{isDownloading ? "Downloader..." : "Download Word"}</span>
+            Download som DOCX
           </DropdownMenuItem>
           <DropdownMenuItem 
             onClick={() => onDownloadTxt(letter, job)}
             disabled={isDownloading}
-            className="flex items-center cursor-pointer"
           >
-            <FileText className="mr-2 h-4 w-4" />
-            <span>{isDownloading ? "Downloader..." : "Download Text"}</span>
-          </DropdownMenuItem>
-          {job?.url && (
-            <DropdownMenuItem asChild>
-              <a 
-                href={job.url} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="flex items-center cursor-pointer"
-              >
-                <ExternalLink className="mr-2 h-4 w-4" />
-                <span>Åbn jobopslag</span>
-              </a>
-            </DropdownMenuItem>
-          )}
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            onClick={() => onDelete(letter.id)}
-            className="flex items-center text-red-600 cursor-pointer"
-          >
-            <Trash2 className="mr-2 h-4 w-4" />
-            <span>Slet</span>
+            Download som TXT
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+      
+      <Button
+        variant="outline"
+        size="sm"
+        className="h-8 w-8 p-0"
+        onClick={() => onDelete(letter.id)}
+      >
+        <Trash2 className="h-4 w-4 text-red-500" />
+      </Button>
     </div>
   );
 };

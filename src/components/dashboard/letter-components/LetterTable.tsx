@@ -77,7 +77,7 @@ const LetterTable: React.FC<LetterTableProps> = ({
             <TableHead>Stilling</TableHead>
             <TableHead>Oprettet</TableHead>
             <TableHead>Frist</TableHead>
-            <TableHead>Handlinger</TableHead>
+            <TableHead className="text-right">Handlinger</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -116,7 +116,7 @@ const LetterTable: React.FC<LetterTableProps> = ({
                     {job?.deadline ? formatDeadline(job.deadline) : ""}
                   </div>
                 </TableCell>
-                <TableCell>
+                <TableCell className="text-right">
                   <LetterActions 
                     letter={letter}
                     job={job}

@@ -1,25 +1,29 @@
 
 import React from "react";
-import { Link } from "react-router-dom";
-import { FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
+import { FilePlus, Plus } from "lucide-react";
 
 const EmptyLetterState: React.FC = () => {
   return (
-    <div className="text-center py-10">
-      <div className="rounded-full bg-gray-100 p-4 inline-flex mx-auto mb-4">
-        <FileText className="h-8 w-8 text-gray-400" />
-      </div>
-      <h3 className="mt-2 text-sm font-semibold text-gray-900">Ingen ansøgninger endnu</h3>
-      <p className="mt-1 text-sm text-gray-500">
-        Du har ikke gemt nogen ansøgninger endnu.
-      </p>
-      <div className="mt-6">
-        <Link to="/generator">
-          <Button>
+    <div className="text-left py-12">
+      <div className="flex flex-col items-center">
+        <div className="rounded-full bg-gray-100 p-5 mb-5">
+          <FilePlus className="h-8 w-8 text-gray-400" />
+        </div>
+        <h3 className="text-lg font-medium text-gray-900 mb-2">
+          Ingen ansøgninger endnu
+        </h3>
+        <p className="text-gray-500 text-center max-w-md mb-6">
+          Du har ikke oprettet nogen ansøgninger endnu. 
+          Kom i gang med at skabe din første ansøgning nu.
+        </p>
+        <Button asChild>
+          <Link to="/ansoegning">
+            <Plus className="h-4 w-4 mr-2" />
             Opret din første ansøgning
-          </Button>
-        </Link>
+          </Link>
+        </Button>
       </div>
     </div>
   );

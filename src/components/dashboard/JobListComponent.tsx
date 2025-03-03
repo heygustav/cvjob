@@ -1,7 +1,8 @@
+
 import React from "react";
 import { JobPosting } from "@/lib/types";
 import { Button } from "@/components/ui/button";
-import { Calendar, Trash2, FileText, Link, Briefcase, Pencil, Plus } from "lucide-react";
+import { Calendar, Trash2, FileText, Link, Pencil } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -75,22 +76,7 @@ const JobListComponent: React.FC<JobListComponentProps> = ({
   };
 
   if (jobPostings.length === 0) {
-    return (
-      <div className="text-center py-12">
-        <Briefcase className="h-12 w-12 mx-auto text-gray-400" />
-        <h3 className="mt-4 text-lg font-medium text-gray-900">
-          Ingen jobopslag endnu
-        </h3>
-        <p className="mt-2 text-sm text-gray-500">
-          Kom i gang ved at tilføje dit første jobopslag.
-        </p>
-        <div className="mt-6">
-          <Button asChild>
-            <RouterLink to="/job/new">Tilføj jobopslag</RouterLink>
-          </Button>
-        </div>
-      </div>
-    );
+    return null; // Empty state handled by parent
   }
 
   return (
