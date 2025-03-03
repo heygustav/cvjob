@@ -42,14 +42,12 @@ const DashboardMain: React.FC<DashboardMainProps> = ({
         isLoading={isRefreshing}
       />
 
-      <div className="mb-6">
-        <TabNav
-          activeTab={activeTab}
-          onTabChange={handleTabChange}
-        />
-      </div>
+      <TabNav
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
+      />
 
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <DashboardActions 
           activeTab={activeTab}
           isRefreshing={isRefreshing}
