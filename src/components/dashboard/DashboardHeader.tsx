@@ -4,8 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { PlusIcon, AlertTriangleIcon } from "lucide-react";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AlertTriangleIcon } from "lucide-react";
 
 interface DashboardHeaderProps {
   jobCount: number;
@@ -21,11 +20,6 @@ interface DashboardHeaderProps {
 }
 
 const DashboardHeader: React.FC<DashboardHeaderProps> = ({
-  jobCount,
-  letterCount,
-  activeTab,
-  setActiveTab,
-  isLoading,
   subscriptionStatus,
 }) => {
   const navigate = useNavigate();
@@ -48,15 +42,11 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     <div className="mb-8 space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Din Jobportal</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
           <p className="text-muted-foreground mt-1">
             Administrer dine jobopslag og ansøgninger
           </p>
         </div>
-        <Button onClick={handleCreateNew} size="default" className="whitespace-nowrap">
-          <PlusIcon className="h-4 w-4 mr-2" />
-          Ny ansøgning
-        </Button>
       </div>
 
       {subscriptionStatus && subscriptionStatus.freeGenerationsUsed >= subscriptionStatus.freeGenerationsAllowed && !subscriptionStatus.canGenerate && (
@@ -67,13 +57,6 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           </AlertDescription>
         </Alert>
       )}
-
-      <Tabs defaultValue={activeTab} onValueChange={(value) => setActiveTab(value as 'jobs' | 'letters')} className="w-full">
-        <TabsList className="w-full md:w-auto flex justify-start">
-          <TabsTrigger value="jobs" className="flex-1 md:flex-initial">Jobopslag ({jobCount})</TabsTrigger>
-          <TabsTrigger value="letters" className="flex-1 md:flex-initial">Ansøgninger ({letterCount})</TabsTrigger>
-        </TabsList>
-      </Tabs>
     </div>
   );
 };

@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import DashboardActions from "@/components/dashboard/DashboardActions";
 import DashboardContent from "@/components/dashboard/DashboardContent";
+import TabNav from "@/components/dashboard/TabNav";
 
 interface DashboardMainProps {
   jobPostings: any[];
@@ -41,9 +42,14 @@ const DashboardMain: React.FC<DashboardMainProps> = ({
         isLoading={isRefreshing}
       />
 
+      <div className="mb-6">
+        <TabNav
+          activeTab={activeTab}
+          onTabChange={handleTabChange}
+        />
+      </div>
+
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-        <h2 className="text-2xl font-bold text-gray-800">Dit dashboard</h2>
-        
         <DashboardActions 
           activeTab={activeTab}
           isRefreshing={isRefreshing}

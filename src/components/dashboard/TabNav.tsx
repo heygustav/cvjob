@@ -10,31 +10,33 @@ interface TabNavProps {
 
 const TabNav: React.FC<TabNavProps> = ({ activeTab, onTabChange }) => {
   return (
-    <div className="border-b border-gray-200">
-      <div className="flex gap-4 px-4 sm:px-6">
+    <div className="bg-white rounded-lg shadow mb-6">
+      <div className="flex">
         <Button
-          variant={activeTab === "letters" ? "default" : "ghost"}
+          variant="ghost"
+          size="lg"
           className={`${
             activeTab === "letters"
-              ? "bg-primary text-white"
+              ? "border-b-2 border-primary text-primary"
               : "text-gray-600 hover:text-gray-900"
-          } rounded-none rounded-t-lg px-6 py-3 h-auto font-medium flex items-center focus:outline-none focus:ring-0`}
+          } flex-1 rounded-none px-6 py-4 h-auto font-medium flex items-center justify-center focus:outline-none`}
           onClick={() => onTabChange("letters")}
         >
-          <File className="mr-2 h-4 w-4" />
-          Mine ansøgninger
+          <File className="mr-2 h-5 w-5" />
+          Ansøgninger
         </Button>
         <Button
-          variant={activeTab === "jobs" ? "default" : "ghost"}
+          variant="ghost" 
+          size="lg"
           className={`${
             activeTab === "jobs"
-              ? "bg-primary text-white"
+              ? "border-b-2 border-primary text-primary"
               : "text-gray-600 hover:text-gray-900"
-          } rounded-none rounded-t-lg px-6 py-3 h-auto font-medium flex items-center focus:outline-none focus:ring-0`}
+          } flex-1 rounded-none px-6 py-4 h-auto font-medium flex items-center justify-center focus:outline-none`}
           onClick={() => onTabChange("jobs")}
         >
-          <Briefcase className="mr-2 h-4 w-4" />
-          Mine jobopslag
+          <Briefcase className="mr-2 h-5 w-5" />
+          Jobopslag
         </Button>
       </div>
     </div>
