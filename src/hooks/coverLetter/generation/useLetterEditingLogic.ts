@@ -2,8 +2,7 @@
 import { useCallback } from "react";
 import { User, CoverLetter } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
-import { updateCoverLetter } from "@/services/coverLetter/database";
-import { saveOrUpdateJob } from "@/services/coverLetter/database";
+import { editCoverLetter, saveOrUpdateJob } from "@/services/coverLetter/database";
 import { JobFormData } from "@/services/coverLetter/types";
 import { useToastMessages } from "../useToastMessages";
 import { GenerationProgress } from "../types";
@@ -37,7 +36,7 @@ export const useLetterEditingLogic = (
     });
 
     try {
-      const updatedLetter = await updateCoverLetter(generatedLetter.id, updatedContent);
+      const updatedLetter = await editCoverLetter(user.id, generatedLetter.id, updatedContent);
       
       if (!isMountedRef.current) return;
       

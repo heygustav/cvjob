@@ -1,8 +1,7 @@
-
 import { useCallback } from "react";
 import { User, JobPosting, CoverLetter } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
-import { fetchCoverLetterById, fetchJobById } from "@/services/coverLetter/database";
+import { fetchLetterById, fetchJobById } from "@/services/coverLetter/database";
 import { useToastMessages } from "../useToastMessages";
 import { GenerationProgress } from "../types";
 
@@ -38,7 +37,7 @@ export const useLetterFetchingLogic = (
         message: 'Henter ansøgning...'
       });
 
-      const letter = await fetchCoverLetterById(id);
+      const letter = await fetchLetterById(id);
       
       if (!letter) {
         toast(toastMessages.letterNotFound);
