@@ -63,39 +63,60 @@ export const generateCoverLetter = async (
           model: "gpt-4",
           temperature: 0.5,
           promptTemplate: `
-Som en professionel jobansøger, skriv en overbevisende og detaljeret ansøgning til stillingen som {jobTitle} hos {company},
-adresseret til {contactPerson}. Brug følgende information om ansøgeren:
+Som en professionel jobansøger skal du skrive en overbevisende og målrettet ansøgning til stillingen som {jobTitle} hos {company}, adresseret til {contactPerson}. Brug følgende oplysninger:
+
+Ansøgerens profil:
 
 Navn: {name}
+
 Email: {email}
+
 Telefon: {phone}
+
 Adresse: {address}
+
 Erfaring: {experience}
+
 Uddannelse: {education}
+
 Færdigheder: {skills}
 
 Jobopslag:
 {jobDescription}
 
-Følg disse retningslinjer for at skrive ansøgningen:
+Retningslinjer:
 
-1. Start direkte med en stærk og fængende indledning, der straks fanger læserens opmærksomhed.
-2. Brug konkrete og specifikke eksempler på færdigheder og resultater. Vær detaljeret og kvantificer præstationer hvor muligt.
-3. Forklar grundigt, hvorfor ansøgeren er interesseret i denne specifikke stilling.
-4. Uddyb hvordan kompetencerne matcher præcis det, som virksomheden/organisationen leder efter til stillingen. Brug specifikke eksempler.
-5. Beskriv hvordan ansøgerens personlige og professionelle værdier aligner med virksomhedens værdier og kultur.
-6. Afslut med en klar opfordring til handling og udtryk, at ansøgeren ser frem til muligheden for at uddybe ved en personlig samtale.
+Start med en fængende indledning der fanger opmærksomhed og viser engagement (Eksempel: "Da jeg læste jeres opslag om X, vidste jeg, at mine erfaringer med Y direkte kan støtte jeres mål om Z").
 
-Skriv ansøgningen på dansk og hold den professionel, engagerende og overbevisende. Sørg for, at ansøgningen er grundig og detaljeret,
-med en optimal længde for en motiveret jobansøgning (typisk omkring 400-600 ord eller 1-1.5 A4-sider).
+Brug konkrete resultater med tal eller effekt (Undgå: "Jeg har erfaring med salg" → Brug: "Jeg øgede kundetilfredsheden med 30% gennem en ny kundehåndteringsproces").
 
-VIGTIGT: 
-- IKKE inkluder "Dato:", "Til:", "Fra:", "Emne:" eller lignende formelle e-mail-headers. 
-- IKKE gentag virksomhedens navn og jobstilling i starten af ansøgningen, da dette allerede vil være indsat i layoutet.
-- Start ansøgningen med "Kære {contactPerson}" (eller passende alternativ hvis ingen kontaktperson er oplyst).
-- IKKE afslut med "Med venlig hilsen" og navn, da dette vil blive tilføjet automatisk senere.
+Forklar din motivation med reference til virksomhedens værdier, projekter eller kultur (Eksempel: "Jeres fokus på bæredygtighed matcher min erfaring med at lede CO2-neutralisering i XX-projekter").
 
-Match tonen i jobopslaget uden at gentage de samme ord og sætninger, undtagen hvor det er nødvendigt for at forklare tekniske kvalifikationer eller lignende krav. Skab en autentisk stemme, der resonerer med virksomhedskulturen, mens du bevarer originalitet.
+Kombiner faglige og personlige styrker til en helhedsprofil (Eksempel: "Mine tekniske kompetencer i Python kombineret med min erfaring som teamkoordinator gør mig effektiv i at oversætte komplekse løsninger til klare handlingsplaner").
+
+Fokuser på virksomhedens behov – forklar, hvordan du løser deres udfordringer, ikke kun dine egne mål.
+
+Integrér nøgleord fra jobopslaget naturligt (Eksempel: Hvis opslaget nævner "agil projektledelse", brug "Min erfaring med Scrum-metoder i en agile miljøer").
+
+Sprog og tone:
+
+Vær professionel men uformel efter dansk standard (Undgå: "Højtærede ledelse" → Brug: "Kære Anna").
+
+Undgå klichéer uden kontekst (F.eks.: "Jeg er en stærk teamplayer" → Brug: "Min rolle som koordinator for en tværfaglig gruppe på 8 kolleger lærte mig at skabe fælles momentum under pres").
+
+Formatering:
+
+Maks 1 A4-side (400-500 ord) med linjeafstand 1-1.15.
+
+Brug overskrifter som "Hvorfor jeg passer til jer" eller "Mine største relevante resultater".
+
+Start med "Kære {contactPerson}" (eller "Kære [Virksomhedsnavn]-team" hvis ingen kontaktperson).
+
+VIGTIGT:
+
+INKLUDER IKKE formelle headers som "Til:", "Emne:", eller "Med venlig hilsen".
+
+Gentag IKKE virksomhedens navn eller jobtitel i teksten.
           `
         },
         headers: {
