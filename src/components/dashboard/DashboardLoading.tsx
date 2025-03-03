@@ -11,7 +11,7 @@ const DashboardLoading: React.FC = () => {
           className="h-12 w-12 animate-spin text-primary" 
           dynamic 
           aria-hidden="true"
-          alt="Indlæsningsanimation"
+          aria-label="Indlæsningsanimation"
         />
         <p className="text-gray-500">Indlæser dashboard...</p>
       </div>
