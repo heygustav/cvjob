@@ -39,7 +39,7 @@ export const GeneratorContent: React.FC<GeneratorProps> = ({ existingLetterId })
   const [loadingState, setLoadingState] = useState("idle");
   const [selectedJob, setSelectedJob] = useState<JobPosting | null>(null);
   const [generationProgress, setGenerationProgress] = useState<GenerationProgress>({
-    phase: 'letter-fetch',
+    phase: 'letter-save', // Changed from 'letter-fetch' to a valid phase
     progress: 0,
     message: 'Loading letter...'
   });
