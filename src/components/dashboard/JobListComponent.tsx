@@ -1,4 +1,3 @@
-
 import React from "react";
 import { JobPosting } from "@/lib/types";
 import { Button } from "@/components/ui/button";
@@ -57,12 +56,7 @@ const JobListComponent: React.FC<JobListComponentProps> = ({
   };
 
   const handleCreateApplication = (job: JobPosting) => {
-    // Navigate to the application creation page with all job data
-    // We'll use the jobId to fetch the job data on the cover letter page
-    // but we need to make sure we're already logged in to avoid the login loop
-    
     if (!isAuthenticated || !session) {
-      // Store the redirect URL and show a toast message
       localStorage.setItem('redirectAfterLogin', `/cover-letter/generator?jobId=${job.id}&step=1&direct=true`);
       toast({
         title: "Log ind kræves",
@@ -73,7 +67,6 @@ const JobListComponent: React.FC<JobListComponentProps> = ({
       return;
     }
     
-    // If authenticated, navigate directly to the generator
     navigate(`/cover-letter/generator?jobId=${job.id}&step=1&direct=true`);
   };
   
@@ -102,14 +95,6 @@ const JobListComponent: React.FC<JobListComponentProps> = ({
 
   return (
     <div>
-      <div className="flex justify-end mb-4">
-        <Button asChild>
-          <RouterLink to="/job/new">
-            <Plus className="h-4 w-4 mr-2" />
-            Tilføj jobopslag
-          </RouterLink>
-        </Button>
-      </div>
       <div className="border rounded-md overflow-x-auto">
         <Table>
           <TableHeader>

@@ -31,10 +31,16 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
   return (
     <div className="bg-white shadow-sm rounded-lg overflow-hidden border border-gray-100">
       <div className="p-6">
-        {/* Jobs tab header - removed the Add button */}
+        {/* Jobs tab header with Add button */}
         {activeTab === "jobs" && jobPostings.length > 0 && (
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-lg font-semibold">Dine jobopslag</h2>
+            <Button asChild>
+              <Link to="/job/new">
+                <Plus className="h-4 w-4 mr-2" />
+                Tilføj jobopslag
+              </Link>
+            </Button>
           </div>
         )}
         
