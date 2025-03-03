@@ -8,10 +8,11 @@ const AboutUs = () => {
   // Set document title for SEO
   useEffect(() => {
     document.title = "Om CVJob | Vores Mission og Team | AI-Drevet Jobansøgningsgenerator";
+    
     // Add meta description
     const metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) {
-      metaDescription.setAttribute('content', 'Lær mere om CVJob's mission, team og teknologi. Vi hjælper jobsøgende med at skabe overbevisende ansøgninger med kunstig intelligens.');
+      metaDescription.setAttribute('content', 'Lær mere om CVJob\'s mission, team og teknologi. Vi hjælper jobsøgende med at skabe overbevisende ansøgninger med kunstig intelligens.');
     }
   }, []);
 
