@@ -1,6 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { JobFormData, UserProfile } from "./types";
+import DOMPurify from "dompurify";
 
 export const generateCoverLetter = async (
   jobInfo: JobFormData,
@@ -22,14 +23,31 @@ export const generateCoverLetter = async (
   try {
     console.log("Preparing to call edge function for letter generation");
     
-    // Ensure we have values for required fields
-    const title = jobInfo.title || "Untitled Position";
-    const company = jobInfo.company || "Unknown Company";
-    const description = jobInfo.description || "No description provided";
+    // Ensure we have values for required fields AND sanitize all inputs
+    const title = jobInfo.title ? DOMPurify.sanitize(jobInfo.title) : "Untitled Position";
+    const company = jobInfo.company ? DOMPurify.sanitize(jobInfo.company) : "Unknown Company";
+    const description = jobInfo.description ? DOMPurify.sanitize(jobInfo.description) : "No description provided";
+    const contactPerson = jobInfo.contact_person ? DOMPurify.sanitize(jobInfo.contact_person) : '';
+    const url = jobInfo.url ? DOMPurify.sanitize(jobInfo.url) : '';
     
-    // Call the edge function directly - no complex Promise racing
-    console.log("Calling Supabase function with job info");
-    const { data, error } = await supabase.functions.invoke(
+    // Sanitize user profile information
+    const sanitizedUserInfo = {
+      name: userInfo.name ? DOMPurify.sanitize(userInfo.name) : '',
+      email: userInfo.email ? DOMPurify.sanitize(userInfo.email) : '',
+      phone: userInfo.phone ? DOMPurify.sanitize(userInfo.phone) : '',
+      address: userInfo.address ? DOMPurify.sanitize(userInfo.address) : '',
+      experience: userInfo.experience ? DOMPurify.sanitize(userInfo.experience) : '',
+      education: userInfo.education ? DOMPurify.sanitize(userInfo.education) : '',
+      skills: userInfo.skills ? DOMPurify.sanitize(userInfo.skills) : '',
+    };
+    
+    // Add request timeout handling
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error('Request timed out')), 60000); // 60 second timeout
+    });
+    
+    // Call the edge function with sanitized data
+    const functionPromise = supabase.functions.invoke(
       'generate-cover-letter',
       {
         body: {
@@ -37,18 +55,10 @@ export const generateCoverLetter = async (
             title: title,
             company: company,
             description: description,
-            contactPerson: jobInfo.contact_person || '',
-            url: jobInfo.url || ''
+            contactPerson: contactPerson,
+            url: url
           },
-          userInfo: {
-            name: userInfo.name || '',
-            email: userInfo.email || '',
-            phone: userInfo.phone || '',
-            address: userInfo.address || '',
-            experience: userInfo.experience || '',
-            education: userInfo.education || '',
-            skills: userInfo.skills || '',
-          },
+          userInfo: sanitizedUserInfo,
           locale: navigator.language,
           model: "gpt-4",
           temperature: 0.5,
@@ -87,13 +97,23 @@ VIGTIGT:
 
 Match tonen i jobopslaget uden at gentage de samme ord og sætninger, undtagen hvor det er nødvendigt for at forklare tekniske kvalifikationer eller lignende krav. Skab en autentisk stemme, der resonerer med virksomhedskulturen, mens du bevarer originalitet.
           `
+        },
+        headers: {
+          'Content-Type': 'application/json'
         }
       }
     );
+    
+    // Race the function call against the timeout
+    const result = await Promise.race([functionPromise, timeoutPromise]);
+    
+    // Type assertion since we know the result is from the function call if we get here
+    const { data, error } = result as Awaited<typeof functionPromise>;
 
     if (error) {
       console.error("Edge function error:", error);
-      throw new Error(`Fejl ved generering af ansøgning: ${error.message || "Ukendt fejl"}`);
+      // Sanitize error messages to avoid information disclosure
+      throw new Error(`Fejl ved generering af ansøgning. Prøv igen senere.`);
     }
 
     if (!data || !data.content) {
@@ -102,7 +122,9 @@ Match tonen i jobopslaget uden at gentage de samme ord og sætninger, undtagen h
     }
 
     console.log("Successfully received content from edge function, length:", data.content.length);
-    return data.content;
+    
+    // Sanitize the returned content to prevent XSS
+    return DOMPurify.sanitize(data.content);
     
   } catch (error) {
     console.error("Error in generateCoverLetter:", error);
@@ -115,11 +137,12 @@ Match tonen i jobopslaget uden at gentage de samme ord og sætninger, undtagen h
       throw new Error('Der opstod en netværksfejl. Kontroller din forbindelse og prøv igen.');
     }
     
-    // For other errors, re-throw with appropriate message
-    if (error instanceof Error) {
-      throw error;
-    } else {
-      throw new Error("Der opstod en fejl ved generering af ansøgningen. Prøv igen senere.");
+    // Handle timeout errors
+    if (error instanceof Error && error.message.includes('timed out')) {
+      throw new Error('Generering af ansøgning tog for lang tid. Prøv igen senere.');
     }
+    
+    // For other errors, use a generic message to avoid exposing details
+    throw new Error("Der opstod en fejl ved generering af ansøgningen. Prøv igen senere.");
   }
 };

@@ -4,12 +4,20 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/components/AuthProvider';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
+import { z } from 'zod';
+import DOMPurify from 'dompurify';
+
+// Define validation schemas
+const emailSchema = z.string().email('Ugyldig email adresse');
+const passwordSchema = z.string().min(8, 'Adgangskode skal være mindst 8 tegn');
 
 const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
   const [redirectUrl, setRedirectUrl] = useState<string | null>(null);
+  const [errors, setErrors] = useState<{email?: string; password?: string}>({});
+  const [attemptCount, setAttemptCount] = useState(0);
   const { signIn, signUp, session, isLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -18,8 +26,15 @@ const Auth = () => {
   useEffect(() => {
     const storedRedirect = localStorage.getItem('redirectAfterLogin');
     if (storedRedirect) {
-      setRedirectUrl(storedRedirect);
-      console.log("Auth: Found redirectUrl:", storedRedirect);
+      // Sanitize the URL to prevent open redirect vulnerabilities
+      const sanitizedUrl = DOMPurify.sanitize(storedRedirect);
+      // Only accept internal URLs
+      if (sanitizedUrl.startsWith('/') && !sanitizedUrl.includes('://')) {
+        setRedirectUrl(sanitizedUrl);
+        console.log("Auth: Found redirectUrl:", sanitizedUrl);
+      } else {
+        console.error("Invalid redirect URL detected and blocked:", storedRedirect);
+      }
     }
   }, []);
 
@@ -29,22 +44,53 @@ const Auth = () => {
       if (redirectUrl) {
         console.log("Auth: Redirecting to:", redirectUrl);
         localStorage.removeItem('redirectAfterLogin');
-        window.location.href = redirectUrl;
+        navigate(redirectUrl);
       } else {
         navigate('/dashboard');
       }
     }
   }, [session, navigate, redirectUrl]);
 
+  const validateForm = (): boolean => {
+    const newErrors: {email?: string; password?: string} = {};
+    
+    try {
+      emailSchema.parse(email);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        newErrors.email = error.errors[0].message;
+      }
+    }
+    
+    try {
+      passwordSchema.parse(password);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        newErrors.password = error.errors[0].message;
+      }
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!email || !password) {
+    // Rate limiting to prevent brute force attacks
+    if (attemptCount > 5) {
       toast({
-        title: 'Manglende oplysninger',
-        description: 'Udfyld venligst e-mail og adgangskode',
+        title: 'For mange forsøg',
+        description: 'Du har foretaget for mange login-forsøg. Prøv igen senere.',
         variant: 'destructive',
       });
+      return;
+    }
+    
+    // Increment attempt counter
+    setAttemptCount(prev => prev + 1);
+    
+    if (!validateForm()) {
       return;
     }
 
@@ -66,7 +112,8 @@ const Auth = () => {
           description: 'Du er nu logget ind',
         });
         
-        // Redirect will happen automatically via the useEffect, no need to duplicate it here
+        // Reset attempt counter on successful login
+        setAttemptCount(0);
       }
     } catch (error: any) {
       console.error('Authentication error:', error);
@@ -78,6 +125,11 @@ const Auth = () => {
           errorMessage = 'Forkert e-mail eller adgangskode';
         } else if (error.message.includes('already registered')) {
           errorMessage = 'Denne e-mail er allerede registreret';
+        } else if (error.message.includes('rate limit')) {
+          errorMessage = 'For mange forsøg. Prøv igen senere.';
+        } else {
+          // Generic error message to avoid leaking implementation details
+          errorMessage = 'Autentificering mislykkedes. Kontrollér dine oplysninger og prøv igen.';
         }
       }
       
@@ -118,11 +170,16 @@ const Auth = () => {
                 type="email"
                 autoComplete="email"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
+                className={`appearance-none rounded-none relative block w-full px-3 py-2 border ${
+                  errors.email ? 'border-red-500' : 'border-gray-300'
+                } placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm`}
                 placeholder="E-mail"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
+              {errors.email && (
+                <p className="mt-1 text-sm text-red-500">{errors.email}</p>
+              )}
             </div>
             <div>
               <label htmlFor="password" className="sr-only">
@@ -134,18 +191,23 @@ const Auth = () => {
                 type="password"
                 autoComplete={isSignUp ? 'new-password' : 'current-password'}
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
+                className={`appearance-none rounded-none relative block w-full px-3 py-2 border ${
+                  errors.password ? 'border-red-500' : 'border-gray-300'
+                } placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm`}
                 placeholder="Adgangskode"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
+              {errors.password && (
+                <p className="mt-1 text-sm text-red-500">{errors.password}</p>
+              )}
             </div>
           </div>
 
           <div>
             <Button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || attemptCount > 5}
               className="group relative w-full flex justify-center"
             >
               {isLoading ? (

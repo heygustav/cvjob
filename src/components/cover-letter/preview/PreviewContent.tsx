@@ -1,5 +1,6 @@
 
 import React from "react";
+import DOMPurify from "dompurify";
 
 interface PreviewContentProps {
   isEditing: boolean;
@@ -20,6 +21,12 @@ const PreviewContent: React.FC<PreviewContentProps> = ({
   contactPerson,
   formattedDate,
 }) => {
+  // Sanitize all user inputs to prevent XSS attacks
+  const sanitizedCompany = company ? DOMPurify.sanitize(company) : "Virksomhed";
+  const sanitizedJobTitle = jobTitle ? DOMPurify.sanitize(jobTitle) : "stillingen";
+  const sanitizedContactPerson = contactPerson ? DOMPurify.sanitize(contactPerson) : "";
+  const sanitizedContent = DOMPurify.sanitize(editedContent);
+
   return (
     <>
       {isEditing ? (
@@ -34,12 +41,12 @@ const PreviewContent: React.FC<PreviewContentProps> = ({
         <div className="flex flex-col h-96 border border-gray-200 rounded-md p-6">
           <header className="flex justify-between mb-8">
             <div className="font-serif text-left">
-              <p className="font-bold">{company || "Virksomhed"}</p>
+              <p className="font-bold">{sanitizedCompany}</p>
               {/* Only render this line if contactPerson exists */}
-              {contactPerson && (
-                <p className="font-bold">Att.: Rekrutteringsansvarlig {contactPerson}</p>
+              {sanitizedContactPerson && (
+                <p className="font-bold">Att.: Rekrutteringsansvarlig {sanitizedContactPerson}</p>
               )}
-              <p className="font-bold">Ansøgning til {jobTitle || "stillingen"}</p>
+              <p className="font-bold">Ansøgning til {sanitizedJobTitle}</p>
             </div>
             <div className="font-serif text-right">
               <p className="font-bold" aria-label="Dato for ansøgning">{formattedDate}</p>
@@ -50,9 +57,8 @@ const PreviewContent: React.FC<PreviewContentProps> = ({
             tabIndex={0} 
             aria-label="Ansøgningstekst"
             role="document"
-          >
-            {editedContent}
-          </article>
+            dangerouslySetInnerHTML={{ __html: sanitizedContent }}
+          />
         </div>
       )}
     </>

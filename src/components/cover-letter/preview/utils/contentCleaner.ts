@@ -1,13 +1,20 @@
+
+import DOMPurify from "dompurify";
+
 /**
  * Cleans up raw cover letter content to remove duplicate headers, email info, etc.
+ * Also sanitizes content to prevent XSS attacks.
  */
 export const cleanCoverLetterContent = (
   rawContent: string,
   company?: string,
   jobTitle?: string
 ): string => {
+  // First sanitize the input to prevent XSS
+  let cleaned = DOMPurify.sanitize(rawContent);
+  
   // Remove any lines with "Dato:" or "Date:" which might be duplicated
-  let cleaned = rawContent.replace(/^(Dato|Date):.*$/gm, "");
+  cleaned = cleaned.replace(/^(Dato|Date):.*$/gm, "");
   
   // Remove any lines with "Til:" or "To:" which might be duplicated
   cleaned = cleaned.replace(/^(Til|To):.*$/gm, "");
@@ -16,13 +23,15 @@ export const cleanCoverLetterContent = (
   cleaned = cleaned.replace(/^(Emne|Subject):.*$/gm, "");
   
   // Remove duplicate company name lines at the beginning
-  const companyRegex = company ? new RegExp(`^${company}$`, 'gm') : null;
+  const sanitizedCompany = company ? DOMPurify.sanitize(company) : "";
+  const companyRegex = sanitizedCompany ? new RegExp(`^${escapeRegExp(sanitizedCompany)}$`, 'gm') : null;
   if (companyRegex) {
     cleaned = cleaned.replace(companyRegex, "");
   }
   
   // Remove duplicate job title references
-  const jobTitleRegex = jobTitle ? new RegExp(`^.*${jobTitle}.*$`, 'gm') : null;
+  const sanitizedJobTitle = jobTitle ? DOMPurify.sanitize(jobTitle) : "";
+  const jobTitleRegex = sanitizedJobTitle ? new RegExp(`^.*${escapeRegExp(sanitizedJobTitle)}.*$`, 'gm') : null;
   if (jobTitleRegex) {
     // Count occurrences
     const matches = cleaned.match(jobTitleRegex);
@@ -46,3 +55,10 @@ export const cleanCoverLetterContent = (
   
   return cleaned;
 };
+
+/**
+ * Helper function to escape special characters in a string for use in a RegExp
+ */
+function escapeRegExp(string: string): string {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+}

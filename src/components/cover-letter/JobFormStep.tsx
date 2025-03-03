@@ -7,6 +7,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { InfoIcon } from "lucide-react";
 import { GenerationProgress } from "@/hooks/coverLetter/types";
 import GenerationProgressIndicator from "../GenerationProgressIndicator";
+import DOMPurify from "dompurify";
 
 export interface JobFormStepProps {
   jobData?: JobFormData;
@@ -41,6 +42,40 @@ const JobFormStep: React.FC<JobFormStepProps> = ({
   const isSavedEmptyJob = selectedJob !== null && 
     (!selectedJob.title || !selectedJob.company || !selectedJob.description);
 
+  // Sanitize job details to prevent XSS
+  const jobTitle = selectedJob?.title ? DOMPurify.sanitize(selectedJob.title) : "";
+  const jobCompany = selectedJob?.company ? DOMPurify.sanitize(selectedJob.company) : "";
+
+  // Safely handle job submission with sanitization
+  const handleSafeSubmit = async (formData: JobFormData) => {
+    // Sanitize all input data before submission
+    const sanitizedData: JobFormData = {
+      title: DOMPurify.sanitize(formData.title),
+      company: DOMPurify.sanitize(formData.company),
+      description: DOMPurify.sanitize(formData.description),
+      contact_person: formData.contact_person ? DOMPurify.sanitize(formData.contact_person) : "",
+      url: formData.url ? DOMPurify.sanitize(formData.url) : "",
+      deadline: formData.deadline ? DOMPurify.sanitize(formData.deadline) : "",
+    };
+    
+    await onSubmit(sanitizedData);
+  };
+  
+  // Safely handle job saving with sanitization
+  const handleSafeSave = onSave ? async (formData: JobFormData) => {
+    // Sanitize all input data before saving
+    const sanitizedData: JobFormData = {
+      title: DOMPurify.sanitize(formData.title),
+      company: DOMPurify.sanitize(formData.company),
+      description: DOMPurify.sanitize(formData.description),
+      contact_person: formData.contact_person ? DOMPurify.sanitize(formData.contact_person) : "",
+      url: formData.url ? DOMPurify.sanitize(formData.url) : "",
+      deadline: formData.deadline ? DOMPurify.sanitize(formData.deadline) : "",
+    };
+    
+    await onSave(sanitizedData);
+  } : undefined;
+
   return (
     <div className="p-4 sm:p-6 md:p-8 text-left">
       {isSavedEmptyJob ? (
@@ -62,8 +97,8 @@ const JobFormStep: React.FC<JobFormStepProps> = ({
       ) : null}
       
       <JobPostingForm
-        onSubmit={onSubmit}
-        onSave={onSave}
+        onSubmit={handleSafeSubmit}
+        onSave={handleSafeSave}
         initialData={selectedJob || undefined}
         isLoading={isLoading}
       />

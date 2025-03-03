@@ -3,6 +3,22 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { JobFormData } from "@/services/coverLetter/types";
 import { JobPosting } from "@/lib/types";
+import { z } from "zod";
+
+// Define Zod schema for validation
+const jobFormSchema = z.object({
+  title: z.string().min(1, "Jobtitel er påkrævet"),
+  company: z.string().min(1, "Virksomhedsnavn er påkrævet"),
+  description: z.string().min(100, "Jobbeskrivelse skal være på mindst 100 tegn"),
+  contact_person: z.string().optional(),
+  url: z.string()
+    .optional()
+    .refine(
+      (val) => !val || /^https?:\/\/.+/.test(val),
+      "URL skal starte med http:// eller https://"
+    ),
+  deadline: z.string().optional(),
+});
 
 interface UseJobFormProps {
   initialData?: JobPosting;
@@ -28,9 +44,13 @@ export const useJobForm = ({ initialData, onSubmit, onSave }: UseJobFormProps) =
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
+    
+    // Sanitize input - remove potentially dangerous HTML/script tags
+    const sanitizedValue = value.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "");
+    
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: sanitizedValue,
     }));
     
     if (errors[name]) {
@@ -43,24 +63,28 @@ export const useJobForm = ({ initialData, onSubmit, onSave }: UseJobFormProps) =
   };
 
   const validateForm = (): boolean => {
-    const newErrors: Record<string, string> = {};
-    
-    if (!formData.title.trim()) {
-      newErrors.title = "Jobtitel er påkrævet";
+    try {
+      // Use Zod to validate the form data
+      jobFormSchema.parse(formData);
+      setErrors({});
+      return true;
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        // Convert Zod validation errors to our format
+        const newErrors: Record<string, string> = {};
+        error.errors.forEach((err) => {
+          if (err.path) {
+            newErrors[err.path[0].toString()] = err.message;
+          }
+        });
+        setErrors(newErrors);
+      } else {
+        // Handle unexpected errors
+        console.error("Validation error:", error);
+        setErrors({ form: "Der opstod en uventet fejl ved validering" });
+      }
+      return false;
     }
-    
-    if (!formData.company.trim()) {
-      newErrors.company = "Virksomhedsnavn er påkrævet";
-    }
-    
-    if (!formData.description.trim()) {
-      newErrors.description = "Jobbeskrivelse er påkrævet";
-    } else if (formData.description.trim().length < 100) {
-      newErrors.description = "Jobbeskrivelse skal være på mindst 100 tegn";
-    }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
