@@ -5,11 +5,13 @@ import { Clock } from "lucide-react";
 interface LoadingSpinnerProps {
   message?: string;
   progress?: number;
+  className?: string; // Added className prop
 }
 
 export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ 
   message = "Indlæser...",
-  progress
+  progress,
+  className = "" // Default to empty string
 }) => {
   const [elapsed, setElapsed] = useState(0);
   const startTimeRef = useRef<number>(Date.now());
@@ -44,7 +46,7 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
     <div className="min-h-[60vh] md:min-h-screen bg-gray-50 flex justify-center items-center px-4" aria-live="polite" role="status">
       <div className="w-full max-w-md bg-white p-6 rounded-lg shadow-sm border border-gray-100">
         <div className="flex justify-center" aria-hidden="true">
-          <Clock className="h-12 w-12 animate-pulse text-gray-700" />
+          <Clock className={`h-12 w-12 animate-pulse text-gray-700 ${className}`} />
         </div>
         <h2 className="mt-4 text-lg font-medium text-gray-800 text-center">{message}</h2>
         <div className="mt-3 flex justify-between items-center">
@@ -68,3 +70,4 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
     </div>
   );
 };
+
