@@ -1,180 +1,182 @@
 
-import { useState, useCallback } from "react";
-import { saveAs } from "file-saver";
-import { jsPDF } from "jspdf";
-import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } from "docx";
-import { format } from "date-fns";
-import { da } from "date-fns/locale";
-import { CoverLetter, JobPosting } from "@/lib/types";
+import { useState } from 'react';
+import { useToast } from '@/hooks/use-toast';
+import { CoverLetter, JobPosting } from '@/lib/types';
+import { saveAs } from 'file-saver';
+import jsPDF from 'jspdf';
+import { Document, Packer, Paragraph, TextRun } from 'docx';
 
-export function useLetterDownload() {
+export const useLetterDownload = () => {
   const [isDownloading, setIsDownloading] = useState(false);
+  const { toast } = useToast();
 
-  // Function to download as PDF
-  const handleDownloadPdf = useCallback(async (letter: CoverLetter, job?: JobPosting) => {
-    try {
-      setIsDownloading(true);
-      
-      // Create a filename based on company and job title
-      const companyName = job?.company || "ukendt-virksomhed";
-      const jobTitle = job?.title || "ukendt-stilling";
-      const fileName = `ansøgning-${companyName.toLowerCase().replace(/\s+/g, '-')}-${jobTitle.toLowerCase().replace(/\s+/g, '-')}.pdf`;
-      
-      // Format the current date in Danish
-      const currentDate = new Date();
-      const formattedDate = format(currentDate, "d. MMMM yyyy", { locale: da });
-      
-      // Create a new PDF document
-      const doc = new jsPDF({
-        orientation: "portrait",
-        unit: "mm",
-        format: "a4",
+  // Helper for error handling
+  const handleDownloadError = (error: any, format: string) => {
+    console.error(`Error downloading ${format}:`, error);
+    toast({
+      title: `Download fejlede`,
+      description: `Der opstod en fejl under download af ${format}. Prøv igen senere.`,
+      variant: 'destructive',
+    });
+    setIsDownloading(false);
+  };
+
+  // Helper to create a sanitized filename
+  const createFilename = (letter: CoverLetter, job: JobPosting | null | undefined, extension: string) => {
+    // Get job title and company if available
+    const jobTitle = job?.title ? job.title.replace(/[^\w\s-]/g, '') : 'untitled';
+    const company = job?.company ? job.company.replace(/[^\w\s-]/g, '') : 'unknown';
+    
+    // Create a timestamp
+    const timestamp = new Date().toISOString().split('T')[0];
+    
+    // Create filename: sanitize and replace spaces with hyphens
+    return `ansøgning-${company}-${jobTitle}-${timestamp}.${extension}`
+      .toLowerCase()
+      .replace(/\s+/g, '-');
+  };
+
+  // Helper to safely get text content from possible HTML
+  const getTextContent = (htmlString: string) => {
+    // Create a temporary div element
+    const tempDiv = document.createElement('div');
+    // Set the HTML content of the div
+    tempDiv.innerHTML = htmlString;
+    // Return the text content of the div
+    return tempDiv.textContent || tempDiv.innerText || '';
+  };
+
+  // Download as PDF
+  const handleDownloadPdf = async (letter: CoverLetter, job?: JobPosting | null) => {
+    if (!letter || !letter.content) {
+      toast({
+        title: 'Ingen indhold',
+        description: 'Der er intet indhold at downloade.',
+        variant: 'destructive',
       });
+      return;
+    }
+
+    setIsDownloading(true);
+
+    try {
+      // Extract text content from possible HTML
+      const contentText = getTextContent(letter.content);
       
-      // Set font
-      doc.setFont("helvetica");
+      // Create PDF document
+      const doc = new jsPDF();
       
-      // Add company name (bold)
-      doc.setFontSize(12);
-      doc.setFont("helvetica", "bold");
-      doc.text(companyName, 20, 20);
+      // Add content to PDF
+      const splitText = doc.splitTextToSize(contentText, 180);
+      doc.text(splitText, 15, 15);
       
-      // Add attention line
-      doc.setFont("helvetica", "normal");
-      doc.text(`Att.: Ansøgning til ${jobTitle}`, 20, 30);
+      // Generate filename
+      const filename = createFilename(letter, job, 'pdf');
       
-      // Add date (right-aligned)
-      const dateWidth = doc.getStringUnitWidth(formattedDate) * doc.getFontSize() / doc.internal.scaleFactor;
-      doc.text(formattedDate, doc.internal.pageSize.width - 20 - dateWidth, 30);
+      // Save PDF
+      doc.save(filename);
       
-      // Add a spacing before content
-      const contentStartY = 50;
-      
-      // Add the main content
-      doc.setFontSize(11);
-      
-      // Split content into lines that fit within the page width
-      const textLines = doc.splitTextToSize(letter.content, 170);
-      
-      // Add the text to the PDF
-      doc.text(textLines, 20, contentStartY);
-      
-      // Save the PDF
-      doc.save(fileName);
+      toast({
+        title: 'PDF downloaded',
+        description: 'Din ansøgning er blevet downloadet som PDF.',
+      });
     } catch (error) {
-      console.error("Error downloading letter as PDF:", error);
-      alert("Der opstod en fejl under download af ansøgning.");
+      handleDownloadError(error, 'PDF');
     } finally {
       setIsDownloading(false);
     }
-  }, []);
+  };
 
-  // Function to download as text file
-  const handleDownloadTxt = useCallback(async (letter: CoverLetter, job?: JobPosting) => {
-    try {
-      setIsDownloading(true);
-      
-      // Create a filename based on company and job title
-      const companyName = job?.company || "ukendt-virksomhed";
-      const jobTitle = job?.title || "ukendt-stilling";
-      const fileName = `ansøgning-${companyName.toLowerCase().replace(/\s+/g, '-')}-${jobTitle.toLowerCase().replace(/\s+/g, '-')}.txt`;
-      
-      // Format the current date in Danish
-      const currentDate = new Date();
-      const formattedDate = format(currentDate, "d. MMMM yyyy", { locale: da });
-      
-      // Create the letter content
-      const letterHeader = `${companyName}\nAtt.: Ansøgning til ${jobTitle}\n\n${formattedDate}\n\n`;
-      const letterContent = letterHeader + letter.content;
-      
-      // Create and download the text file
-      const element = document.createElement("a");
-      const file = new Blob([letterContent], { type: "text/plain" });
-      element.href = URL.createObjectURL(file);
-      element.download = fileName;
-      document.body.appendChild(element);
-      element.click();
-      document.body.removeChild(element);
-    } catch (error) {
-      console.error("Error downloading letter as text:", error);
-      alert("Der opstod en fejl under download af ansøgning.");
-    } finally {
-      setIsDownloading(false);
+  // Download as DOCX
+  const handleDownloadDocx = async (letter: CoverLetter, job?: JobPosting | null) => {
+    if (!letter || !letter.content) {
+      toast({
+        title: 'Ingen indhold',
+        description: 'Der er intet indhold at downloade.',
+        variant: 'destructive',
+      });
+      return;
     }
-  }, []);
 
-  // Function to download as Word document
-  const handleDownloadDocx = useCallback(async (letter: CoverLetter, job?: JobPosting) => {
+    setIsDownloading(true);
+
     try {
-      setIsDownloading(true);
+      // Extract text content from possible HTML
+      const contentText = getTextContent(letter.content);
       
-      // Create a filename based on company and job title
-      const companyName = job?.company || "ukendt-virksomhed";
-      const jobTitle = job?.title || "ukendt-stilling";
-      const fileName = `ansøgning-${companyName.toLowerCase().replace(/\s+/g, '-')}-${jobTitle.toLowerCase().replace(/\s+/g, '-')}.docx`;
-      
-      // Format the current date in Danish
-      const currentDate = new Date();
-      const formattedDate = format(currentDate, "d. MMMM yyyy", { locale: da });
-      
-      // Create a new document
+      // Create DOCX document
       const doc = new Document({
-        sections: [
-          {
-            properties: {},
-            children: [
-              // Company name
-              new Paragraph({
-                text: companyName,
-                heading: HeadingLevel.HEADING_3,
-              }),
-              
-              // Job title
-              new Paragraph({
-                text: `Att.: Ansøgning til ${jobTitle}`,
-                spacing: {
-                  after: 200,
-                },
-              }),
-              
-              // Date - right-aligned
-              new Paragraph({
-                alignment: AlignmentType.RIGHT,
-                children: [
-                  new TextRun({
-                    text: formattedDate,
-                  }),
-                ],
-                spacing: {
-                  after: 400,
-                },
-              }),
-              
-              // Content - split by paragraphs
-              ...letter.content.split("\n\n").map(paragraph => 
-                new Paragraph({
-                  text: paragraph,
-                  spacing: {
-                    after: 200,
-                  },
-                })
-              ),
-            ],
-          },
-        ],
+        sections: [{
+          properties: {},
+          children: [
+            new Paragraph({
+              children: [
+                new TextRun(contentText),
+              ],
+            }),
+          ],
+        }],
       });
       
-      // Generate and download the document
-      Packer.toBlob(doc).then(blob => {
-        saveAs(blob, fileName);
+      // Generate buffer
+      const buffer = await Packer.toBuffer(doc);
+      
+      // Create Blob from buffer
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+      
+      // Generate filename
+      const filename = createFilename(letter, job, 'docx');
+      
+      // Save file
+      saveAs(blob, filename);
+      
+      toast({
+        title: 'DOCX downloaded',
+        description: 'Din ansøgning er blevet downloadet som DOCX.',
       });
     } catch (error) {
-      console.error("Error downloading letter as Word document:", error);
-      alert("Der opstod en fejl under download af ansøgning.");
+      handleDownloadError(error, 'DOCX');
     } finally {
       setIsDownloading(false);
     }
-  }, []);
+  };
+
+  // Download as TXT
+  const handleDownloadTxt = async (letter: CoverLetter, job?: JobPosting | null) => {
+    if (!letter || !letter.content) {
+      toast({
+        title: 'Ingen indhold',
+        description: 'Der er intet indhold at downloade.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setIsDownloading(true);
+
+    try {
+      // Extract text content from possible HTML
+      const contentText = getTextContent(letter.content);
+      
+      // Create Blob from text
+      const blob = new Blob([contentText], { type: 'text/plain;charset=utf-8' });
+      
+      // Generate filename
+      const filename = createFilename(letter, job, 'txt');
+      
+      // Save file
+      saveAs(blob, filename);
+      
+      toast({
+        title: 'TXT downloaded',
+        description: 'Din ansøgning er blevet downloadet som TXT.',
+      });
+    } catch (error) {
+      handleDownloadError(error, 'TXT');
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
   return {
     isDownloading,
