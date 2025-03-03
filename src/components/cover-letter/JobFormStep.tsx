@@ -71,10 +71,10 @@ const JobFormStep: React.FC<JobFormStepProps> = ({
       {isGenerating && (
         <div className="mt-8 border-t border-gray-200 pt-6">
           <GenerationProgressIndicator 
-            isLoading={isGenerating}
-            phase={generationPhase || 'generation'} 
             progress={generationProgress?.progress || 0}
-            message={generationProgress?.message}
+            elapsed={1500}
+            phase={generationPhase || 'generation'} 
+            message={generationProgress?.message || "Genererer din ansøgning..."}
             onRetry={resetError}
           />
         </div>

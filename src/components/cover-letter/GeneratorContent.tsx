@@ -44,7 +44,7 @@ export const GeneratorContent: React.FC<GeneratorProps> = ({ existingLetterId })
 
   // Ensure user has all required properties by creating a complete User object
   const completeUser: User | null = user ? {
-    id: user.id,
+    id: user.id || "",
     email: user.email || "",
     name: user.name || "",
     phone: user.phone || "",
