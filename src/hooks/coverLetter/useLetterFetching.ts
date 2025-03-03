@@ -1,3 +1,4 @@
+
 import { useCallback } from "react";
 import { CoverLetter, User } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
@@ -17,7 +18,7 @@ export const useLetterFetching = (
   setLoadingState: React.Dispatch<React.SetStateAction<string>>,
   setGenerationError: React.Dispatch<React.SetStateAction<string | null>>,
   setGenerationPhase: React.Dispatch<React.SetStateAction<string | null>>,
-  setGenerationProgress: GenerationProgress
+  setGenerationProgress: React.Dispatch<React.SetStateAction<GenerationProgress>>
 ) => {
   const { toast } = useToast();
   const toastMessages = useToastMessages();

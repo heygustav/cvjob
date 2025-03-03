@@ -14,13 +14,14 @@ import SubscriptionRequired from "../subscription/SubscriptionRequired";
 import { useToastMessages } from "@/hooks/coverLetter/useToastMessages";
 import { CoverLetter, JobPosting, User } from "@/lib/types";
 import { JobFormData } from "@/services/coverLetter/types";
+import { GenerationProgress } from "@/hooks/coverLetter/types";
 
 interface GeneratorProps {
   existingLetterId?: string;
 }
 
 export const GeneratorContent: React.FC<GeneratorProps> = ({ existingLetterId }) => {
-  const { user } = useAuth();
+  const { user: authUser } = useAuth();
   const navigate = useNavigate();
   const { jobId } = useParams();
   const [searchParams] = useSearchParams();
@@ -37,6 +38,11 @@ export const GeneratorContent: React.FC<GeneratorProps> = ({ existingLetterId })
   const [generationPhase, setGenerationPhase] = useState<string | null>(null);
   const [loadingState, setLoadingState] = useState("idle");
   const [selectedJob, setSelectedJob] = useState<JobPosting | null>(null);
+  const [generationProgress, setGenerationProgress] = useState<GenerationProgress>({
+    phase: 'letter-fetch',
+    progress: 0,
+    message: 'Loading letter...'
+  });
   
   const toastMessages = useToastMessages();
   
@@ -48,9 +54,19 @@ export const GeneratorContent: React.FC<GeneratorProps> = ({ existingLetterId })
     }
   };
   
+  // Ensure user has all required properties by creating a complete User object
+  const completeUser: User | null = authUser ? {
+    id: authUser.id || "",
+    email: authUser.email || "",
+    name: authUser.user_metadata?.name || "",
+    phone: authUser.user_metadata?.phone || "",
+    address: authUser.user_metadata?.address || "",
+    profileComplete: !!authUser.user_metadata?.profileComplete
+  } : null;
+  
   // Initialize hook with required arguments
   const { fetchLetter } = useLetterFetching(
-    user,
+    completeUser,
     isMountedRef,
     safeSetState,
     setSelectedJob,
@@ -59,24 +75,10 @@ export const GeneratorContent: React.FC<GeneratorProps> = ({ existingLetterId })
     setLoadingState,
     setError,
     setGenerationPhase,
-    {
-      phase: 'letter-fetch',
-      progress: 0,
-      message: 'Loading letter...'
-    }
+    setGenerationProgress
   );
   
   const { subscriptionStatus, fetchSubscriptionStatus } = useSubscription();
-
-  // Ensure user has all required properties by creating a complete User object
-  const completeUser: User | null = user ? {
-    id: user.id || "",
-    email: user.email || "",
-    name: user.name || "",
-    phone: user.phone || "",
-    address: user.address || "",
-    profileComplete: user.profileComplete || false
-  } : null;
 
   // Fetch subscription status on mount
   useEffect(() => {
