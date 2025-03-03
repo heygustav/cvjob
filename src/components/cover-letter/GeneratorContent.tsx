@@ -78,9 +78,10 @@ export const GeneratorContent: React.FC<GeneratorProps> = ({ existingLetterId })
     setGenerationProgress
   );
   
-  const { subscriptionStatus, fetchSubscriptionStatus } = useSubscription();
+  // Fix: Pass the completeUser object to useSubscription
+  const { subscriptionStatus, fetchSubscriptionStatus } = useSubscription(completeUser);
 
-  // Fetch subscription status on mount
+  // Fetch subscription status on mount - pass the user ID to the function
   useEffect(() => {
     if (completeUser?.id) {
       fetchSubscriptionStatus(completeUser.id);
