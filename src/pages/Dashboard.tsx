@@ -30,7 +30,7 @@ const Dashboard = () => {
   }));
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-20">
+    <div className="min-h-screen bg-gray-50 py-20">
       <DashboardMain
         jobPostings={processedJobPostings}
         coverLetters={coverLetters}

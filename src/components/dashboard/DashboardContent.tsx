@@ -33,7 +33,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
     <div className="bg-white shadow-sm rounded-lg overflow-hidden border border-gray-100">
       <TabNav activeTab={activeTab} onTabChange={onTabChange} />
 
-      <div className="p-4 sm:p-6">
+      <div className="p-6">
         {activeTab === "letters" ? (
           <LetterListComponent 
             coverLetters={coverLetters}
@@ -52,15 +52,15 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
         
         {((activeTab === "letters" && coverLetters.length === 0) || 
            (activeTab === "jobs" && jobPostings.length === 0)) && (
-          <div className="flex flex-col items-center justify-center py-10 px-4 text-center">
-            <div className="rounded-full bg-gray-100 p-4 mb-4">
+          <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+            <div className="rounded-full bg-gray-100 p-5 mb-5">
               {activeTab === "letters" ? (
                 <FilePlus className="h-8 w-8 text-gray-400" />
               ) : (
                 <Briefcase className="h-8 w-8 text-gray-400" />
               )}
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-1">
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
               {activeTab === "letters" ? "Ingen ansøgninger endnu" : "Ingen jobopslag endnu"}
             </h3>
             <p className="text-gray-500 max-w-md mb-6">
@@ -69,7 +69,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
                 : "Du har ikke tilføjet nogen jobopslag endnu. Tilføj dit første jobopslag for at komme i gang."}
             </p>
             <Button asChild>
-              <Link to={activeTab === "letters" ? "/generator" : "/job/new"}>
+              <Link to={activeTab === "letters" ? "/ansoegning" : "/job/new"}>
                 <Plus className="h-4 w-4 mr-2" />
                 {activeTab === "letters" ? "Opret din første ansøgning" : "Tilføj dit første jobopslag"}
               </Link>

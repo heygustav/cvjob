@@ -30,13 +30,15 @@ const Profile: React.FC = () => {
   }
 
   return (
-    <ProfileContainer
-      formData={formData}
-      handleChange={handleChange}
-      handleSubmit={handleSubmit}
-      setFormData={setFormData}
-      isLoading={isLoading}
-    />
+    <div className="bg-gray-50 min-h-screen py-20">
+      <ProfileContainer
+        formData={formData}
+        handleChange={handleChange}
+        handleSubmit={handleSubmit}
+        setFormData={setFormData}
+        isLoading={isLoading}
+      />
+    </div>
   );
 };
 

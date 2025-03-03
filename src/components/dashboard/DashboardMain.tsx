@@ -32,7 +32,7 @@ const DashboardMain: React.FC<DashboardMainProps> = ({
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
       <DashboardHeader 
         jobCount={jobPostings.length}
         letterCount={coverLetters.length}
@@ -41,7 +41,7 @@ const DashboardMain: React.FC<DashboardMainProps> = ({
         isLoading={isRefreshing}
       />
 
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <h2 className="text-2xl font-bold text-gray-800">Dit dashboard</h2>
         
         <DashboardActions 

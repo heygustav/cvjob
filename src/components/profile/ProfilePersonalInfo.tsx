@@ -46,10 +46,10 @@ const ProfilePersonalInfo: React.FC<ProfilePersonalInfoProps> = ({
   };
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-8">
       <div>
-        <h3 className="text-lg font-medium">Personlige oplysninger</h3>
-        <p className="text-sm text-muted-foreground">
+        <h3 className="text-lg font-medium text-gray-900">Personlige oplysninger</h3>
+        <p className="text-sm text-muted-foreground mt-1">
           Disse oplysninger bruges til at generere dine ansøgninger
         </p>
       </div>
