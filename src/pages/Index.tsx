@@ -9,7 +9,6 @@ const HowItWorksSection = lazy(() => import('../components/home/HowItWorksSectio
 const TestimonialsSection = lazy(() => import('../components/home/TestimonialsSection'));
 const CTASection = lazy(() => import('../components/home/CTASection'));
 const FooterSection = lazy(() => import('../components/home/FooterSection'));
-const IconDemo = lazy(() => import('../components/IconDemo'));
 
 // Better loading placeholder with clear visual feedback
 const SectionPlaceholder = () => (
@@ -63,7 +62,6 @@ const LazyHowItWorksSection = createLazyComponent(HowItWorksSection);
 const LazyTestimonialsSection = createLazyComponent(TestimonialsSection);
 const LazyCTASection = createLazyComponent(CTASection);
 const LazyFooterSection = createLazyComponent(FooterSection);
-const LazyIconDemo = createLazyComponent(IconDemo);
 
 const Index = () => {
   const { session } = useAuth();
@@ -87,14 +85,6 @@ const Index = () => {
         <FeaturesSection />
         
         {/* Non-critical components loaded lazily with intersection observer */}
-        <section className="container mx-auto px-4 py-12">
-          <h2 className="text-3xl font-bold text-center mb-8">Vores Optimerede Ikonsystem</h2>
-          <p className="text-center text-muted-foreground mb-8">
-            Vi anvender et højeffektivt ikonsystem med både statiske og dynamiske indlæsningsstrategier for optimal ydeevne.
-          </p>
-          <LazyIconDemo />
-        </section>
-        
         <LazyHowItWorksSection session={session} />
         <LazyTestimonialsSection />
         <LazyCTASection session={session} />
