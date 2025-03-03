@@ -1,50 +1,81 @@
 
-import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.1'
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
-
-const supabase = createClient(
-  Deno.env.get('SUPABASE_URL') || '',
-  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
-)
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.5.0'
+import { corsHeaders } from '../_shared/cors.ts'
 
 serve(async (req) => {
-  // Handle CORS preflight requests
+  // This is needed if you're planning to invoke your function from a browser.
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
+    return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    // Get the user ID from the request
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') || ''
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
+    const supabase = createClient(supabaseUrl, supabaseServiceKey)
+
+    // Get the request body
     const { userId } = await req.json()
-    
+
     if (!userId) {
-      return new Response(JSON.stringify({ error: 'User ID is required' }), {
+      return new Response(JSON.stringify({ error: 'Missing userId' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       })
     }
-    
-    // Call the database function to increment generation count
-    const { error } = await supabase.rpc('increment_user_generation_count', { user_id: userId })
-    
-    if (error) {
-      throw error
+
+    console.log(`Incrementing generation count for user: ${userId}`)
+
+    // Check if user exists in user_generations
+    const { data: existingData, error: fetchError } = await supabase
+      .from('user_generations')
+      .select('*')
+      .eq('user_id', userId)
+      .maybeSingle()
+
+    if (fetchError && fetchError.code !== 'PGRST116') {
+      console.error('Error checking user generation count:', fetchError)
+      throw fetchError
     }
-    
-    return new Response(JSON.stringify({ success: true }), {
-      status: 200,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+
+    let result
+
+    if (existingData) {
+      // Update existing record
+      const { data, error } = await supabase
+        .from('user_generations')
+        .update({
+          count: existingData.count + 1,
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', userId)
+        .select()
+
+      if (error) throw error
+      result = data
+    } else {
+      // Create new record
+      const { data, error } = await supabase
+        .from('user_generations')
+        .insert({
+          user_id: userId,
+          count: 1
+        })
+        .select()
+
+      if (error) throw error
+      result = data
+    }
+
+    return new Response(JSON.stringify({ success: true, data: result }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: 200
     })
   } catch (error) {
     console.error('Error incrementing generation count:', error)
     return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: 500
     })
   }
 })

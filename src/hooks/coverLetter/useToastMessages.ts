@@ -1,77 +1,80 @@
 
-import { ToastMessagesType } from "./types";
+import { useToast } from "../use-toast";
 
-export const useToastMessages = () => {
+type ToastMessagesType = {
+  generationStarted: () => void;
+  generationSuccess: () => void;
+  generationError: (errorMessage: string) => void;
+  letterSaved: () => void;
+  letterSaveError: (errorMessage: string) => void;
+  letterUpdated: () => void;
+  letterUpdateError: (errorMessage: string) => void;
+  subscriptionRequired: () => void;
+};
+
+export const useToastMessages = (): ToastMessagesType => {
+  const { toast } = useToast();
+
   const messages: ToastMessagesType = {
-    networkError: {
-      title: "Netværksfejl",
-      description: "Kunne ikke forbinde til serveren. Tjek din internetforbindelse og prøv igen.",
-      variant: "destructive",
+    generationStarted: () => {
+      toast({
+        title: "Generering startet",
+        description: "Vi genererer nu din ansøgning. Det kan tage op til et minut.",
+      });
     },
-    jobNotFound: {
-      title: "Job ikke fundet",
-      description: "Det angivne job blev ikke fundet. Prøv igen eller opret et nyt job.",
-      variant: "destructive",
+    
+    generationSuccess: () => {
+      toast({
+        title: "Ansøgning genereret",
+        description: "Din ansøgning er nu klar. Du kan redigere og downloade den.",
+      });
     },
-    letterNotFound: {
-      title: "Ansøgning ikke fundet",
-      description: "Den angivne ansøgning blev ikke fundet. Prøv igen eller opret en ny ansøgning.",
-      variant: "destructive",
+    
+    generationError: (errorMessage: string) => {
+      toast({
+        title: "Fejl ved generering",
+        description: errorMessage || "Der opstod en fejl under generering af ansøgningen.",
+        variant: "destructive",
+      });
     },
-    letterGenerated: {
-      title: "Ansøgning genereret",
-      description: "Din ansøgning er blevet genereret. Du kan nu redigere og gemme den.",
+    
+    letterSaved: () => {
+      toast({
+        title: "Ansøgning gemt",
+        description: "Din ansøgning er blevet gemt i din profil.",
+      });
     },
-    letterUpdated: {
-      title: "Ansøgning opdateret",
-      description: "Din ansøgning er blevet opdateret og gemt.",
+    
+    letterSaveError: (errorMessage: string) => {
+      toast({
+        title: "Fejl ved gemning",
+        description: errorMessage || "Der opstod en fejl under gemning af ansøgningen.",
+        variant: "destructive",
+      });
     },
-    letterSaved: {
-      title: "Ansøgning gemt",
-      description: "Din ansøgning er blevet gemt.",
+    
+    letterUpdated: () => {
+      toast({
+        title: "Ansøgning opdateret",
+        description: "Dine ændringer er blevet gemt.",
+      });
     },
-    missingFields: {
-      title: "Manglende felter",
-      description: "Udfyld venligst alle påkrævede felter.",
-      variant: "destructive",
+    
+    letterUpdateError: (errorMessage: string) => {
+      toast({
+        title: "Fejl ved opdatering",
+        description: errorMessage || "Der opstod en fejl under opdatering af ansøgningen.",
+        variant: "destructive",
+      });
     },
-    generationInProgress: {
-      title: "Generering i gang",
-      description: "En ansøgning er allerede ved at blive genereret. Vent venligst et øjeblik.",
-    },
-    loginRequired: {
-      title: "Login påkrævet",
-      description: "Du skal være logget ind for at udføre denne handling.",
-      variant: "destructive",
-    },
-    incompleteProfile: {
-      title: "Ufuldstændig profil",
-      description: "For at få bedre resultater, opdater venligst din profil med mere information.",
-      variant: "default",
-    },
-    generationTimeout: {
-      title: "Generering tog for lang tid",
-      description: "Generering af ansøgningen tog for lang tid. Prøv igen senere.",
-      variant: "destructive",
-    },
-    subscriptionRequired: {
-      title: "Abonnement påkrævet",
-      description: "Du har brugt din gratis generering. Opret et abonnement for at fortsætte.",
-      variant: "default",
-    },
-    subscriptionSuccess: {
-      title: "Abonnement oprettet",
-      description: "Dit abonnement er blevet oprettet. Du har nu ubegrænset adgang.",
-    },
-    promoCodeApplied: {
-      title: "Rabatkode anvendt",
-      description: "Din rabatkode er blevet anvendt på dit abonnement.",
-    },
-    promoCodeInvalid: {
-      title: "Ugyldig rabatkode",
-      description: "Den angivne rabatkode er ugyldig eller udløbet.",
-      variant: "destructive",
-    },
+    
+    subscriptionRequired: () => {
+      toast({
+        title: "Abonnement påkrævet",
+        description: "Du har brugt din gratis generering. Opret et abonnement for at fortsætte.",
+        variant: "default",
+      });
+    }
   };
 
   return messages;

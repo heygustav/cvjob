@@ -1,34 +1,50 @@
 
 import React from "react";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-interface GeneratorHeaderProps {
+export interface GeneratorHeaderProps {
   step: 1 | 2;
   setStep: (step: 1 | 2) => void;
+  hasGeneratedLetter: boolean;
 }
 
-const GeneratorHeader: React.FC<GeneratorHeaderProps> = ({ step, setStep }) => {
+export const GeneratorHeader: React.FC<GeneratorHeaderProps> = ({
+  step,
+  setStep,
+  hasGeneratedLetter,
+}) => {
+  const handleStepChange = (value: string) => {
+    if (value === "1") {
+      setStep(1);
+    } else if (value === "2" && hasGeneratedLetter) {
+      setStep(2);
+    }
+  };
+
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 md:mb-8 gap-4">
-      <div className="text-left">
-        <h1 className="text-2xl sm:text-3xl font-bold leading-tight text-gray-900">
-          {step === 1 ? "Copy/paste jobannonce" : "Din ansøgning"}
+    <div className="mb-8 space-y-4">
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight">
+          Ansøgningsgenerator
         </h1>
-        <p className="mt-1 text-sm sm:text-lg text-gray-600">
-          {step === 1
-            ? "Angiv information om jobbet, du søger"
-            : "Gennemgå og rediger din AI-genererede ansøgning"}
+        <p className="text-muted-foreground">
+          Generér den perfekte ansøgning til dit næste job
         </p>
       </div>
-      {step === 2 && (
-        <button
-          onClick={() => setStep(1)}
-          className="inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black w-full sm:w-auto"
-        >
-          Rediger jobdetaljer
-        </button>
-      )}
+
+      <Tabs
+        defaultValue={step.toString()}
+        value={step.toString()}
+        onValueChange={handleStepChange}
+        className="w-full"
+      >
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="1">Joboplysninger</TabsTrigger>
+          <TabsTrigger value="2" disabled={!hasGeneratedLetter}>
+            Forhåndsvisning
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>
     </div>
   );
 };
-
-export default GeneratorHeader;

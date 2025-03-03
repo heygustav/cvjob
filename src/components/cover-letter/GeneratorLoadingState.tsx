@@ -1,42 +1,39 @@
 
 import React from "react";
-import { LoadingSpinner } from "../LoadingSpinner";
-import { GenerationStatus } from "../GenerationStatus";
+import { GenerationPhase, LoadingState } from "@/hooks/coverLetter/types";
+import { GenerationProgressIndicator } from "@/components/GenerationProgressIndicator";
 
-interface GeneratorLoadingStateProps {
+export interface GeneratorLoadingStateProps {
   isGenerating: boolean;
-  loadingState: string;
-  generationPhase: string | null;
-  generationProgress?: {
-    progress?: number;
-    message?: string;
-  };
+  loadingState: LoadingState;
+  generationPhase: GenerationPhase;
   resetError: () => void;
 }
 
-const GeneratorLoadingState: React.FC<GeneratorLoadingStateProps> = ({
+export const GeneratorLoadingState: React.FC<GeneratorLoadingStateProps> = ({
   isGenerating,
   loadingState,
   generationPhase,
-  generationProgress,
   resetError
 }) => {
-  // Determine which loading message to show based on the current phase
-  const getMessage = () => {
-    if (isGenerating) {
-      return generationPhase === 'user-fetch' ? "Henter brugerdata..." :
-        generationPhase === 'job-save' ? "Gemmer jobdetaljer..." :
-        generationPhase === 'generation' ? (generationProgress?.message || "Genererer ansøgning...") :
-        generationPhase === 'letter-save' ? "Gemmer ansøgning..." : "Arbejder...";
-    } else {
-      return loadingState === "saving" ? "Gemmer ændringer..." : "Indlæser data...";
-    }
-  };
+  return (
+    <div className="container py-8">
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold tracking-tight">
+          Genererer din ansøgning
+        </h1>
+        <p className="text-muted-foreground">
+          Vi arbejder på at skabe den perfekte ansøgning til dig
+        </p>
+      </div>
 
-  const progress = generationProgress?.progress || 30;
-  const message = getMessage();
-
-  return <LoadingSpinner message={message} progress={progress} />;
+      <div className="flex flex-col items-center justify-center py-12">
+        <GenerationProgressIndicator 
+          loading={isGenerating} 
+          phase={generationPhase} 
+          state={loadingState} 
+        />
+      </div>
+    </div>
+  );
 };
-
-export default GeneratorLoadingState;

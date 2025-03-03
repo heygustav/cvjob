@@ -49,40 +49,26 @@ export const incrementGenerationCount = async (userId: string): Promise<void> =>
 // Validate a promo code
 export const validatePromoCode = async (code: string): Promise<PromoCodeValidation> => {
   try {
-    const { data: promoData, error } = await supabase
-      .from('promo_codes')
-      .select('*')
-      .eq('code', code)
-      .single();
+    // Since we don't have the promo_codes table yet, we'll return a mock response
+    // This will be replaced with actual implementation once the SQL is run
+    console.log('Validating promo code:', code);
     
-    if (error) {
+    // Mock implementation until table is created
+    if (code === 'WELCOME10') {
       return { 
-        isValid: false, 
-        message: 'Ugyldig kampagnekode' 
+        isValid: true,
+        discountPercent: 10
       };
-    }
-    
-    const now = new Date();
-    
-    // Check if promo code has expired
-    if (promoData.valid_until && new Date(promoData.valid_until) < now) {
+    } else if (code === 'SUMMER20') {
       return { 
-        isValid: false, 
-        message: 'Kampagnekoden er udløbet' 
-      };
-    }
-    
-    // Check if promo code has reached max uses
-    if (promoData.max_uses && promoData.current_uses >= promoData.max_uses) {
-      return { 
-        isValid: false, 
-        message: 'Kampagnekoden er allerede brugt maksimalt antal gange' 
+        isValid: true,
+        discountPercent: 20
       };
     }
     
     return { 
-      isValid: true,
-      discountPercent: promoData.discount_percent
+      isValid: false, 
+      message: 'Ugyldig kampagnekode' 
     };
   } catch (error) {
     console.error('Error validating promo code:', error);

@@ -1,133 +1,142 @@
 
-import React, { useState } from "react";
-import JobFormStep from "@/components/cover-letter/JobFormStep";
-import PreviewStep from "@/components/cover-letter/PreviewStep";
-import GeneratorErrorState from "@/components/cover-letter/GeneratorErrorState";
-import GeneratorLoadingState from "@/components/cover-letter/GeneratorLoadingState";
-import GeneratorHeader from "@/components/cover-letter/GeneratorHeader";
-import { JobFormData } from "@/services/coverLetter/types";
-import { CoverLetter, JobPosting } from "@/lib/types";
-import { useAuth } from "@/components/AuthProvider";
+import React, { useEffect, useState } from "react";
+import { JobFormStep } from "./JobFormStep";
+import { PreviewStep } from "./PreviewStep";
+import { GeneratorHeader } from "./GeneratorHeader";
+import { GeneratorLoadingState } from "./GeneratorLoadingState";
+import { GeneratorErrorState } from "./GeneratorErrorState";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useLetterGeneration } from "@/hooks/coverLetter/useLetterGeneration";
+import { useLetterFetching } from "@/hooks/coverLetter/useLetterFetching";
+import { useAuthContext } from "@/components/AuthProvider";
 import { useSubscription } from "@/hooks/useSubscription";
-import SubscriptionRequired from "@/components/subscription/SubscriptionRequired";
+import SubscriptionRequired from "../subscription/SubscriptionRequired";
+import { useToastMessages } from "@/hooks/coverLetter/useToastMessages";
+import { CoverLetter } from "@/lib/types";
 
-interface GeneratorContentProps {
-  initialLoading: boolean;
-  isLoading: boolean;
-  isGenerating: boolean;
-  loadingState: string;
-  step: 1 | 2;
-  generationPhase: string | null;
-  generationProgress: any;
-  generationError: string | null;
-  selectedJob: JobPosting | null;
-  generatedLetter: CoverLetter | null;
-  setStep: (step: 1 | 2) => void;
-  resetError: () => void;
-  handleJobFormSubmit: (jobData: JobFormData) => Promise<void>;
-  handleEditLetter: (content: string) => Promise<void>;
-  handleSaveJobAsDraft: (jobData: JobFormData) => Promise<void>;
+interface GeneratorProps {
+  existingLetterId?: string;
 }
 
-const GeneratorContent: React.FC<GeneratorContentProps> = ({
-  initialLoading,
-  isLoading,
-  isGenerating,
-  loadingState,
-  step,
-  generationPhase,
-  generationProgress,
-  generationError,
-  selectedJob,
-  generatedLetter,
-  setStep,
-  resetError,
-  handleJobFormSubmit,
-  handleEditLetter,
-  handleSaveJobAsDraft,
-}) => {
-  const { user } = useAuth();
-  const { subscriptionStatus, canGenerateLetter, recordGeneration } = useSubscription(user);
-  const [showSubscription, setShowSubscription] = useState(false);
+export const GeneratorContent: React.FC<GeneratorProps> = ({ existingLetterId }) => {
+  const { user } = useAuthContext();
+  const navigate = useNavigate();
+  const { jobId } = useParams();
+  const [searchParams] = useSearchParams();
+  const [step, setStep] = useState<1 | 2>(1);
+  const toastMessages = useToastMessages();
+  
+  const { 
+    jobData, 
+    setJobData, 
+    generatedLetter, 
+    setGeneratedLetter, 
+    isLoading, 
+    error, 
+    handleGenerateLetter, 
+    resetError,
+    isGenerating,
+    generationPhase,
+    loadingState,
+    handleEditContent
+  } = useLetterGeneration();
+  
+  const { fetchLetterById } = useLetterFetching();
+  const { subscriptionStatus, fetchSubscriptionStatus } = useSubscription();
 
-  const handleSubmit = async (jobData: JobFormData) => {
-    if (!user) return;
-    
-    // Check if user can generate letter
-    if (!canGenerateLetter()) {
-      setShowSubscription(true);
-      return;
+  // Fetch subscription status on mount
+  useEffect(() => {
+    if (user?.id) {
+      fetchSubscriptionStatus(user.id);
     }
-    
-    // Record generation before proceeding
-    await recordGeneration(user.id);
-    
-    // Proceed with letter generation
-    await handleJobFormSubmit(jobData);
-  };
+  }, [user?.id, fetchSubscriptionStatus]);
 
-  if (initialLoading || isLoading) {
-    return <GeneratorLoadingState />;
-  }
+  // Handle existing letter
+  useEffect(() => {
+    const loadExistingLetter = async () => {
+      if (existingLetterId && user?.id) {
+        try {
+          const letter = await fetchLetterById(existingLetterId);
+          if (letter) {
+            setGeneratedLetter(letter);
+            setStep(2);
+          }
+        } catch (error) {
+          console.error("Error fetching letter:", error);
+        }
+      }
+    };
 
-  if (generationError) {
+    loadExistingLetter();
+  }, [existingLetterId, user?.id, fetchLetterById, setGeneratedLetter]);
+
+  // Handle job ID from URL
+  useEffect(() => {
+    if (jobId && !existingLetterId) {
+      navigate(`/generator?jobId=${jobId}`);
+    }
+  }, [jobId, existingLetterId, navigate]);
+
+  // If subscription check is complete and user can't generate
+  if (subscriptionStatus && !subscriptionStatus.canGenerate && !generatedLetter) {
     return (
-      <GeneratorErrorState
-        error={generationError}
-        onRetry={resetError}
-      />
-    );
-  }
-
-  // Show subscription requirement if needed and user doesn't have access
-  if (showSubscription && user && subscriptionStatus && !subscriptionStatus.hasActiveSubscription && 
-      subscriptionStatus.freeGenerationsUsed >= subscriptionStatus.freeGenerationsAllowed) {
-    return (
-      <div className="container max-w-4xl mx-auto px-4 py-8">
-        <GeneratorHeader 
-          step={1} 
-          setStep={setStep} 
-          isLoading={isLoading} 
-          hasGeneratedLetter={!!generatedLetter}
+      <div className="container py-8">
+        <SubscriptionRequired 
+          user={user} 
+          freeGenerationsUsed={subscriptionStatus.freeGenerationsUsed}
+          freeGenerationsAllowed={subscriptionStatus.freeGenerationsAllowed}
         />
-        <div className="mt-6">
-          <SubscriptionRequired 
-            user={user}
-            freeGenerationsUsed={subscriptionStatus.freeGenerationsUsed}
-            freeGenerationsAllowed={subscriptionStatus.freeGenerationsAllowed}
-          />
-        </div>
       </div>
     );
   }
 
+  // Show loading screen
+  if (isGenerating) {
+    return (
+      <GeneratorLoadingState 
+        isGenerating={isGenerating}
+        loadingState={loadingState}
+        generationPhase={generationPhase}
+        resetError={resetError}
+      />
+    );
+  }
+
+  // Show error screen
+  if (error) {
+    return (
+      <GeneratorErrorState 
+        message={error} 
+        onRetry={resetError} 
+      />
+    );
+  }
+
   return (
-    <div className="container max-w-4xl mx-auto px-4 py-8">
+    <div className="container py-8">
       <GeneratorHeader 
         step={step} 
         setStep={setStep} 
-        isLoading={isLoading} 
         hasGeneratedLetter={!!generatedLetter}
       />
-      
-      {step === 1 ? (
+
+      {step === 1 && (
         <JobFormStep
-          selectedJob={selectedJob}
-          isGenerating={isGenerating}
-          generationPhase={generationPhase}
-          generationProgress={generationProgress}
-          resetError={resetError}
-          onSubmit={handleSubmit}
-          onSave={handleSaveJobAsDraft}
+          jobData={jobData}
+          setJobData={setJobData}
+          onSubmit={handleGenerateLetter}
+          isLoading={isLoading}
+          user={user}
+          initialJobId={searchParams.get("jobId") || undefined}
         />
-      ) : (
-        <PreviewStep
-          generatedLetter={generatedLetter}
-          onEditContent={handleEditLetter}
+      )}
+
+      {step === 2 && generatedLetter && (
+        <PreviewStep 
+          generatedLetter={generatedLetter as CoverLetter} 
+          onEdit={handleEditContent}
         />
       )}
     </div>
   );
 };
-
-export default GeneratorContent;
