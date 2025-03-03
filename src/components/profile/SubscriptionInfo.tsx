@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Loader2 } from "lucide-react";
-import { createCheckoutSession } from "@/services/coverLetter/database";
+import { createCheckoutSession } from "@/services/subscription/subscriptionService";
 import { format } from "date-fns";
 
 interface SubscriptionInfoProps {
