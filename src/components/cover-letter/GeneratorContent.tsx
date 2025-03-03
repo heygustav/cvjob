@@ -12,7 +12,7 @@ import { useAuth } from "@/components/AuthProvider";
 import { useSubscription } from "@/hooks/useSubscription";
 import SubscriptionRequired from "../subscription/SubscriptionRequired";
 import { useToastMessages } from "@/hooks/coverLetter/useToastMessages";
-import { CoverLetter, JobPosting } from "@/lib/types";
+import { CoverLetter, JobPosting, User } from "@/lib/types";
 import { JobFormData } from "@/services/coverLetter/types";
 
 interface GeneratorProps {
@@ -42,12 +42,22 @@ export const GeneratorContent: React.FC<GeneratorProps> = ({ existingLetterId })
   const { fetchLetter } = useLetterFetching();
   const { subscriptionStatus, fetchSubscriptionStatus } = useSubscription();
 
+  // Ensure user has all required properties by creating a complete User object
+  const completeUser: User | null = user ? {
+    id: user.id,
+    email: user.email || "",
+    name: user.name || "",
+    phone: user.phone || "",
+    address: user.address || "",
+    profileComplete: user.profileComplete || false
+  } : null;
+
   // Fetch subscription status on mount
   useEffect(() => {
-    if (user?.id) {
-      fetchSubscriptionStatus(user.id);
+    if (completeUser?.id) {
+      fetchSubscriptionStatus(completeUser.id);
     }
-  }, [user?.id, fetchSubscriptionStatus]);
+  }, [completeUser?.id, fetchSubscriptionStatus]);
 
   // Handle job form submission
   const handleGenerateLetter = async (data: JobFormData) => {
@@ -65,7 +75,7 @@ export const GeneratorContent: React.FC<GeneratorProps> = ({ existingLetterId })
         setSelectedJob({
           ...data,
           id: data.id,
-          user_id: user?.id || "",
+          user_id: completeUser?.id || "",
           created_at: new Date().toISOString()
         } as JobPosting);
       }
@@ -73,9 +83,9 @@ export const GeneratorContent: React.FC<GeneratorProps> = ({ existingLetterId })
       // Create a mock letter
       const letter: CoverLetter = {
         id: Math.random().toString(36).substring(2, 15),
-        user_id: user?.id || "",
+        user_id: completeUser?.id || "",
         job_posting_id: data.id || Math.random().toString(36).substring(2, 15),
-        content: `Kære HR,\n\nJeg ansøger hermed om stillingen som ${data.title} hos ${data.company}.\n\nMed venlig hilsen,\n${user?.name || ""}`,
+        content: `Kære HR,\n\nJeg ansøger hermed om stillingen som ${data.title} hos ${data.company}.\n\nMed venlig hilsen,\n${completeUser?.name || ""}`,
         created_at: new Date().toISOString()
       };
       
@@ -118,7 +128,7 @@ export const GeneratorContent: React.FC<GeneratorProps> = ({ existingLetterId })
   // Handle existing letter
   useEffect(() => {
     const loadExistingLetter = async () => {
-      if (existingLetterId && user?.id) {
+      if (existingLetterId && completeUser?.id) {
         try {
           const letter = await fetchLetter(existingLetterId);
           if (letter) {
@@ -132,7 +142,7 @@ export const GeneratorContent: React.FC<GeneratorProps> = ({ existingLetterId })
     };
 
     loadExistingLetter();
-  }, [existingLetterId, user?.id, fetchLetter]);
+  }, [existingLetterId, completeUser?.id, fetchLetter]);
 
   // Handle job ID from URL
   useEffect(() => {
@@ -146,7 +156,7 @@ export const GeneratorContent: React.FC<GeneratorProps> = ({ existingLetterId })
     return (
       <div className="container py-8">
         <SubscriptionRequired 
-          user={user} 
+          user={completeUser}
           freeGenerationsUsed={subscriptionStatus.freeGenerationsUsed}
           freeGenerationsAllowed={subscriptionStatus.freeGenerationsAllowed}
         />
@@ -190,7 +200,7 @@ export const GeneratorContent: React.FC<GeneratorProps> = ({ existingLetterId })
           setJobData={setJobData}
           onSubmit={handleGenerateLetter}
           isLoading={isLoading}
-          user={user}
+          user={completeUser}
           initialJobId={searchParams.get("jobId") || undefined}
           selectedJob={selectedJob}
           isGenerating={isGenerating}

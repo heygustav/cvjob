@@ -29,9 +29,10 @@ export const GeneratorLoadingState: React.FC<GeneratorLoadingStateProps> = ({
 
       <div className="flex flex-col items-center justify-center py-12">
         <GenerationProgressIndicator 
-          loading={isGenerating} 
-          phase={generationPhase} 
-          state={loadingState} 
+          isLoading={isGenerating}
+          phase={generationPhase || "generating"} 
+          state={loadingState}
+          onRetry={resetError}
         />
       </div>
     </div>

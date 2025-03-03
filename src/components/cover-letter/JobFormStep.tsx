@@ -71,7 +71,7 @@ const JobFormStep: React.FC<JobFormStepProps> = ({
       {isGenerating && (
         <div className="mt-8 border-t border-gray-200 pt-6">
           <GenerationProgressIndicator 
-            loading={isGenerating}
+            isLoading={isGenerating}
             phase={generationPhase || 'generation'} 
             progress={generationProgress?.progress || 0}
             message={generationProgress?.message}

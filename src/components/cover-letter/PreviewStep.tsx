@@ -1,7 +1,7 @@
 
 import React from "react";
 import { CoverLetter } from "@/lib/types";
-import { CoverLetterPreview } from "./preview/index";
+import CoverLetterPreview from "./preview/CoverLetterPreview";
 
 export interface PreviewStepProps {
   generatedLetter: CoverLetter;
@@ -15,7 +15,11 @@ export const PreviewStep: React.FC<PreviewStepProps> = ({
   return (
     <div className="space-y-6">
       <div className="bg-white rounded-lg border">
-        <CoverLetterPreview letter={generatedLetter} onEditContent={onEdit} />
+        <CoverLetterPreview 
+          content={generatedLetter.content}
+          onEdit={onEdit}
+          isEditable={true}
+        />
       </div>
     </div>
   );
