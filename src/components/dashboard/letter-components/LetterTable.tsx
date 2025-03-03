@@ -77,7 +77,7 @@ const LetterTable: React.FC<LetterTableProps> = ({
             <TableHead>Stilling</TableHead>
             <TableHead>Oprettet</TableHead>
             <TableHead>Frist</TableHead>
-            <TableHead className="text-right">Handlinger</TableHead>
+            <TableHead>Handlinger</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
