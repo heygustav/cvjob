@@ -10,5 +10,7 @@ export interface User extends Partial<SupabaseUser> {
   id: string;
   name?: string;
   profileComplete?: boolean;
+  phone?: string;
+  address?: string;
   // Other custom properties can be added here
 }

@@ -1,87 +1,170 @@
-
-import { useState, useCallback } from "react";
+import { useCallback, useRef, useState, useEffect } from "react";
+import { User, JobPosting, CoverLetter } from "@/lib/types";
 import { JobFormData } from "@/services/coverLetter/types";
-import { CoverLetter, JobPosting } from "@/lib/types";
+import { LoadingState, GenerationProgress } from "../types";
+import { useToastMessages } from "../useToastMessages";
+import { useGenerationTracking } from "../generation-tracking";
+import { useGenerationErrorHandling } from "../generation-error-handling";
+import { useGenerationSteps } from "../useGenerationSteps";
+import { useJobFetchingLogic } from "./useJobFetchingLogic";
+import { useLetterFetchingLogic } from "./useLetterFetchingLogic";
+import { useLetterGenerationLogic } from "./useLetterGenerationLogic";
+import { useLetterEditingLogic } from "./useLetterEditingLogic";
 
-export const useLetterGeneration = () => {
-  const [jobData, setJobData] = useState<JobFormData>({
-    title: "",
-    company: "",
-    description: ""
-  });
+export const useCoverLetterGeneration = (user: User | null) => {
+  // State management
+  const [step, setStep] = useState<1 | 2>(1);
+  const [loadingState, setLoadingState] = useState<LoadingState>("idle");
+  const [selectedJob, setSelectedJob] = useState<JobPosting | null>(null);
   const [generatedLetter, setGeneratedLetter] = useState<CoverLetter | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [isGenerating, setIsGenerating] = useState(false);
+  const [generationError, setGenerationError] = useState<string | null>(null);
   const [generationPhase, setGenerationPhase] = useState<string | null>(null);
-  const [loadingState, setLoadingState] = useState("idle");
+  const [generationProgress, setGenerationProgress] = useState<GenerationProgress>({
+    phase: 'job-save',
+    progress: 0,
+    message: 'Forbereder...'
+  });
+  
+  // Refs
+  const generationAttemptRef = useRef(0);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const isMountedRef = useRef(true);
 
-  // Handle job form submission
-  const handleGenerateLetter = useCallback(async (data: JobFormData) => {
-    setIsGenerating(true);
-    setLoadingState("generating");
-    setJobData(data);
+  // Cleanup on unmount
+  useEffect(() => {
+    isMountedRef.current = true;
     
-    try {
-      // Simulation of letter generation process
-      await new Promise(resolve => setTimeout(resolve, 2000));
+    return () => {
+      isMountedRef.current = false;
       
-      // Create a mock letter
-      const letter: CoverLetter = {
-        id: Math.random().toString(36).substring(2, 15),
-        user_id: "user123", // This would come from the authenticated user
-        job_posting_id: data.id || Math.random().toString(36).substring(2, 15),
-        content: `Kære HR,\n\nJeg ansøger hermed om stillingen som ${data.title} hos ${data.company}.\n\nMed venlig hilsen,\nAnsøger`,
-        created_at: new Date().toISOString()
-      };
+      if ((window as any).__generationTimeoutId) {
+        clearTimeout((window as any).__generationTimeoutId);
+        (window as any).__generationTimeoutId = null;
+      }
       
-      setGeneratedLetter(letter);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Der opstod en fejl");
-    } finally {
-      setIsGenerating(false);
-      setLoadingState("idle");
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        abortControllerRef.current = null;
+      }
+    };
+  }, []);
+
+  // Safe state updater
+  const safeSetState = useCallback(<T,>(stateSetter: React.Dispatch<React.SetStateAction<T>>, value: T) => {
+    if (isMountedRef.current) {
+      stateSetter(value);
     }
   }, []);
 
-  // Handle letter content edit
-  const handleEditContent = async (content: string) => {
-    if (!generatedLetter) return;
-    
-    setIsLoading(true);
-    try {
-      // Update letter content
-      setGeneratedLetter({
-        ...generatedLetter,
-        content,
-        updated_at: new Date().toISOString()
-      });
-    } catch (err) {
-      console.error("Error updating letter:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // Derived state
+  const isLoading = loadingState !== "idle";
+  const isGenerating = loadingState === "generating";
+  const isInitializing = loadingState === "initializing";
 
-  // Reset any error
-  const resetError = () => {
-    setError(null);
-    setIsGenerating(false);
-    setLoadingState("idle");
-  };
+  // Compose hooks
+  const toastMessages = useToastMessages();
+  
+  const generationTracking = useGenerationTracking({
+    isMountedRef,
+    safeSetState,
+    setGenerationPhase,
+    setGenerationProgress
+  });
+
+  const errorHandling = useGenerationErrorHandling({
+    isMountedRef,
+    safeSetState,
+    setGenerationError,
+    setLoadingState
+  });
+
+  const generationSteps = useGenerationSteps(
+    user,
+    isMountedRef,
+    generationTracking.updatePhase,
+    abortControllerRef
+  );
+
+  // Domain-specific hooks
+  const { fetchJob } = useJobFetchingLogic(
+    user,
+    isMountedRef,
+    safeSetState,
+    setSelectedJob,
+    setGeneratedLetter,
+    setStep,
+    setLoadingState,
+    setGenerationError,
+    setGenerationPhase,
+    setGenerationProgress
+  );
+
+  const { fetchLetter } = useLetterFetchingLogic(
+    user,
+    isMountedRef,
+    safeSetState,
+    setSelectedJob,
+    setGeneratedLetter,
+    setStep,
+    setLoadingState,
+    setGenerationError,
+    setGenerationPhase,
+    setGenerationProgress
+  );
+
+  const { handleJobFormSubmit } = useLetterGenerationLogic(
+    user,
+    generationAttemptRef,
+    abortControllerRef,
+    isMountedRef,
+    safeSetState,
+    setSelectedJob,
+    setGeneratedLetter,
+    setStep,
+    setLoadingState,
+    setGenerationError,
+    setGenerationPhase,
+    setGenerationProgress,
+    selectedJob,
+    loadingState,
+    generationSteps,
+    generationTracking,
+    errorHandling,
+    toastMessages
+  );
+
+  const { 
+    handleEditLetter, 
+    handleSaveLetter, 
+    saveJobAsDraft, 
+    resetError 
+  } = useLetterEditingLogic(
+    user,
+    isMountedRef,
+    safeSetState,
+    setGeneratedLetter,
+    setLoadingState,
+    setGenerationProgress,
+    generatedLetter
+  );
 
   return {
-    jobData,
-    setJobData,
-    generatedLetter,
-    setGeneratedLetter,
-    isLoading,
-    error,
-    handleGenerateLetter,
-    resetError,
+    step,
     isGenerating,
-    generationPhase,
+    isLoading,
     loadingState,
-    handleEditContent
+    generationPhase,
+    generationProgress,
+    selectedJob,
+    generatedLetter,
+    generationError,
+    setStep,
+    fetchJob,
+    fetchLetter,
+    handleJobFormSubmit,
+    handleEditLetter,
+    handleSaveLetter,
+    saveJobAsDraft,
+    resetError,
   };
 };

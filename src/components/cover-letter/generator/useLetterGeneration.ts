@@ -52,7 +52,8 @@ export const useLetterGeneration = ({
         user_id: completeUser?.id || "",
         job_posting_id: data.id || Math.random().toString(36).substring(2, 15),
         content: `Kære HR,\n\nJeg ansøger hermed om stillingen som ${data.title} hos ${data.company}.\n\nMed venlig hilsen,\n${completeUser?.name || ""}`,
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString() // Add the missing updated_at property
       };
       
       setGeneratedLetter(letter);
