@@ -9,8 +9,8 @@ import { SubscriptionStatus } from "@/services/subscription/types";
 
 const Dashboard = () => {
   const { user } = useAuth();
-  // Pass undefined instead of user directly if user is null
-  const { subscriptionStatus, isLoading: isSubLoading } = useSubscription(user?.id ? user : null);
+  // Pass user object directly since useSubscription now accepts both User types
+  const { subscriptionStatus, isLoading: isSubLoading } = useSubscription(user);
   
   const {
     jobPostings,
