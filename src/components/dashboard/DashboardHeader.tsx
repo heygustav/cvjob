@@ -1,7 +1,9 @@
 
 import React from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertTriangleIcon } from "lucide-react";
+import { AlertTriangle, AlertCircle } from "lucide-react";
+import { Button } from "../ui/button";
+import { useNavigate } from "react-router-dom";
 
 interface DashboardHeaderProps {
   jobCount: number;
@@ -24,6 +26,8 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   isLoading,
   subscriptionStatus,
 }) => {
+  const navigate = useNavigate();
+
   return (
     <div className="mb-8 space-y-6">
       <div className="text-left">
@@ -34,10 +38,17 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
       </div>
 
       {subscriptionStatus && subscriptionStatus.freeGenerationsUsed >= subscriptionStatus.freeGenerationsAllowed && !subscriptionStatus.canGenerate && (
-        <Alert variant="destructive" className="mt-4">
-          <AlertTriangleIcon className="h-4 w-4 mr-2" />
-          <AlertDescription>
-            Du har brugt dit gratis forsøg. Opret et abonnement på din profil for at generere flere ansøgninger.
+        <Alert variant="warning" className="mt-4 bg-amber-50 border-amber-200 text-amber-800">
+          <AlertCircle className="h-4 w-4 mr-2 text-amber-800" />
+          <AlertDescription className="flex justify-between items-center">
+            <span>Du har brugt dit gratis forsøg. Opret et abonnement for at generere flere ansøgninger.</span>
+            <Button 
+              size="sm" 
+              onClick={() => navigate('/profile')}
+              className="ml-4"
+            >
+              Opret abonnement
+            </Button>
           </AlertDescription>
         </Alert>
       )}

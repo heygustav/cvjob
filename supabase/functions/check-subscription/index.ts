@@ -1,70 +1,95 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.5.0'
-import { corsHeaders } from '../_shared/cors.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.13.1'
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
 
 serve(async (req) => {
-  // Handle CORS
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
 
+  // Get request body
+  let body;
   try {
-    const supabaseUrl = Deno.env.get('SUPABASE_URL') || ''
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
-    const supabase = createClient(supabaseUrl, supabaseServiceKey)
+    body = await req.json();
+  } catch (error) {
+    return new Response(JSON.stringify({ error: 'Invalid request body' }), { 
+      status: 400,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+  }
 
-    // Get request payload
-    const { userId } = await req.json()
+  const { userId } = body;
+  if (!userId) {
+    return new Response(JSON.stringify({ error: 'User ID is required' }), { 
+      status: 400,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+  }
 
-    if (!userId) {
-      return new Response(JSON.stringify({ error: 'Missing userId' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      })
-    }
+  // Initialize Supabase client with service role key for admin access
+  const supabaseAdmin = createClient(
+    Deno.env.get('SUPABASE_URL') ?? '',
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+  )
 
-    console.log(`Checking subscription status for user: ${userId}`)
-
-    // Check if user has any generations
-    const { data: generationData, error: generationError } = await supabase
-      .from('user_generations')
+  try {
+    // Check if user has an active subscription
+    const { data: subscriptionData, error: subscriptionError } = await supabaseAdmin
+      .from('subscriptions')
       .select('*')
       .eq('user_id', userId)
-      .maybeSingle()
+      .eq('status', 'active')
+      .maybeSingle();
 
-    if (generationError && generationError.code !== 'PGRST116') {
-      console.error('Error checking user generation count:', generationError)
-      throw generationError
+    if (subscriptionError) {
+      console.error('Error fetching subscription:', subscriptionError);
+      throw subscriptionError;
     }
 
-    // Number of free generations allowed
-    const freeGenerationsAllowed = 1
+    // Get user's generation count
+    const { data: generationData, error: generationError } = await supabaseAdmin
+      .from('user_generation_counts')
+      .select('free_generations_used')
+      .eq('user_id', userId)
+      .maybeSingle();
 
-    // Current count of generations used
-    const freeGenerationsUsed = generationData?.count || 0
+    if (generationError) {
+      console.error('Error fetching generation count:', generationError);
+      throw generationError;
+    }
 
-    // Check if user has an active subscription (mocked for now)
-    // This would normally check a subscriptions table or call a payment provider API
-    const hasActiveSubscription = false
+    // Get free generations allowed
+    const FREE_GENERATIONS_ALLOWED = 1;
+    const freeGenerationsUsed = generationData?.free_generations_used || 0;
 
     // Determine if user can generate
-    const canGenerate = hasActiveSubscription || freeGenerationsUsed < freeGenerationsAllowed
+    const canGenerate = 
+      !!subscriptionData || // Has active subscription
+      freeGenerationsUsed < FREE_GENERATIONS_ALLOWED; // Has free generations left
 
-    return new Response(JSON.stringify({
+    // Prepare response
+    const response = {
       canGenerate,
+      subscription: subscriptionData || null,
       freeGenerationsUsed,
-      freeGenerationsAllowed,
-      subscription: null // We'll add actual subscription data later
-    }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 200
-    })
+      freeGenerationsAllowed: FREE_GENERATIONS_ALLOWED
+    };
+
+    return new Response(JSON.stringify(response), { 
+      status: 200,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
   } catch (error) {
-    console.error('Error checking subscription status:', error)
-    return new Response(JSON.stringify({ error: error.message }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 500
-    })
+    console.error('Error checking subscription status:', error);
+    return new Response(JSON.stringify({ error: 'Server error' }), { 
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
   }
 })
