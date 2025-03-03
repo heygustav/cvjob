@@ -53,13 +53,13 @@ const DashboardMain: React.FC<DashboardMainProps> = ({
         />
       </div>
 
-      <div className="flex justify-end mb-6">
-        <DashboardActions 
-          activeTab={activeTab}
-          isRefreshing={isRefreshing}
-          onRefresh={onRefresh}
-        />
-      </div>
+      <div className="flex justify-start mb-6">
+  <DashboardActions 
+    activeTab={activeTab}
+    isRefreshing={isRefreshing}
+    onRefresh={onRefresh}
+  />
+</div>
 
       <DashboardContent 
         activeTab={activeTab}
