@@ -1,13 +1,13 @@
 
 import React from 'react';
-import { FileText, CheckCircle, Sparkles } from 'lucide-react';
+import Icon from '../ui/icon';
 
 const FeaturesSection: React.FC = () => {
   return (
-    <div className="py-16 sm:py-24 bg-secondary/50">
+    <section className="py-16 sm:py-24 bg-secondary/50" aria-labelledby="features-heading">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mx-auto max-w-2xl lg:text-left">
-          <h2 className="text-base font-semibold leading-7 text-primary-700">
+          <h2 id="features-heading" className="text-base font-semibold leading-7 text-primary-700">
             Spar tid på jobsøgningen
           </h2>
           <p className="mt-2 text-3xl font-bold tracking-tight text-primary-800 sm:text-4xl">
@@ -23,7 +23,7 @@ const FeaturesSection: React.FC = () => {
             <div className="relative pl-16">
               <dt className="text-base font-semibold leading-7 text-primary-800">
                 <div className="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary-700">
-                  <FileText className="h-6 w-6 text-white" aria-hidden="true" />
+                  <Icon name="FileText" className="h-6 w-6 text-white" aria-hidden="true" />
                 </div>
                 Skræddersyede ansøgninger
               </dt>
@@ -35,7 +35,7 @@ const FeaturesSection: React.FC = () => {
             <div className="relative pl-16">
               <dt className="text-base font-semibold leading-7 text-primary-800">
                 <div className="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary-700">
-                  <CheckCircle className="h-6 w-6 text-white" aria-hidden="true" />
+                  <Icon name="CheckCircle" className="h-6 w-6 text-white" aria-hidden="true" />
                 </div>
                 Simpel og intuitiv
               </dt>
@@ -47,7 +47,7 @@ const FeaturesSection: React.FC = () => {
             <div className="relative pl-16">
               <dt className="text-base font-semibold leading-7 text-primary-800">
                 <div className="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary-700">
-                  <Sparkles className="h-6 w-6 text-white" aria-hidden="true" />
+                  <Icon name="Sparkles" className="h-6 w-6 text-white" dynamic aria-hidden="true" />
                 </div>
                 Avanceret AI-teknologi
               </dt>
@@ -59,9 +59,7 @@ const FeaturesSection: React.FC = () => {
             <div className="relative pl-16">
               <dt className="text-base font-semibold leading-7 text-primary-800">
                 <div className="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary-700">
-                  <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-                  </svg>
+                  <Icon name="folder" className="h-6 w-6 text-white" dynamic aria-hidden="true" />
                 </div>
                 Organisér dine ansøgninger
               </dt>
@@ -73,7 +71,7 @@ const FeaturesSection: React.FC = () => {
           </dl>
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 

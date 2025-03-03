@@ -46,12 +46,17 @@ const IconCard = React.memo(({
     className="flex flex-col items-center p-4 border rounded-lg hover:bg-gray-50 transition-colors hover:border-primary cursor-pointer"
     onMouseEnter={onMouseEnter}
     onMouseLeave={onMouseLeave}
+    tabIndex={0}
+    role="button"
+    aria-pressed={isHovered}
+    aria-label={`${label} ikon ${isDynamic ? '(dynamisk indlæst)' : '(statisk indlæst)'}`}
   >
     <Icon 
       name={name} 
       dynamic={isDynamic} 
       size={32} 
       className={`${isHovered ? 'text-primary' : 'text-gray-700'} transition-colors mb-2`} 
+      aria-hidden="true"
     />
     <span className="mt-2 text-sm font-medium">{label}</span>
     <span className="text-xs text-gray-500 mt-1">{isDynamic ? "Dynamic" : "Static"}</span>
@@ -104,48 +109,71 @@ const IconDemo: React.FC = () => {
   }, [hoveredIcon, handleMouseEnter, handleMouseLeave]);
 
   return (
-    <div className="p-4">
+    <section className="p-4" aria-labelledby="icon-demo-heading">
+      <h3 id="icon-demo-heading" className="sr-only">Icon Demonstration</h3>
       <div className="mb-6">
-        <div className="flex justify-center space-x-4 mb-8">
+        <div className="flex justify-center space-x-4 mb-8" role="tablist" aria-label="Icon kategorier">
           <button 
             className={`px-4 py-2 rounded-md ${selectedCategory === 'all' ? 'bg-primary text-white' : 'bg-gray-100'}`}
             onClick={() => setSelectedCategory('all')}
+            role="tab"
+            aria-selected={selectedCategory === 'all'}
+            aria-controls="all-icons-panel"
+            id="all-icons-tab"
           >
-            All Icons
+            Alle Ikoner
           </button>
           <button 
             className={`px-4 py-2 rounded-md ${selectedCategory === 'static' ? 'bg-primary text-white' : 'bg-gray-100'}`}
             onClick={() => setSelectedCategory('static')}
+            role="tab"
+            aria-selected={selectedCategory === 'static'}
+            aria-controls="static-icons-panel"
+            id="static-icons-tab"
           >
-            Static Icons
+            Statiske Ikoner
           </button>
           <button 
             className={`px-4 py-2 rounded-md ${selectedCategory === 'dynamic' ? 'bg-primary text-white' : 'bg-gray-100'}`}
             onClick={() => setSelectedCategory('dynamic')}
+            role="tab"
+            aria-selected={selectedCategory === 'dynamic'}
+            aria-controls="dynamic-icons-panel"
+            id="dynamic-icons-tab"
           >
-            Dynamic Icons
+            Dynamiske Ikoner
           </button>
         </div>
       </div>
 
       {(selectedCategory === 'all' || selectedCategory === 'static') && (
-        <>
-          <h2 className="text-xl font-semibold mb-4">Static Icons (Fast Load)</h2>
+        <div 
+          id="static-icons-panel" 
+          role="tabpanel" 
+          aria-labelledby="static-icons-tab"
+          className={selectedCategory !== 'static' && selectedCategory !== 'all' ? 'hidden' : ''}
+        >
+          <h4 className="text-xl font-semibold mb-4">Statiske Ikoner (Hurtig Indlæsning)</h4>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-8">
             {staticIconItems}
           </div>
-        </>
+        </div>
       )}
       
       {(selectedCategory === 'all' || selectedCategory === 'dynamic') && (
-        <>
-          <h2 className="text-xl font-semibold mb-4">Dynamic Icons (Lazy Loaded)</h2>
+        <div 
+          id="dynamic-icons-panel" 
+          role="tabpanel" 
+          aria-labelledby="dynamic-icons-tab"
+          className={selectedCategory !== 'dynamic' && selectedCategory !== 'all' ? 'hidden' : ''}
+        >
+          <h4 className="text-xl font-semibold mb-4">Dynamiske Ikoner (Lazy Loaded)</h4>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
             {dynamicIconItems}
           </div>
-        </>
+        </div>
       )}
-    </div>
+    </section>
   );
 };
 

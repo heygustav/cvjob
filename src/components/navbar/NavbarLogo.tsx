@@ -13,7 +13,7 @@ const NavbarLogo = React.memo(({ className = "" }: NavbarLogoProps) => {
     <Link 
       to="/" 
       className={`text-xl font-medium tracking-tight text-white flex items-center gap-2 transition-opacity hover:opacity-90 ${className}`}
-      aria-label="CVJob homepage"
+      aria-label="CVJob hjemmeside - AI-drevet jobansøgningsgenerator"
     >
       <Icon name="FileText" className="h-5 w-5" aria-hidden="true" />
       <span className="text-xl sm:text-2xl font-semibold truncate max-w-[180px] sm:max-w-none">
