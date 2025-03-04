@@ -1,5 +1,5 @@
 
-import React, { lazy, Suspense, useState, useEffect } from 'react';
+import React, { lazy, Suspense, useState, useEffect, useMemo, useCallback } from 'react';
 import { useAuth } from '../components/AuthProvider';
 import HeroSection from '../components/home/HeroSection';
 import FeaturesSection from '../components/home/FeaturesSection';
@@ -18,12 +18,15 @@ const SectionPlaceholder = () => (
 );
 
 // Factory function for Intersection Observer based lazy loading
-const createLazyComponent = (Component: React.LazyExoticComponent<any>, placeholder = <SectionPlaceholder />) => {
-  return ({ ...props }) => {
+const createLazyComponent = (Component: React.LazyExoticComponent<any>) => {
+  return memo(({ ...props }) => {
     const [isVisible, setIsVisible] = useState(false);
     const ref = React.useRef<HTMLDivElement>(null);
 
+    // Setup intersection observer only once
     useEffect(() => {
+      if (!ref.current) return;
+      
       const observer = new IntersectionObserver(
         (entries) => {
           if (entries[0].isIntersecting) {
@@ -31,30 +34,27 @@ const createLazyComponent = (Component: React.LazyExoticComponent<any>, placehol
             observer.disconnect();
           }
         },
-        { threshold: 0.1 } // Start loading when 10% of the element is visible
-      );
-
-      if (ref.current) {
-        observer.observe(ref.current);
-      }
-
-      return () => {
-        if (ref.current) {
-          observer.disconnect();
+        { 
+          threshold: 0.1,
+          rootMargin: '100px' // Load when element is 100px from viewport
         }
-      };
+      );
+      
+      observer.observe(ref.current);
+      
+      return () => observer.disconnect();
     }, []);
 
     return (
       <div ref={ref} className="min-h-[100px]">
         {isVisible ? (
-          <Suspense fallback={placeholder}>
+          <Suspense fallback={<SectionPlaceholder />}>
             <Component {...props} />
           </Suspense>
-        ) : placeholder}
+        ) : <SectionPlaceholder />}
       </div>
     );
-  };
+  });
 };
 
 // Create optimized lazy components
@@ -63,61 +63,62 @@ const LazyTestimonialsSection = createLazyComponent(TestimonialsSection);
 const LazyCTASection = createLazyComponent(CTASection);
 const LazyFooterSection = createLazyComponent(FooterSection);
 
-const Index = () => {
+// Memoize the entire component for better performance
+const Index = memo(() => {
   // Use optional chaining with session to prevent errors
   const { session } = useAuth() || {};
 
   // Set document title, meta description and canonical for SEO
   useEffect(() => {
+    // SEO updates - only run once
     document.title = "CVJob | AI-Drevet Jobansøgningsgenerator til Personlige Ansøgninger";
     
-    // Add meta description
-    const metaDescription = document.querySelector('meta[name="description"]');
-    if (metaDescription) {
-      metaDescription.setAttribute('content', 'Skab professionelle, personlige jobansøgninger på få minutter med CVJob\'s AI-drevne værktøj. Få flere jobsamtaler med mindre indsats.');
-    }
+    // Set meta tags in a more efficient way
+    const updateMetaTag = (selector: string, attribute: string, value: string) => {
+      let tag = document.querySelector(selector);
+      if (!tag) {
+        tag = document.createElement(selector === 'link[rel="canonical"]' ? 'link' : 'meta');
+        if (selector.includes('property=')) {
+          tag.setAttribute('property', selector.match(/property="([^"]+)"/)![1]);
+        } else if (selector.includes('name=')) {
+          tag.setAttribute('name', selector.match(/name="([^"]+)"/)![1]);
+        } else if (selector.includes('rel=')) {
+          tag.setAttribute('rel', 'canonical');
+        }
+        document.head.appendChild(tag);
+      }
+      tag.setAttribute(attribute, value);
+    };
     
-    // Add canonical link to prevent duplicate content issues
-    let canonicalLink = document.querySelector('link[rel="canonical"]');
-    if (!canonicalLink) {
-      canonicalLink = document.createElement('link');
-      canonicalLink.setAttribute('rel', 'canonical');
-      document.head.appendChild(canonicalLink);
-    }
-    canonicalLink.setAttribute('href', 'https://cvjob.dk');
-    
-    // Update open graph tags to match current content
-    const ogTitle = document.querySelector('meta[property="og:title"]');
-    if (ogTitle) {
-      ogTitle.setAttribute('content', 'CVJob | AI-Drevet Jobansøgningsgenerator til Personlige Ansøgninger');
-    }
-    
-    const ogDescription = document.querySelector('meta[property="og:description"]');
-    if (ogDescription) {
-      ogDescription.setAttribute('content', 'Skab professionelle, personlige jobansøgninger på få minutter med CVJob\'s AI-drevne værktøj. Spild mindre tid på ansøgninger, få flere jobsamtaler.');
-    }
-    
-    const ogUrl = document.querySelector('meta[property="og:url"]');
-    if (ogUrl) {
-      ogUrl.setAttribute('content', 'https://cvjob.dk');
-    }
+    // Update all meta tags at once
+    updateMetaTag('meta[name="description"]', 'content', 'Skab professionelle, personlige jobansøgninger på få minutter med CVJob\'s AI-drevne værktøj. Få flere jobsamtaler med mindre indsats.');
+    updateMetaTag('link[rel="canonical"]', 'href', 'https://cvjob.dk');
+    updateMetaTag('meta[property="og:title"]', 'content', 'CVJob | AI-Drevet Jobansøgningsgenerator til Personlige Ansøgninger');
+    updateMetaTag('meta[property="og:description"]', 'content', 'Skab professionelle, personlige jobansøgninger på få minutter med CVJob\'s AI-drevne værktøj. Spild mindre tid på ansøgninger, få flere jobsamtaler.');
+    updateMetaTag('meta[property="og:url"]', 'content', 'https://cvjob.dk');
   }, []);
+
+  // Memoize the session prop to prevent unnecessary re-renders
+  const sessionProp = useMemo(() => session, [session]);
 
   return (
     <div className="bg-background">
       <main>
         {/* Critical components loaded eagerly */}
-        <HeroSection session={session} />
+        <HeroSection session={sessionProp} />
         <FeaturesSection />
         
         {/* Non-critical components loaded lazily with intersection observer */}
-        <LazyHowItWorksSection session={session} />
+        <LazyHowItWorksSection session={sessionProp} />
         <LazyTestimonialsSection />
-        <LazyCTASection session={session} />
+        <LazyCTASection session={sessionProp} />
       </main>
       <LazyFooterSection />
     </div>
   );
-};
+});
+
+// Add displayName for debugging
+Index.displayName = 'IndexPage';
 
 export default Index;

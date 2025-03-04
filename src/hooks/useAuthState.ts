@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
@@ -39,46 +39,60 @@ export const useAuthState = (): [AuthState, AuthActions] => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Computed property for authentication status
-  const isAuthenticated = !!session && !!user;
+  // Memoize the isAuthenticated value to prevent unnecessary re-renders
+  const isAuthenticated = useMemo(() => !!session && !!user, [session, user]);
 
+  // Retrieve stored redirect URL on mount only once
   useEffect(() => {
-    // Check for stored redirect URL on mount
     const storedRedirect = localStorage.getItem('redirectAfterLogin');
-    if (storedRedirect) {
-      // Sanitize the URL to prevent open redirect vulnerabilities
-      const sanitizedUrl = DOMPurify.sanitize(storedRedirect);
-      // Only accept internal URLs
-      if (sanitizedUrl.startsWith('/') && !sanitizedUrl.includes('://')) {
-        setRedirectUrl(sanitizedUrl);
-        console.log("Auth: Found redirectUrl:", sanitizedUrl);
-      } else {
-        console.error("Invalid redirect URL detected and blocked:", storedRedirect);
-      }
+    if (!storedRedirect) return;
+    
+    // Sanitize the URL to prevent open redirect vulnerabilities
+    const sanitizedUrl = DOMPurify.sanitize(storedRedirect);
+    // Only accept internal URLs
+    if (sanitizedUrl.startsWith('/') && !sanitizedUrl.includes('://')) {
+      setRedirectUrl(sanitizedUrl);
+      console.log("Auth: Found redirectUrl:", sanitizedUrl);
+    } else {
+      console.error("Invalid redirect URL detected and blocked:", storedRedirect);
     }
   }, []);
 
+  // Optimize auth state listener with proper cleanup
   useEffect(() => {
+    let mounted = true;
+    
     // Check for active session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setIsLoading(false);
+    const getInitialSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      if (mounted) {
+        setSession(data.session);
+        setUser(data.session?.user ?? null);
+        setIsLoading(false);
+      }
+    };
+    
+    getInitialSession();
+
+    // Use the subscription for real-time updates
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+      if (mounted) {
+        setSession(session);
+        setUser(session?.user ?? null);
+        setIsLoading(false);
+      }
     });
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setIsLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
+    // Cleanup on unmount
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
-  // This useEffect handles redirection after login
+  // Optimize redirect effect to only run when necessary
   useEffect(() => {
-    // Only redirect if we have a new session (i.e., just logged in)
+    // Only redirect if we have a new session and a redirect URL
     if (session && redirectUrl) {
       console.log("Auth: Redirecting to:", redirectUrl);
       localStorage.removeItem('redirectAfterLogin');
@@ -87,32 +101,38 @@ export const useAuthState = (): [AuthState, AuthActions] => {
     }
   }, [session, navigate, redirectUrl]);
 
-  const signIn = async (email: string, password: string) => {
+  // Memoize authentication functions to prevent unnecessary re-renders
+  const signIn = useCallback(async (email: string, password: string) => {
     setIsLoading(true);
     const result = await supabase.auth.signInWithPassword({ email, password });
     setIsLoading(false);
     return result;
-  };
+  }, []);
 
-  const signUp = async (email: string, password: string, name?: string) => {
+  const signUp = useCallback(async (email: string, password: string, name?: string) => {
     setIsLoading(true);
     // If we have a name, add it as metadata
     const options = name ? { data: { name } } : undefined;
     const result = await supabase.auth.signUp({ email, password, options });
     setIsLoading(false);
     return result;
-  };
+  }, []);
 
-  const signOut = async () => {
+  const signOut = useCallback(async () => {
     await supabase.auth.signOut();
     navigate('/login');
-  };
+  }, [navigate]);
 
-  const resetAttemptCount = () => {
+  const resetAttemptCount = useCallback(() => {
     setAttemptCount(0);
-  };
+  }, []);
 
-  const handleAuthentication = async (email: string, password: string, isSignUp: boolean, name?: string) => {
+  const handleAuthentication = useCallback(async (
+    email: string, 
+    password: string, 
+    isSignUp: boolean, 
+    name?: string
+  ) => {
     // Rate limiting to prevent brute force attacks
     if (attemptCount > 5) {
       toast({
@@ -123,7 +143,7 @@ export const useAuthState = (): [AuthState, AuthActions] => {
       return;
     }
     
-    // Increment attempt counter
+    // Use functional update to prevent stale state issues
     setAttemptCount(prev => prev + 1);
 
     try {
@@ -176,25 +196,26 @@ export const useAuthState = (): [AuthState, AuthActions] => {
         variant: 'destructive',
       });
     }
-  };
+  }, [attemptCount, navigate, redirectUrl, resetAttemptCount, signIn, signUp, toast]);
 
-  const state: AuthState = {
+  // Memoize state and actions to prevent unnecessary re-renders
+  const state: AuthState = useMemo(() => ({
     session,
     user,
     isLoading,
     isAuthenticated,
     redirectUrl,
     attemptCount,
-  };
+  }), [session, user, isLoading, isAuthenticated, redirectUrl, attemptCount]);
 
-  const actions: AuthActions = {
+  const actions: AuthActions = useMemo(() => ({
     signIn,
     signUp,
     signOut,
     handleAuthentication,
     setRedirectUrl,
     resetAttemptCount,
-  };
+  }), [signIn, signUp, signOut, handleAuthentication, setRedirectUrl, resetAttemptCount]);
 
   return [state, actions];
 };

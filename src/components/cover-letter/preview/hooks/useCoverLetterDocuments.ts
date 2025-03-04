@@ -1,5 +1,5 @@
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { da } from "date-fns/locale";
@@ -13,106 +13,217 @@ export const useCoverLetterDocuments = (
   jobTitle?: string
 ) => {
   const { toast } = useToast();
-  const currentDate = new Date();
-  // Format the date in Danish, e.g., "1. februar 2025"
-  const formattedDate = format(currentDate, "d. MMMM yyyy", { locale: da });
+  const [isDownloading, setIsDownloading] = useState(false);
+  const downloadTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Generate a memoized formatted date
+  const formattedDate = useCallback(() => {
+    const currentDate = new Date();
+    return format(currentDate, "d. MMMM yyyy", { locale: da });
+  }, []);
 
-  // Function to download as text file
-  const handleDownloadTxt = useCallback(() => {
-    try {
-      const documentOptions: TextDocumentOptions = {
-        content,
-        company,
-        jobTitle,
-        formattedDate
-      };
+  // Debounce function to prevent multiple quick downloads
+  const debounce = (func: Function, wait: number) => {
+    return (...args: any[]) => {
+      if (downloadTimeoutRef.current) {
+        clearTimeout(downloadTimeoutRef.current);
+      }
       
-      const documentText = createTextDocument(documentOptions);
-      const filename = generateTextFilename(company, jobTitle);
+      if (isDownloading) {
+        toast({
+          title: "Download i gang",
+          description: "Vent venligst mens vi forbereder din fil...",
+        });
+        return;
+      }
       
-      const element = document.createElement("a");
-      const file = new Blob([documentText], { type: "text/plain" });
-      element.href = URL.createObjectURL(file);
-      element.download = filename;
-      document.body.appendChild(element);
-      element.click();
-      document.body.removeChild(element);
+      setIsDownloading(true);
+      
+      downloadTimeoutRef.current = setTimeout(async () => {
+        try {
+          await func(...args);
+        } finally {
+          setIsDownloading(false);
+          downloadTimeoutRef.current = null;
+        }
+      }, wait);
+    };
+  };
 
+  // Helper for error handling
+  const handleDownloadError = useCallback((error: any, format: string) => {
+    console.error(`Error downloading ${format}:`, error);
+    toast({
+      title: `Download fejlede`,
+      description: `Der opstod en fejl under download af ${format}. Prøv igen senere.`,
+      variant: 'destructive',
+    });
+    setIsDownloading(false);
+  }, [toast]);
+
+  // Helper to create a sanitized filename
+  const createFilename = useCallback((letter: string, job: string | undefined, company: string | undefined, extension: string) => {
+    // Get job title and company if available
+    const jobTitle = job ? job.replace(/[^\w\s-]/g, '') : 'untitled';
+    const companyName = company ? company.replace(/[^\w\s-]/g, '') : 'unknown';
+    
+    // Create a timestamp
+    const timestamp = new Date().toISOString().split('T')[0];
+    
+    // Create filename: sanitize and replace spaces with hyphens
+    return `ansøgning-${companyName}-${jobTitle}-${timestamp}.${extension}`
+      .toLowerCase()
+      .replace(/\s+/g, '-');
+  }, []);
+
+  // Helper to safely get text content from possible HTML
+  const getTextContent = useCallback((htmlString: string) => {
+    // Create a temporary div element
+    const tempDiv = document.createElement('div');
+    // Set the HTML content of the div
+    tempDiv.innerHTML = htmlString;
+    // Return the text content of the div
+    return tempDiv.textContent || tempDiv.innerText || '';
+  }, []);
+
+  // Download as PDF - wrapped with debounce
+  const handleDownloadPdf = useCallback(debounce(async (letterContent: string) => {
+    if (!letterContent) {
       toast({
-        title: "Download startet",
-        description: "Din ansøgning bliver downloadet som tekstfil.",
+        title: 'Ingen indhold',
+        description: 'Der er intet indhold at downloade.',
+        variant: 'destructive',
       });
-    } catch (error) {
-      console.error("Error generating text file:", error);
-      toast({
-        title: "Fejl ved generering af tekstfil",
-        description: "Der opstod en fejl. Prøv igen senere.",
-        variant: "destructive",
-      });
+      return;
     }
-  }, [content, company, jobTitle, formattedDate, toast]);
 
-  // Function to download as PDF
-  const handleDownloadPdf = useCallback(() => {
     try {
+      // Extract text content from possible HTML
+      const contentText = getTextContent(letterContent);
+      
+      // Create PDF document
       const documentOptions: PdfDocumentOptions = {
-        content,
+        content: contentText,
         company,
         jobTitle,
-        formattedDate
+        formattedDate: formattedDate()
       };
       
       const doc = createPdfDocument(documentOptions);
-      const filename = generatePdfFilename(company, jobTitle);
+      
+      // Generate filename
+      const filename = createFilename(letterContent, jobTitle, company, 'pdf');
+      
+      // Save PDF
       doc.save(filename);
       
       toast({
-        title: "PDF download startet",
-        description: "Din ansøgning bliver downloadet som PDF.",
+        title: 'PDF downloaded',
+        description: 'Din ansøgning er blevet downloadet som PDF.',
       });
     } catch (error) {
-      console.error("Error generating PDF:", error);
-      toast({
-        title: "Fejl ved generering af PDF",
-        description: "Der opstod en fejl. Prøv igen senere.",
-        variant: "destructive",
-      });
+      handleDownloadError(error, 'PDF');
     }
-  }, [content, company, jobTitle, formattedDate, toast]);
+  }, 300), [company, jobTitle, formattedDate, getTextContent, createFilename, handleDownloadError, toast]);
 
-  // Function to download as Word document
-  const handleDownloadDocx = useCallback(() => {
+  // Download as DOCX - wrapped with debounce
+  const handleDownloadDocx = useCallback(debounce(async (letterContent: string) => {
+    if (!letterContent) {
+      toast({
+        title: 'Ingen indhold',
+        description: 'Der er intet indhold at downloade.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     try {
+      // Extract text content from possible HTML
+      const contentText = getTextContent(letterContent);
+      
+      // Create DOCX document
       const documentOptions: DocxDocumentOptions = {
-        content,
+        content: contentText,
         company,
         jobTitle,
-        formattedDate
+        formattedDate: formattedDate()
       };
       
       const doc = createDocxDocument(documentOptions);
-      const filename = generateDocxFilename(company, jobTitle);
       
-      saveDocxDocument(doc, filename).then(() => {
-        toast({
-          title: "Word download startet",
-          description: "Din ansøgning bliver downloadet som Word-dokument.",
-        });
+      // Generate filename
+      const filename = createFilename(letterContent, jobTitle, company, 'docx');
+      
+      // Save file
+      await saveDocxDocument(doc, filename);
+      
+      toast({
+        title: 'DOCX downloaded',
+        description: 'Din ansøgning er blevet downloadet som DOCX.',
       });
     } catch (error) {
-      console.error("Error generating Word document:", error);
-      toast({
-        title: "Fejl ved generering af Word-dokument",
-        description: "Der opstod en fejl. Prøv igen senere.",
-        variant: "destructive",
-      });
+      handleDownloadError(error, 'DOCX');
     }
-  }, [content, company, jobTitle, formattedDate, toast]);
+  }, 300), [company, jobTitle, formattedDate, getTextContent, createFilename, handleDownloadError, toast]);
+
+  // Download as TXT - wrapped with debounce
+  const handleDownloadTxt = useCallback(debounce(async (letterContent: string) => {
+    if (!letterContent) {
+      toast({
+        title: 'Ingen indhold',
+        description: 'Der er intet indhold at downloade.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      // Extract text content from possible HTML
+      const contentText = getTextContent(letterContent);
+      
+      // Create text document
+      const documentOptions: TextDocumentOptions = {
+        content: contentText,
+        company,
+        jobTitle,
+        formattedDate: formattedDate()
+      };
+      
+      const documentText = createTextDocument(documentOptions);
+      
+      // Create Blob from text
+      const blob = new Blob([documentText], { type: 'text/plain;charset=utf-8' });
+      
+      // Generate filename
+      const filename = createFilename(letterContent, jobTitle, company, 'txt');
+      
+      // Create download link
+      const element = document.createElement("a");
+      element.href = URL.createObjectURL(blob);
+      element.download = filename;
+      document.body.appendChild(element);
+      element.click();
+      
+      // Clean up
+      setTimeout(() => {
+        document.body.removeChild(element);
+        URL.revokeObjectURL(element.href);
+      }, 100);
+      
+      toast({
+        title: 'TXT downloaded',
+        description: 'Din ansøgning er blevet downloadet som TXT.',
+      });
+    } catch (error) {
+      handleDownloadError(error, 'TXT');
+    }
+  }, 300), [company, jobTitle, formattedDate, getTextContent, createFilename, handleDownloadError, toast]);
 
   return {
-    formattedDate,
-    handleDownloadTxt,
-    handleDownloadPdf,
-    handleDownloadDocx
+    isDownloading,
+    formattedDate: formattedDate(),
+    handleDownloadPdf: () => handleDownloadPdf(content),
+    handleDownloadDocx: () => handleDownloadDocx(content),
+    handleDownloadTxt: () => handleDownloadTxt(content)
   };
 };
