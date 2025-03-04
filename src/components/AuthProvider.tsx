@@ -2,7 +2,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import DOMPurify from 'dompurify';
 
@@ -35,6 +35,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [redirectUrl, setRedirectUrl] = useState<string | null>(null);
   const [attemptCount, setAttemptCount] = useState(0);
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
 
   // Computed property for authentication status
@@ -74,16 +75,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => subscription.unsubscribe();
   }, []);
 
+  // This useEffect is causing the navigation issue
+  // We only want to redirect after login, not on every render when session exists
   useEffect(() => {
-    if (session) {
-      // Redirect to stored URL if available, otherwise to dashboard
-      if (redirectUrl) {
-        console.log("Auth: Redirecting to:", redirectUrl);
-        localStorage.removeItem('redirectAfterLogin');
-        navigate(redirectUrl);
-      } else {
-        navigate('/dashboard');
-      }
+    // Only redirect if we have a new session (i.e., just logged in)
+    if (session && redirectUrl) {
+      console.log("Auth: Redirecting to:", redirectUrl);
+      localStorage.removeItem('redirectAfterLogin');
+      navigate(redirectUrl);
+      setRedirectUrl(null); // Clear the redirect URL after use
     }
   }, [session, navigate, redirectUrl]);
 
@@ -139,6 +139,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           title: 'Logget ind',
           description: 'Du er nu logget ind',
         });
+        
+        // Set default redirect to dashboard if none specified
+        if (!redirectUrl) {
+          navigate('/dashboard');
+        }
         
         // Reset attempt counter on successful login
         setAttemptCount(0);
