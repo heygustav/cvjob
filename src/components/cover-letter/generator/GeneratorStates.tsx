@@ -2,7 +2,7 @@
 import React from "react";
 import { GeneratorLoadingState } from "../GeneratorLoadingState";
 import { GeneratorErrorState } from "../GeneratorErrorState";
-import SubscriptionRequired from "../../subscription/SubscriptionRequired";
+import SubscriptionRequired from "@/components/subscription/subscriptionRequired";
 import { User } from "@/lib/types";
 import { SubscriptionStatus } from "@/services/subscription/types";
 
