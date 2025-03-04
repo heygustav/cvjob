@@ -1,17 +1,17 @@
 
 import React, { useState, useEffect, useRef } from "react";
-import { Clock } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 interface LoadingSpinnerProps {
   message?: string;
   progress?: number;
-  className?: string; // Added className prop
+  className?: string;
 }
 
 export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ 
   message = "Indlæser...",
   progress,
-  className = "" // Default to empty string
+  className = ""
 }) => {
   const [elapsed, setElapsed] = useState(0);
   const startTimeRef = useRef<number>(Date.now());
@@ -44,9 +44,9 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
 
   return (
     <div className="min-h-[60vh] md:min-h-screen bg-gray-50 flex justify-center items-center px-4" aria-live="polite" role="status">
-      <div className="w-full max-w-md bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+      <div className="w-full max-w-md bg-white p-6 rounded-lg shadow-sm border border-gray-100 text-center">
         <div className="flex justify-center" aria-hidden="true">
-          <Clock className={`h-12 w-12 animate-pulse text-gray-700 ${className}`} />
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
         </div>
         <h2 className="mt-4 text-lg font-medium text-gray-800 text-center">{message}</h2>
         <div className="mt-3 flex justify-between items-center">
@@ -57,7 +57,7 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
         {progress !== undefined && progress > 0 && (
           <div className="mt-4 w-full bg-gray-200 rounded-full h-2.5" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress} role="progressbar">
             <div 
-              className="bg-blue-600 h-2.5 rounded-full transition-all duration-500 ease-in-out" 
+              className="bg-primary h-2.5 rounded-full transition-all duration-500 ease-in-out" 
               style={{ width: `${progress}%` }}
             ></div>
           </div>
@@ -70,4 +70,3 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
     </div>
   );
 };
-

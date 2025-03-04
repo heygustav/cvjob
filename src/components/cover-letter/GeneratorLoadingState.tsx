@@ -1,7 +1,7 @@
 
 import React from "react";
 import { LoadingState } from "@/hooks/coverLetter/types";
-import GenerationProgressIndicator from "@/components/GenerationProgressIndicator";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 
 export interface GeneratorLoadingStateProps {
   isGenerating: boolean;
@@ -28,12 +28,9 @@ export const GeneratorLoadingState: React.FC<GeneratorLoadingStateProps> = ({
       </div>
 
       <div className="flex flex-col items-center justify-center py-12">
-        <GenerationProgressIndicator 
+        <LoadingSpinner 
           progress={70}
-          elapsed={1500}
-          phase={generationPhase || "generating"} 
           message="Genererer din ansøgning..."
-          onRetry={resetError}
         />
       </div>
     </div>

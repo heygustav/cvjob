@@ -57,7 +57,7 @@ const ProfileContainer: React.FC<ProfileContainerProps> = ({
   };
 
   return (
-    <div className="container mx-auto px-4 max-w-4xl">
+    <div className="container mx-auto px-4 max-w-4xl text-left">
       <ProfileHeader 
         title="Min Profil" 
         subtitle="Administrer dine personoplysninger og indstillinger" 
@@ -87,11 +87,11 @@ const ProfileContainer: React.FC<ProfileContainerProps> = ({
               />
             </TabsContent>
             
-            <TabsContent value="subscription" className="m-0 p-8">
+            <TabsContent value="subscription" className="m-0 p-8 text-left">
               <SubscriptionInfo user={appUser} />
             </TabsContent>
             
-            <TabsContent value="account" className="m-0">
+            <TabsContent value="account" className="m-0 text-left">
               <ProfileAccountSettings />
             </TabsContent>
           </CardContent>

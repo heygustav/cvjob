@@ -1,3 +1,4 @@
+
 import React, { useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useAuth } from "@/components/AuthProvider";
@@ -67,9 +68,32 @@ const CoverLetterGenerator: React.FC = () => {
     await saveJobAsDraft(jobData);
   };
 
+  if (initialLoading) {
+    return <LoadingSpinner message="Forbereder generator..." />;
+  }
+
   return (
-    <GeneratorContent existingLetterId={letterId || undefined} />
+    <GeneratorContent 
+      existingLetterId={letterId || undefined}
+      step={step}
+      isGenerating={isGenerating}
+      isLoading={isLoading}
+      loadingState={loadingState}
+      generationPhase={generationPhase}
+      generationProgress={generationProgress}
+      selectedJob={selectedJob}
+      generatedLetter={generatedLetter}
+      generationError={generationError}
+      setStep={setStep}
+      handleJobFormSubmit={handleJobFormSubmit}
+      handleEditLetter={handleEditLetter}
+      handleSaveJobAsDraft={handleSaveJobAsDraft}
+      resetError={resetError}
+    />
   );
 };
+
+// Import at the top of the file
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 
 export default CoverLetterGenerator;

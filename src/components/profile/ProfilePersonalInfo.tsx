@@ -46,7 +46,7 @@ const ProfilePersonalInfo: React.FC<ProfilePersonalInfoProps> = ({
   };
 
   return (
-    <div className="space-y-6 p-8">
+    <div className="space-y-6 p-8 text-left">
       <div>
         <h3 className="text-lg font-medium text-gray-900">Personlige oplysninger</h3>
         <p className="text-sm text-muted-foreground mt-1">
