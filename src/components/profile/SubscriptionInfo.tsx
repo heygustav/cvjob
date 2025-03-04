@@ -5,9 +5,11 @@ import { useSubscription } from "@/hooks/useSubscription";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2 } from "lucide-react";
+import { Loader2, Bug } from "lucide-react";
 import { createCheckoutSession } from "@/services/subscription/subscriptionService";
 import { format } from "date-fns";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useToast } from "@/hooks/use-toast";
 
 interface SubscriptionInfoProps {
   user: User;
@@ -16,6 +18,8 @@ interface SubscriptionInfoProps {
 const SubscriptionInfo: React.FC<SubscriptionInfoProps> = ({ user }) => {
   const { subscriptionStatus, isLoading, fetchSubscriptionStatus } = useSubscription(user);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [showDebug, setShowDebug] = useState(false);
+  const { toast } = useToast();
   
   useEffect(() => {
     if (user?.id) {
@@ -37,8 +41,23 @@ const SubscriptionInfo: React.FC<SubscriptionInfoProps> = ({ user }) => {
       window.location.href = url;
     } catch (error) {
       console.error("Error creating checkout session:", error);
+      toast({
+        title: "Fejl ved oprettelse af abonnement",
+        description: "Der opstod en fejl ved oprettelse af abonnement. Prøv igen senere.",
+        variant: "destructive",
+      });
     } finally {
       setIsUpdating(false);
+    }
+  };
+
+  const handleRefreshStatus = () => {
+    if (user?.id) {
+      toast({
+        title: "Opdaterer abonnementsstatus",
+        description: "Henter den seneste abonnementsstatus...",
+      });
+      fetchSubscriptionStatus(user.id);
     }
   };
   
@@ -61,7 +80,17 @@ const SubscriptionInfo: React.FC<SubscriptionInfoProps> = ({ user }) => {
     return (
       <Card className="mt-4">
         <CardHeader className="pb-2">
-          <CardTitle>Abonnement</CardTitle>
+          <div className="flex justify-between items-center">
+            <CardTitle>Abonnement</CardTitle>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => setShowDebug(!showDebug)}
+              title="Vis/skjul debug info"
+            >
+              <Bug className="h-4 w-4" />
+            </Button>
+          </div>
           <CardDescription>Du har ingen aktive abonnementer</CardDescription>
         </CardHeader>
         <CardContent className="py-4">
@@ -73,8 +102,17 @@ const SubscriptionInfo: React.FC<SubscriptionInfoProps> = ({ user }) => {
               Opret et abonnement for at få ubegrænset adgang til at generere ansøgninger.
             </p>
           </div>
+          
+          {showDebug && (
+            <Alert className="mt-4 bg-gray-100">
+              <AlertDescription className="font-mono text-xs overflow-auto">
+                <p className="font-semibold">Debug information:</p>
+                <pre>{JSON.stringify(subscriptionStatus, null, 2)}</pre>
+              </AlertDescription>
+            </Alert>
+          )}
         </CardContent>
-        <CardFooter>
+        <CardFooter className="flex flex-col space-y-2">
           <Button 
             className="w-full" 
             onClick={handleSubscribe}
@@ -82,6 +120,14 @@ const SubscriptionInfo: React.FC<SubscriptionInfoProps> = ({ user }) => {
           >
             {isUpdating ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
             Opret abonnement - 99 DKK/måned
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleRefreshStatus}
+            className="w-full"
+          >
+            Opdater abonnementsstatus
           </Button>
         </CardFooter>
       </Card>
@@ -98,9 +144,19 @@ const SubscriptionInfo: React.FC<SubscriptionInfoProps> = ({ user }) => {
       <CardHeader className="pb-2">
         <div className="flex justify-between items-center">
           <CardTitle>Abonnement</CardTitle>
-          <Badge variant={isActive ? "default" : "destructive"}>
-            {isActive ? "Aktiv" : "Inaktiv"}
-          </Badge>
+          <div className="flex items-center space-x-2">
+            <Badge variant={isActive ? "default" : "destructive"}>
+              {isActive ? "Aktiv" : "Inaktiv"}
+            </Badge>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => setShowDebug(!showDebug)}
+              title="Vis/skjul debug info"
+            >
+              <Bug className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
         <CardDescription>Dit abonnementsdetaljer</CardDescription>
       </CardHeader>
@@ -129,8 +185,17 @@ const SubscriptionInfo: React.FC<SubscriptionInfoProps> = ({ user }) => {
             Dit abonnement er ikke længere aktivt. Opret et nyt abonnement for at få adgang til at generere ansøgninger.
           </div>
         )}
+        
+        {showDebug && (
+          <Alert className="mt-4 bg-gray-100">
+            <AlertDescription className="font-mono text-xs overflow-auto">
+              <p className="font-semibold">Debug information:</p>
+              <pre>{JSON.stringify(subscriptionStatus, null, 2)}</pre>
+            </AlertDescription>
+          </Alert>
+        )}
       </CardContent>
-      <CardFooter>
+      <CardFooter className="flex flex-col space-y-2">
         {!isActive ? (
           <Button 
             className="w-full" 
@@ -149,6 +214,14 @@ const SubscriptionInfo: React.FC<SubscriptionInfoProps> = ({ user }) => {
             Administrer abonnement
           </Button>
         )}
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={handleRefreshStatus}
+          className="w-full"
+        >
+          Opdater abonnementsstatus
+        </Button>
       </CardFooter>
     </Card>
   );

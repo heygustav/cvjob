@@ -5,10 +5,11 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2 } from "lucide-react";
+import { Loader2, Bug } from "lucide-react";
 import { createCheckoutSession, validatePromoCode } from "@/services/subscription/subscriptionService";
 import { User } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
+import { Badge } from "@/components/ui/badge";
 
 interface SubscriptionRequiredProps {
   user: User;
@@ -27,11 +28,14 @@ const SubscriptionRequired: React.FC<SubscriptionRequiredProps> = ({
   const [promoCodeSuccess, setPromoCodeSuccess] = useState("");
   const [discountPercent, setDiscountPercent] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'mobilepay'>('stripe');
+  const [showDebug, setShowDebug] = useState(false);
+  const [testMode, setTestMode] = useState(false);
   const { toast } = useToast();
 
   const handleSubscribe = async () => {
     setIsLoading(true);
     try {
+      // Log the options we're sending for debugging
       const options = {
         userId: user.id,
         ...(promoCode && { promoCode }),
@@ -39,9 +43,30 @@ const SubscriptionRequired: React.FC<SubscriptionRequiredProps> = ({
         cancelUrl: window.location.href,
         paymentMethod
       };
+      
+      if (showDebug) {
+        console.log("Creating checkout session with options:", options);
+      }
 
       const { url } = await createCheckoutSession(options);
-      window.location.href = url;
+      
+      if (showDebug) {
+        console.log("Checkout session created, URL:", url);
+      }
+      
+      // In test mode, show the URL instead of redirecting
+      if (testMode) {
+        toast({
+          title: "Test Mode",
+          description: "Redirecting to: " + url,
+        });
+        // Wait a moment before redirecting to allow reading the toast
+        setTimeout(() => {
+          window.location.href = url;
+        }, 3000);
+      } else {
+        window.location.href = url;
+      }
     } catch (error) {
       console.error("Error creating checkout session:", error);
       toast({
@@ -65,7 +90,15 @@ const SubscriptionRequired: React.FC<SubscriptionRequiredProps> = ({
     setPromoCodeSuccess("");
 
     try {
+      if (showDebug) {
+        console.log("Validating promo code:", promoCode);
+      }
+      
       const result = await validatePromoCode(promoCode);
+      
+      if (showDebug) {
+        console.log("Promo code validation result:", result);
+      }
       
       if (result.isValid) {
         setDiscountPercent(result.discountPercent || 0);
@@ -81,10 +114,35 @@ const SubscriptionRequired: React.FC<SubscriptionRequiredProps> = ({
     }
   };
 
+  const toggleTestMode = () => {
+    setTestMode(!testMode);
+    toast({
+      title: testMode ? "Test-tilstand deaktiveret" : "Test-tilstand aktiveret",
+      description: testMode 
+        ? "Nu vil du blive sendt direkte til betalingssiden" 
+        : "Nu vil du se checkout URL'en før omdirigering",
+    });
+  };
+
   return (
     <Card className="w-full max-w-md mx-auto">
       <CardHeader>
-        <CardTitle className="text-center">Abonnement påkrævet</CardTitle>
+        <div className="flex justify-between items-center">
+          <CardTitle className="text-center">Abonnement påkrævet</CardTitle>
+          <div className="flex space-x-2">
+            {testMode && (
+              <Badge variant="outline" className="bg-yellow-50">Test tilstand</Badge>
+            )}
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => setShowDebug(!showDebug)}
+              title="Vis/skjul debug info"
+            >
+              <Bug className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
         <Alert>
@@ -137,13 +195,34 @@ const SubscriptionRequired: React.FC<SubscriptionRequiredProps> = ({
           </TabsList>
           <TabsContent value="stripe" className="text-center py-4">
             Betal sikkert med dit kreditkort via Stripe
+            {showDebug && (
+              <div className="mt-2 text-xs text-muted-foreground">
+                Test kort: 4242 4242 4242 4242, enhver fremtidig udløbsdato, enhver CVC
+              </div>
+            )}
           </TabsContent>
           <TabsContent value="mobilepay" className="text-center py-4">
             Betal nemt med MobilePay
           </TabsContent>
         </Tabs>
+        
+        {showDebug && (
+          <Alert className="mt-4 bg-gray-100">
+            <AlertDescription className="font-mono text-xs overflow-auto">
+              <p className="font-semibold">Debug information:</p>
+              <p>User ID: {user.id}</p>
+              <p>Free generations used: {freeGenerationsUsed}</p>
+              <p>Free generations allowed: {freeGenerationsAllowed}</p>
+              <p>Payment method: {paymentMethod}</p>
+              <p>Promo code: {promoCode || "None"}</p>
+              <p>Discount: {discountPercent}%</p>
+              <p>Test mode: {testMode ? "Enabled" : "Disabled"}</p>
+              <p>Return URL: {`${window.location.origin}/dashboard?subscription=success`}</p>
+            </AlertDescription>
+          </Alert>
+        )}
       </CardContent>
-      <CardFooter>
+      <CardFooter className="flex flex-col space-y-2">
         <Button 
           className="w-full" 
           onClick={handleSubscribe} 
@@ -151,6 +230,15 @@ const SubscriptionRequired: React.FC<SubscriptionRequiredProps> = ({
         >
           {isLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
           Opret abonnement nu
+        </Button>
+        
+        <Button
+          variant="outline"
+          size="sm"
+          className="w-full"
+          onClick={toggleTestMode}
+        >
+          {testMode ? "Deaktiver test-tilstand" : "Aktiver test-tilstand"}
         </Button>
       </CardFooter>
     </Card>
