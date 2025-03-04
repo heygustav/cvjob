@@ -1,72 +1,43 @@
 
-import React, { useState, useEffect, useRef } from "react";
+import React from "react";
 import { Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-interface LoadingSpinnerProps {
+export interface LoadingSpinnerProps {
   message?: string;
   progress?: number;
   className?: string;
+  size?: "sm" | "md" | "lg";
 }
 
-export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ 
+export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   message = "Indlæser...",
   progress,
-  className = ""
+  className,
+  size = "md"
 }) => {
-  const [elapsed, setElapsed] = useState(0);
-  const startTimeRef = useRef<number>(Date.now());
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-
-  useEffect(() => {
-    // Clear any existing interval
-    if (intervalRef.current) clearInterval(intervalRef.current);
-    
-    // Reset start time
-    startTimeRef.current = Date.now();
-    
-    // Start timer
-    intervalRef.current = setInterval(() => {
-      const currentElapsed = Math.floor((Date.now() - startTimeRef.current) / 10);
-      setElapsed(currentElapsed);
-    }, 100);
-    
-    // Cleanup on unmount
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
-  }, []);
-
-  const formatTime = (ms: number) => {
-    const seconds = Math.floor(ms / 100);
-    const hundredths = ms % 100;
-    return `${seconds}.${hundredths.toString().padStart(2, '0')}`;
+  const sizeClasses = {
+    sm: "h-4 w-4",
+    md: "h-8 w-8",
+    lg: "h-12 w-12"
   };
 
   return (
-    <div className="min-h-[60vh] md:min-h-screen bg-gray-50 flex justify-center items-center px-4" aria-live="polite" role="status">
-      <div className="w-full max-w-md bg-white p-6 rounded-lg shadow-sm border border-gray-100 text-center">
-        <div className="flex justify-center" aria-hidden="true">
-          <Loader2 className="h-12 w-12 animate-spin text-primary" />
+    <div className={cn("flex flex-col items-center justify-center space-y-4 text-center", className)}>
+      <Loader2 className={cn("animate-spin text-primary", sizeClasses[size])} />
+      
+      {message && (
+        <p className="text-sm text-muted-foreground">{message}</p>
+      )}
+      
+      {progress !== undefined && (
+        <div className="w-full max-w-xs bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+          <div 
+            className="bg-primary h-2.5 rounded-full transition-all duration-300 ease-in-out" 
+            style={{ width: `${Math.min(Math.max(progress, 0), 100)}%` }}
+          />
         </div>
-        <h2 className="mt-4 text-lg font-medium text-gray-800 text-center">{message}</h2>
-        <div className="mt-3 flex justify-between items-center">
-          <span className="text-sm text-gray-600">Vent venligst</span>
-          <span className="text-sm font-medium text-gray-700">{formatTime(elapsed)}s</span>
-        </div>
-        
-        {progress !== undefined && progress > 0 && (
-          <div className="mt-4 w-full bg-gray-200 rounded-full h-2.5" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress} role="progressbar">
-            <div 
-              className="bg-primary h-2.5 rounded-full transition-all duration-500 ease-in-out" 
-              style={{ width: `${progress}%` }}
-            ></div>
-          </div>
-        )}
-        
-        <p className="mt-4 text-sm text-gray-500 text-center italic">
-          Tålmod er det bedste mod.
-        </p>
-      </div>
+      )}
     </div>
   );
 };
