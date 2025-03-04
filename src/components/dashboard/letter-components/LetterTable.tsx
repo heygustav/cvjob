@@ -73,15 +73,14 @@ const LetterTable: React.FC<LetterTableProps> = ({
                 <TableCell>{job?.deadline ? formatDate(job.deadline) : ""}</TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end space-x-2">
-                    <IconButton
-                      variant="outline"
-                      size="sm"
-                      icon={<Pencil className="h-4 w-4" />}
-                      title="Rediger ansøgning"
-                      asChild
-                    >
-                      <Link to={`/cover-letter/${letter.id}`} />
-                    </IconButton>
+                    <Link to={`/cover-letter/${letter.id}`}>
+                      <IconButton
+                        variant="outline"
+                        size="sm"
+                        icon={<Pencil className="h-4 w-4" />}
+                        title="Rediger ansøgning"
+                      />
+                    </Link>
                     
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
