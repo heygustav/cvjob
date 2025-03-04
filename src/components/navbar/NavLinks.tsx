@@ -30,35 +30,22 @@ const NavLinks: React.FC<NavLinksProps> = ({
     ? "w-full justify-start gap-2 text-white hover:bg-primary-700 hover:text-white"
     : "gap-2 text-white hover:bg-primary-700 hover:text-white";
 
-  // Add CSP nonce attribute for better security (optional for future enhancement)
-  const nonceAttr = {};
-
-  // Handler to prevent excessive clicks (basic rate limiting)
-  const handleLogoutWithProtection = () => {
-    // Disable the button to prevent multiple rapid clicks
-    const button = document.activeElement as HTMLElement;
-    if (button) button.setAttribute('disabled', 'true');
-    
-    // Call the actual logout handler
-    handleLogout();
-  };
-
   return (
     <>
-      <Link to="/" className={linkClass} {...nonceAttr}>
+      <Link to="/" className={linkClass}>
         <Home className="h-4 w-4" />
         Forsiden
       </Link>
       
       {session && (
-        <Link to="/dashboard" className={linkClass} {...nonceAttr}>
+        <Link to="/dashboard" className={linkClass}>
           <LayoutDashboard className="h-4 w-4" />
           Dashboard
         </Link>
       )}
       
       {session && (
-        <Link to="/ansoegning" className={linkClass} {...nonceAttr}>
+        <Link to="/ansoegning" className={linkClass}>
           <PenTool className="h-4 w-4" />
           Opret ansøgning
         </Link>
@@ -66,14 +53,14 @@ const NavLinks: React.FC<NavLinksProps> = ({
       
       {session ? (
         <>
-          <Link to="/profile" className={linkClass} {...nonceAttr}>
+          <Link to="/profile" className={linkClass}>
             <UserCircle className="h-4 w-4" />
             Profil
           </Link>
           
           <Button
             variant="ghost"
-            onClick={handleLogoutWithProtection}
+            onClick={handleLogout}
             className={buttonClass}
           >
             <LogOut className="h-4 w-4" />
@@ -81,7 +68,7 @@ const NavLinks: React.FC<NavLinksProps> = ({
           </Button>
         </>
       ) : (
-        <Link to="/auth" className={linkClass} {...nonceAttr}>
+        <Link to="/auth" className={linkClass}>
           Log ind
         </Link>
       )}

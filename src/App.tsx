@@ -1,4 +1,3 @@
-
 import React, { lazy, Suspense, useEffect } from 'react';
 import { Route, Routes, BrowserRouter, Navigate, useLocation, useNavigate } from "react-router-dom";
 import './App.css';
@@ -162,6 +161,15 @@ function App() {
             <Route path="/generator" element={<Navigate to="/ansoegning" replace />} />
             <Route path="/cover-letter" element={<Navigate to="/ansoegning" replace />} />
             <Route path="/cover-letter/generator" element={<Navigate to="/ansoegning" replace />} />
+            
+            {/* Cover letter editor route */}
+            <Route path="/cover-letter/:id" element={
+              <Suspense fallback={<RouteLoading />}>
+                <ProtectedRoute>
+                  <CoverLetterGenerator />
+                </ProtectedRoute>
+              </Suspense>
+            } />
             
             <Route path="*" element={
               <Suspense fallback={<RouteLoading />}>
