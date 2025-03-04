@@ -8,7 +8,7 @@ interface LetterPreviewStepProps {
   onEdit: (content: string) => Promise<void>;
 }
 
-export const LetterPreviewStep: React.FC<LetterPreviewStepProps> = ({
+const LetterPreviewStep: React.FC<LetterPreviewStepProps> = ({
   generatedLetter,
   onEdit,
 }) => {
@@ -19,3 +19,5 @@ export const LetterPreviewStep: React.FC<LetterPreviewStepProps> = ({
     />
   );
 };
+
+export default LetterPreviewStep;

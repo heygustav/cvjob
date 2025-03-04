@@ -23,7 +23,7 @@ export const useNetworkUtils = () => {
    * Wraps a promise with a timeout and automatic retry logic
    */
   const fetchWithTimeout = useCallback(async <T,>(
-    promiseFactory: () => Promise<T>, 
+    promiseOrFactory: (() => Promise<T>) | Promise<T>, 
     timeoutMs = 30000,
     maxRetries = MAX_RETRIES,
     retryDelay = 1000
@@ -40,7 +40,10 @@ export const useNetworkUtils = () => {
           }, timeoutMs);
         });
 
-        const resultPromise = promiseFactory();
+        // Handle both Promise and Promise factory function
+        const resultPromise = typeof promiseOrFactory === 'function' 
+          ? promiseOrFactory() 
+          : promiseOrFactory;
         
         // Race between the operation and the timeout
         const result = await Promise.race([resultPromise, timeoutPromise]);

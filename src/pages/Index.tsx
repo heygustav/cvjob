@@ -1,10 +1,10 @@
 
-import React, { lazy, Suspense, useState, useEffect, useMemo, useCallback } from 'react';
+import React, { lazy, Suspense, useState, useEffect, useMemo, useCallback, memo } from 'react';
 import { useAuth } from '../components/AuthProvider';
 import HeroSection from '../components/home/HeroSection';
 import FeaturesSection from '../components/home/FeaturesSection';
 
-// Lazy load non-critical components to improve initial load time
+// Lazy load non-critical components
 const HowItWorksSection = lazy(() => import('../components/home/HowItWorksSection'));
 const TestimonialsSection = lazy(() => import('../components/home/TestimonialsSection'));
 const CTASection = lazy(() => import('../components/home/CTASection'));

@@ -45,7 +45,7 @@ export const useLetterFetching = (
         letter = await fetchLetterById(id);
       } catch (directError) {
         console.warn("Direct letter fetch failed, retrying with timeout:", directError);
-        letter = await fetchWithTimeout(fetchLetterById(id));
+        letter = await fetchWithTimeout(() => fetchLetterById(id));
       }
       
       if (!isMountedRef.current) {
@@ -76,7 +76,7 @@ export const useLetterFetching = (
           job = await fetchJobById(letter.job_posting_id);
         } catch (directError) {
           console.warn("Direct job fetch for letter failed, retrying with timeout:", directError);
-          job = await fetchWithTimeout(fetchJobById(letter.job_posting_id));
+          job = await fetchWithTimeout(() => fetchJobById(letter.job_posting_id));
         }
         
         if (!isMountedRef.current) {

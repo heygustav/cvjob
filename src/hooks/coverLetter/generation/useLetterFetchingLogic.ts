@@ -1,3 +1,4 @@
+
 import { useCallback } from "react";
 import { User, JobPosting, CoverLetter } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
