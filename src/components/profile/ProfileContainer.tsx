@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ProfileHeader from "./ProfileHeader";
 import ProfilePersonalInfo from "./ProfilePersonalInfo";
 import ProfileAccountSettings from "./ProfileAccountSettings";
-import SubscriptionInfo from "./SubscriptionInfo";
+import SubscriptionInfo from "./subscription/SubscriptionInfo";
 import { useAuth } from "@/components/AuthProvider";
 import { User } from "@/lib/types";
 import { useSearchParams } from "react-router-dom";
