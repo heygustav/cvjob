@@ -59,7 +59,7 @@ const ProfileContainer: React.FC<ProfileContainerProps> = ({
   return (
     <div className="container mx-auto px-4 max-w-4xl text-left">
       <ProfileHeader 
-        title="Min Profil" 
+        title="Profil" 
         subtitle="Administrer dine personoplysninger og indstillinger" 
       />
 

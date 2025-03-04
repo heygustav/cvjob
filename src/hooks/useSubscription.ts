@@ -23,12 +23,8 @@ export const useSubscription = (user: User | SupabaseUser | null) => {
       return status;
     } catch (err) {
       console.error("Error fetching subscription status:", err);
-      setError("Kunne ikke hente abonnementsstatus");
-      toast({
-        title: "Fejl",
-        description: "Kunne ikke hente abonnementsstatus",
-        variant: "destructive",
-      });
+      const errorMessage = "Kunne ikke hente abonnementsstatus";
+      setError(errorMessage);
       return null;
     } finally {
       setIsLoading(false);

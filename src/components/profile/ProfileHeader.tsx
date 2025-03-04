@@ -7,7 +7,7 @@ export interface ProfileHeaderProps {
 }
 
 const ProfileHeader: React.FC<ProfileHeaderProps> = ({ 
-  title = "Min Profil", 
+  title = "Profil", 
   subtitle = "Administrer dine personoplysninger og indstillinger"
 }) => {
   return (

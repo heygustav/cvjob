@@ -1,22 +1,22 @@
-
 import React, { useEffect, useState } from "react";
 import { User } from "@/lib/types";
 import { useSubscription } from "@/hooks/useSubscription";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Bug } from "lucide-react";
+import { Bug } from "lucide-react";
 import { createCheckoutSession } from "@/services/subscription/subscriptionService";
 import { format } from "date-fns";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 
 interface SubscriptionInfoProps {
   user: User;
 }
 
 const SubscriptionInfo: React.FC<SubscriptionInfoProps> = ({ user }) => {
-  const { subscriptionStatus, isLoading, fetchSubscriptionStatus } = useSubscription(user);
+  const { subscriptionStatus, isLoading, error, fetchSubscriptionStatus } = useSubscription(user);
   const [isUpdating, setIsUpdating] = useState(false);
   const [showDebug, setShowDebug] = useState(false);
   const { toast } = useToast();
@@ -26,6 +26,16 @@ const SubscriptionInfo: React.FC<SubscriptionInfoProps> = ({ user }) => {
       fetchSubscriptionStatus(user.id);
     }
   }, [user?.id, fetchSubscriptionStatus]);
+
+  useEffect(() => {
+    if (error) {
+      toast({
+        title: "Fejl ved indlæsning af abonnement",
+        description: error,
+        variant: "destructive",
+      });
+    }
+  }, [error, toast]);
   
   const handleSubscribe = async () => {
     setIsUpdating(true);
@@ -69,8 +79,35 @@ const SubscriptionInfo: React.FC<SubscriptionInfoProps> = ({ user }) => {
           <CardDescription>Dit abonnementsdetaljer</CardDescription>
         </CardHeader>
         <CardContent className="flex justify-center py-6">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          <LoadingSpinner size="md" message="Indlæser abonnementsinformation..." />
         </CardContent>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card className="mt-4">
+        <CardHeader className="pb-2">
+          <CardTitle>Abonnement</CardTitle>
+          <CardDescription>Der opstod en fejl</CardDescription>
+        </CardHeader>
+        <CardContent className="py-4">
+          <Alert variant="destructive">
+            <AlertDescription>
+              Der opstod en fejl ved indlæsning af abonnementsinformation. Prøv at opdatere siden eller kontakt support.
+            </AlertDescription>
+          </Alert>
+        </CardContent>
+        <CardFooter>
+          <Button 
+            variant="outline" 
+            onClick={handleRefreshStatus}
+            className="w-full"
+          >
+            Prøv igen
+          </Button>
+        </CardFooter>
       </Card>
     );
   }
@@ -118,7 +155,7 @@ const SubscriptionInfo: React.FC<SubscriptionInfoProps> = ({ user }) => {
             onClick={handleSubscribe}
             disabled={isUpdating}
           >
-            {isUpdating ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+            {isUpdating ? <LoadingSpinner size="sm" className="mr-2" /> : null}
             Opret abonnement - 99 DKK/måned
           </Button>
           <Button 
@@ -202,7 +239,7 @@ const SubscriptionInfo: React.FC<SubscriptionInfoProps> = ({ user }) => {
             onClick={handleSubscribe}
             disabled={isUpdating}
           >
-            {isUpdating ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+            {isUpdating ? <LoadingSpinner size="sm" className="mr-2" /> : null}
             Forny abonnement
           </Button>
         ) : (
