@@ -3,6 +3,7 @@ import React, { lazy, Suspense, useState, useEffect, useMemo, useCallback, memo 
 import { useAuth } from '../components/AuthProvider';
 import HeroSection from '../components/home/HeroSection';
 import FeaturesSection from '../components/home/FeaturesSection';
+import { Session } from '@supabase/supabase-js';
 
 // Lazy load non-critical components
 const HowItWorksSection = lazy(() => import('../components/home/HowItWorksSection'));
@@ -19,7 +20,7 @@ const SectionPlaceholder = () => (
 
 // Factory function for Intersection Observer based lazy loading
 const createLazyComponent = (Component: React.LazyExoticComponent<any>) => {
-  return memo(({ ...props }) => {
+  return memo(({ ...props }: Record<string, any>) => {
     const [isVisible, setIsVisible] = useState(false);
     const ref = React.useRef<HTMLDivElement>(null);
 
@@ -62,6 +63,11 @@ const LazyHowItWorksSection = createLazyComponent(HowItWorksSection);
 const LazyTestimonialsSection = createLazyComponent(TestimonialsSection);
 const LazyCTASection = createLazyComponent(CTASection);
 const LazyFooterSection = createLazyComponent(FooterSection);
+
+// Define props interfaces for components
+interface SectionProps {
+  session?: Session | null;
+}
 
 // Memoize the entire component for better performance
 const Index = memo(() => {
