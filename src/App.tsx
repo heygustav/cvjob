@@ -54,7 +54,7 @@ const App = () => {
           path="/dashboard"
           element={
             userId ? (
-              <Dashboard userId={userId} onLogout={handleLogout} />
+              <Dashboard />
             ) : (
               <Login onLogin={handleLogin} />
             )
