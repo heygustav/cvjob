@@ -29,7 +29,48 @@ export const supabase = createClient<Database>(
       detectSessionInUrl: true,
       // Use the dynamic site URL for redirects
       flowType: 'pkce',
-      redirectTo: `${getSiteUrl()}/auth/callback`,
-    }
+      storage: {
+        getItem: (key) => {
+          try {
+            return Promise.resolve(localStorage.getItem(key));
+          } catch (error) {
+            return Promise.resolve(null);
+          }
+        },
+        setItem: (key, value) => {
+          try {
+            localStorage.setItem(key, value);
+            return Promise.resolve();
+          } catch (error) {
+            return Promise.resolve();
+          }
+        },
+        removeItem: (key) => {
+          try {
+            localStorage.removeItem(key);
+            return Promise.resolve();
+          } catch (error) {
+            return Promise.resolve();
+          }
+        },
+      }
+    },
+    global: {
+      headers: {
+        'X-Client-Info': 'supabase-js-web/2.x'
+      },
+    },
   }
 );
+
+// Set site URL for Auth redirect
+supabase.auth.setSession({
+  access_token: '',
+  refresh_token: '',
+}).then(() => {
+  // Set redirect URL after setting session
+  supabase.auth.setSettings({
+    flowType: 'pkce',
+    redirectTo: `${getSiteUrl()}/auth/callback`,
+  });
+});
