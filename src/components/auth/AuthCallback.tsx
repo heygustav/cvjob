@@ -47,7 +47,7 @@ const AuthCallback: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center">
-      <LoadingSpinner size="large" />
+      <LoadingSpinner size="lg" />
       <p className="mt-4 text-gray-600">Verificerer din konto...</p>
     </div>
   );

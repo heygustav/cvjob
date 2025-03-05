@@ -63,14 +63,13 @@ export const supabase = createClient<Database>(
   }
 );
 
-// Set site URL for Auth redirect
-supabase.auth.setSession({
-  access_token: '',
-  refresh_token: '',
-}).then(() => {
-  // Set redirect URL after setting session
-  supabase.auth.setSettings({
-    flowType: 'pkce',
-    redirectTo: `${getSiteUrl()}/auth/callback`,
-  });
+// Configure redirect URL for authentication
+supabase.auth.onAuthStateChange((event, session) => {
+  if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+    console.log('Auth state changed:', event);
+  }
 });
+
+// Initialize with the correct redirect URL
+const redirectTo = `${getSiteUrl()}/auth/callback`;
+console.log('Setting redirect URL to:', redirectTo);
