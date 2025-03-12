@@ -3,7 +3,7 @@ import React, { lazy, Suspense, useState, useEffect, useMemo, useCallback, memo 
 import { useAuth } from '../components/AuthProvider';
 import HeroSection from '../components/home/HeroSection';
 import FeaturesSection from '../components/home/FeaturesSection';
-import Header from '../components/navbar/Header';
+import Navbar from '../components/navbar/Navbar';
 import { Session } from '@supabase/supabase-js';
 
 // Lazy load non-critical components
@@ -110,7 +110,7 @@ const Index = memo(() => {
 
   return (
     <div className="bg-background">
-      <Header />
+      <Navbar />
       <main>
         {/* Critical components loaded eagerly */}
         <HeroSection session={sessionProp} />
