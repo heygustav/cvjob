@@ -7,6 +7,7 @@ import Signup from './pages/Signup';
 import Auth from './pages/Auth';
 import Dashboard from './pages/Dashboard';
 import CoverLetter from './pages/CoverLetter';
+import CoverLetterGenerator from './pages/CoverLetterGenerator';
 import NotFound from './pages/NotFound';
 import { AuthProvider } from './components/AuthProvider';
 import AuthCallback from './components/auth/AuthCallback';
@@ -65,6 +66,16 @@ const App = () => {
           element={
             userId ? (
               <CoverLetter userId={userId} />
+            ) : (
+              <Login onLogin={handleLogin} />
+            )
+          }
+        />
+        <Route
+          path="/ansoegning"
+          element={
+            userId ? (
+              <CoverLetterGenerator />
             ) : (
               <Login onLogin={handleLogin} />
             )

@@ -35,7 +35,7 @@ const Header: React.FC = () => {
                 Dashboard
               </Link>
               <Button variant="outline" asChild>
-                <Link to="/cover-letter">Ny ansøgning</Link>
+                <Link to="/ansoegning">Ny ansøgning</Link>
               </Button>
             </>
           ) : (
