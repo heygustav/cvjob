@@ -60,7 +60,7 @@ const HowItWorksSection: React.FC<HowItWorksSectionProps> = ({ session }) => {
           </ol>
           <div className="mt-16 text-center">
             <Link
-              to={session ? "/generator" : "/auth"}
+              to={session ? "/ansoegning" : "/auth"}
               className="inline-flex items-center rounded-md bg-white px-6 py-3 text-sm font-semibold text-primary-800 shadow-sm hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             >
               {session ? "Opret ansøgning" : "Opret konto og start"} <ChevronRight className="ml-2 h-4 w-4" />

@@ -39,7 +39,7 @@ const LetterActions: React.FC<LetterActionsProps> = ({
         icon={<FileEdit className="h-4 w-4" />}
         asChild
       >
-        <Link to={`/cover-letter/generator?letterId=${letter.id}&step=2`} />
+        <Link to={`/ansoegning?letterId=${letter.id}&step=2`} />
       </IconButton>
       
       <DropdownMenu>

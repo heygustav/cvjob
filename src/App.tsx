@@ -11,6 +11,7 @@ import CoverLetterGenerator from './pages/CoverLetterGenerator';
 import NotFound from './pages/NotFound';
 import { AuthProvider } from './components/AuthProvider';
 import AuthCallback from './components/auth/AuthCallback';
+import Profile from './pages/Profile';
 
 const App = () => {
   const [userId, setUserId] = useState<string | null>(null);
@@ -76,6 +77,26 @@ const App = () => {
           element={
             userId ? (
               <CoverLetterGenerator />
+            ) : (
+              <Login onLogin={handleLogin} />
+            )
+          }
+        />
+        <Route
+          path="/cover-letter/generator"
+          element={
+            userId ? (
+              <CoverLetterGenerator />
+            ) : (
+              <Login onLogin={handleLogin} />
+            )
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            userId ? (
+              <Profile />
             ) : (
               <Login onLogin={handleLogin} />
             )
