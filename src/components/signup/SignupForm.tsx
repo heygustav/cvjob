@@ -3,6 +3,8 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Eye, EyeOff, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import PasswordStrengthIndicator from "./PasswordStrengthIndicator";
 import DOMPurify from "dompurify";
 
@@ -47,58 +49,45 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSubmit, isLoading }) => {
   return (
     <form className="space-y-6" onSubmit={handleSubmit}>
       <div>
-        <label
-          htmlFor="name"
-          className="block text-sm font-medium text-gray-700"
-        >
+        <Label htmlFor="name" className="block mb-1.5">
           Fulde navn
-        </label>
-        <div className="mt-1">
-          <input
-            id="name"
-            name="name"
-            type="text"
-            autoComplete="name"
-            required
-            value={formData.name}
-            onChange={handleChange}
-            className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-black focus:outline-none focus:ring-black sm:text-sm"
-            placeholder="Anders Andersen"
-          />
-        </div>
+        </Label>
+        <Input
+          id="name"
+          name="name"
+          type="text"
+          autoComplete="name"
+          required
+          value={formData.name}
+          onChange={handleChange}
+          placeholder="Anders Andersen"
+          className="w-full"
+        />
       </div>
 
       <div>
-        <label
-          htmlFor="email"
-          className="block text-sm font-medium text-gray-700"
-        >
+        <Label htmlFor="email" className="block mb-1.5">
           E-mailadresse
-        </label>
-        <div className="mt-1">
-          <input
-            id="email"
-            name="email"
-            type="email"
-            autoComplete="email"
-            required
-            value={formData.email}
-            onChange={handleChange}
-            className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-black focus:outline-none focus:ring-black sm:text-sm"
-            placeholder="dig@eksempel.dk"
-          />
-        </div>
+        </Label>
+        <Input
+          id="email"
+          name="email"
+          type="email"
+          autoComplete="email"
+          required
+          value={formData.email}
+          onChange={handleChange}
+          placeholder="dig@eksempel.dk"
+          className="w-full"
+        />
       </div>
 
       <div>
-        <label
-          htmlFor="password"
-          className="block text-sm font-medium text-gray-700"
-        >
+        <Label htmlFor="password" className="block mb-1.5">
           Adgangskode
-        </label>
-        <div className="mt-1 relative">
-          <input
+        </Label>
+        <div className="relative">
+          <Input
             id="password"
             name="password"
             type={showPassword ? "text" : "password"}
@@ -106,8 +95,8 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSubmit, isLoading }) => {
             required
             value={formData.password}
             onChange={handleChange}
-            className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-black focus:outline-none focus:ring-black sm:text-sm"
             placeholder="••••••••"
+            className="w-full pr-10"
           />
           <button
             type="button"
@@ -127,25 +116,20 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSubmit, isLoading }) => {
       </div>
 
       <div>
-        <label
-          htmlFor="confirmPassword"
-          className="block text-sm font-medium text-gray-700"
-        >
+        <Label htmlFor="confirmPassword" className="block mb-1.5">
           Bekræft adgangskode
-        </label>
-        <div className="mt-1">
-          <input
-            id="confirmPassword"
-            name="confirmPassword"
-            type={showPassword ? "text" : "password"}
-            autoComplete="new-password"
-            required
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-black focus:outline-none focus:ring-black sm:text-sm"
-            placeholder="••••••••"
-          />
-        </div>
+        </Label>
+        <Input
+          id="confirmPassword"
+          name="confirmPassword"
+          type={showPassword ? "text" : "password"}
+          autoComplete="new-password"
+          required
+          value={formData.confirmPassword}
+          onChange={handleChange}
+          placeholder="••••••••"
+          className="w-full"
+        />
         {formData.password && formData.confirmPassword && (
           <p
             className={`mt-2 text-xs ${
@@ -167,25 +151,25 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSubmit, isLoading }) => {
           name="terms"
           type="checkbox"
           required
-          className="h-4 w-4 rounded border-gray-300 text-black focus:ring-black"
+          className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
         />
         <label htmlFor="terms" className="ml-2 block text-sm text-gray-700">
           Jeg accepterer{" "}
-          <a href="#" className="font-medium text-black hover:text-gray-800">
+          <a href="#" className="font-medium text-primary hover:text-primary-800">
             Brugsbetingelserne
           </a>{" "}
           og{" "}
-          <a href="#" className="font-medium text-black hover:text-gray-800">
+          <a href="#" className="font-medium text-primary hover:text-primary-800">
             Privatlivspolitikken
           </a>
         </label>
       </div>
 
       <div>
-        <button
+        <Button 
           type="submit"
           disabled={isLoading}
-          className="flex w-full justify-center items-center rounded-md border border-transparent bg-green-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-70 disabled:cursor-not-allowed"
+          className="w-full bg-green-600 hover:bg-green-700 focus:ring-green-500"
         >
           {isLoading ? (
             <span className="flex items-center">
@@ -217,7 +201,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSubmit, isLoading }) => {
               <ArrowRight className="ml-2 h-4 w-4" />
             </span>
           )}
-        </button>
+        </Button>
       </div>
     </form>
   );

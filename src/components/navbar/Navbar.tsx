@@ -42,9 +42,11 @@ const Navbar: React.FC = () => {
   };
 
   return (
-    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-200 ${
-      scrolled ? "shadow-md" : "backdrop-blur-sm"
-    } gradient-header border-b border-primary/20`}>
+    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      scrolled 
+        ? "bg-white/90 backdrop-blur-md shadow-md dark:bg-gray-900/90" 
+        : "bg-transparent"
+    } border-b border-primary/10`}>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <NavbarLogo />

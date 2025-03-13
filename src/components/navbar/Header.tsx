@@ -2,17 +2,17 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../AuthProvider';
-import { FileText } from 'lucide-react';
+import Icon from "../ui/icon";
 import { Button } from '../ui/button';
 
 const Header: React.FC = () => {
   const { session } = useAuth();
 
   return (
-    <header className="w-full py-4 bg-background border-b border-border/40">
+    <header className="w-full py-4 bg-background border-b border-border/40 shadow-sm">
       <div className="container mx-auto px-4 flex justify-between items-center">
         <Link to="/" className="flex items-center gap-2">
-          <FileText className="h-6 w-6 text-primary" />
+          <Icon name="FileText" className="h-6 w-6 text-primary" />
           <span className="text-xl font-semibold">CVJob</span>
         </Link>
         
@@ -43,7 +43,7 @@ const Header: React.FC = () => {
               <Link to="/login" className="text-sm text-foreground hover:text-primary transition-colors">
                 Log ind
               </Link>
-              <Button asChild>
+              <Button variant="default" className="bg-green-600 hover:bg-green-700" asChild>
                 <Link to="/signup">Opret konto</Link>
               </Button>
             </>

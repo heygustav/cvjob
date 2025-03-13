@@ -13,7 +13,7 @@ const LoginLayout: React.FC<LoginLayoutProps> = ({ children, redirectUrl }) => {
     <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-gray-50">
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <Card className="shadow-lg border border-gray-100 overflow-hidden">
-          <div className="bg-gradient-to-r from-primary-600 to-primary-800 p-6">
+          <div className="bg-gradient-to-r from-primary-600 via-primary-700 to-primary-800 p-6 sm:p-8">
             <h2 className="text-center text-3xl font-bold tracking-tight text-white">
               Velkommen tilbage
             </h2>
@@ -28,7 +28,7 @@ const LoginLayout: React.FC<LoginLayoutProps> = ({ children, redirectUrl }) => {
             </p>
           </div>
           
-          <CardContent className="p-6 pt-8 bg-white">
+          <CardContent className="p-6 sm:p-8 pt-8 bg-white">
             {redirectUrl && (
               <div className="mb-6 p-3 bg-amber-50 border border-amber-200 rounded-md">
                 <p className="text-sm text-amber-800">
