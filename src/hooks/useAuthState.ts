@@ -55,6 +55,7 @@ export const useAuthState = (): [AuthState, AuthActions] => {
       console.log("Auth: Found redirectUrl:", sanitizedUrl);
     } else {
       console.error("Invalid redirect URL detected and blocked:", storedRedirect);
+      localStorage.removeItem('redirectAfterLogin');
     }
   }, []);
 
@@ -64,18 +65,28 @@ export const useAuthState = (): [AuthState, AuthActions] => {
     
     // Check for active session
     const getInitialSession = async () => {
-      const { data } = await supabase.auth.getSession();
-      if (mounted) {
-        setSession(data.session);
-        setUser(data.session?.user ?? null);
-        setIsLoading(false);
+      try {
+        const { data, error } = await supabase.auth.getSession();
+        if (error) throw error;
+        
+        if (mounted) {
+          setSession(data.session);
+          setUser(data.session?.user ?? null);
+          setIsLoading(false);
+        }
+      } catch (error) {
+        console.error("Error getting session:", error);
+        if (mounted) {
+          setIsLoading(false);
+        }
       }
     };
     
     getInitialSession();
 
     // Use the subscription for real-time updates
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("Auth state changed:", event);
       if (mounted) {
         setSession(session);
         setUser(session?.user ?? null);
@@ -148,8 +159,17 @@ export const useAuthState = (): [AuthState, AuthActions] => {
 
     try {
       if (isSignUp) {
-        const { error } = await signUp(email, password, name);
+        const { error, data } = await signUp(email, password, name);
         if (error) throw error;
+        
+        if (data?.user?.identities?.length === 0) {
+          toast({
+            title: 'Konto findes allerede',
+            description: 'Denne e-mail er allerede registreret. Prøv at logge ind i stedet.',
+            variant: 'destructive',
+          });
+          return;
+        }
         
         toast({
           title: 'Konto oprettet',

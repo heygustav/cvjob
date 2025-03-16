@@ -12,7 +12,8 @@ const AuthCallback: React.FC = () => {
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
-        const { error } = await supabase.auth.getSession();
+        // Fetch the current session to confirm authentication
+        const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
           console.error('Error during auth callback:', error);
@@ -21,16 +22,37 @@ const AuthCallback: React.FC = () => {
             description: 'Der opstod en fejl under verifikation. Prøv at logge ind igen.',
             variant: 'destructive',
           });
-          navigate('/login');
+          navigate('/auth');
           return;
         }
 
-        toast({
-          title: 'Verifikation gennemført',
-          description: 'Din konto er nu verificeret. Du er logget ind.',
-        });
+        if (!session) {
+          console.warn('No session found during callback');
+          toast({
+            title: 'Ingen session fundet',
+            description: 'Prøv at logge ind igen.',
+            variant: 'destructive',
+          });
+          navigate('/auth');
+          return;
+        }
+
+        console.log('Authentication successful, redirecting to dashboard');
         
-        navigate('/dashboard');
+        // Check if there's a stored redirect URL
+        const storedRedirect = localStorage.getItem('redirectAfterLogin');
+        if (storedRedirect) {
+          console.log('Redirecting to stored URL:', storedRedirect);
+          localStorage.removeItem('redirectAfterLogin');
+          navigate(storedRedirect);
+        } else {
+          // Default redirect to dashboard
+          toast({
+            title: 'Verifikation gennemført',
+            description: 'Din konto er nu verificeret. Du er logget ind.',
+          });
+          navigate('/dashboard');
+        }
       } catch (error) {
         console.error('Unexpected error during auth callback:', error);
         toast({
@@ -38,7 +60,7 @@ const AuthCallback: React.FC = () => {
           description: 'Der opstod en uventet fejl. Prøv at logge ind igen.',
           variant: 'destructive',
         });
-        navigate('/login');
+        navigate('/auth');
       }
     };
 
