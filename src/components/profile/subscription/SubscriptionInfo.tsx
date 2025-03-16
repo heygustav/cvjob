@@ -1,5 +1,5 @@
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { User } from "@/lib/types";
 import { useSubscription } from "@/hooks/useSubscription";
 import { Card } from "@/components/ui/card";
@@ -15,6 +15,7 @@ interface SubscriptionInfoProps {
 
 const SubscriptionInfo: React.FC<SubscriptionInfoProps> = ({ user }) => {
   const { subscriptionStatus, isLoading, error, fetchSubscriptionStatus } = useSubscription(user);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const { toast } = useToast();
   
   useEffect(() => {
@@ -32,13 +33,57 @@ const SubscriptionInfo: React.FC<SubscriptionInfoProps> = ({ user }) => {
       });
     }
   }, [error, toast]);
+
+  // Handle URL parameters for subscription success/cancel
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const subscriptionParam = urlParams.get('subscription');
+    
+    if (subscriptionParam === 'success') {
+      toast({
+        title: "Abonnement oprettet",
+        description: "Dit abonnement er blevet oprettet. Du har nu adgang til at generere ubegrænset ansøgninger.",
+      });
+      
+      // Remove the subscription parameter from the URL
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, document.title, newUrl);
+      
+      // Refresh the subscription status
+      if (user?.id) {
+        fetchSubscriptionStatus(user.id);
+      }
+    }
+  }, [user?.id, fetchSubscriptionStatus, toast]);
+  
+  const handleRefresh = async () => {
+    if (!user?.id) return;
+    
+    setIsRefreshing(true);
+    try {
+      await fetchSubscriptionStatus(user.id);
+      toast({
+        title: "Abonnement opdateret",
+        description: "Abonnementsstatus er blevet opdateret.",
+      });
+    } catch (refreshError) {
+      console.error("Error refreshing subscription:", refreshError);
+      toast({
+        title: "Fejl ved opdatering",
+        description: "Der opstod en fejl ved opdatering af abonnementsstatus.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
   
   if (isLoading) {
     return <SubscriptionLoading />;
   }
 
   if (error) {
-    return <SubscriptionError onRetry={() => user?.id && fetchSubscriptionStatus(user.id)} />;
+    return <SubscriptionError onRetry={handleRefresh} />;
   }
   
   // No subscription or subscription data available
@@ -47,7 +92,7 @@ const SubscriptionInfo: React.FC<SubscriptionInfoProps> = ({ user }) => {
       <SubscriptionEmpty 
         user={user}
         subscriptionStatus={subscriptionStatus}
-        onRefresh={() => user?.id && fetchSubscriptionStatus(user.id)}
+        onRefresh={handleRefresh}
       />
     );
   }
@@ -57,7 +102,7 @@ const SubscriptionInfo: React.FC<SubscriptionInfoProps> = ({ user }) => {
     <SubscriptionActive 
       user={user}
       subscriptionStatus={subscriptionStatus}
-      onRefresh={() => user?.id && fetchSubscriptionStatus(user.id)}
+      onRefresh={handleRefresh}
     />
   );
 };

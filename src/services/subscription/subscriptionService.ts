@@ -32,7 +32,16 @@ export const checkSubscriptionStatus = async (userId: string): Promise<Subscript
 // Create a checkout session for subscription
 export const createCheckoutSession = async (options: CheckoutOptions): Promise<{ url: string }> => {
   try {
-    console.log("Creating checkout session with options:", options);
+    console.log("Creating checkout session with options:", {
+      ...options,
+      // Don't log userId for privacy
+      userId: options.userId ? "[REDACTED]" : undefined
+    });
+    
+    if (!options.userId) {
+      throw new Error("User ID is required");
+    }
+    
     const { data, error } = await supabase.functions.invoke('create-checkout-session', {
       body: options
     });
@@ -42,7 +51,12 @@ export const createCheckoutSession = async (options: CheckoutOptions): Promise<{
       throw error;
     }
     
-    console.log("Checkout session created:", data);
+    if (!data?.url) {
+      console.error('No checkout URL returned:', data);
+      throw new Error('Betalingssiden kunne ikke oprettes. Kontakt support.');
+    }
+    
+    console.log("Checkout session created with URL:", data.url.substring(0, 60) + "...");
     return data;
   } catch (error) {
     console.error('Error creating checkout session:', error);
@@ -118,5 +132,31 @@ export const validatePromoCode = async (code: string): Promise<PromoCodeValidati
       isValid: false, 
       message: 'Der opstod en fejl ved validering af kampagnekoden' 
     };
+  }
+}
+
+// Get Stripe customer portal URL
+export const getCustomerPortalUrl = async (userId: string): Promise<{ url: string }> => {
+  try {
+    console.log("Getting customer portal URL for user:", userId);
+    const { data, error } = await supabase.functions.invoke('get-customer-portal', {
+      body: { userId }
+    });
+
+    if (error) {
+      console.error('Error getting customer portal URL:', error);
+      throw error;
+    }
+    
+    if (!data?.url) {
+      console.error('No customer portal URL returned:', data);
+      throw new Error('Kunne ikke få adgang til kundeportalen. Kontakt support.');
+    }
+    
+    console.log("Customer portal URL created");
+    return data;
+  } catch (error) {
+    console.error('Error getting customer portal URL:', error);
+    throw new Error('Kunne ikke få adgang til kundeportalen. Prøv igen senere.');
   }
 }

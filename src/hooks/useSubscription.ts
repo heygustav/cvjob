@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { User } from "@/lib/types";
 import { checkSubscriptionStatus, incrementGenerationCount } from "@/services/subscription/subscriptionService";
 import { SubscriptionStatus } from "@/services/subscription/types";
@@ -14,7 +14,7 @@ export const useSubscription = (user: User | SupabaseUser | null) => {
   const { toast } = useToast();
 
   // Fetch subscription status
-  const fetchSubscriptionStatus = async (userId: string) => {
+  const fetchSubscriptionStatus = useCallback(async (userId: string) => {
     setIsLoading(true);
     setError(null);
     try {
@@ -31,15 +31,15 @@ export const useSubscription = (user: User | SupabaseUser | null) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   // Check if user can generate a cover letter
-  const canGenerateLetter = (): boolean => {
+  const canGenerateLetter = useCallback((): boolean => {
     return subscriptionStatus?.canGenerate ?? false;
-  };
+  }, [subscriptionStatus?.canGenerate]);
 
   // Record a generation
-  const recordGeneration = async (userId: string): Promise<boolean> => {
+  const recordGeneration = useCallback(async (userId: string): Promise<boolean> => {
     try {
       console.log("Recording generation for user:", userId);
       await incrementGenerationCount(userId);
@@ -55,16 +55,7 @@ export const useSubscription = (user: User | SupabaseUser | null) => {
       });
       return false;
     }
-  };
-
-  // Initial fetch when user is loaded
-  useEffect(() => {
-    if (user?.id) {
-      fetchSubscriptionStatus(user.id);
-    } else {
-      setIsLoading(false);
-    }
-  }, [user?.id]);
+  }, [fetchSubscriptionStatus, toast]);
 
   return {
     subscriptionStatus,

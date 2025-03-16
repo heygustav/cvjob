@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Bug } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { format } from "date-fns";
-import { createCheckoutSession } from "@/services/subscription/subscriptionService";
+import { createCheckoutSession, getCustomerPortalUrl } from "@/services/subscription/subscriptionService";
 import { useToast } from "@/hooks/use-toast";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 
@@ -24,6 +24,7 @@ const SubscriptionActive: React.FC<SubscriptionActiveProps> = ({
   onRefresh 
 }) => {
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isPortalLoading, setIsPortalLoading] = useState(false);
   const [showDebug, setShowDebug] = useState(false);
   const { toast } = useToast();
   
@@ -52,6 +53,23 @@ const SubscriptionActive: React.FC<SubscriptionActiveProps> = ({
       });
     } finally {
       setIsUpdating(false);
+    }
+  };
+
+  const handleManageSubscription = async () => {
+    setIsPortalLoading(true);
+    try {
+      const { url } = await getCustomerPortalUrl(user.id);
+      window.location.href = url;
+    } catch (error) {
+      console.error("Error accessing customer portal:", error);
+      toast({
+        title: "Fejl ved adgang til kundeportal",
+        description: "Der opstod en fejl ved adgang til kundeportalen. Prøv igen senere.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsPortalLoading(false);
     }
   };
   
@@ -125,8 +143,10 @@ const SubscriptionActive: React.FC<SubscriptionActiveProps> = ({
           <Button
             variant="outline"
             className="w-full"
-            onClick={() => window.open('https://dashboard.stripe.com/billing/portal', '_blank')}
+            onClick={handleManageSubscription}
+            disabled={isPortalLoading}
           >
+            {isPortalLoading ? <LoadingSpinner size="sm" className="mr-2" /> : null}
             Administrer abonnement
           </Button>
         )}
