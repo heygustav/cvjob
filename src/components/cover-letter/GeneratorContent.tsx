@@ -1,15 +1,17 @@
-import React, { lazy, Suspense, useMemo, memo } from "react";
+
+import React, { lazy, Suspense, memo } from "react";
 import { useGeneratorSetup } from "./generator/useGeneratorSetup";
 import { useLetterGeneration } from "./generator/useLetterGeneration";
-import { JobPosting, CoverLetter, User } from "@/lib/types";
 import { JobFormData } from "@/services/coverLetter/types";
+import { CoverLetter } from "@/lib/types";
 import { GenerationProgress, LoadingState } from "@/hooks/coverLetter/types";
+import { useGeneratorProps } from "./generator/useGeneratorProps";
+import { useLetterEdit } from "./generator/useLetterEdit";
+import { GeneratorErrorHandler } from "./generator/GeneratorErrorHandler";
+import { GeneratorStepRenderer } from "./generator/GeneratorStepRenderer";
 
 // Lazy load non-critical components
-const JobFormStep = lazy(() => import("./JobFormStep"));
 const GeneratorLayout = lazy(() => import("./generator/GeneratorLayout").then(m => ({ default: m.GeneratorLayout })));
-const GeneratorStates = lazy(() => import("./generator/GeneratorStates").then(m => ({ default: m.GeneratorStates })));
-const LetterPreviewStep = lazy(() => import("./LetterPreviewStep"));
 
 // Loading fallback with clear visual feedback
 const ComponentLoader = () => (
@@ -26,7 +28,7 @@ interface GeneratorProps {
   loadingState?: LoadingState;
   generationPhase?: string | null;
   generationProgress?: GenerationProgress;
-  selectedJob?: JobPosting | null;
+  selectedJob?: any;
   generatedLetter?: CoverLetter | null;
   generationError?: string | null;
   setStep?: (step: 1 | 2) => void;
@@ -89,7 +91,7 @@ export const GeneratorContent: React.FC<GeneratorProps> = memo(({
     setError: () => {} // This is handled in useGeneratorSetup
   });
 
-  // Memoize merged props to prevent unnecessary re-renders
+  // Use our custom hooks to merge props and hook values
   const {
     step, 
     isGenerating, 
@@ -103,69 +105,45 @@ export const GeneratorContent: React.FC<GeneratorProps> = memo(({
     setStepFn,
     resetErrorFn,
     handleJobFormSubmitFn
-  } = useMemo(() => ({
-    step: propStep ?? hookStep,
-    isGenerating: propIsGenerating ?? hookIsGenerating,
-    isLoading: propIsLoading ?? hookIsLoading,
-    loadingState: propLoadingState ?? hookLoadingState,
-    generationPhase: propGenerationPhase ?? hookGenerationPhase,
-    selectedJob: propSelectedJob ?? hookSelectedJob,
-    generatedLetter: propGeneratedLetter ?? hookGeneratedLetter, 
-    error: propGenerationError ?? hookError,
-    generationProgress: propGenerationProgress ?? hookGenerationProgress,
-    setStepFn: propSetStep ?? hookSetStep,
-    resetErrorFn: propResetError ?? hookResetError,
-    handleJobFormSubmitFn: propHandleJobFormSubmit ?? handleGenerateLetter
-  }), [
-    propStep, hookStep, 
+  } = useGeneratorProps({
+    propStep, hookStep,
     propIsGenerating, hookIsGenerating,
     propIsLoading, hookIsLoading,
     propLoadingState, hookLoadingState,
     propGenerationPhase, hookGenerationPhase,
+    propGenerationProgress, hookGenerationProgress,
     propSelectedJob, hookSelectedJob,
     propGeneratedLetter, hookGeneratedLetter,
     propGenerationError, hookError,
-    propGenerationProgress, hookGenerationProgress,
     propSetStep, hookSetStep,
     propResetError, hookResetError,
     propHandleJobFormSubmit, handleGenerateLetter
-  ]);
+  });
   
-  // Memoize letter edit handler to prevent unnecessary re-renders
-  const onEditContent = useMemo(() => async (content: string) => {
-    if (!generatedLetter) return;
-    
-    if (propHandleEditLetter) {
-      await propHandleEditLetter(content);
-    } else {
-      try {
-        await handleEditContent(content);
-        hookSetGeneratedLetter({
-          ...generatedLetter,
-          content,
-          updated_at: new Date().toISOString()
-        });
-      } catch (err) {
-        console.error("Error updating letter:", err);
-      }
-    }
-  }, [generatedLetter, propHandleEditLetter, handleEditContent, hookSetGeneratedLetter]);
+  // Use our custom hook for letter editing
+  const onEditContent = useLetterEdit({
+    generatedLetter,
+    propHandleEditLetter: propHandleEditLetter,
+    handleEditContent,
+    hookSetGeneratedLetter
+  });
 
-  // Early return for loading states to avoid rendering unnecessary components
-  if ((isGenerating || error || (subscriptionStatus && !subscriptionStatus.canGenerate && !generatedLetter))) {
+  // Handle error states, generation states, and subscription issues
+  const showErrorHandler = isGenerating || error || (subscriptionStatus && !subscriptionStatus.canGenerate && !generatedLetter);
+
+  if (showErrorHandler) {
     return (
-      <Suspense fallback={<ComponentLoader />}>
-        <GeneratorStates 
-          isGenerating={isGenerating}
-          error={error}
-          loadingState={loadingState}
-          generationPhase={generationPhase}
-          user={completeUser}
-          subscriptionStatus={subscriptionStatus}
-          hasGeneratedLetter={!!generatedLetter}
-          resetError={resetErrorFn}
-        />
-      </Suspense>
+      <GeneratorErrorHandler
+        isGenerating={isGenerating}
+        error={error}
+        loadingState={loadingState}
+        generationPhase={generationPhase}
+        generationProgress={generationProgress}
+        user={completeUser}
+        subscriptionStatus={subscriptionStatus}
+        hasGeneratedLetter={!!generatedLetter}
+        resetError={resetErrorFn}
+      />
     );
   }
 
@@ -176,33 +154,23 @@ export const GeneratorContent: React.FC<GeneratorProps> = memo(({
         setStep={setStepFn}
         hasGeneratedLetter={!!generatedLetter}
       >
-        {step === 1 && (
-          <Suspense fallback={<ComponentLoader />}>
-            <JobFormStep
-              jobData={jobData}
-              setJobData={setJobData}
-              onSubmit={handleJobFormSubmitFn}
-              isLoading={isLoading}
-              user={completeUser}
-              initialJobId={new URLSearchParams(window.location.search).get("jobId") || undefined}
-              selectedJob={selectedJob}
-              isGenerating={isGenerating}
-              generationPhase={generationPhase}
-              generationProgress={generationProgress}
-              resetError={resetErrorFn}
-              onSave={propHandleSaveJobAsDraft}
-            />
-          </Suspense>
-        )}
-
-        {step === 2 && generatedLetter && (
-          <Suspense fallback={<ComponentLoader />}>
-            <LetterPreviewStep 
-              generatedLetter={generatedLetter} 
-              onEdit={onEditContent}
-            />
-          </Suspense>
-        )}
+        <GeneratorStepRenderer
+          step={step}
+          jobData={jobData}
+          setJobData={setJobData}
+          generatedLetter={generatedLetter}
+          isLoading={isLoading}
+          user={completeUser}
+          initialJobId={new URLSearchParams(window.location.search).get("jobId") || undefined}
+          selectedJob={selectedJob}
+          isGenerating={isGenerating}
+          generationPhase={generationPhase}
+          generationProgress={generationProgress}
+          resetError={resetErrorFn}
+          handleJobFormSubmit={handleJobFormSubmitFn}
+          handleEditContent={onEditContent}
+          handleSaveJobAsDraft={propHandleSaveJobAsDraft}
+        />
       </GeneratorLayout>
     </Suspense>
   );
