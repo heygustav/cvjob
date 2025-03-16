@@ -68,7 +68,7 @@ export const useLetterGeneration = ({
   };
 
   // Handle letter content edit
-  const handleEditContent = async (content: string) => {
+  const handleEditContent = async (content: string): Promise<void> => {
     setIsGenerating(true);
     try {
       // Update letter content logic would go here
@@ -78,7 +78,6 @@ export const useLetterGeneration = ({
     } finally {
       setIsGenerating(false);
     }
-    return content;
   };
 
   return {
