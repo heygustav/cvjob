@@ -1,11 +1,17 @@
-import { useEffect, useState, useRef } from "react";
+
+import { useEffect } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import { useLetterFetching } from "@/hooks/coverLetter/useLetterFetching";
 import { useSubscription } from "@/hooks/useSubscription";
-import { JobFormData } from "@/services/coverLetter/types";
-import { CoverLetter, JobPosting, User } from "@/lib/types";
 import { GenerationProgress } from "@/hooks/coverLetter/types";
-import { useSearchParams, useParams, useNavigate } from "react-router-dom";
+import { CoverLetter, JobPosting, User } from "@/lib/types";
+import { JobFormData } from "@/services/coverLetter/types";
+
+import { useGeneratorState } from "./useGeneratorState";
+import { useSafeState } from "./useSafeState";
+import { useUrlParams } from "./useUrlParams";
+import { useExistingLetter } from "./useExistingLetter";
+import { useCompleteUser } from "./useCompleteUser";
 
 interface GeneratorSetupResult {
   step: 1 | 2;
@@ -32,45 +38,29 @@ interface GeneratorSetupResult {
 
 export const useGeneratorSetup = (existingLetterId?: string): GeneratorSetupResult => {
   const { user: authUser } = useAuth();
-  const navigate = useNavigate();
-  const { jobId } = useParams();
-  const [searchParams] = useSearchParams();
-  const [step, setStep] = useState<1 | 2>(1);
-  const [jobData, setJobData] = useState<JobFormData>({
-    title: "",
-    company: "",
-    description: "",
-  });
-  const [generatedLetter, setGeneratedLetter] = useState<CoverLetter | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [generationPhase, setGenerationPhase] = useState<string | null>(null);
-  const [loadingState, setLoadingState] = useState("idle");
-  const [selectedJob, setSelectedJob] = useState<JobPosting | null>(null);
-  const [generationProgress, setGenerationProgress] = useState<GenerationProgress>({
-    phase: 'letter-save',
-    progress: 0,
-    message: 'Loading letter...'
-  });
+  // Use our state management hook
+  const {
+    step, setStep,
+    jobData, setJobData,
+    generatedLetter, setGeneratedLetter,
+    isLoading, setIsLoading,
+    error, setError,
+    isGenerating, setIsGenerating,
+    generationPhase, setGenerationPhase,
+    loadingState, setLoadingState,
+    selectedJob, setSelectedJob,
+    generationProgress, setGenerationProgress,
+    resetError
+  } = useGeneratorState();
+
+  // Use safe state management
+  const { isMountedRef, safeSetState } = useSafeState();
   
-  // Create refs and safe setState function needed by the hooks
-  const isMountedRef = useRef(true);
-  const safeSetState = <T,>(stateSetter: React.Dispatch<React.SetStateAction<T>>, value: T) => {
-    if (isMountedRef.current) {
-      stateSetter(value);
-    }
-  };
+  // Handle URL parameters
+  useUrlParams(existingLetterId);
   
-  // Ensure user has all required properties by creating a complete User object
-  const completeUser: User | null = authUser ? {
-    id: authUser.id || "",
-    email: authUser.email || "",
-    name: authUser.user_metadata?.name || "",
-    phone: authUser.user_metadata?.phone || "",
-    address: authUser.user_metadata?.address || "",
-    profileComplete: !!authUser.user_metadata?.profileComplete
-  } : null;
+  // Get the complete user object
+  const completeUser = useCompleteUser(authUser);
   
   // Initialize hook with required arguments
   const { fetchLetter } = useLetterFetching(
@@ -86,6 +76,15 @@ export const useGeneratorSetup = (existingLetterId?: string): GeneratorSetupResu
     setGenerationProgress
   );
   
+  // Handle existing letter
+  useExistingLetter({
+    existingLetterId,
+    completeUser,
+    isMountedRef,
+    setStep,
+    fetchLetter
+  });
+  
   // Pass the completeUser object to useSubscription
   const { subscriptionStatus, fetchSubscriptionStatus } = useSubscription(completeUser);
 
@@ -95,39 +94,6 @@ export const useGeneratorSetup = (existingLetterId?: string): GeneratorSetupResu
       fetchSubscriptionStatus(completeUser.id);
     }
   }, [completeUser?.id, fetchSubscriptionStatus]);
-
-  // Reset any error
-  const resetError = () => {
-    setError(null);
-    setIsGenerating(false);
-    setLoadingState("idle");
-  };
-
-  // Handle existing letter
-  useEffect(() => {
-    const loadExistingLetter = async () => {
-      if (existingLetterId && completeUser?.id) {
-        try {
-          const letter = await fetchLetter(existingLetterId);
-          if (letter) {
-            setGeneratedLetter(letter);
-            setStep(2);
-          }
-        } catch (error) {
-          console.error("Error fetching letter:", error);
-        }
-      }
-    };
-
-    loadExistingLetter();
-  }, [existingLetterId, completeUser?.id, fetchLetter]);
-
-  // Handle job ID from URL
-  useEffect(() => {
-    if (jobId && !existingLetterId) {
-      navigate(`/generator?jobId=${jobId}`);
-    }
-  }, [jobId, existingLetterId, navigate]);
 
   return {
     step,
