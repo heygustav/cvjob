@@ -47,7 +47,7 @@ const Navbar: React.FC = () => {
         ? "bg-white/90 backdrop-blur-md shadow-md dark:bg-gray-900/90" 
         : "bg-transparent"
     } border-b border-primary/10`}>
-      <div className={`${!scrolled ? "gradient-header" : ""} transition-all duration-300`}>
+      <div className="gradient-header transition-all duration-300">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <NavbarLogo />
