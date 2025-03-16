@@ -1,94 +1,89 @@
 
-import { JobFormData, UserProfile } from "@/services/coverLetter/types";
-import { User, JobPosting } from "@/lib/types";
-import { GenerationOptions, GenerationResult } from "./types";
+import { JobFormData } from "@/services/coverLetter/types";
+import { User } from "@/lib/types";
 
-const TIMEOUT_DURATION = 60000; // 1 minute
+// Validate user login
+export const validateUserLogin = (user: User | null): boolean => {
+  return !!user;
+};
 
+// Validate job form data
+export const validateJobFormData = (jobData: JobFormData): boolean => {
+  return !!(jobData.title && jobData.company && jobData.description);
+};
+
+// Setup generation timeout
 export const setupGenerationTimeout = (): [Promise<never>, number] => {
-  let timeoutId: number = 0;
+  let timeoutId: number;
   
   const timeoutPromise = new Promise<never>((_, reject) => {
     timeoutId = window.setTimeout(() => {
-      console.error("Generation timed out after 60 seconds");
-      reject(new Error('Generation timed out. Prøv igen senere.'));
-    }, TIMEOUT_DURATION);
+      reject(new Error("Generation timed out. Please try again."));
+    }, 60000); // 60-second timeout
     
-    // Store the timeout ID for cleanup
+    // Store timeoutId on window for access from other components
     (window as any).__generationTimeoutId = timeoutId;
   });
   
   return [timeoutPromise, timeoutId];
 };
 
-export const validateJobFormData = (jobData: JobFormData): boolean => {
-  // We're not enforcing validation anymore - we'll use defaults instead
-  return true;
-};
-
-export const validateUserLogin = (user: User | null): boolean => {
-  return !!user;
-};
-
+// Execute generation process
 export const executeGenerationProcess = async (
-  jobData: JobFormData, 
+  jobData: JobFormData,
   user: User,
-  selectedJob: JobPosting | null,
-  options: GenerationOptions,
+  selectedJob: any,
+  generationMeta: {
+    currentAttempt: number;
+    abortController: AbortController;
+  },
   generationSteps: any,
   updatePhase: (phase: string, progress: number, message: string) => void,
   isMountedRef: React.MutableRefObject<boolean>
-): Promise<GenerationResult> => {
+) => {
+  const { currentAttempt, abortController } = generationMeta;
+  const { 
+    fetchUserStep, 
+    saveJobStep, 
+    generateLetterStep, 
+    saveLetterStep, 
+    fetchUpdatedJobStep 
+  } = generationSteps;
+  
+  console.log(`Starting generation execution (attempt #${currentAttempt})`);
+  
   try {
-    console.log("Starting generation process with job data:", {
-      title: jobData.title || "(missing)",
-      company: jobData.company || "(missing)",
-      description: jobData.description?.length || 0
-    });
-    
     // Step 1: Fetch user profile
-    updatePhase('user-fetch', 20, 'Henter din profil...');
-    console.log("Step 1: Starting user profile fetch");
-    const userInfo = await generationSteps.fetchUserStep();
-    console.log("Step 1: User profile fetch completed", {
-      hasName: !!userInfo.name,
-      hasEmail: !!userInfo.email
-    });
+    const userInfo = await fetchUserStep();
     
-    if (!isMountedRef.current) {
-      console.warn("Component unmounted after fetching user profile");
-      throw new Error('Component unmounted');
+    if (!isMountedRef.current) return { job: null, letter: null };
+    
+    // Step 2: Save job details
+    const existingJobId = selectedJob?.id;
+    const jobId = await saveJobStep(jobData, user.id, existingJobId);
+    
+    if (!isMountedRef.current) return { job: null, letter: null };
+    
+    // Step 3: Generate letter content
+    const content = await generateLetterStep(jobData, userInfo);
+    
+    if (!isMountedRef.current || abortController.signal.aborted) {
+      return { job: null, letter: null };
     }
     
-    // Step 2: Save or update the job posting
-    updatePhase('job-save', 40, 'Gemmer jobdetaljer...');
-    console.log("Step 2: Starting job save");
-    const jobId = await generationSteps.saveJobStep(jobData, user.id, selectedJob?.id);
-    console.log("Step 2: Job saved with ID:", jobId);
-
-    // Step 3: Generate letter content
-    updatePhase('generation', 60, 'Genererer ansøgning...');
-    console.log("Step 3: Starting letter generation");
-    const content = await generationSteps.generateLetterStep(jobData, userInfo);
-    console.log("Step 3: Letter generation completed, content length:", content?.length);
-
     // Step 4: Save the generated letter
-    updatePhase('letter-save', 80, 'Gemmer ansøgning...');
-    console.log("Step 4: Starting letter save");
-    const letter = await generationSteps.saveLetterStep(user.id, jobId, content);
-    console.log("Step 4: Letter saved with ID:", letter.id);
-
-    // Step 5: Update the job object 
-    console.log("Step 5: Fetching updated job");
-    const updatedJob = await generationSteps.fetchUpdatedJobStep(jobId, jobData, user.id);
-    console.log("Step 5: Updated job fetched");
+    const letter = await saveLetterStep(user.id, jobId, content);
     
-    // Final progress update
-    updatePhase('letter-save', 100, 'Færdig!');
+    if (!isMountedRef.current) return { job: null, letter: null };
     
-    return { letter, job: updatedJob };
+    // Step 5: Fetch updated job details
+    const updatedJob = await fetchUpdatedJobStep(jobId, jobData, user.id);
+    
+    updatePhase('complete', 100, 'Din ansøgning er klar!');
+    
+    return { job: updatedJob, letter };
   } catch (error) {
-    console.error("Error in generation process:", error);
+    console.error(`Generation failed (attempt #${currentAttempt})`, error);
     throw error;
   }
 };

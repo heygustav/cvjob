@@ -1,13 +1,14 @@
 
 import { useEffect } from "react";
+import { CoverLetter } from "@/lib/types";
 import { User } from "@/lib/types";
 
-interface UseExistingLetterArgs {
+interface UseExistingLetterProps {
   existingLetterId?: string;
   completeUser: User | null;
   isMountedRef: React.MutableRefObject<boolean>;
-  setStep: (step: 1 | 2) => void;
-  fetchLetter: (id: string) => Promise<any>;
+  setStep: React.Dispatch<React.SetStateAction<1 | 2>>;
+  fetchLetter: (id: string) => Promise<CoverLetter | null>;
 }
 
 export const useExistingLetter = ({
@@ -16,22 +17,24 @@ export const useExistingLetter = ({
   isMountedRef,
   setStep,
   fetchLetter
-}: UseExistingLetterArgs) => {
-  // Handle existing letter
+}: UseExistingLetterProps) => {
+  // Load existing letter if we have an ID
   useEffect(() => {
-    const loadExistingLetter = async () => {
-      if (existingLetterId && completeUser?.id) {
+    if (existingLetterId && completeUser?.id) {
+      const loadExistingLetter = async () => {
         try {
-          const letter = await fetchLetter(existingLetterId);
-          if (letter && isMountedRef.current) {
+          console.log(`Loading existing letter: ${existingLetterId}`);
+          await fetchLetter(existingLetterId);
+          
+          if (isMountedRef.current) {
             setStep(2);
           }
         } catch (error) {
-          console.error("Error fetching letter:", error);
+          console.error("Error loading existing letter:", error);
         }
-      }
-    };
-
-    loadExistingLetter();
+      };
+      
+      loadExistingLetter();
+    }
   }, [existingLetterId, completeUser?.id, fetchLetter, isMountedRef, setStep]);
 };

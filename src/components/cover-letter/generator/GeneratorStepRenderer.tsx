@@ -1,24 +1,15 @@
 
-import React, { Suspense, lazy } from "react";
-import { JobPosting, CoverLetter, User } from "@/lib/types";
+import React from "react";
+import JobFormStep from "../JobFormStep";
+import LetterPreviewStep from "../LetterPreviewStep";
+import { CoverLetter, JobPosting, User } from "@/lib/types";
 import { JobFormData } from "@/services/coverLetter/types";
 import { GenerationProgress } from "@/hooks/coverLetter/types";
 
-// Lazy loaded components
-const JobFormStep = lazy(() => import("../JobFormStep"));
-const LetterPreviewStep = lazy(() => import("../LetterPreviewStep"));
-
-// Loading fallback
-const ComponentLoader = () => (
-  <div className="w-full py-16 flex justify-center items-center" aria-hidden="true">
-    <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div>
-  </div>
-);
-
 interface GeneratorStepRendererProps {
   step: 1 | 2;
-  jobData?: JobFormData;
-  setJobData?: (data: JobFormData) => void;
+  jobData: JobFormData;
+  setJobData: React.Dispatch<React.SetStateAction<JobFormData>>;
   generatedLetter: CoverLetter | null;
   isLoading: boolean;
   user: User | null;
@@ -50,31 +41,40 @@ export const GeneratorStepRenderer: React.FC<GeneratorStepRendererProps> = ({
   handleEditContent,
   handleSaveJobAsDraft
 }) => {
-  return (
-    <Suspense fallback={<ComponentLoader />}>
-      {step === 1 && (
-        <JobFormStep
-          jobData={jobData}
-          setJobData={setJobData}
-          onSubmit={handleJobFormSubmit}
-          isLoading={isLoading}
-          user={user}
-          initialJobId={initialJobId}
-          selectedJob={selectedJob}
-          isGenerating={isGenerating}
-          generationPhase={generationPhase}
-          generationProgress={generationProgress}
-          resetError={resetError}
-          onSave={handleSaveJobAsDraft}
-        />
-      )}
+  // Render the appropriate step
+  if (step === 1) {
+    return (
+      <JobFormStep
+        jobData={jobData}
+        setJobData={setJobData}
+        onSubmit={handleJobFormSubmit}
+        isLoading={isLoading}
+        user={user}
+        initialJobId={initialJobId}
+        selectedJob={selectedJob}
+        isGenerating={isGenerating}
+        generationPhase={generationPhase}
+        generationProgress={generationProgress}
+        resetError={resetError}
+        onSave={handleSaveJobAsDraft}
+      />
+    );
+  }
 
-      {step === 2 && generatedLetter && (
-        <LetterPreviewStep 
-          generatedLetter={generatedLetter} 
-          onEdit={handleEditContent}
-        />
-      )}
-    </Suspense>
+  // Step 2: Letter preview
+  if (generatedLetter) {
+    return (
+      <LetterPreviewStep
+        generatedLetter={generatedLetter}
+        onEdit={handleEditContent}
+      />
+    );
+  }
+
+  // Fallback if we don't have a letter yet
+  return (
+    <div className="p-8 text-center">
+      <p className="text-muted-foreground">Ingen ansøgning genereret endnu.</p>
+    </div>
   );
 };

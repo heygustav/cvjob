@@ -1,123 +1,166 @@
 
-import { useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-import { AuthActions } from './types';
+import { useNavigate } from 'react-router-dom';
 
 export const useAuthLogic = (
-  isLoading: boolean, 
-  attemptCount: number, 
-  redirectUrl: string | null, 
-  resetAttemptCount: () => void, 
-  setAttemptCount: (updater: (prev: number) => number) => void
-): Pick<AuthActions, 'signIn' | 'signUp' | 'signOut' | 'handleAuthentication'> => {
-  const navigate = useNavigate();
+  isLoading: boolean,
+  attemptCount: number,
+  redirectUrl: string | null,
+  resetAttemptCount: () => void,
+  setAttemptCount: (count: number) => void
+) => {
   const { toast } = useToast();
+  const navigate = useNavigate();
 
-  // Sign in with email and password
   const signIn = useCallback(async (email: string, password: string) => {
-    return await supabase.auth.signInWithPassword({ email, password });
-  }, []);
-
-  // Sign up with email and password
-  const signUp = useCallback(async (email: string, password: string, name?: string) => {
-    // If we have a name, add it as metadata
-    const options = name ? { data: { name } } : undefined;
-    return await supabase.auth.signUp({ email, password, options });
-  }, []);
-
-  // Sign out
-  const signOut = useCallback(async () => {
-    await supabase.auth.signOut();
-    navigate('/login');
-  }, [navigate]);
-
-  // Handle authentication (sign in or sign up)
-  const handleAuthentication = useCallback(async (
-    email: string, 
-    password: string, 
-    isSignUp: boolean, 
-    name?: string
-  ) => {
-    // Rate limiting to prevent brute force attacks
-    if (attemptCount > 5) {
-      toast({
-        title: 'For mange forsøg',
-        description: 'Du har foretaget for mange login-forsøg. Prøv igen senere.',
-        variant: 'destructive',
-      });
-      return;
-    }
-    
-    // Use functional update to prevent stale state issues
-    setAttemptCount(prev => prev + 1);
-
     try {
-      if (isSignUp) {
-        const { error, data } = await signUp(email, password, name);
-        if (error) throw error;
-        
-        if (data?.user?.identities?.length === 0) {
-          toast({
-            title: 'Konto findes allerede',
-            description: 'Denne e-mail er allerede registreret. Prøv at logge ind i stedet.',
-            variant: 'destructive',
-          });
-          return;
-        }
-        
-        toast({
-          title: 'Konto oprettet',
-          description: 'Din konto er oprettet. Tjek din e-mail for bekræftelse.',
-        });
+      console.log("Attempting to sign in with email:", email);
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      
+      if (error) {
+        console.error("Sign in error:", error.message);
+        throw error;
+      }
+      
+      console.log("Sign in successful, redirectUrl:", redirectUrl);
+      
+      if (redirectUrl) {
+        navigate(redirectUrl);
       } else {
-        const { error } = await signIn(email, password);
-        if (error) throw error;
-        
-        toast({
-          title: 'Logget ind',
-          description: 'Du er nu logget ind',
-        });
-        
-        // Set default redirect to dashboard if none specified
-        if (!redirectUrl) {
-          navigate('/dashboard');
-        }
-        
-        // Reset attempt counter on successful login
-        resetAttemptCount();
+        navigate('/');
       }
-    } catch (error: any) {
-      console.error('Authentication error:', error);
       
-      let errorMessage = 'Der opstod en fejl. Prøv igen senere.';
-      
-      if (error.message) {
-        if (error.message.includes('Invalid login')) {
-          errorMessage = 'Forkert e-mail eller adgangskode';
-        } else if (error.message.includes('already registered')) {
-          errorMessage = 'Denne e-mail er allerede registreret';
-        } else if (error.message.includes('rate limit')) {
-          errorMessage = 'For mange forsøg. Prøv igen senere.';
-        } else {
-          // Generic error message to avoid leaking implementation details
-          errorMessage = 'Autentificering mislykkedes. Kontrollér dine oplysninger og prøv igen.';
-        }
-      }
+      return { error: null, data };
+    } catch (error) {
+      console.error("Sign in error:", error);
       
       toast({
-        title: 'Fejl',
-        description: errorMessage,
-        variant: 'destructive',
+        title: "Login fejlede",
+        description: error instanceof Error ? error.message : "Der opstod en fejl ved login",
+        variant: "destructive",
+      });
+      
+      setAttemptCount(attemptCount + 1);
+      
+      return {
+        error: error instanceof Error ? error : new Error("Unknown error"),
+        data: null,
+      };
+    }
+  }, [attemptCount, navigate, redirectUrl, setAttemptCount, toast]);
+
+  const signUp = useCallback(async (email: string, password: string, name?: string) => {
+    try {
+      console.log("Attempting to sign up with email:", email);
+      
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name: name || '',
+          },
+        },
+      });
+      
+      if (error) {
+        console.error("Sign up error:", error.message);
+        throw error;
+      }
+      
+      console.log("Sign up successful");
+      
+      if (data?.user && !data.session) {
+        toast({
+          title: "Bekræft din email",
+          description: "Vi har sendt dig en email med et link til at bekræfte din konto.",
+        });
+      } else if (redirectUrl) {
+        navigate(redirectUrl);
+      } else {
+        navigate('/profile');
+      }
+      
+      return { error: null, data };
+    } catch (error) {
+      console.error("Sign up error:", error);
+      
+      toast({
+        title: "Oprettelse fejlede",
+        description: error instanceof Error ? error.message : "Der opstod en fejl ved oprettelse af konto",
+        variant: "destructive",
+      });
+      
+      setAttemptCount(attemptCount + 1);
+      
+      return {
+        error: error instanceof Error ? error : new Error("Unknown error"),
+        data: null,
+      };
+    }
+  }, [attemptCount, navigate, redirectUrl, setAttemptCount, toast]);
+
+  const signOut = useCallback(async () => {
+    try {
+      console.log("Attempting to sign out");
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error("Sign out error:", error.message);
+        throw error;
+      }
+      
+      console.log("Sign out successful");
+      resetAttemptCount();
+      navigate('/login');
+    } catch (error) {
+      console.error("Sign out error:", error);
+      
+      toast({
+        title: "Log ud fejlede",
+        description: error instanceof Error ? error.message : "Der opstod en fejl ved log ud",
+        variant: "destructive",
       });
     }
-  }, [attemptCount, navigate, redirectUrl, resetAttemptCount, signIn, signUp, toast, setAttemptCount]);
+  }, [navigate, resetAttemptCount, toast]);
+
+  const handleAuthentication = useCallback(
+    async (email: string, password: string, isSignUp: boolean, name?: string) => {
+      if (isLoading) {
+        console.log("Authentication in progress, please wait");
+        return;
+      }
+      
+      try {
+        console.log(`Handling ${isSignUp ? 'sign up' : 'sign in'}`);
+        
+        if (isSignUp) {
+          await signUp(email, password, name);
+        } else {
+          await signIn(email, password);
+        }
+      } catch (error) {
+        console.error("Authentication error:", error);
+        
+        toast({
+          title: `${isSignUp ? 'Oprettelse' : 'Login'} fejlede`,
+          description: error instanceof Error ? error.message : `Der opstod en fejl ved ${isSignUp ? 'oprettelse af konto' : 'login'}`,
+          variant: "destructive",
+        });
+      }
+    },
+    [isLoading, signIn, signUp, toast]
+  );
 
   return {
     signIn,
     signUp,
     signOut,
-    handleAuthentication
+    handleAuthentication,
   };
 };

@@ -1,12 +1,12 @@
 
-import { useMemo } from "react";
+import { useCallback } from "react";
 import { CoverLetter } from "@/lib/types";
 
-interface UseLetterEditArgs {
+interface UseLetterEditProps {
   generatedLetter: CoverLetter | null;
   propHandleEditLetter?: (content: string) => Promise<void>;
-  handleEditContent: (content: string) => Promise<string | void>;
-  hookSetGeneratedLetter: React.Dispatch<React.SetStateAction<CoverLetter | null>>;
+  handleEditContent?: (content: string) => Promise<void>;
+  hookSetGeneratedLetter?: React.Dispatch<React.SetStateAction<CoverLetter | null>>;
 }
 
 export const useLetterEdit = ({
@@ -14,26 +14,35 @@ export const useLetterEdit = ({
   propHandleEditLetter,
   handleEditContent,
   hookSetGeneratedLetter
-}: UseLetterEditArgs) => {
-  
-  // Memoize letter edit handler to prevent unnecessary re-renders
-  return useMemo(() => async (content: string): Promise<void> => {
-    if (!generatedLetter) return;
+}: UseLetterEditProps) => {
+  const onEditContent = useCallback(async (updatedContent: string) => {
+    if (!generatedLetter) {
+      console.error("Cannot edit letter: No letter available");
+      return;
+    }
     
-    if (propHandleEditLetter) {
-      await propHandleEditLetter(content);
-    } else {
-      try {
-        // We need to consume the return value without returning it
-        await handleEditContent(content);
+    try {
+      console.log("Editing letter content");
+      
+      // Use prop function if available, otherwise use hook function
+      if (propHandleEditLetter) {
+        await propHandleEditLetter(updatedContent);
+      } else if (handleEditContent) {
+        await handleEditContent(updatedContent);
+      } else if (hookSetGeneratedLetter) {
+        // Simple update if no handler is provided
         hookSetGeneratedLetter({
           ...generatedLetter,
-          content,
+          content: updatedContent,
           updated_at: new Date().toISOString()
         });
-      } catch (err) {
-        console.error("Error updating letter:", err);
       }
+      
+      console.log("Letter content updated successfully");
+    } catch (error) {
+      console.error("Error updating letter content:", error);
     }
-  }, [generatedLetter, propHandleEditLetter, handleEditContent, hookSetGeneratedLetter]);
+  }, [generatedLetter, handleEditContent, hookSetGeneratedLetter, propHandleEditLetter]);
+
+  return onEditContent;
 };
