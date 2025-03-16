@@ -1,10 +1,11 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { Loader2, InfoIcon } from "lucide-react";
 import { User } from "@/lib/types";
 import { createCheckoutSession } from "@/services/subscription/subscriptionService";
 import { useToast } from "@/hooks/use-toast";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface SubscriptionActionsProps {
   user: User;
@@ -87,14 +88,30 @@ const SubscriptionActions: React.FC<SubscriptionActionsProps> = ({
         Opret abonnement nu
       </Button>
       
-      <Button
-        variant="outline"
-        size="sm"
-        className="w-full"
-        onClick={toggleTestMode}
-      >
-        {testMode ? "Deaktiver test-tilstand" : "Aktiver test-tilstand"}
-      </Button>
+      <div className="flex items-center mt-2">
+        <Button
+          variant="outline"
+          size="sm"
+          className="w-full"
+          onClick={toggleTestMode}
+        >
+          {testMode ? "Deaktiver test-tilstand" : "Aktiver test-tilstand"}
+        </Button>
+        
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <InfoIcon className="h-4 w-4 ml-2 text-gray-500" />
+            </TooltipTrigger>
+            <TooltipContent>
+              <p className="max-w-xs">
+                Test-tilstand viser checkout URL og giver dig tid til at læse den, før du omdirigeres.
+                Brug dette til at teste betalingsprocessen uden at gennemføre en betaling.
+              </p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </div>
     </>
   );
 };

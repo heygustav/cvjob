@@ -41,6 +41,21 @@ const Navbar: React.FC = () => {
     setIsOpen(false);
   };
 
+  // Close menu if user clicks outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (isOpen && !target.closest('.mobile-menu-container')) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
+
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
       scrolled 
@@ -52,12 +67,14 @@ const Navbar: React.FC = () => {
           <div className="flex justify-between items-center h-16">
             <NavbarLogo />
             <DesktopNavigation session={session} handleLogout={handleLogout} />
-            <MobileNavigation 
-              isOpen={isOpen} 
-              toggleMenu={toggleMenu} 
-              session={session} 
-              handleLogout={handleLogout} 
-            />
+            <div className="mobile-menu-container">
+              <MobileNavigation 
+                isOpen={isOpen} 
+                toggleMenu={toggleMenu} 
+                session={session} 
+                handleLogout={handleLogout} 
+              />
+            </div>
           </div>
         </div>
       </div>

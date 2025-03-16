@@ -1,5 +1,6 @@
 
 import React from "react";
+import { Link } from "react-router-dom";
 
 const TermsCheckbox: React.FC = () => {
   return (
@@ -13,13 +14,13 @@ const TermsCheckbox: React.FC = () => {
       />
       <label htmlFor="terms" className="ml-2 block text-sm text-gray-700">
         Jeg accepterer{" "}
-        <a href="#" className="font-medium text-primary hover:text-primary-800">
+        <Link to="/terms" className="font-medium text-primary hover:text-primary-800">
           Brugsbetingelserne
-        </a>{" "}
+        </Link>{" "}
         og{" "}
-        <a href="#" className="font-medium text-primary hover:text-primary-800">
+        <Link to="/privacy" className="font-medium text-primary hover:text-primary-800">
           Privatlivspolitikken
-        </a>
+        </Link>
       </label>
     </div>
   );
