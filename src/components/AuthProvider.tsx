@@ -1,7 +1,6 @@
 
 import React, { createContext, useContext, useMemo } from 'react';
-import { Session, User } from '@supabase/supabase-js';
-import { useAuthState, AuthState, AuthActions } from '@/hooks/useAuthState';
+import { useAuthState, AuthState, AuthActions } from '@/hooks/auth/useAuthState';
 
 interface AuthContextType extends AuthState, AuthActions {}
 
