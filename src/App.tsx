@@ -12,6 +12,7 @@ import NotFound from './pages/NotFound';
 import { AuthProvider, useAuth } from './components/AuthProvider';
 import AuthCallback from './components/auth/AuthCallback';
 import Profile from './pages/Profile';
+import Navbar from './components/navbar/Navbar';
 
 // Protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -24,12 +25,24 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+// Layout component that includes the Navbar
+const MainLayout = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <>
+      <Navbar />
+      <main className="pt-16">
+        {children}
+      </main>
+    </>
+  );
+};
+
 const AppRoutes = () => {
   const { session } = useAuth();
   
   return (
     <Routes>
-      <Route path="/" element={<Index />} />
+      <Route path="/" element={<MainLayout><Index /></MainLayout>} />
       <Route path="/login" element={<Login onLogin={() => {}} />} />
       <Route path="/signup" element={<Signup onSignup={() => {}} />} />
       <Route path="/auth" element={<Auth />} />
@@ -40,7 +53,7 @@ const AppRoutes = () => {
         path="/dashboard" 
         element={
           <ProtectedRoute>
-            <Dashboard />
+            <MainLayout><Dashboard /></MainLayout>
           </ProtectedRoute>
         } 
       />
@@ -48,7 +61,7 @@ const AppRoutes = () => {
         path="/cover-letter/:id?" 
         element={
           <ProtectedRoute>
-            <CoverLetter userId={session?.user?.id || ''} />
+            <MainLayout><CoverLetter userId={session?.user?.id || ''} /></MainLayout>
           </ProtectedRoute>
         } 
       />
@@ -56,7 +69,7 @@ const AppRoutes = () => {
         path="/ansoegning" 
         element={
           <ProtectedRoute>
-            <CoverLetterGenerator />
+            <MainLayout><CoverLetterGenerator /></MainLayout>
           </ProtectedRoute>
         } 
       />
@@ -64,7 +77,7 @@ const AppRoutes = () => {
         path="/cover-letter/generator" 
         element={
           <ProtectedRoute>
-            <CoverLetterGenerator />
+            <MainLayout><CoverLetterGenerator /></MainLayout>
           </ProtectedRoute>
         } 
       />
@@ -72,12 +85,12 @@ const AppRoutes = () => {
         path="/profile" 
         element={
           <ProtectedRoute>
-            <Profile />
+            <MainLayout><Profile /></MainLayout>
           </ProtectedRoute>
         } 
       />
       
-      <Route path="*" element={<NotFound />} />
+      <Route path="*" element={<MainLayout><NotFound /></MainLayout>} />
     </Routes>
   );
 };
