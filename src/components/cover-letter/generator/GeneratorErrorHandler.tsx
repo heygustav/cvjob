@@ -12,7 +12,7 @@ interface GeneratorErrorHandlerProps {
   generationPhase: string | null;
   generationProgress: GenerationProgress;
   user: User | null;
-  subscriptionStatus: any;
+  subscriptionStatus: SubscriptionStatus | null;
   hasGeneratedLetter: boolean;
   resetError: () => void;
 }
@@ -28,10 +28,13 @@ export const GeneratorErrorHandler = memo(({
   hasGeneratedLetter,
   resetError,
 }: GeneratorErrorHandlerProps) => {
-  // Early return if there's no error, subscription issue, or generation in progress
-  if (!isGenerating && !error && (!subscriptionStatus || subscriptionStatus.canGenerate || hasGeneratedLetter)) {
+  // Don't render anything if there's no state to show
+  if (!isGenerating && !error && 
+      (!subscriptionStatus || (subscriptionStatus.canGenerate !== false) || hasGeneratedLetter)) {
     return null;
   }
+
+  console.log("Rendering error handler with subscription status:", subscriptionStatus);
 
   return (
     <GeneratorStates

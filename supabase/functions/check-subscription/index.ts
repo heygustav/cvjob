@@ -18,6 +18,7 @@ serve(async (req) => {
   try {
     body = await req.json();
   } catch (error) {
+    console.error('Error parsing request body:', error);
     return new Response(JSON.stringify({ error: 'Invalid request body' }), { 
       status: 400,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -26,11 +27,14 @@ serve(async (req) => {
 
   const { userId } = body;
   if (!userId) {
+    console.error('Missing userId in request body');
     return new Response(JSON.stringify({ error: 'User ID is required' }), { 
       status: 400,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
   }
+
+  console.log(`Checking subscription status for user: ${userId}`);
 
   // Initialize Supabase client with service role key for admin access
   const supabaseAdmin = createClient(
@@ -72,6 +76,12 @@ serve(async (req) => {
     const canGenerate = 
       !!subscriptionData || // Has active subscription
       freeGenerationsUsed < FREE_GENERATIONS_ALLOWED; // Has free generations left
+
+    console.log(`Subscription status for user ${userId}:`, {
+      hasActiveSubscription: !!subscriptionData,
+      freeGenerationsUsed,
+      canGenerate
+    });
 
     // Prepare response
     const response = {

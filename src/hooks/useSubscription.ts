@@ -6,7 +6,7 @@ import { SubscriptionStatus } from "@/services/subscription/types";
 import { useToast } from "@/hooks/use-toast";
 import { User as SupabaseUser } from "@supabase/supabase-js";
 
-// Update the hook to accept either our custom User type or the Supabase User type
+// Accept either our custom User type or the Supabase User type
 export const useSubscription = (user: User | SupabaseUser | null) => {
   const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -18,7 +18,9 @@ export const useSubscription = (user: User | SupabaseUser | null) => {
     setIsLoading(true);
     setError(null);
     try {
+      console.log("Fetching subscription status for user:", userId);
       const status = await checkSubscriptionStatus(userId);
+      console.log("Subscription status received:", status);
       setSubscriptionStatus(status);
       return status;
     } catch (err) {
@@ -39,6 +41,7 @@ export const useSubscription = (user: User | SupabaseUser | null) => {
   // Record a generation
   const recordGeneration = async (userId: string): Promise<boolean> => {
     try {
+      console.log("Recording generation for user:", userId);
       await incrementGenerationCount(userId);
       // Update local state after recording generation
       await fetchSubscriptionStatus(userId);
