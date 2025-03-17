@@ -81,6 +81,7 @@ export const generateCoverLetter = async (jobData: JobFormData, userInfo: UserPr
       throw new Error("Ingen ansøgning blev genereret. Prøv igen.");
     }
     
+    console.log("Letter generation successful, received content length:", data.content.length);
     return data.content;
   } catch (error) {
     console.error("Error in generateCoverLetter:", error);

@@ -59,7 +59,7 @@ const JobListComponent: React.FC<JobListComponentProps> = ({
 
   const handleCreateApplication = (job: JobPosting) => {
     if (!isAuthenticated || !session) {
-      localStorage.setItem('redirectAfterLogin', `/cover-letter/generator?jobId=${job.id}&step=1&direct=true`);
+      localStorage.setItem('redirectAfterLogin', `/ansoegning?jobId=${job.id}&step=1&direct=true`);
       toast({
         title: "Log ind kræves",
         description: "Du skal være logget ind for at oprette en ansøgning.",

@@ -28,11 +28,16 @@ export const useSubscription = (user: User | SupabaseUser | null) => {
       console.error("Error fetching subscription status:", err);
       const errorMessage = "Kunne ikke hente abonnementsstatus";
       setError(errorMessage);
+      toast({
+        title: "Fejl ved hentning af abonnement",
+        description: errorMessage,
+        variant: "destructive",
+      });
       return null;
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [toast]);
 
   // Initial fetch
   useEffect(() => {
@@ -43,8 +48,12 @@ export const useSubscription = (user: User | SupabaseUser | null) => {
 
   // Check if user can generate a cover letter
   const canGenerateLetter = useCallback((): boolean => {
+    if (error) {
+      console.warn("Error state present in subscription, defaulting to allow generation");
+      return true; // If there's an error, we'll allow generation and let the backend handle actual limits
+    }
     return subscriptionStatus?.canGenerate ?? false;
-  }, [subscriptionStatus?.canGenerate]);
+  }, [subscriptionStatus?.canGenerate, error]);
 
   // Record a generation
   const recordGeneration = useCallback(async (userId: string): Promise<boolean> => {
@@ -68,10 +77,10 @@ export const useSubscription = (user: User | SupabaseUser | null) => {
       console.error("Error recording generation:", err);
       toast({
         title: "Fejl",
-        description: "Kunne ikke registrere generering",
+        description: "Kunne ikke registrere generering, men fortsætter processen",
         variant: "destructive",
       });
-      return false;
+      return true; // Return true so generation can continue despite recording issues
     } finally {
       setIsRecordingGeneration(false);
     }

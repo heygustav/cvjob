@@ -8,15 +8,24 @@ import { AlertCircle, RefreshCw } from "lucide-react";
 
 const DashboardLoading: React.FC = () => {
   const [isLongLoading, setIsLongLoading] = useState(false);
+  const [isTimeout, setIsTimeout] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     // If loading takes more than 10 seconds, show loading timeout message
-    const timeoutId = setTimeout(() => {
+    const longTimeoutId = setTimeout(() => {
       setIsLongLoading(true);
     }, 10000);
+    
+    // If loading takes more than 30 seconds, show timeout message
+    const timeoutId = setTimeout(() => {
+      setIsTimeout(true);
+    }, 30000);
 
-    return () => clearTimeout(timeoutId);
+    return () => {
+      clearTimeout(longTimeoutId);
+      clearTimeout(timeoutId);
+    };
   }, []);
 
   const handleRefresh = () => {
@@ -29,12 +38,14 @@ const DashboardLoading: React.FC = () => {
       
       {isLongLoading && (
         <div className="mt-6">
-          <Alert variant="destructive" className="mb-4">
+          <Alert variant={isTimeout ? "destructive" : "default"} className="mb-4">
             <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Indlæsning tager længere tid end forventet</AlertTitle>
+            <AlertTitle>{isTimeout ? "Timeout ved indlæsning" : "Indlæsning tager længere tid end forventet"}</AlertTitle>
             <AlertDescription>
-              Der kan være problemer med at indlæse data. Du kan prøve at opdatere siden, 
-              eller gå tilbage til forsiden og prøve igen senere.
+              {isTimeout 
+                ? "Der er opstået et problem med indlæsningen af data. Prøv venligst at opdatere siden eller gå tilbage til forsiden."
+                : "Der kan være problemer med at indlæse data. Du kan prøve at opdatere siden, eller gå tilbage til forsiden og prøve igen senere."
+              }
             </AlertDescription>
           </Alert>
           
