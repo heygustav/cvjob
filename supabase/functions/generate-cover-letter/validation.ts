@@ -35,12 +35,22 @@ export function validateRequestData(requestData: any): { jobInfo: any, userInfo:
 export function createLogPayload(requestData: any): any {
   if (!requestData) return null;
   
+  const truncateText = (text: string, maxLength = 50) => {
+    if (!text) return undefined;
+    return text.length > maxLength ? `${text.substring(0, maxLength)}... (truncated)` : text;
+  };
+  
   return {
     ...requestData,
     jobInfo: requestData.jobInfo ? {
       ...requestData.jobInfo,
-      description: requestData.jobInfo.description ? 
-        `${requestData.jobInfo.description.substring(0, 50)}... (truncated)` : undefined
+      description: truncateText(requestData.jobInfo.description)
+    } : undefined,
+    userInfo: requestData.userInfo ? {
+      ...requestData.userInfo,
+      education: truncateText(requestData.userInfo.education),
+      experience: truncateText(requestData.userInfo.experience),
+      skills: truncateText(requestData.userInfo.skills)
     } : undefined
   };
 }
