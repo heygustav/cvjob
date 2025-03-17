@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+
+import { useState, useEffect, useCallback } from "react";
 import { JobPosting, CoverLetter } from "@/lib/types";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/AuthProvider";
@@ -10,29 +11,37 @@ export const useDashboardData = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
   const { toast } = useToast();
 
-  useEffect(() => {
-    if (user) {
-      fetchJobPostings();
-      fetchCoverLetters();
+  const fetchJobPostings = useCallback(async () => {
+    if (!user?.id) {
+      console.log("No user ID available for fetching job postings");
+      return;
     }
-  }, [user]);
 
-  const fetchJobPostings = async () => {
     try {
+      console.log("Fetching job postings for user:", user.id);
       setIsLoading(true);
-      const { data, error } = await supabase
+      setError(null);
+      
+      const { data, error: fetchError } = await supabase
         .from("job_postings")
         .select("*")
+        .eq("user_id", user.id)
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
+      if (fetchError) {
+        console.error("Error fetching job postings:", fetchError);
+        throw fetchError;
+      }
 
+      console.log(`Fetched ${data?.length || 0} job postings`);
       setJobPostings(data || []);
     } catch (error) {
       console.error("Error fetching job postings:", error);
+      setError("Der opstod en fejl under indlæsning af jobopslag.");
       toast({
         title: "Fejl ved indlæsning",
         description: "Der opstod en fejl under indlæsning af jobopslag.",
@@ -41,23 +50,50 @@ export const useDashboardData = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user?.id, toast]);
 
-  const fetchCoverLetters = async () => {
+  const fetchCoverLetters = useCallback(async () => {
+    if (!user?.id) {
+      console.log("No user ID available for fetching cover letters");
+      return;
+    }
+
     try {
-      const { data, error } = await supabase
+      console.log("Fetching cover letters for user:", user.id);
+      setError(null);
+      
+      const { data, error: fetchError } = await supabase
         .from("cover_letters")
         .select("*")
+        .eq("user_id", user.id)
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
+      if (fetchError) {
+        console.error("Error fetching cover letters:", fetchError);
+        throw fetchError;
+      }
 
+      console.log(`Fetched ${data?.length || 0} cover letters`);
       setCoverLetters(data || []);
     } catch (error) {
       console.error("Error fetching cover letters:", error);
+      setError("Der opstod en fejl under indlæsning af ansøgninger.");
+      toast({
+        title: "Fejl ved indlæsning",
+        description: "Der opstod en fejl under indlæsning af ansøgninger.",
+        variant: "destructive",
+      });
     }
-  };
+  }, [user?.id, toast]);
 
+  useEffect(() => {
+    if (user) {
+      fetchJobPostings();
+      fetchCoverLetters();
+    }
+  }, [user, fetchJobPostings, fetchCoverLetters]);
+
+  // Updated function to handle deletion
   const deleteJobPosting = async (id: string) => {
     try {
       setIsDeleting(true);
@@ -140,6 +176,7 @@ export const useDashboardData = () => {
   const refreshData = async () => {
     try {
       setIsRefreshing(true);
+      setError(null);
       await Promise.all([fetchJobPostings(), fetchCoverLetters()]);
       toast({
         title: "Opdateret",
@@ -147,6 +184,7 @@ export const useDashboardData = () => {
       });
     } catch (error) {
       console.error("Error refreshing data:", error);
+      setError("Der opstod en fejl under opdatering af data.");
       toast({
         title: "Fejl ved opdatering",
         description: "Der opstod en fejl under opdatering af data.",
@@ -157,20 +195,25 @@ export const useDashboardData = () => {
     }
   };
 
-  // Updated function to handle incomplete jobs
+  // Find job for letter with error handling
   const findJobForLetter = (jobPostingId: string) => {
-    const job = jobPostings.find(job => job.id === jobPostingId);
-    
-    // If job not found, return null
-    if (!job) return null;
-    
-    // Ensure the job has all required fields even if incomplete
-    return {
-      ...job,
-      title: job.title || "Untitled Position",
-      company: job.company || "Unknown Company",
-      description: job.description || "No description provided"
-    };
+    try {
+      const job = jobPostings.find(job => job.id === jobPostingId);
+      
+      // If job not found, return null
+      if (!job) return null;
+      
+      // Ensure the job has all required fields even if incomplete
+      return {
+        ...job,
+        title: job.title || "Untitled Position",
+        company: job.company || "Unknown Company",
+        description: job.description || "No description provided"
+      };
+    } catch (err) {
+      console.error("Error finding job for letter:", err);
+      return null;
+    }
   };
 
   return {
@@ -179,6 +222,7 @@ export const useDashboardData = () => {
     isLoading,
     isDeleting,
     isRefreshing,
+    error,
     deleteJobPosting,
     deleteCoverLetter,
     refreshData,

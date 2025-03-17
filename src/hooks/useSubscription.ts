@@ -1,5 +1,5 @@
 
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { User } from "@/lib/types";
 import { checkSubscriptionStatus, incrementGenerationCount } from "@/services/subscription/subscriptionService";
 import { SubscriptionStatus } from "@/services/subscription/types";
@@ -11,6 +11,7 @@ export const useSubscription = (user: User | SupabaseUser | null) => {
   const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isRecordingGeneration, setIsRecordingGeneration] = useState(false);
   const { toast } = useToast();
 
   // Fetch subscription status
@@ -33,6 +34,13 @@ export const useSubscription = (user: User | SupabaseUser | null) => {
     }
   }, []);
 
+  // Initial fetch
+  useEffect(() => {
+    if (user?.id) {
+      fetchSubscriptionStatus(user.id);
+    }
+  }, [user?.id, fetchSubscriptionStatus]);
+
   // Check if user can generate a cover letter
   const canGenerateLetter = useCallback((): boolean => {
     return subscriptionStatus?.canGenerate ?? false;
@@ -40,11 +48,21 @@ export const useSubscription = (user: User | SupabaseUser | null) => {
 
   // Record a generation
   const recordGeneration = useCallback(async (userId: string): Promise<boolean> => {
+    if (isRecordingGeneration) {
+      console.log("Already recording a generation, skipping duplicate request");
+      return false;
+    }
+    
+    setIsRecordingGeneration(true);
+    
     try {
       console.log("Recording generation for user:", userId);
       await incrementGenerationCount(userId);
+      
       // Update local state after recording generation
+      console.log("Generation recorded, fetching updated subscription status");
       await fetchSubscriptionStatus(userId);
+      
       return true;
     } catch (err) {
       console.error("Error recording generation:", err);
@@ -54,8 +72,10 @@ export const useSubscription = (user: User | SupabaseUser | null) => {
         variant: "destructive",
       });
       return false;
+    } finally {
+      setIsRecordingGeneration(false);
     }
-  }, [fetchSubscriptionStatus, toast]);
+  }, [fetchSubscriptionStatus, toast, isRecordingGeneration]);
 
   return {
     subscriptionStatus,
