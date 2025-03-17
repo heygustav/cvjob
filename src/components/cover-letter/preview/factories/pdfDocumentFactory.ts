@@ -42,7 +42,8 @@ export const createPdfDocument = ({
   // Split content by new lines and add line by line to handle word wrapping
   const contentLines = content.split("\n");
   let yPosition = 50;
-  const lineHeight = 5;
+  // Set line height to 1 (reduced from previous value)
+  const lineHeight = 4; // Reduced for tighter spacing
   
   contentLines.forEach(line => {
     // Use splitTextToSize to handle word wrapping (limit line width to 170 mm)
@@ -58,7 +59,7 @@ export const createPdfDocument = ({
       }
     });
     
-    // Reduced paragraph spacing
+    // Small paragraph spacing (reduced from before)
     yPosition += 1;
   });
   

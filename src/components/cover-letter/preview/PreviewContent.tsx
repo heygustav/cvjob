@@ -53,10 +53,11 @@ const PreviewContent: React.FC<PreviewContentProps> = ({
             </div>
           </header>
           <article 
-            className="prose max-w-none font-serif whitespace-pre-line text-base leading-relaxed overflow-auto flex-grow border border-gray-100 rounded p-4 shadow-inner text-left" 
+            className="prose max-w-none font-serif whitespace-pre-line text-base leading-snug overflow-auto flex-grow border border-gray-100 rounded p-4 shadow-inner text-left" 
             tabIndex={0} 
             aria-label="Ansøgningstekst"
             role="document"
+            style={{ lineHeight: "1.0" }}
             dangerouslySetInnerHTML={{ __html: sanitizedContent }}
           />
         </div>

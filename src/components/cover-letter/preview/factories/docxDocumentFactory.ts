@@ -1,5 +1,5 @@
 
-import { Document, Packer, Paragraph, TextRun, AlignmentType } from "docx";
+import { Document, Packer, Paragraph, TextRun, AlignmentType, LineRuleType, Spacing } from "docx";
 import { saveAs } from "file-saver";
 
 export interface DocxDocumentOptions {
@@ -32,6 +32,11 @@ export const createDocxDocument = ({
                 bold: true,
               }),
             ],
+            spacing: {
+              after: 0, // Reduced spacing
+              line: 240, // 1 line spacing (24 points)
+              lineRule: LineRuleType.EXACT
+            },
           }),
           
           // Job title - bold
@@ -43,7 +48,9 @@ export const createDocxDocument = ({
               }),
             ],
             spacing: {
-              after: 200,
+              after: 200, // Space after header
+              line: 240, // 1 line spacing (24 points)
+              lineRule: LineRuleType.EXACT
             },
           }),
           
@@ -57,7 +64,9 @@ export const createDocxDocument = ({
               }),
             ],
             spacing: {
-              after: 400,
+              after: 200, // Space after date
+              line: 240, // 1 line spacing (24 points)
+              lineRule: LineRuleType.EXACT
             },
           }),
           
@@ -66,7 +75,9 @@ export const createDocxDocument = ({
             new Paragraph({
               text: paragraph,
               spacing: {
-                after: 100,
+                after: 100, // Minimal space between paragraphs
+                line: 240, // 1 line spacing (24 points)
+                lineRule: LineRuleType.EXACT
               },
             })
           ),

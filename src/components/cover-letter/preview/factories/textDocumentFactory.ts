@@ -15,8 +15,16 @@ export const createTextDocument = ({
   jobTitle = "stillingen",
   formattedDate
 }: TextDocumentOptions): string => {
+  // Create a cleaner header with single line spacing
   const letterHeader = `${company}\nAtt.: Ansøgning til ${jobTitle}\n\n${formattedDate}\n\n`;
-  return letterHeader + content;
+  
+  // Process content to ensure consistent single line breaks between paragraphs
+  const processedContent = content
+    .replace(/\n{3,}/g, '\n\n') // Replace 3+ consecutive line breaks with 2
+    .replace(/\s+\n/g, '\n') // Remove whitespace before line breaks
+    .trim();
+  
+  return letterHeader + processedContent;
 };
 
 /**
