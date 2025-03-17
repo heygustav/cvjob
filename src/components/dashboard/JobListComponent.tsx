@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { JobPosting } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import IconButton from "@/components/ui/icon-button";
@@ -69,11 +69,12 @@ const JobListComponent: React.FC<JobListComponentProps> = ({
       return;
     }
     
-    navigate(`/cover-letter/generator?jobId=${job.id}&step=1&direct=true`);
+    navigate(`/ansoegning?jobId=${job.id}&step=1&direct=true`);
   };
   
   const handleEditJob = (jobId: string) => {
-    navigate(`/job/${jobId}`);
+    // Navigate to the cover letter generator with this job pre-selected
+    navigate(`/ansoegning?jobId=${jobId}&step=1&direct=true`);
   };
 
   if (jobPostings.length === 0) {
