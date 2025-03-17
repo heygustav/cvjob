@@ -19,9 +19,13 @@ const NotFound = () => {
       const jobId = jobMatch[1];
       console.log("Detected job ID in 404 route, redirecting to proper route:", jobId);
       
-      // Redirect to the correct route
+      // Redirect to the correct route with clear parameters
       navigate(`/ansoegning?jobId=${jobId}&step=1&direct=true`, { replace: true });
+      return;
     }
+    
+    // Log additional information for debugging
+    console.log("Current path parts:", location.pathname.split('/'));
   }, [location.pathname, navigate]);
 
   return (
