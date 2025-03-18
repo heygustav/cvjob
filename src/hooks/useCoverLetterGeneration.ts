@@ -1,6 +1,6 @@
 
 import { User } from "@/lib/types";
-import { useCoverLetterGeneration as useRefactoredCoverLetterGeneration } from "./coverLetter/generation";
+import { useCoverLetterGeneration as useRefactoredCoverLetterGeneration } from "./coverLetter/letter-generation";
 
 /**
  * Main hook for cover letter generation functionality

@@ -1,4 +1,3 @@
-
 import { useCallback, useRef, useState, useEffect } from "react";
 import { User, JobPosting, CoverLetter } from "@/lib/types";
 import { JobFormData } from "@/services/coverLetter/types";
@@ -7,9 +6,9 @@ import { useToastMessages } from "../useToastMessages";
 import { useGenerationTracking } from "../generation-tracking";
 import { useGenerationErrorHandling } from "../generation-error-handling";
 import { useGenerationSteps } from "../useGenerationSteps";
-import { useJobFetchingLogic } from "./useJobFetchingLogic";
-import { useLetterFetchingLogic } from "./useLetterFetchingLogic";
-import { useLetterEditingLogic } from "./useLetterEditingLogic";
+import { useJobFetchingLogic } from "../generation/useJobFetchingLogic";
+import { useLetterFetchingLogic } from "../generation/useLetterFetchingLogic";
+import { useLetterEditingLogic } from "../generation/useLetterEditingLogic";
 import { handleLetterGeneration, setupGenerationTimeout } from "./letterGenerationUtils";
 import { useToast } from "@/hooks/use-toast";
 

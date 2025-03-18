@@ -3,6 +3,7 @@ import { JobFormData } from "@/services/coverLetter/types";
 import { User } from "@/lib/types";
 import { GenerationProgress } from "../types";
 import { ToastMessagesType } from "../types";
+import { executeGenerationProcess } from "./generationLogic";
 
 /**
  * Core letter generation handler used by both generation hooks
