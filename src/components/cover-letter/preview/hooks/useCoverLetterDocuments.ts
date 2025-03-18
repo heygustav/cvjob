@@ -6,6 +6,8 @@ import { da } from "date-fns/locale";
 import { createPdfDocument, generatePdfFilename, PdfDocumentOptions } from "../factories/pdfDocumentFactory";
 import { createDocxDocument, generateDocxFilename, saveDocxDocument, DocxDocumentOptions } from "../factories/docxDocumentFactory";
 import { createTextDocument, generateTextFilename, TextDocumentOptions } from "../factories/textDocumentFactory";
+import { generateCoverLetterFilename } from "@/utils/fileNaming";
+import { useAuth } from "@/components/AuthProvider";
 
 export const useCoverLetterDocuments = (
   content: string,
@@ -15,6 +17,7 @@ export const useCoverLetterDocuments = (
   const { toast } = useToast();
   const [isDownloading, setIsDownloading] = useState(false);
   const downloadTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const { user } = useAuth();
   
   // Generate a memoized formatted date
   const formattedDate = useCallback(() => {
@@ -61,20 +64,14 @@ export const useCoverLetterDocuments = (
     setIsDownloading(false);
   }, [toast]);
 
-  // Helper to create a sanitized filename
-  const createFilename = useCallback((letter: string, job: string | undefined, company: string | undefined, extension: string) => {
-    // Get job title and company if available
-    const jobTitle = job ? job.replace(/[^\w\s-]/g, '') : 'untitled';
-    const companyName = company ? company.replace(/[^\w\s-]/g, '') : 'unknown';
-    
-    // Create a timestamp
-    const timestamp = new Date().toISOString().split('T')[0];
-    
-    // Create filename: sanitize and replace spaces with hyphens
-    return `ansøgning-${companyName}-${jobTitle}-${timestamp}.${extension}`
-      .toLowerCase()
-      .replace(/\s+/g, '-');
-  }, []);
+  // Helper to create a standardized filename
+  const createFilename = useCallback((contentText: string, extension: string) => {
+    return generateCoverLetterFilename(extension, {
+      fullName: user?.user_metadata?.name,
+      jobTitle,
+      companyName: company,
+    });
+  }, [user, jobTitle, company]);
 
   // Helper to safely get text content from possible HTML
   const getTextContent = useCallback((htmlString: string) => {
@@ -112,7 +109,7 @@ export const useCoverLetterDocuments = (
       const doc = createPdfDocument(documentOptions);
       
       // Generate filename
-      const filename = createFilename(letterContent, jobTitle, company, 'pdf');
+      const filename = createFilename(contentText, 'pdf');
       
       // Save PDF
       doc.save(filename);
@@ -152,7 +149,7 @@ export const useCoverLetterDocuments = (
       const doc = createDocxDocument(documentOptions);
       
       // Generate filename
-      const filename = createFilename(letterContent, jobTitle, company, 'docx');
+      const filename = createFilename(contentText, 'docx');
       
       // Save file
       await saveDocxDocument(doc, filename);
@@ -195,7 +192,7 @@ export const useCoverLetterDocuments = (
       const blob = new Blob([documentText], { type: 'text/plain;charset=utf-8' });
       
       // Generate filename
-      const filename = createFilename(letterContent, jobTitle, company, 'txt');
+      const filename = createFilename(contentText, 'txt');
       
       // Create download link
       const element = document.createElement("a");

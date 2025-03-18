@@ -1,12 +1,13 @@
 
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { CoverLetter, JobPosting } from '@/lib/types';
+import { CoverLetter, JobPosting, User } from '@/lib/types';
 import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 import { Document, Packer, Paragraph, TextRun } from 'docx';
+import { generateCoverLetterFilename } from '@/utils/fileNaming';
 
-export const useLetterDownload = () => {
+export const useLetterDownload = (currentUser?: User | null) => {
   const [isDownloading, setIsDownloading] = useState(false);
   const { toast } = useToast();
 
@@ -21,19 +22,13 @@ export const useLetterDownload = () => {
     setIsDownloading(false);
   };
 
-  // Helper to create a sanitized filename
+  // Generate filename using our new utility
   const createFilename = (letter: CoverLetter, job: JobPosting | null | undefined, extension: string) => {
-    // Get job title and company if available
-    const jobTitle = job?.title ? job.title.replace(/[^\w\s-]/g, '') : 'untitled';
-    const company = job?.company ? job.company.replace(/[^\w\s-]/g, '') : 'unknown';
-    
-    // Create a timestamp
-    const timestamp = new Date().toISOString().split('T')[0];
-    
-    // Create filename: sanitize and replace spaces with hyphens
-    return `ansøgning-${company}-${jobTitle}-${timestamp}.${extension}`
-      .toLowerCase()
-      .replace(/\s+/g, '-');
+    return generateCoverLetterFilename(extension, {
+      fullName: currentUser?.name,
+      jobTitle: job?.title,
+      companyName: job?.company,
+    });
   };
 
   // Helper to safely get text content from possible HTML

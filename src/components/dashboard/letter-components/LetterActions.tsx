@@ -2,7 +2,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import IconButton from "@/components/ui/icon-button";
-import { CoverLetter, JobPosting } from "@/lib/types";
+import { CoverLetter, JobPosting, User } from "@/lib/types";
 import { Link } from "react-router-dom";
 import { Download, FileEdit, Trash2 } from "lucide-react";
 import {
@@ -15,6 +15,7 @@ import {
 interface LetterActionsProps {
   letter: CoverLetter;
   job?: JobPosting;
+  currentUser?: User;
   onDelete: (id: string) => void;
   onDownloadPdf: (letter: CoverLetter, job?: JobPosting) => void;
   onDownloadDocx: (letter: CoverLetter, job?: JobPosting) => void;
@@ -25,6 +26,7 @@ interface LetterActionsProps {
 const LetterActions: React.FC<LetterActionsProps> = ({
   letter,
   job,
+  currentUser,
   onDelete,
   onDownloadPdf,
   onDownloadDocx,
