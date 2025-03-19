@@ -12,6 +12,7 @@ import NotFound from './pages/NotFound';
 import { AuthProvider, useAuth } from './components/AuthProvider';
 import AuthCallback from './components/auth/AuthCallback';
 import Profile from './pages/Profile';
+import ResumeBuilder from './pages/ResumeBuilder';
 import Navbar from './components/navbar/Navbar';
 
 // Protected route component
@@ -86,6 +87,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <MainLayout><Profile /></MainLayout>
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/resume" 
+        element={
+          <ProtectedRoute>
+            <MainLayout><ResumeBuilder /></MainLayout>
           </ProtectedRoute>
         } 
       />

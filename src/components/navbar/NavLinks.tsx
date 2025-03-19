@@ -8,6 +8,7 @@ import {
   UserCircle,
   LogOut,
   Home,
+  FileText,
 } from "lucide-react";
 
 interface NavLinksProps {
@@ -48,6 +49,13 @@ const NavLinks: React.FC<NavLinksProps> = ({
         <Link to="/ansoegning" className={linkClass}>
           <PenTool className="h-4 w-4" />
           Opret ansøgning
+        </Link>
+      )}
+      
+      {session && (
+        <Link to="/resume" className={linkClass}>
+          <FileText className="h-4 w-4" />
+          CV Builder
         </Link>
       )}
       
