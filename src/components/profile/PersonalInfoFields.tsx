@@ -1,4 +1,3 @@
-
 import React from "react";
 import { PersonalInfoFormState } from "@/pages/Profile";
 import { FormControl } from "@/components/ui/form";
@@ -27,7 +26,7 @@ const PersonalInfoFields: React.FC<PersonalInfoFieldsProps> = React.memo(({
     console.log("Viewport size:", window.innerWidth, "x", window.innerHeight);
     
     // Mark component as ready for end-to-end testing
-    if (window.Cypress) {
+    if (typeof window !== 'undefined' && 'Cypress' in window) {
       // @ts-ignore - For Cypress testing
       window.personalInfoFieldsReady = true;
     }
