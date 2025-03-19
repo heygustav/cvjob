@@ -23,15 +23,24 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({
   setFormData,
   isLoading,
 }) => {
+  console.log("PersonalInfoForm rendering with data:", formData);
+  
   const handleExtractedData = (extractedData: Partial<PersonalInfoFormState>) => {
+    console.log("Received extracted data from resume:", extractedData);
     setFormData(prev => ({
       ...prev,
       ...extractedData
     }));
   };
 
+  const onSubmit = (e: React.FormEvent) => {
+    console.log("Form submission in PersonalInfoForm");
+    e.preventDefault(); // Prevent default form submission behavior
+    handleSubmit(e);
+  };
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 text-left">
+    <form onSubmit={onSubmit} className="space-y-6 text-left">
       <ResumeUploader onExtractedData={handleExtractedData} />
       
       <PersonalInfoFields formData={formData} handleChange={handleChange} />

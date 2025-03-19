@@ -22,12 +22,16 @@ export const useProfileData = () => {
 
   useEffect(() => {
     if (user) {
+      console.log("User is authenticated, fetching profile data");
       fetchProfile();
+    } else {
+      console.log("No authenticated user found");
     }
   }, [user]);
 
   const fetchProfile = async () => {
     try {
+      console.log("Fetching profile data for user:", user?.id);
       setIsProfileLoading(true);
       const { data, error } = await supabase
         .from("profiles")
@@ -36,10 +40,12 @@ export const useProfileData = () => {
         .single();
 
       if (error && error.code !== "PGRST116") {
+        console.error("Error fetching profile:", error);
         throw error;
       }
 
       if (data) {
+        console.log("Profile data fetched successfully:", data);
         setFormData({
           name: data.name || "",
           email: data.email || user?.email || "",
@@ -49,6 +55,8 @@ export const useProfileData = () => {
           education: data.education || "",
           skills: data.skills || "",
         });
+      } else {
+        console.log("No profile data found for user");
       }
     } catch (error) {
       console.error("Error fetching profile:", error);
@@ -66,6 +74,7 @@ export const useProfileData = () => {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
+    console.log(`Field "${name}" changed to: ${value.substring(0, 20)}${value.length > 20 ? '...' : ''}`);
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -73,10 +82,18 @@ export const useProfileData = () => {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
+    console.log("Form submit triggered");
     e.preventDefault();
     setIsLoading(true);
 
     try {
+      console.log("Saving profile data:", {
+        id: user?.id,
+        name: formData.name,
+        email: formData.email,
+        // Not logging all details for privacy
+      });
+      
       const { error } = await supabase.from("profiles").upsert({
         id: user?.id,
         name: formData.name,
@@ -89,8 +106,12 @@ export const useProfileData = () => {
         updated_at: new Date().toISOString(),
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error updating profile:", error);
+        throw error;
+      }
 
+      console.log("Profile updated successfully");
       toast({
         title: "Profil opdateret",
         description: "Dine profiloplysninger er blevet gemt.",

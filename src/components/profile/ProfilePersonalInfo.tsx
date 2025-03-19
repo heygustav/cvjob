@@ -1,7 +1,11 @@
 
 import React, { ChangeEvent, FormEvent, Dispatch, SetStateAction } from "react";
 import { PersonalInfoFormState } from "@/pages/Profile";
-import PersonalInfoForm from "@/components/PersonalInfoForm";
+import PersonalInfoFields from "./PersonalInfoFields";
+import ExperienceField from "./ExperienceField";
+import EducationField from "./EducationField";
+import SkillsField from "./SkillsField";
+import FormActions from "./FormActions";
 
 export interface ProfilePersonalInfoProps {
   formData: PersonalInfoFormState;
@@ -18,31 +22,15 @@ const ProfilePersonalInfo: React.FC<ProfilePersonalInfoProps> = ({
   setFormData, 
   isLoading 
 }) => {
-  // Create a mock user object with the required fields
-  const user = {
-    id: "",
-    email: formData.email,
-    name: formData.name,
-    phone: formData.phone,
-    address: formData.address,
-    profileComplete: false
-  };
+  console.log("ProfilePersonalInfo rendering with formData:", formData);
+  console.log("isLoading state:", isLoading);
 
-  const handleSave = (data: any) => {
-    // Map data to formData structure
-    setFormData({
-      name: data.name,
-      email: data.email,
-      phone: data.phone,
-      address: data.address,
-      experience: data.experience,
-      education: data.education,
-      skills: data.skills
-    });
+  const handleSave = (e: FormEvent<HTMLFormElement>) => {
+    console.log("Form submission handler triggered");
+    e.preventDefault(); // Prevent default form submission behavior
     
-    // Submit the form
-    const event = { preventDefault: () => {} } as FormEvent<HTMLFormElement>;
-    handleSubmit(event);
+    // Submit the form using the passed handler
+    handleSubmit(e);
   };
 
   return (
@@ -54,11 +42,28 @@ const ProfilePersonalInfo: React.FC<ProfilePersonalInfoProps> = ({
         </p>
       </div>
       
-      <PersonalInfoForm
-        user={user}
-        onSave={handleSave}
-        isLoading={isLoading}
-      />
+      <form onSubmit={handleSave} className="space-y-6 text-left">
+        <PersonalInfoFields formData={formData} handleChange={handleChange} />
+        
+        <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+          <ExperienceField 
+            value={formData.experience} 
+            onChange={handleChange} 
+          />
+          
+          <EducationField 
+            value={formData.education} 
+            onChange={handleChange} 
+          />
+          
+          <SkillsField 
+            value={formData.skills} 
+            onChange={handleChange} 
+          />
+        </div>
+
+        <FormActions isLoading={isLoading} />
+      </form>
     </div>
   );
 };
