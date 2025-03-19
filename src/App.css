@@ -74,11 +74,11 @@ button[type="submit"]:not(.bg-green-600):not([disabled]) {
 }
 
 button[type="submit"]:hover:not(.bg-green-600):not([disabled]) {
-  background-color: #054370 !important; /* primary-800 */
+  background-color: hsl(201, 90%, 27%) !important; /* primary darker */
 }
 
 button[type="submit"]:active:not(.bg-green-600):not([disabled]) {
-  background-color: #072b4a !important; /* primary-950 */
+  background-color: hsl(204, 90%, 22%) !important; /* primary darkest */
 }
 
 /* Consistent blue colors for various elements */
@@ -91,19 +91,19 @@ button[type="submit"]:active:not(.bg-green-600):not([disabled]) {
 }
 
 .hover\:bg-blue-600:hover, .hover\:bg-blue-700:hover, .hover\:bg-blue-800:hover {
-  background-color: #054370 !important; /* primary-800 */
+  background-color: hsl(201, 90%, 27%) !important; /* primary darker */
 }
 
 .hover\:text-blue-600:hover, .hover\:text-blue-700:hover, .hover\:text-blue-800:hover {
-  color: #054370 !important; /* primary-800 */
+  color: hsl(201, 90%, 27%) !important; /* primary darker */
 }
 
 .active\:bg-blue-700:active, .active\:bg-blue-800:active {
-  background-color: #072b4a !important; /* primary-950 */
+  background-color: hsl(204, 90%, 22%) !important; /* primary darkest */
 }
 
 .active\:text-blue-700:active, .active\:text-blue-800:active {
-  color: #072b4a !important; /* primary-950 */
+  color: hsl(204, 90%, 22%) !important; /* primary darkest */
 }
 
 .border-blue-500, .border-blue-600, .border-blue-700 {
@@ -111,7 +111,7 @@ button[type="submit"]:active:not(.bg-green-600):not([disabled]) {
 }
 
 .hover\:border-blue-600:hover, .hover\:border-blue-700:hover, .hover\:border-blue-800:hover {
-  border-color: #054370 !important; /* primary-800 */
+  border-color: hsl(201, 90%, 27%) !important; /* primary darker */
 }
 
 .focus\:border-blue-500:focus, .focus\:border-blue-600:focus, .focus\:border-blue-700:focus {
@@ -124,6 +124,12 @@ button[type="submit"]:active:not(.bg-green-600):not([disabled]) {
 
 .focus\:ring-blue-500:focus, .focus\:ring-blue-600:focus, .focus\:ring-blue-700:focus {
   --tw-ring-color: hsl(var(--primary)) !important;
+}
+
+/* Enhanced focus visibility for accessibility */
+*:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
 }
 
 /* Mobile Specific Styling */
