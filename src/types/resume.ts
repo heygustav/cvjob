@@ -23,7 +23,7 @@ export interface Resume {
   // Metadata
   created_at?: string;
   updated_at?: string;
-  email_preferences?: any;
+  email_preferences?: Record<string, any>;
   
   // Template and Styling
   template?: "modern" | "classic" | "creative";
