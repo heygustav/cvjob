@@ -4,7 +4,7 @@ import { PersonalInfoFormState } from "@/pages/Profile";
 import { Card, CardContent } from "@/components/ui/card";
 
 interface ResumePreviewProps {
-  data: PersonalInfoFormState;
+  data: PersonalInfoFormState & { photo?: string };
   template: "modern" | "classic" | "creative";
 }
 
@@ -50,14 +50,25 @@ const getTemplateClass = (template: string): string => {
 };
 
 // Template Components
-const ModernTemplate: React.FC<{ data: PersonalInfoFormState }> = ({ data }) => (
-  <div className="font-sans">
+const ModernTemplate: React.FC<{ data: PersonalInfoFormState & { photo?: string } }> = ({ data }) => (
+  <div className="font-serif">
     <div className="border-b pb-4 mb-6">
-      <h1 className="text-2xl font-bold text-gray-900">{data.name}</h1>
-      <div className="mt-2 text-gray-600 flex flex-wrap gap-x-4">
-        {data.email && <div>{data.email}</div>}
-        {data.phone && <div>{data.phone}</div>}
-        {data.address && <div>{data.address}</div>}
+      <div className="flex items-start gap-4">
+        {data.photo && (
+          <img 
+            src={data.photo} 
+            alt="Profilbillede" 
+            className="w-24 h-24 object-cover rounded-md"
+          />
+        )}
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">{data.name}</h1>
+          <div className="mt-2 text-gray-600 flex flex-wrap gap-x-4">
+            {data.email && <div>{data.email}</div>}
+            {data.phone && <div>{data.phone}</div>}
+            {data.address && <div>{data.address}</div>}
+          </div>
+        </div>
       </div>
     </div>
     
@@ -84,9 +95,18 @@ const ModernTemplate: React.FC<{ data: PersonalInfoFormState }> = ({ data }) => 
   </div>
 );
 
-const ClassicTemplate: React.FC<{ data: PersonalInfoFormState }> = ({ data }) => (
+const ClassicTemplate: React.FC<{ data: PersonalInfoFormState & { photo?: string } }> = ({ data }) => (
   <div className="font-serif">
     <div className="text-center mb-6">
+      {data.photo && (
+        <div className="flex justify-center mb-3">
+          <img 
+            src={data.photo} 
+            alt="Profilbillede" 
+            className="w-24 h-24 object-cover rounded-full border-2 border-gray-300"
+          />
+        </div>
+      )}
       <h1 className="text-2xl font-bold text-gray-900">{data.name}</h1>
       <div className="mt-2 text-gray-600">
         {data.email && <div>{data.email}</div>}
@@ -124,10 +144,19 @@ const ClassicTemplate: React.FC<{ data: PersonalInfoFormState }> = ({ data }) =>
   </div>
 );
 
-const CreativeTemplate: React.FC<{ data: PersonalInfoFormState }> = ({ data }) => (
+const CreativeTemplate: React.FC<{ data: PersonalInfoFormState & { photo?: string } }> = ({ data }) => (
   <div className="font-sans">
     <div className="flex flex-col md:flex-row gap-6">
       <div className="md:w-1/3 bg-indigo-100 p-4 rounded-lg">
+        {data.photo && (
+          <div className="mb-4 flex justify-center">
+            <img 
+              src={data.photo} 
+              alt="Profilbillede" 
+              className="w-28 h-28 object-cover rounded-full border-2 border-indigo-300"
+            />
+          </div>
+        )}
         <h1 className="text-xl font-bold text-indigo-900 mb-4">{data.name}</h1>
         <div className="text-indigo-800 space-y-2">
           {data.email && <div>{data.email}</div>}

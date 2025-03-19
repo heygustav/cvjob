@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { PersonalInfoFormState } from "@/pages/Profile";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2 } from "lucide-react";
+import { Loader2, Upload, X } from "lucide-react";
 import { useDownloadErrorHandler } from "@/utils/download/downloadErrorHandler";
 import { getTextContent } from "@/utils/download/contentExtractor";
 import { jsPDF } from "jspdf";
@@ -21,7 +21,7 @@ const TEMPLATES = ["modern", "classic", "creative"];
 const ResumeBuilder: React.FC = () => {
   const [activeTab, setActiveTab] = useState("edit");
   const [selectedTemplate, setSelectedTemplate] = useState("modern");
-  const [resumeData, setResumeData] = useState<PersonalInfoFormState>({
+  const [resumeData, setResumeData] = useState<PersonalInfoFormState & { photo?: string }>({
     name: "",
     email: "",
     phone: "",
@@ -29,12 +29,14 @@ const ResumeBuilder: React.FC = () => {
     education: "",
     experience: "",
     skills: "",
+    photo: undefined,
   });
   const [isLoading, setIsLoading] = useState(true);
   const [isDownloading, setIsDownloading] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
   const { handleDownloadError } = useDownloadErrorHandler();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Fetch profile data when component mounts
   useEffect(() => {
@@ -71,7 +73,7 @@ const ResumeBuilder: React.FC = () => {
           
           // Transform the data to match PersonalInfoFormState
           // Using 'name' property from the profiles table
-          const profileData: PersonalInfoFormState = {
+          const profileData = {
             name: data.name || "",
             email: user.email || "",
             phone: data.phone || "",
@@ -79,6 +81,7 @@ const ResumeBuilder: React.FC = () => {
             education: data.education || "",
             experience: data.experience || "",
             skills: data.skills || "",
+            photo: data.photo || undefined,
           };
 
           setResumeData(profileData);
@@ -106,6 +109,53 @@ const ResumeBuilder: React.FC = () => {
     }));
   };
 
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "Fejl ved upload",
+        description: "Billedet må ikke overstige 5MB.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      if (event.target?.result) {
+        setResumeData(prev => ({
+          ...prev,
+          photo: event.target.result as string
+        }));
+
+        toast({
+          title: "Billede uploadet",
+          description: "Dit foto er blevet tilføjet til CV'et.",
+        });
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemovePhoto = () => {
+    setResumeData(prev => ({
+      ...prev,
+      photo: undefined
+    }));
+    
+    // Clear the file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+
+    toast({
+      title: "Billede fjernet",
+      description: "Dit foto er blevet fjernet fra CV'et.",
+    });
+  };
+
   const handleExport = async () => {
     try {
       setIsDownloading(true);
@@ -117,32 +167,46 @@ const ResumeBuilder: React.FC = () => {
       // Create a PDF document with jsPDF
       const doc = new jsPDF();
       
+      // Set font to Times New Roman
+      doc.setFont("times", "normal");
+      
       // Add title
       doc.setFontSize(20);
-      doc.text("CV", 105, 15, { align: "center" });
+      doc.text("Curriculum Vitae", 105, 15, { align: "center" });
+      
+      // Add photo if available
+      let contentStartY = 30;
+      if (resumeData.photo) {
+        try {
+          doc.addImage(resumeData.photo, 'JPEG', 20, 20, 30, 30);
+          contentStartY = 60; // Move content down if photo is present
+        } catch (err) {
+          console.error("Error adding image to PDF:", err);
+        }
+      }
       
       // Add personal info section
       doc.setFontSize(16);
-      doc.text("Personlige Oplysninger", 20, 30);
+      doc.text("Personlige Oplysninger", resumeData.photo ? 60 : 20, 30);
       doc.setFontSize(12);
-      doc.text(`Navn: ${resumeData.name}`, 20, 40);
-      doc.text(`Email: ${resumeData.email}`, 20, 45);
-      if (resumeData.phone) doc.text(`Telefon: ${resumeData.phone}`, 20, 50);
-      if (resumeData.address) doc.text(`Adresse: ${resumeData.address}`, 20, 55);
+      doc.text(`Navn: ${resumeData.name}`, resumeData.photo ? 60 : 20, 40);
+      doc.text(`Email: ${resumeData.email}`, resumeData.photo ? 60 : 20, 45);
+      if (resumeData.phone) doc.text(`Telefon: ${resumeData.phone}`, resumeData.photo ? 60 : 20, 50);
+      if (resumeData.address) doc.text(`Adresse: ${resumeData.address}`, resumeData.photo ? 60 : 20, 55);
       
       // Add experience section
       doc.setFontSize(16);
-      doc.text("Erhvervserfaring", 20, 70);
+      doc.text("Erhvervserfaring", 20, contentStartY);
       doc.setFontSize(12);
       if (resumeData.experience) {
         const experienceLines = doc.splitTextToSize(getTextContent(resumeData.experience), 170);
-        doc.text(experienceLines, 20, 80);
+        doc.text(experienceLines, 20, contentStartY + 10);
       } else {
-        doc.text("Ingen erhvervserfaring angivet.", 20, 80);
+        doc.text("Ingen erhvervserfaring angivet.", 20, contentStartY + 10);
       }
       
       // Add education section
-      const educationYPos = resumeData.experience ? 110 : 80;
+      const educationYPos = resumeData.experience ? contentStartY + 40 : contentStartY + 10;
       doc.setFontSize(16);
       doc.text("Uddannelse", 20, educationYPos);
       doc.setFontSize(12);
@@ -165,9 +229,8 @@ const ResumeBuilder: React.FC = () => {
         doc.text("Ingen færdigheder angivet.", 20, skillsYPos + 10);
       }
       
-      // Generate filename and save the PDF
-      const filename = `CV_${resumeData.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
-      doc.save(filename);
+      // Save the PDF with the new filename
+      doc.save("Ansoegning.pdf");
       
       toast({
         title: "CV Downloadet",
@@ -214,6 +277,43 @@ const ResumeBuilder: React.FC = () => {
                    template === "creative" ? "Kreativ" : template}
                 </Button>
               ))}
+            </div>
+          </div>
+
+          <div className="mb-6">
+            <h4 className="text-sm font-medium mb-2">Profilbillede (valgfrit)</h4>
+            <div className="flex items-center space-x-4">
+              {resumeData.photo ? (
+                <div className="relative inline-block">
+                  <img 
+                    src={resumeData.photo} 
+                    alt="Profilbillede" 
+                    className="w-16 h-16 object-cover rounded-full border"
+                  />
+                  <button
+                    onClick={handleRemovePhoto}
+                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                    aria-label="Fjern billede"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              ) : (
+                <Button variant="outline" onClick={() => fileInputRef.current?.click()}>
+                  <Upload className="h-4 w-4 mr-2" />
+                  Upload billede
+                </Button>
+              )}
+              <input 
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
+                accept="image/*"
+                onChange={handlePhotoUpload}
+              />
+              <span className="text-xs text-muted-foreground">
+                Billedet vil blive vist i øverste venstre hjørne af dit CV
+              </span>
             </div>
           </div>
 
@@ -318,3 +418,4 @@ const ResumeBuilder: React.FC = () => {
 };
 
 export default ResumeBuilder;
+
