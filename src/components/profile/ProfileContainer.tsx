@@ -1,6 +1,10 @@
+
 import React, { useEffect, useState, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { FileText } from "lucide-react";
 import ProfileHeader from "./ProfileHeader";
 import ProfilePersonalInfo from "./ProfilePersonalInfo";
 import ProfileAccountSettings from "./ProfileAccountSettings";
@@ -93,12 +97,27 @@ const ProfileContainer: React.FC<ProfileContainerProps> = ({
     profileComplete: false
   };
 
+  // Check if profile has enough data to build a resume
+  const hasProfileData = formData.name && formData.email && 
+    (formData.experience || formData.education || formData.skills);
+
   return (
     <div className="container mx-auto px-4 max-w-4xl text-left">
       <ProfileHeader 
         title="Profil" 
         subtitle="Administrer dine personoplysninger og indstillinger" 
       />
+
+      {hasProfileData && (
+        <div className="mb-8 flex justify-center">
+          <Link to="/resume">
+            <Button className="gap-2">
+              <FileText className="h-4 w-4" />
+              Byg dit CV med profildata
+            </Button>
+          </Link>
+        </div>
+      )}
 
       <Tabs 
         defaultValue="personal-info" 
