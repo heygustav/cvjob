@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import ProfileLoader from "@/components/profile/ProfileLoader";
 import ProfileContainer from "@/components/profile/ProfileContainer";
@@ -7,7 +8,9 @@ import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 
 // Define the type for the form data
-export type PersonalInfoFormState = ProfileState;
+export type PersonalInfoFormState = ProfileState & {
+  photo?: string;
+};
 
 const Profile: React.FC = () => {
   const { user } = useAuth();

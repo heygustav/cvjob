@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -73,6 +72,7 @@ const ResumeBuilder: React.FC = () => {
           
           // Transform the data to match PersonalInfoFormState
           // Using 'name' property from the profiles table
+          // Important: The photo is handled separately since it's not in the database schema
           const profileData = {
             name: data.name || "",
             email: user.email || "",
@@ -81,7 +81,7 @@ const ResumeBuilder: React.FC = () => {
             education: data.education || "",
             experience: data.experience || "",
             skills: data.skills || "",
-            photo: data.photo || undefined,
+            photo: undefined, // Initialize as undefined since it's not in the database
           };
 
           setResumeData(profileData);
@@ -418,4 +418,3 @@ const ResumeBuilder: React.FC = () => {
 };
 
 export default ResumeBuilder;
-

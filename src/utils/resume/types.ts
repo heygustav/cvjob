@@ -15,6 +15,7 @@ export interface RawResumeData {
   education?: ParsedSection[] | string;
   experience?: ParsedSection[] | string;
   languages?: string[];
+  photo?: string;
   confidence?: {
     [key: string]: number;
   };

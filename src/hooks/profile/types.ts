@@ -10,6 +10,7 @@ export interface ProfileState {
   experience: string;
   education: string;
   skills: string;
+  photo?: string;
 }
 
 export interface ValidationErrors {
