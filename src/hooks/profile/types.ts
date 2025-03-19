@@ -12,6 +12,7 @@ export interface ProfileState {
   skills: string;
   summary: string;
   photo?: string;
+  has_completed_onboarding?: boolean;
 }
 
 export interface ValidationErrors {

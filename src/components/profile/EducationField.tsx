@@ -13,7 +13,7 @@ const EducationField: React.FC<EducationFieldProps> = ({ value, onChange }) => {
         htmlFor="education"
         className="block text-sm font-medium text-gray-700"
       >
-        Education
+        Uddannelse
       </label>
       <div className="mt-1">
         <textarea
@@ -23,11 +23,11 @@ const EducationField: React.FC<EducationFieldProps> = ({ value, onChange }) => {
           value={value}
           onChange={onChange}
           className="block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
-          placeholder="Describe your educational background..."
+          placeholder="Beskriv din uddannelsesbaggrund..."
         />
       </div>
       <p className="mt-2 text-sm text-gray-500">
-        List your degrees, institutions, and graduation years.
+        List dine grader, institutioner og afgangsår.
       </p>
     </div>
   );

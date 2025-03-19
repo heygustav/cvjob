@@ -47,6 +47,7 @@ export const useProfileSubmit = (validateForm: (formData: ProfileState) => boole
         experience: formData.experience,
         education: formData.education,
         skills: formData.skills,
+        has_completed_onboarding: true,
         updated_at: new Date().toISOString(),
       };
       

@@ -11,6 +11,7 @@ export const useAuthSession = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [redirectUrl, setRedirectUrl] = useState<string | null>(null);
   const [attemptCount, setAttemptCount] = useState(0);
+  const [isNewUser, setIsNewUser] = useState(false);
   const navigate = useNavigate();
 
   // Reset attempt count
@@ -60,6 +61,12 @@ export const useAuthSession = () => {
     // Use the subscription for real-time updates
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log("Auth state changed:", event);
+      
+      // Check if this is a new sign up
+      if (event === 'SIGNED_IN' && !session?.user.last_sign_in_at) {
+        setIsNewUser(true);
+      }
+      
       if (mounted) {
         setSession(session);
         setUser(session?.user ?? null);
@@ -74,16 +81,27 @@ export const useAuthSession = () => {
     };
   }, []);
 
-  // Redirect based on session and redirectUrl
+  // Redirect based on session, redirectUrl, and whether user is new
   useEffect(() => {
-    // Only redirect if we have a new session and a redirect URL
-    if (session && redirectUrl) {
-      console.log("Auth: Redirecting to:", redirectUrl);
-      localStorage.removeItem('redirectAfterLogin');
-      navigate(redirectUrl);
-      setRedirectUrl(null); // Clear the redirect URL after use
+    // Only redirect if we have a new session
+    if (session && !isLoading) {
+      // For new users, redirect to the quiz
+      if (isNewUser) {
+        console.log("Auth: New user detected, redirecting to quiz");
+        navigate('/profile-quiz');
+        setIsNewUser(false); // Reset the flag
+        return;
+      }
+      
+      // For returning users with a redirect URL
+      if (redirectUrl) {
+        console.log("Auth: Redirecting to:", redirectUrl);
+        localStorage.removeItem('redirectAfterLogin');
+        navigate(redirectUrl);
+        setRedirectUrl(null); // Clear the redirect URL after use
+      }
     }
-  }, [session, navigate, redirectUrl]);
+  }, [session, navigate, redirectUrl, isLoading, isNewUser]);
 
   return {
     session,
@@ -91,8 +109,10 @@ export const useAuthSession = () => {
     isLoading,
     redirectUrl,
     attemptCount,
+    isNewUser,
     setRedirectUrl,
     resetAttemptCount,
-    setAttemptCount
+    setAttemptCount,
+    setIsNewUser
   };
 };
