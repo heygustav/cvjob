@@ -6,7 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import ResumeViewer from "@/components/resume/ResumeViewer";
-import ResumeOptions from "@/components/resume/ResumeOptions";
+import ResumeOptionsPanel from "@/components/resume/ResumeOptions";
 import ResumeLoading from "@/components/resume/ResumeLoading";
 import { UserProfile } from "@/services/coverLetter/types";
 
@@ -70,7 +70,7 @@ const ResumeBuilder = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <ResumeOptions 
+              <ResumeOptionsPanel 
                 options={options} 
                 onChange={updateOptions} 
               />

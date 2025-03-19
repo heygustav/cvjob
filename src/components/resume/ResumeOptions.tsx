@@ -3,14 +3,14 @@ import React from "react";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Switch } from "@/components/ui/switch";
-import { ResumeOptions } from "@/pages/ResumeBuilder";
+import type { ResumeOptions } from "@/pages/ResumeBuilder";
 
 interface ResumeOptionsProps {
   options: ResumeOptions;
   onChange: (options: Partial<ResumeOptions>) => void;
 }
 
-const ResumeOptions: React.FC<ResumeOptionsProps> = ({ options, onChange }) => {
+const ResumeOptionsPanel: React.FC<ResumeOptionsProps> = ({ options, onChange }) => {
   return (
     <div className="space-y-6">
       <div className="space-y-4">
@@ -53,4 +53,4 @@ const ResumeOptions: React.FC<ResumeOptionsProps> = ({ options, onChange }) => {
   );
 };
 
-export default ResumeOptions;
+export default ResumeOptionsPanel;
