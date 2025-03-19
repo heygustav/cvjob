@@ -29,22 +29,20 @@ export const useProfileData = () => {
     }
     
     try {
-      console.log("Fetching profile data for user:", user.id);
       setIsProfileLoading(true);
       
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", user.id)
-        .maybeSingle();  // Changed from single() to maybeSingle() to prevent errors if no profile exists
+        .maybeSingle();
 
-      if (error && error.code !== "PGRST116") {
+      if (error) {
         console.error("Error fetching profile:", error);
         throw error;
       }
 
       if (data) {
-        console.log("Profile data fetched successfully", data);
         setFormData({
           name: data.name || "",
           email: data.email || user.email || "",
@@ -55,7 +53,11 @@ export const useProfileData = () => {
           skills: data.skills || "",
         });
       } else {
-        console.log("No profile data found for user - will create on first save");
+        // No profile data found, just use the email from user object
+        setFormData(prev => ({
+          ...prev,
+          email: user.email || ""
+        }));
       }
     } catch (error) {
       console.error("Error fetching profile:", error);
@@ -71,10 +73,8 @@ export const useProfileData = () => {
 
   useEffect(() => {
     if (user) {
-      console.log("User is authenticated, fetching profile data", user.id);
       fetchProfile();
     } else {
-      console.log("No authenticated user found");
       setIsProfileLoading(false);
     }
   }, [user, fetchProfile]);
@@ -82,11 +82,11 @@ export const useProfileData = () => {
   const validateForm = useCallback(() => {
     const errors: Record<string, string> = {};
     
-    if (!formData.name.trim()) {
+    if (!formData.name?.trim()) {
       errors.name = "Navn er påkrævet";
     }
     
-    if (!formData.email.trim()) {
+    if (!formData.email?.trim()) {
       errors.email = "Email er påkrævet";
     } else {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -167,19 +167,9 @@ export const useProfileData = () => {
     } catch (error) {
       console.error("Error updating profile:", error);
       
-      let errorMessage = "Der opstod en fejl under opdatering af din profil. Prøv venligst igen.";
-      
-      if (error instanceof Error) {
-        if (error.message.includes("network")) {
-          errorMessage = "Netværksfejl. Kontroller din internetforbindelse og prøv igen.";
-        } else if (error.message.includes("timeout")) {
-          errorMessage = "Serveren svarer ikke. Prøv igen senere.";
-        } else if (error.message.includes("duplicate")) {
-          errorMessage = "Denne email er allerede i brug.";
-        } else {
-          errorMessage = error.message;
-        }
-      }
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : "Der opstod en fejl under opdatering af din profil. Prøv venligst igen.";
       
       toast({
         title: "Fejl ved opdatering",
