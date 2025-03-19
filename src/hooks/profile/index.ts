@@ -4,7 +4,7 @@ import { useAuth } from "@/components/AuthProvider";
 import { useProfileForm } from "./useProfileForm";
 import { useProfileFetch } from "./useProfileFetch";
 import { useProfileSubmit } from "./useProfileSubmit";
-import { UseProfileDataReturn } from "./types";
+import { UseProfileDataReturn, ProfileState } from "./types";
 
 // Export type definitions for consumers
 export * from "./types";
@@ -13,7 +13,7 @@ export const useProfileData = (): UseProfileDataReturn => {
   const { user } = useAuth();
   
   // Initialize with empty profile state
-  const initialState = {
+  const initialState: ProfileState = {
     name: "",
     email: user?.email || "",
     phone: "",
@@ -39,7 +39,7 @@ export const useProfileData = (): UseProfileDataReturn => {
     } else {
       setFormData(initialState);
     }
-  }, [user, fetchProfile]);
+  }, [user, fetchProfile, setFormData]);
 
   // Wrap handleSubmit to include form data
   const submitForm = async (e: React.FormEvent) => {

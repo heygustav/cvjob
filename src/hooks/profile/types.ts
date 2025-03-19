@@ -1,7 +1,8 @@
 
 import { PersonalInfoFormState } from "@/pages/Profile";
 
-export interface ProfileState extends PersonalInfoFormState {
+// Define ProfileState without self-reference
+export interface ProfileState {
   name: string;
   email: string;
   phone: string;
