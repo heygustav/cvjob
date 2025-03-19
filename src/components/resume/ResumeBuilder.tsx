@@ -1,6 +1,6 @@
+
 import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
 import ResumeHeader from "./ResumeHeader";
 import ResumeEditorTabs from "./ResumeEditorTabs";
 import { useToast } from "@/hooks/use-toast";
@@ -11,6 +11,7 @@ import TemplateSelector from "./TemplateSelector";
 import PhotoUploader from "./PhotoUploader";
 import { exportResumeToPdf } from "@/utils/resume/pdfExporter";
 import { Resume } from "@/types/resume";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 
 const ResumeBuilder: React.FC = () => {
   const [activeTab, setActiveTab] = useState("edit");
@@ -127,9 +128,8 @@ const ResumeBuilder: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <span className="ml-2">Indlæser dine profildata...</span>
+      <div className="flex items-center justify-center min-h-[calc(100vh-4rem)]">
+        <LoadingSpinner message="Indlæser dine profildata..." />
       </div>
     );
   }

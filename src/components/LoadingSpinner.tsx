@@ -8,13 +8,15 @@ export interface LoadingSpinnerProps {
   progress?: number;
   className?: string;
   size?: "sm" | "md" | "lg";
+  fullPage?: boolean;
 }
 
 export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   message = "Indlæser...",
   progress,
   className,
-  size = "md"
+  size = "md",
+  fullPage = false
 }) => {
   const sizeClasses = {
     sm: "h-4 w-4",
@@ -22,8 +24,14 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
     lg: "h-12 w-12"
   };
 
+  const containerClasses = cn(
+    "flex flex-col items-center justify-center space-y-4 text-center",
+    fullPage && "fixed inset-0 bg-background/80 z-50",
+    className
+  );
+
   return (
-    <div className={cn("flex flex-col items-center justify-center space-y-4 text-center", className)}>
+    <div className={containerClasses}>
       <Loader2 className={cn("animate-spin text-primary", sizeClasses[size])} />
       
       {message && (

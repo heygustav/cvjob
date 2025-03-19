@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useMemo, useEffect, useState } from 'react';
 import { useAuthState, AuthState, AuthActions } from '@/hooks/auth/useAuthState';
 import { supabase } from "@/integrations/supabase/client";
+import { LoadingSpinner } from './LoadingSpinner';
 
 interface AuthContextType extends AuthState, AuthActions {}
 
@@ -37,9 +38,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = React.memo(
 
   // Show loading state until auth is initialized
   if (!isInitialized) {
-    return <div className="flex items-center justify-center min-h-screen">
-      <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
-    </div>;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <LoadingSpinner message="Indlæser..." />
+      </div>
+    );
   }
 
   return (

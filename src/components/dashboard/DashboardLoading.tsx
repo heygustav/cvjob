@@ -33,11 +33,11 @@ const DashboardLoading: React.FC = () => {
   };
 
   return (
-    <div className="container py-12">
+    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-4rem)] p-4">
       <LoadingSpinner message="Indlæser dashboard..." />
       
       {isLongLoading && (
-        <div className="mt-6">
+        <div className="mt-6 max-w-md">
           <Alert variant={isTimeout ? "destructive" : "default"} className="mb-4">
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>{isTimeout ? "Timeout ved indlæsning" : "Indlæsning tager længere tid end forventet"}</AlertTitle>
