@@ -1,7 +1,7 @@
 
 import React, { ChangeEvent, FormEvent, Dispatch, SetStateAction } from "react";
 import { PersonalInfoFormState } from "@/pages/Profile";
-import PersonalInfoForm from "@/components/profile/PersonalInfoForm";
+import PersonalInfoForm from "@/components/PersonalInfoForm";
 
 export interface ProfilePersonalInfoProps {
   formData: PersonalInfoFormState;
@@ -18,6 +18,33 @@ const ProfilePersonalInfo: React.FC<ProfilePersonalInfoProps> = ({
   setFormData, 
   isLoading 
 }) => {
+  // Create a mock user object with the required fields
+  const user = {
+    id: "",
+    email: formData.email,
+    name: formData.name,
+    phone: formData.phone,
+    address: formData.address,
+    profileComplete: false
+  };
+
+  const handleSave = (data: any) => {
+    // Map data to formData structure
+    setFormData({
+      name: data.name,
+      email: data.email,
+      phone: data.phone,
+      address: data.address,
+      experience: data.experience,
+      education: data.education,
+      skills: data.skills
+    });
+    
+    // Submit the form
+    const event = { preventDefault: () => {} } as FormEvent<HTMLFormElement>;
+    handleSubmit(event);
+  };
+
   return (
     <div className="space-y-6 p-8 text-left">
       <div>
@@ -28,10 +55,8 @@ const ProfilePersonalInfo: React.FC<ProfilePersonalInfoProps> = ({
       </div>
       
       <PersonalInfoForm
-        formData={formData}
-        handleChange={handleChange}
-        handleSubmit={handleSubmit}
-        setFormData={setFormData}
+        user={user}
+        onSave={handleSave}
         isLoading={isLoading}
       />
     </div>
