@@ -31,7 +31,7 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({ data }) => (
     
     {data.experience && (
       <div className="mb-6">
-        <h2 className="text-lg font-medium text-gray-900 mb-2 border-b pb-1">
+        <h2 className="text-lg font-medium text-gray-900 mb-2 border-b border-gray-900 pb-1">
           Professional Experience
         </h2>
         <div className="whitespace-pre-line text-gray-700 mt-3">{data.experience}</div>
@@ -40,7 +40,7 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({ data }) => (
     
     {data.education && (
       <div className="mb-6">
-        <h2 className="text-lg font-medium text-gray-900 mb-2 border-b pb-1">
+        <h2 className="text-lg font-medium text-gray-900 mb-2 border-b border-gray-900 pb-1">
           Education
         </h2>
         <div className="whitespace-pre-line text-gray-700 mt-3">{data.education}</div>
@@ -49,8 +49,8 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({ data }) => (
     
     {data.skills && (
       <div>
-        <h2 className="text-lg font-medium text-gray-900 mb-2 border-b pb-1">
-          Skills
+        <h2 className="text-lg font-medium text-gray-900 mb-2 border-b border-gray-900 pb-1">
+          Kompetencer
         </h2>
         <div className="whitespace-pre-line text-gray-700 mt-3">{data.skills}</div>
       </div>

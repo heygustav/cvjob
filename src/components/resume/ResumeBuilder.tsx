@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useDownloadErrorHandler } from "@/utils/download/downloadErrorHandler";
 import TemplateSelector from "./TemplateSelector";
 import PhotoUploader from "./PhotoUploader";
-import { exportResumeToPdf } from "@/utils/resume/pdfExporter";
+import { exportResume, ResumeFormat } from "@/utils/resume/pdfExporter";
 import { Resume } from "@/types/resume";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 
@@ -108,19 +108,19 @@ const ResumeBuilder: React.FC = () => {
     }));
   };
 
-  const handleExport = async () => {
+  const handleExport = async (format: ResumeFormat) => {
     try {
       setIsDownloading(true);
       
-      await exportResumeToPdf(resumeData);
+      await exportResume(resumeData, format);
       
       toast({
         title: "CV Downloadet",
-        description: "Dit CV er blevet downloadet som PDF.",
+        description: `Dit CV er blevet downloadet som ${format.toUpperCase()}.`,
       });
     } catch (error) {
       console.error("Error exporting resume:", error);
-      handleDownloadError(error, "PDF");
+      handleDownloadError(error, format.toUpperCase());
     } finally {
       setIsDownloading(false);
     }

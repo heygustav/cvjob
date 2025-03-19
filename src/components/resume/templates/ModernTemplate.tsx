@@ -33,21 +33,21 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({ data }) => (
     
     {data.experience && (
       <div className="mb-6">
-        <h2 className="text-lg font-medium text-gray-900 mb-2">Experience</h2>
+        <h2 className="text-lg font-medium text-gray-900 mb-2 border-b border-gray-900 pb-1">Experience</h2>
         <div className="whitespace-pre-line text-gray-700">{data.experience}</div>
       </div>
     )}
     
     {data.education && (
       <div className="mb-6">
-        <h2 className="text-lg font-medium text-gray-900 mb-2">Education</h2>
+        <h2 className="text-lg font-medium text-gray-900 mb-2 border-b border-gray-900 pb-1">Education</h2>
         <div className="whitespace-pre-line text-gray-700">{data.education}</div>
       </div>
     )}
     
     {data.skills && (
       <div>
-        <h2 className="text-lg font-medium text-gray-900 mb-2">Skills</h2>
+        <h2 className="text-lg font-medium text-gray-900 mb-2 border-b border-gray-900 pb-1">Kompetencer</h2>
         <div className="whitespace-pre-line text-gray-700">{data.skills}</div>
       </div>
     )}

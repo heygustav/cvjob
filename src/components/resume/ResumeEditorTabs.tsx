@@ -1,11 +1,14 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 import ResumeSectionEditor from "./ResumeSectionEditor";
 import ResumePreview from "./ResumePreview";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { Resume } from "@/types/resume";
+import { ResumeFormat } from "@/utils/resume/pdfExporter";
 
 interface ResumeEditorTabsProps {
   activeTab: string;
@@ -13,7 +16,7 @@ interface ResumeEditorTabsProps {
   resumeData: Resume;
   selectedTemplate: string;
   handleUpdateSection: (section: keyof Resume, value: string) => void;
-  handleExport: () => void;
+  handleExport: (format: ResumeFormat) => void;
   isDownloading: boolean;
 }
 
@@ -26,6 +29,8 @@ const ResumeEditorTabs: React.FC<ResumeEditorTabsProps> = ({
   handleExport,
   isDownloading
 }) => {
+  const [exportFormat, setExportFormat] = useState<ResumeFormat>("pdf");
+
   return (
     <Tabs defaultValue="edit" value={activeTab} onValueChange={setActiveTab}>
       <TabsList className="grid grid-cols-2 mb-6">
@@ -83,11 +88,11 @@ const ResumeEditorTabs: React.FC<ResumeEditorTabsProps> = ({
 
         <div className="grid md:grid-cols-2 gap-6">
           <ResumeSectionEditor
-            title="Færdigheder"
+            title="Kompetencer"
             sections={[
               { 
                 key: "skills", 
-                label: "Færdigheder", 
+                label: "Kompetencer", 
                 value: resumeData.skills || "", 
                 multiline: true 
               },
@@ -109,24 +114,42 @@ const ResumeEditorTabs: React.FC<ResumeEditorTabsProps> = ({
           template={selectedTemplate as "modern" | "classic" | "creative"} 
         />
         
-        <div className="flex justify-between mt-6">
+        <div className="flex flex-col md:flex-row justify-between gap-4 mt-6">
           <Button variant="outline" onClick={() => setActiveTab("edit")} className="h-10 px-4">
             Tilbage til Redigering
           </Button>
-          <Button 
-            onClick={handleExport} 
-            disabled={isDownloading}
-            className="h-10 px-4"
-          >
-            {isDownloading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Downloader...
-              </>
-            ) : (
-              "Download CV"
-            )}
-          </Button>
+          
+          <div className="flex flex-col md:flex-row items-center gap-4">
+            <RadioGroup 
+              value={exportFormat} 
+              onValueChange={(value) => setExportFormat(value as ResumeFormat)}
+              className="flex space-x-4"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="pdf" id="pdf" />
+                <Label htmlFor="pdf">PDF</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="docx" id="docx" />
+                <Label htmlFor="docx">Word (DOCX)</Label>
+              </div>
+            </RadioGroup>
+            
+            <Button 
+              onClick={() => handleExport(exportFormat)} 
+              disabled={isDownloading}
+              className="h-10 px-4 min-w-[140px]"
+            >
+              {isDownloading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Downloader...
+                </>
+              ) : (
+                "Download CV"
+              )}
+            </Button>
+          </div>
         </div>
       </TabsContent>
     </Tabs>
