@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -53,8 +52,6 @@ const ProfileContainer: React.FC<ProfileContainerProps> = ({
       // @ts-ignore - For Cypress testing
       window.profileContainerReady = true;
     }
-    
-    logTiming("Initial render completed");
     
     // Record page visit - for testing persistence between refreshes
     const visitCount = parseInt(localStorage.getItem('profileVisitCount') || '0', 10);
