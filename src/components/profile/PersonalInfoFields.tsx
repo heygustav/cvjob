@@ -1,7 +1,6 @@
 
 import React from "react";
 import { PersonalInfoFormState } from "@/pages/Profile";
-import { FormControl } from "@/components/ui/form";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 
@@ -50,7 +49,7 @@ const PersonalInfoFields: React.FC<PersonalInfoFieldsProps> = React.memo(({
           <Label htmlFor="name" className="block text-sm font-medium text-gray-700">
             Navn <span className="text-red-500">*</span>
           </Label>
-          <FormControl>
+          <div className="mt-1">
             <Input
               type="text"
               id="name"
@@ -65,7 +64,7 @@ const PersonalInfoFields: React.FC<PersonalInfoFieldsProps> = React.memo(({
               aria-describedby={hasNameError ? "name-error" : undefined}
               data-state={hasNameError ? "invalid" : "valid"}
             />
-          </FormControl>
+          </div>
           {hasNameError && (
             <p className="mt-1 text-sm text-red-600" id="name-error">
               {validationErrors.name || "Navn er påkrævet"}
@@ -79,7 +78,7 @@ const PersonalInfoFields: React.FC<PersonalInfoFieldsProps> = React.memo(({
           <Label htmlFor="email" className="block text-sm font-medium text-gray-700">
             Email <span className="text-red-500">*</span>
           </Label>
-          <FormControl>
+          <div className="mt-1">
             <Input
               type="email"
               id="email"
@@ -94,7 +93,7 @@ const PersonalInfoFields: React.FC<PersonalInfoFieldsProps> = React.memo(({
               aria-describedby={hasEmailError ? "email-error" : undefined}
               data-state={hasEmailError ? "invalid" : "valid"}
             />
-          </FormControl>
+          </div>
           {hasEmailError && (
             <p className="mt-1 text-sm text-red-600" id="email-error">
               {validationErrors.email || "Indtast venligst en gyldig email adresse"}
@@ -108,7 +107,7 @@ const PersonalInfoFields: React.FC<PersonalInfoFieldsProps> = React.memo(({
           <Label htmlFor="phone" className="block text-sm font-medium text-gray-700">
             Telefon
           </Label>
-          <FormControl>
+          <div className="mt-1">
             <Input
               type="tel"
               id="phone"
@@ -120,7 +119,7 @@ const PersonalInfoFields: React.FC<PersonalInfoFieldsProps> = React.memo(({
               placeholder="f.eks. 12345678"
               inputMode="tel"
             />
-          </FormControl>
+          </div>
         </div>
       </div>
 
@@ -129,7 +128,7 @@ const PersonalInfoFields: React.FC<PersonalInfoFieldsProps> = React.memo(({
           <Label htmlFor="address" className="block text-sm font-medium text-gray-700">
             Adresse
           </Label>
-          <FormControl>
+          <div className="mt-1">
             <Input
               type="text"
               id="address"
@@ -140,7 +139,7 @@ const PersonalInfoFields: React.FC<PersonalInfoFieldsProps> = React.memo(({
               data-testid="profile-address-input"
               placeholder="f.eks. Gadenavn 123, 1234 By"
             />
-          </FormControl>
+          </div>
         </div>
       </div>
     </div>
