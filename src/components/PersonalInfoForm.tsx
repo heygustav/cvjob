@@ -1,110 +1,129 @@
-
-import React, { useState } from "react";
-import { User } from "../lib/types";
-import { useToast } from "@/hooks/use-toast";
+import React, { useState, ChangeEvent, FormEvent } from "react";
+import { toast } from "sonner";
 import PersonalInfoFields from "./profile/PersonalInfoFields";
-import PersonalInfoSummary from "./profile/PersonalInfoSummary";
 import WorkExperienceField from "./profile/WorkExperienceField";
 import EducationField from "./profile/EducationField";
 import SkillsField from "./profile/SkillsField";
-import SubmitButton from "./profile/SubmitButton";
+import FormActions from "./profile/FormActions";
 
-interface PersonalInfoFormProps {
-  user: User;
-  onSave: (data: PersonalInfoFormData) => void;
-  isLoading?: boolean;
+export interface PersonalInfoFormData {
+  name: string;
+  phone: string;
+  address: string;
+  workExperiences: string[];
+  education: string[];
+  skills: string[];
+  summary?: string;
 }
 
-interface PersonalInfoFormData {
+export interface PersonalInfoFormState {
   name: string;
-  email: string;
   phone: string;
   address: string;
   summary: string;
-  experience: string;
-  education: string;
-  skills: string;
+  workExperiences: string[];
+  education: string[];
+  skills: string[];
 }
 
-const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({
-  user,
-  onSave,
-  isLoading = false,
-}) => {
-  const [formData, setFormData] = useState<PersonalInfoFormData>({
-    name: user.name || "",
-    email: user.email || "",
-    phone: user.phone || "",
-    address: user.address || "",
-    summary: user.summary || "", // Use the summary from user object
-    experience: "",
-    education: "",
-    skills: "",
+const PersonalInfoForm: React.FC = () => {
+  const [formData, setFormData] = useState<PersonalInfoFormState>({
+    name: "",
+    phone: "",
+    address: "",
+    summary: "",
+    workExperiences: [],
+    education: [],
+    skills: [],
   });
-  const { toast } = useToast();
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const validateForm = (): boolean => {
+    let errors: Record<string, string> = {};
+
+    if (!formData.name) {
+      errors.name = "Navn er påkrævet";
+    }
+
+    if (!formData.phone) {
+      errors.phone = "Telefonnummer er påkrævet";
+    } else if (!/^\d+$/.test(formData.phone)) {
+      errors.phone = "Telefonnummer skal kun indeholde tal";
+    }
+
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
+    setFormData({
+      ...formData,
       [name]: value,
+    });
+
+    // Clear validation error for the field being changed
+    setValidationErrors(prevErrors => ({
+      ...prevErrors,
+      [name]: '',
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    console.log("Form submission in PersonalInfoForm component");
-    console.log("Form action:", (e.target as HTMLFormElement).action);
-    console.log("Form method:", (e.target as HTMLFormElement).method);
-    
-    e.preventDefault();
-    
-    if (!formData.name || !formData.email) {
-      toast({
-        title: "Missing information",
-        description: "Please provide at least your name and email",
-        variant: "destructive",
-      });
+  const handleSubmit = async (event: FormEvent) => {
+    event.preventDefault();
+
+    if (!validateForm()) {
+      toast.error("Der er fejl i formularen. Tjek venligst.");
       return;
     }
-    
-    // Log network activity
-    console.log("Network monitoring: About to call onSave with form data");
-    onSave(formData);
-    console.log("Network monitoring: onSave called");
+
+    setIsSubmitting(true);
+    try {
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      toast.success("Profil gemt!");
+    } catch (error) {
+      toast.error("Failed to save profile.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
-
+  
+  const isValid = Object.keys(validationErrors).length === 0 && formData.name !== "" && formData.phone !== "";
+  
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
-        <PersonalInfoFields 
-          formData={formData} 
-          handleChange={handleChange}
-        />
-
-        <PersonalInfoSummary 
-          value={formData.summary} 
-          onChange={handleChange} 
-        />
-
-        <WorkExperienceField 
-          value={formData.experience} 
-          onChange={handleChange} 
-        />
-
-        <EducationField 
-          value={formData.education} 
-          onChange={handleChange} 
-        />
-
-        <SkillsField 
-          value={formData.skills} 
-          onChange={handleChange} 
-        />
-      </div>
-
-      <SubmitButton isLoading={isLoading} />
+    <form onSubmit={handleSubmit} className="space-y-8">
+      <PersonalInfoFields 
+        formData={formData} 
+        handleChange={handleChange} 
+        validationErrors={validationErrors}
+      />
+      
+      <WorkExperienceField 
+        workExperiences={formData.workExperiences}
+        setWorkExperiences={(experiences) => {
+          setFormData({ ...formData, workExperiences: experiences });
+        }}
+      />
+      
+      <EducationField 
+        education={formData.education}
+        setEducation={(education) => {
+          setFormData({ ...formData, education });
+        }}
+      />
+      
+      <SkillsField 
+        skills={formData.skills}
+        setSkills={(skills) => {
+          setFormData({ ...formData, skills });
+        }}
+      />
+      
+      <FormActions isLoading={isSubmitting} isFormValid={isValid} />
     </form>
   );
 };

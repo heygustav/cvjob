@@ -16,7 +16,7 @@ const SaveButton: React.FC<SaveButtonProps> = ({ onClick, disabled, isLoading })
       onClick={onClick}
       disabled={disabled || isLoading}
       variant="outline"
-      className="mr-2"
+      className="mr-2 h-10 px-4"
     >
       {isLoading ? (
         <>

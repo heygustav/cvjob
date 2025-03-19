@@ -1,11 +1,14 @@
-
 import React from "react";
 import FormSection from "./FormSection";
 import PersonalInfoSummary from "./PersonalInfoSummary";
-import { PersonalInfoFormState } from "../PersonalInfoForm";
 
 export interface PersonalInfoFieldsProps {
-  formData: PersonalInfoFormState;
+  formData: {
+    name: string;
+    phone: string;
+    address: string;
+    summary?: string;
+  };
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   validationErrors: Record<string, string>;
 }

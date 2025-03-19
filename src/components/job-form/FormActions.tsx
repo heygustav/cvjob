@@ -8,7 +8,7 @@ interface FormActionsProps {
   isSaving?: boolean;
   showSaveButton?: boolean;
   onSave?: (e: React.MouseEvent) => Promise<void>;
-  elapsedTime?: string; // Added elapsedTime as an optional prop
+  elapsedTime?: string;
 }
 
 const FormActions: React.FC<FormActionsProps> = ({
@@ -16,7 +16,7 @@ const FormActions: React.FC<FormActionsProps> = ({
   isSaving = false,
   showSaveButton = false,
   onSave,
-  elapsedTime = "" // Default to empty string if not provided
+  elapsedTime = ""
 }) => {
   return (
     <div className="flex justify-between items-center">
@@ -30,7 +30,7 @@ const FormActions: React.FC<FormActionsProps> = ({
         )}
       </div>
       <div>
-        <SubmitButton isLoading={isLoading} elapsedTime={elapsedTime} />
+        <SubmitButton isLoading={isLoading} elapsedTime={elapsedTime} className="h-10 px-4" />
       </div>
     </div>
   );

@@ -42,13 +42,6 @@ const ResumeEditorTabs: React.FC<ResumeEditorTabsProps> = ({
               { key: "email", label: "Email", value: resumeData.email },
               { key: "phone", label: "Telefon", value: resumeData.phone || "" },
               { key: "address", label: "Adresse", value: resumeData.address || "" },
-            ]}
-            onUpdate={handleUpdateSection}
-          />
-          
-          <ResumeSectionEditor
-            title="Kort Resume"
-            sections={[
               { 
                 key: "summary", 
                 label: "Kort beskrivelse", 
@@ -104,7 +97,7 @@ const ResumeEditorTabs: React.FC<ResumeEditorTabsProps> = ({
         </div>
 
         <div className="flex justify-end">
-          <Button onClick={() => setActiveTab("preview")}>
+          <Button onClick={() => setActiveTab("preview")} className="h-10 px-4">
             Forhåndsvis CV
           </Button>
         </div>
@@ -117,12 +110,13 @@ const ResumeEditorTabs: React.FC<ResumeEditorTabsProps> = ({
         />
         
         <div className="flex justify-between mt-6">
-          <Button variant="outline" onClick={() => setActiveTab("edit")}>
+          <Button variant="outline" onClick={() => setActiveTab("edit")} className="h-10 px-4">
             Tilbage til Redigering
           </Button>
           <Button 
             onClick={handleExport} 
             disabled={isDownloading}
+            className="h-10 px-4"
           >
             {isDownloading ? (
               <>

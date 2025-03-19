@@ -53,7 +53,7 @@ export const GeneratorLayout: React.FC<GeneratorLayoutProps> = ({
               <TabsList className="grid w-full max-w-md grid-cols-2">
                 <TabsTrigger value="step-1" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                   <PencilIcon className="h-4 w-4 mr-2" />
-                  <span className="hidden sm:inline">Job Information</span>
+                  <span className="hidden sm:inline">Joboplysninger</span>
                   <span className="sm:hidden">Job</span>
                 </TabsTrigger>
                 <TabsTrigger 
@@ -75,7 +75,7 @@ export const GeneratorLayout: React.FC<GeneratorLayoutProps> = ({
                   variant="outline" 
                   size="sm" 
                   onClick={() => setStep(1)}
-                  className="hidden sm:flex"
+                  className="hidden sm:flex items-center h-10 px-4"
                 >
                   <ChevronLeftIcon className="h-4 w-4 mr-2" />
                   Tilbage til jobinfo

@@ -32,7 +32,7 @@ const FormActions: React.FC<FormActionsProps> = React.memo(({ isLoading, isFormV
             <Button
               type="button"
               disabled={true}
-              className="inline-flex items-center bg-gray-400"
+              className="inline-flex items-center bg-gray-400 h-10 px-4"
               aria-busy="true"
               aria-label="Gemmer profil"
               data-testid="save-profile-button-loading"
@@ -67,7 +67,7 @@ const FormActions: React.FC<FormActionsProps> = React.memo(({ isLoading, isFormV
         ) : (
           <Button
             type="submit"
-            className="inline-flex items-center"
+            className="inline-flex items-center h-10 px-4"
             aria-busy={isLoading}
             aria-label="Gem profil"
             data-testid="save-profile-button"

@@ -12,7 +12,7 @@ const SubmitButton: React.FC<SubmitButtonProps> = ({ isLoading }) => {
     <Button 
       type="submit"
       disabled={isLoading}
-      className="w-full bg-green-600 hover:bg-green-700 focus:ring-green-500"
+      className="w-full h-10 px-4 bg-green-600 hover:bg-green-700 focus:ring-green-500"
     >
       {isLoading ? (
         <span className="flex items-center">

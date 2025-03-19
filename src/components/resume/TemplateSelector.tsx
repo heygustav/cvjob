@@ -23,7 +23,7 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
             key={template}
             variant={selectedTemplate === template ? "default" : "outline"}
             onClick={() => onSelectTemplate(template)}
-            className="capitalize"
+            className="capitalize h-10 px-4"
           >
             {template === "modern" ? "Moderne" : 
              template === "classic" ? "Klassisk" : 
