@@ -31,7 +31,7 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({
     email: user.email || "",
     phone: user.phone || "",
     address: user.address || "",
-    summary: user.summary || "",
+    summary: user.summary || "", // Use the summary from user object
     experience: "",
     education: "",
     skills: "",

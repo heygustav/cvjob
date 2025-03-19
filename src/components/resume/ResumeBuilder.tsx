@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
@@ -67,7 +66,6 @@ const ResumeBuilder: React.FC = () => {
           console.log("Profile data fetched successfully:", data);
           
           // Transform the data to match Resume type
-          // Important: The photo is handled separately since it's not in the database schema
           const profileData: Resume = {
             name: data.name || "",
             email: user.email || "",
