@@ -6,21 +6,13 @@ import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 import { Document, Packer, Paragraph, TextRun } from 'docx';
 import { generateCoverLetterFilename } from '@/utils/fileNaming';
+import { getTextContent } from '@/utils/download/contentExtractor';
+import { useDownloadErrorHandler } from '@/utils/download/downloadErrorHandler';
 
 export const useLetterDownload = (currentUser?: User | null) => {
   const [isDownloading, setIsDownloading] = useState(false);
   const { toast } = useToast();
-
-  // Helper for error handling
-  const handleDownloadError = (error: any, format: string) => {
-    console.error(`Error downloading ${format}:`, error);
-    toast({
-      title: `Download fejlede`,
-      description: `Der opstod en fejl under download af ${format}. Prøv igen senere.`,
-      variant: 'destructive',
-    });
-    setIsDownloading(false);
-  };
+  const { handleDownloadError } = useDownloadErrorHandler();
 
   // Generate filename using our new utility
   const createFilename = (letter: CoverLetter, job: JobPosting | null | undefined, extension: string) => {
@@ -29,16 +21,6 @@ export const useLetterDownload = (currentUser?: User | null) => {
       jobTitle: job?.title,
       companyName: job?.company,
     });
-  };
-
-  // Helper to safely get text content from possible HTML
-  const getTextContent = (htmlString: string) => {
-    // Create a temporary div element
-    const tempDiv = document.createElement('div');
-    // Set the HTML content of the div
-    tempDiv.innerHTML = htmlString;
-    // Return the text content of the div
-    return tempDiv.textContent || tempDiv.innerText || '';
   };
 
   // Download as PDF

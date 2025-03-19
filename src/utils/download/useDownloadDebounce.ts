@@ -1,41 +1,25 @@
 
-import { useRef, useState, useCallback } from "react";
-import { useToast } from "@/hooks/use-toast";
+import { useState, useCallback } from 'react';
 
-export const useDownloadDebounce = (debounceTime: number = 300) => {
+export const useDownloadDebounce = (delay: number = 300) => {
   const [isDownloading, setIsDownloading] = useState(false);
-  const downloadTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const { toast } = useToast();
 
-  const debounce = useCallback((func: Function) => {
-    return (...args: any[]) => {
-      if (downloadTimeoutRef.current) {
-        clearTimeout(downloadTimeoutRef.current);
-      }
-      
-      if (isDownloading) {
-        toast({
-          title: "Download i gang",
-          description: "Vent venligst mens vi forbereder din fil...",
-        });
-        return;
-      }
+  const debounce = useCallback((callback: () => void) => {
+    return () => {
+      if (isDownloading) return;
       
       setIsDownloading(true);
       
-      downloadTimeoutRef.current = setTimeout(async () => {
-        try {
-          await func(...args);
-        } finally {
+      try {
+        callback();
+      } finally {
+        // Reset download state after the specified delay
+        setTimeout(() => {
           setIsDownloading(false);
-          downloadTimeoutRef.current = null;
-        }
-      }, debounceTime);
+        }, delay);
+      }
     };
-  }, [isDownloading, toast, debounceTime]);
+  }, [isDownloading, delay]);
 
-  return {
-    isDownloading,
-    debounce
-  };
+  return { isDownloading, debounce };
 };

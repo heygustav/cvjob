@@ -1,6 +1,6 @@
 
 /**
- * Helper to safely get text content from possible HTML
+ * Extracts plain text content from HTML string
  */
 export const getTextContent = (htmlString: string): string => {
   // Create a temporary div element
