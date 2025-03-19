@@ -1,10 +1,9 @@
-
 import React from "react";
-import { PersonalInfoFormState } from "@/pages/Profile";
 import { Card, CardContent } from "@/components/ui/card";
+import { Resume } from "@/types/resume";
 
 interface ResumePreviewProps {
-  data: PersonalInfoFormState & { photo?: string };
+  data: Resume;
   template: "modern" | "classic" | "creative";
 }
 
@@ -50,7 +49,7 @@ const getTemplateClass = (template: string): string => {
 };
 
 // Template Components
-const ModernTemplate: React.FC<{ data: PersonalInfoFormState & { photo?: string } }> = ({ data }) => (
+const ModernTemplate: React.FC<{ data: Resume }> = ({ data }) => (
   <div className="font-serif">
     <div className="border-b pb-4 mb-6">
       <div className="flex items-start gap-4">
@@ -95,7 +94,7 @@ const ModernTemplate: React.FC<{ data: PersonalInfoFormState & { photo?: string 
   </div>
 );
 
-const ClassicTemplate: React.FC<{ data: PersonalInfoFormState & { photo?: string } }> = ({ data }) => (
+const ClassicTemplate: React.FC<{ data: Resume }> = ({ data }) => (
   <div className="font-serif">
     <div className="text-center mb-6">
       {data.photo && (
@@ -144,7 +143,7 @@ const ClassicTemplate: React.FC<{ data: PersonalInfoFormState & { photo?: string
   </div>
 );
 
-const CreativeTemplate: React.FC<{ data: PersonalInfoFormState & { photo?: string } }> = ({ data }) => (
+const CreativeTemplate: React.FC<{ data: Resume }> = ({ data }) => (
   <div className="font-sans">
     <div className="flex flex-col md:flex-row gap-6">
       <div className="md:w-1/3 bg-indigo-100 p-4 rounded-lg">

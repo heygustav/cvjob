@@ -1,10 +1,10 @@
 
-import { PersonalInfoFormState } from '@/pages/Profile';
 import { jsPDF } from "jspdf";
 import { getTextContent } from '@/utils/download/contentExtractor';
+import { Resume } from '@/types/resume';
 
 export const exportResumeToPdf = (
-  resumeData: PersonalInfoFormState & { photo?: string }
+  resumeData: Resume
 ): Promise<void> => {
   return new Promise((resolve, reject) => {
     try {

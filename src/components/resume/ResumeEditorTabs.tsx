@@ -5,14 +5,14 @@ import ResumeSectionEditor from "./ResumeSectionEditor";
 import ResumePreview from "./ResumePreview";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import { PersonalInfoFormState } from "@/pages/Profile";
+import { Resume } from "@/types/resume";
 
 interface ResumeEditorTabsProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
-  resumeData: PersonalInfoFormState & { photo?: string };
+  resumeData: Resume;
   selectedTemplate: string;
-  handleUpdateSection: (section: keyof PersonalInfoFormState, value: string) => void;
+  handleUpdateSection: (section: keyof Resume, value: string) => void;
   handleExport: () => void;
   isDownloading: boolean;
 }

@@ -3,19 +3,12 @@ import React from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { PersonalInfoFormState } from "@/pages/Profile";
-
-interface SectionField {
-  key: keyof PersonalInfoFormState;
-  label: string;
-  value: string;
-  multiline?: boolean;
-}
+import { Resume, ResumeSectionField } from "@/types/resume";
 
 interface ResumeSectionEditorProps {
   title: string;
-  sections: SectionField[];
-  onUpdate: (section: keyof PersonalInfoFormState, value: string) => void;
+  sections: ResumeSectionField[];
+  onUpdate: (section: keyof Resume, value: string) => void;
 }
 
 const ResumeSectionEditor: React.FC<ResumeSectionEditorProps> = ({

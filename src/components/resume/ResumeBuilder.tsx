@@ -5,18 +5,18 @@ import { Loader2 } from "lucide-react";
 import ResumeHeader from "./ResumeHeader";
 import ResumeEditorTabs from "./ResumeEditorTabs";
 import { useToast } from "@/hooks/use-toast";
-import { PersonalInfoFormState } from "@/pages/Profile";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { useDownloadErrorHandler } from "@/utils/download/downloadErrorHandler";
 import TemplateSelector from "./TemplateSelector";
 import PhotoUploader from "./PhotoUploader";
 import { exportResumeToPdf } from "@/utils/resume/pdfExporter";
+import { Resume } from "@/types/resume";
 
 const ResumeBuilder: React.FC = () => {
   const [activeTab, setActiveTab] = useState("edit");
   const [selectedTemplate, setSelectedTemplate] = useState("modern");
-  const [resumeData, setResumeData] = useState<PersonalInfoFormState & { photo?: string }>({
+  const [resumeData, setResumeData] = useState<Resume>({
     name: "",
     email: "",
     phone: "",
@@ -65,9 +65,9 @@ const ResumeBuilder: React.FC = () => {
         if (data) {
           console.log("Profile data fetched successfully:", data);
           
-          // Transform the data to match PersonalInfoFormState
+          // Transform the data to match Resume type
           // Important: The photo is handled separately since it's not in the database schema
-          const profileData = {
+          const profileData: Resume = {
             name: data.name || "",
             email: user.email || "",
             phone: data.phone || "",
@@ -96,7 +96,7 @@ const ResumeBuilder: React.FC = () => {
     fetchProfileData();
   }, [user, toast]);
 
-  const handleUpdateSection = (section: keyof PersonalInfoFormState, value: string) => {
+  const handleUpdateSection = (section: keyof Resume, value: string) => {
     setResumeData((prev) => ({
       ...prev,
       [section]: value,
