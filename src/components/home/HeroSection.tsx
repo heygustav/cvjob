@@ -12,19 +12,19 @@ const HeroSection: React.FC<HeroSectionProps> = ({ session }) => {
     <div 
       className="relative w-full h-[600px] overflow-hidden" 
     >
-      {/* Background image with proper sizing */}
+      {/* Background image with fixed styling to ensure visibility */}
       <div 
-        className="absolute inset-0 w-full h-full z-0"
+        className="absolute inset-0 w-full h-full z-0 bg-gray-100"
         style={{
           backgroundImage: "url('/lovable-uploads/dc39dd5e-8adb-439a-ae9e-4b391af2afcf.png')",
-          backgroundSize: 'contain', // Changed from 'cover' to 'contain'
+          backgroundSize: '100% auto',
           backgroundPosition: 'center',
-          backgroundRepeat: 'repeat', // Changed from 'no-repeat' to 'repeat'
+          backgroundRepeat: 'no-repeat',
         }}
       />
       
-      {/* Dark overlay */}
-      <div className="absolute inset-0 bg-black/40 z-10" />
+      {/* Dark overlay - reduced opacity to see background better */}
+      <div className="absolute inset-0 bg-black/30 z-10" />
       
       {/* Content */}
       <div className="relative z-20 h-full flex items-center justify-center">
