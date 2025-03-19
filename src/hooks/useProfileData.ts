@@ -22,7 +22,8 @@ export const useProfileData = () => {
 
   useEffect(() => {
     if (user) {
-      console.log("User is authenticated, fetching profile data");
+      console.log("User is authenticated, fetching profile data", user.id);
+      console.log("Supabase client initialized:", !!supabase);
       fetchProfile();
     } else {
       console.log("No authenticated user found");
@@ -33,14 +34,27 @@ export const useProfileData = () => {
     try {
       console.log("Fetching profile data for user:", user?.id);
       setIsProfileLoading(true);
-      const { data, error } = await supabase
+      
+      console.log("Database connection test - starting query");
+      const startTime = performance.now();
+      
+      const { data, error, status } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", user?.id)
         .single();
 
+      const endTime = performance.now();
+      console.log(`Profile query completed in ${endTime - startTime}ms with status: ${status}`);
+      
       if (error && error.code !== "PGRST116") {
         console.error("Error fetching profile:", error);
+        console.error("Error details:", {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint
+        });
         throw error;
       }
 
@@ -56,7 +70,7 @@ export const useProfileData = () => {
           skills: data.skills || "",
         });
       } else {
-        console.log("No profile data found for user");
+        console.log("No profile data found for user - will create on first save");
       }
     } catch (error) {
       console.error("Error fetching profile:", error);
@@ -87,6 +101,21 @@ export const useProfileData = () => {
     setIsLoading(true);
 
     try {
+      // Validate required fields
+      if (!formData.name.trim()) {
+        throw new Error("Navn er påkrævet");
+      }
+      
+      if (!formData.email.trim()) {
+        throw new Error("Email er påkrævet");
+      }
+      
+      // Email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.email)) {
+        throw new Error("Ugyldig email adresse");
+      }
+      
       // Log the complete request payload for debugging
       const profileData = {
         id: user?.id,
@@ -101,6 +130,17 @@ export const useProfileData = () => {
       };
       
       console.log("About to save profile data with payload:", profileData);
+      console.log("Current authenticated user:", user?.id);
+      console.log("Database connection status check before saving...");
+      
+      // Verify database connection with a simple query
+      const connectionTest = await supabase.from("profiles").select("count").limit(1);
+      console.log("Database connection test result:", connectionTest);
+      
+      if (connectionTest.error) {
+        console.error("Database connection test failed:", connectionTest.error);
+        throw new Error("Kunne ikke forbinde til databasen. Prøv igen senere.");
+      }
       
       // Track network request timing for performance debugging
       const startTime = performance.now();
@@ -108,7 +148,7 @@ export const useProfileData = () => {
       const { error, data, status } = await supabase.from("profiles").upsert(profileData);
       
       const endTime = performance.now();
-      console.log(`Network request completed in ${endTime - startTime}ms with status: ${status}`);
+      console.log(`Profile save completed in ${endTime - startTime}ms with status: ${status}`);
       console.log("Supabase response data:", data);
 
       if (error) {
@@ -131,7 +171,7 @@ export const useProfileData = () => {
       console.error("Error updating profile:", error);
       toast({
         title: "Fejl ved opdatering",
-        description: "Der opstod en fejl under opdatering af din profil. Prøv venligst igen.",
+        description: error instanceof Error ? error.message : "Der opstod en fejl under opdatering af din profil. Prøv venligst igen.",
         variant: "destructive",
       });
     } finally {

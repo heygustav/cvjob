@@ -12,16 +12,16 @@ const FormActions: React.FC<FormActionsProps> = ({ isLoading }) => {
   return (
     <div className="pt-5">
       <div className="flex justify-end">
-        <Button
-          type="submit"
-          disabled={isLoading}
-          className="inline-flex items-center"
-          aria-busy={isLoading}
-          aria-label={isLoading ? "Gemmer profil" : "Gem profil"}
-          data-testid="save-profile-button"
-        >
-          {isLoading ? (
-            <>
+        {isLoading ? (
+          <div className="relative">
+            <Button
+              type="button"
+              disabled={true}
+              className="inline-flex items-center bg-gray-400"
+              aria-busy="true"
+              aria-label="Gemmer profil"
+              data-testid="save-profile-button-loading"
+            >
               <svg
                 className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
                 xmlns="http://www.w3.org/2000/svg"
@@ -44,14 +44,21 @@ const FormActions: React.FC<FormActionsProps> = ({ isLoading }) => {
                 ></path>
               </svg>
               Gemmer...
-            </>
-          ) : (
-            <>
-              <Save className="h-4 w-4 mr-2" aria-hidden="true" />
-              Gem profil
-            </>
-          )}
-        </Button>
+            </Button>
+            <span className="sr-only">Gemmer dine profiloplysninger</span>
+          </div>
+        ) : (
+          <Button
+            type="submit"
+            className="inline-flex items-center"
+            aria-busy={isLoading}
+            aria-label="Gem profil"
+            data-testid="save-profile-button"
+          >
+            <Save className="h-4 w-4 mr-2" aria-hidden="true" />
+            Gem profil
+          </Button>
+        )}
       </div>
     </div>
   );
