@@ -1,151 +1,98 @@
 
 import React from "react";
-import { PersonalInfoFormState } from "@/pages/Profile";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 
 interface PersonalInfoFieldsProps {
-  formData: PersonalInfoFormState;
+  formData: {
+    name: string;
+    email: string;
+    phone: string;
+    address: string;
+  };
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
-  validationErrors?: Record<string, string>;
 }
 
-// Using memo to prevent unnecessary re-renders
-const PersonalInfoFields: React.FC<PersonalInfoFieldsProps> = React.memo(({ 
-  formData, 
-  handleChange, 
-  validationErrors = {} 
-}) => {
-  // Performance monitoring 
-  const renderCount = React.useRef(0);
-  
-  React.useEffect(() => {
-    renderCount.current++;
-    console.log(`PersonalInfoFields rendered ${renderCount.current} time(s)`);
-    console.log("PersonalInfoFields rendered in browser:", navigator.userAgent);
-    console.log("Viewport size:", window.innerWidth, "x", window.innerHeight);
-    
-    // Mark component as ready for end-to-end testing
-    if (typeof window !== 'undefined' && 'Cypress' in window) {
-      // @ts-ignore - For Cypress testing
-      window.personalInfoFieldsReady = true;
-    }
-  });
-  
-  // Simple form validation
-  const validateEmail = React.useCallback((email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return email.trim() === "" || emailRegex.test(email);
-  }, []);
-
-  const isEmailValid = validateEmail(formData.email);
-  const hasNameError = !formData.name.trim() || !!validationErrors.name;
-  const hasEmailError = !isEmailValid || !!validationErrors.email;
-
+const PersonalInfoFields: React.FC<PersonalInfoFieldsProps> = ({ formData, handleChange }) => {
   return (
-    <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+    <>
       <div className="sm:col-span-3">
-        <div className="form-group">
-          <Label htmlFor="name" className="block text-sm font-medium text-gray-700">
-            Navn <span className="text-red-500">*</span>
-          </Label>
-          <div className="mt-1">
-            <Input
-              type="text"
-              id="name"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              required
-              className={`mt-1 block w-full ${hasNameError ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''}`}
-              data-testid="profile-name-input"
-              aria-required="true"
-              aria-invalid={hasNameError}
-              aria-describedby={hasNameError ? "name-error" : undefined}
-              data-state={hasNameError ? "invalid" : "valid"}
-            />
-          </div>
-          {hasNameError && (
-            <p className="mt-1 text-sm text-red-600" id="name-error">
-              {validationErrors.name || "Navn er påkrævet"}
-            </p>
-          )}
+        <label
+          htmlFor="name"
+          className="block text-sm font-medium text-gray-700"
+        >
+          Full Name
+        </label>
+        <div className="mt-1">
+          <input
+            type="text"
+            name="name"
+            id="name"
+            value={formData.name}
+            onChange={handleChange}
+            required
+            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
+          />
         </div>
       </div>
 
       <div className="sm:col-span-3">
-        <div className="form-group">
-          <Label htmlFor="email" className="block text-sm font-medium text-gray-700">
-            Email <span className="text-red-500">*</span>
-          </Label>
-          <div className="mt-1">
-            <Input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-              className={`mt-1 block w-full ${hasEmailError ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''}`}
-              data-testid="profile-email-input"
-              aria-required="true"
-              aria-invalid={hasEmailError}
-              aria-describedby={hasEmailError ? "email-error" : undefined}
-              data-state={hasEmailError ? "invalid" : "valid"}
-            />
-          </div>
-          {hasEmailError && (
-            <p className="mt-1 text-sm text-red-600" id="email-error">
-              {validationErrors.email || "Indtast venligst en gyldig email adresse"}
-            </p>
-          )}
+        <label
+          htmlFor="email"
+          className="block text-sm font-medium text-gray-700"
+        >
+          Email Address
+        </label>
+        <div className="mt-1">
+          <input
+            type="email"
+            name="email"
+            id="email"
+            value={formData.email}
+            onChange={handleChange}
+            required
+            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
+          />
         </div>
       </div>
 
       <div className="sm:col-span-3">
-        <div className="form-group">
-          <Label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-            Telefon
-          </Label>
-          <div className="mt-1">
-            <Input
-              type="tel"
-              id="phone"
-              name="phone"
-              value={formData.phone}
-              onChange={handleChange}
-              className="mt-1 block w-full"
-              data-testid="profile-phone-input"
-              placeholder="f.eks. 12345678"
-              inputMode="tel"
-            />
-          </div>
+        <label
+          htmlFor="phone"
+          className="block text-sm font-medium text-gray-700"
+        >
+          Phone Number
+        </label>
+        <div className="mt-1">
+          <input
+            type="tel"
+            name="phone"
+            id="phone"
+            value={formData.phone}
+            onChange={handleChange}
+            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
+          />
         </div>
       </div>
 
       <div className="sm:col-span-3">
-        <div className="form-group">
-          <Label htmlFor="address" className="block text-sm font-medium text-gray-700">
-            Adresse
-          </Label>
-          <div className="mt-1">
-            <Input
-              type="text"
-              id="address"
-              name="address"
-              value={formData.address}
-              onChange={handleChange}
-              className="mt-1 block w-full"
-              data-testid="profile-address-input"
-              placeholder="f.eks. Gadenavn 123, 1234 By"
-            />
-          </div>
+        <label
+          htmlFor="address"
+          className="block text-sm font-medium text-gray-700"
+        >
+          Address
+        </label>
+        <div className="mt-1">
+          <input
+            type="text"
+            name="address"
+            id="address"
+            value={formData.address}
+            onChange={handleChange}
+            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
+          />
         </div>
       </div>
-    </div>
+    </>
   );
-});
-
-PersonalInfoFields.displayName = "PersonalInfoFields";
+};
 
 export default PersonalInfoFields;
