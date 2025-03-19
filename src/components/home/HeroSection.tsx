@@ -16,7 +16,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ session }) => {
       <div 
         className="absolute inset-0 w-full h-full bg-cover bg-center z-0"
         style={{
-          backgroundImage: "url('/lovable-uploads/bcb9bf93-379a-47f0-914f-b08a2828bc40.png')",
+          backgroundImage: "url('/lovable-uploads/0abc60a6-733d-464f-9670-262c71b58d8c.png')",
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
