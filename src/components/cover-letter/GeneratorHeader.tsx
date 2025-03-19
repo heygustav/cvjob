@@ -41,7 +41,7 @@ export const GeneratorHeader: React.FC<GeneratorHeaderProps> = ({
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="1">Joboplysninger</TabsTrigger>
           <TabsTrigger value="2" disabled={!hasGeneratedLetter}>
-            Forhåndsvisning
+            Ansøgning
           </TabsTrigger>
         </TabsList>
       </Tabs>

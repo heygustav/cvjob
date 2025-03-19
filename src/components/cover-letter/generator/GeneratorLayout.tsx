@@ -65,8 +65,8 @@ export const GeneratorLayout: React.FC<GeneratorLayoutProps> = ({
                   )}
                 >
                   <FileTextIcon className="h-4 w-4 mr-2" />
-                  <span className="hidden sm:inline">Cover Letter</span>
-                  <span className="sm:hidden">Letter</span>
+                  <span className="hidden sm:inline">Ansøgning</span>
+                  <span className="sm:hidden">Brev</span>
                 </TabsTrigger>
               </TabsList>
 
