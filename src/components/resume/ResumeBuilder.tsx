@@ -65,8 +65,9 @@ const ResumeBuilder: React.FC = () => {
           console.log("Profile data fetched successfully:", data);
           
           // Transform the data to match PersonalInfoFormState
+          // Fixed: Using 'name' instead of 'full_name' to match the actual property in the profiles table
           const profileData: PersonalInfoFormState = {
-            name: data.full_name || "",
+            name: data.name || "",
             email: user.email || "",
             phone: data.phone || "",
             address: data.address || "",
