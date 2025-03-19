@@ -11,6 +11,9 @@ export interface Resume {
   phone: string;
   address: string;
   
+  // Short Summary
+  summary: string;
+  
   // Resume Content Sections
   experience: string;
   education: string;

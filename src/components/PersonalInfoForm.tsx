@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { User } from "../lib/types";
 import { useToast } from "@/hooks/use-toast";
@@ -14,6 +15,7 @@ interface PersonalInfoFormData {
   email: string;
   phone: string;
   address: string;
+  summary: string;
   experience: string;
   education: string;
   skills: string;
@@ -29,6 +31,7 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({
     email: user.email || "",
     phone: user.phone || "",
     address: user.address || "",
+    summary: user.summary || "",
     experience: "",
     education: "",
     skills: "",
@@ -146,6 +149,29 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({
               className="block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
             />
           </div>
+        </div>
+
+        <div className="sm:col-span-6">
+          <label
+            htmlFor="summary"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Short Resume/Summary
+          </label>
+          <div className="mt-1">
+            <textarea
+              id="summary"
+              name="summary"
+              rows={2}
+              value={formData.summary}
+              onChange={handleChange}
+              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
+              placeholder="A brief summary about yourself..."
+            />
+          </div>
+          <p className="mt-2 text-sm text-gray-500">
+            A short description that will appear under your name in the CV.
+          </p>
         </div>
 
         <div className="sm:col-span-6">

@@ -47,6 +47,21 @@ const ResumeEditorTabs: React.FC<ResumeEditorTabsProps> = ({
           />
           
           <ResumeSectionEditor
+            title="Kort Resume"
+            sections={[
+              { 
+                key: "summary", 
+                label: "Kort beskrivelse", 
+                value: resumeData.summary || "", 
+                multiline: true 
+              },
+            ]}
+            onUpdate={handleUpdateSection}
+          />
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-6">
+          <ResumeSectionEditor
             title="Erhvervserfaring"
             sections={[
               { 
@@ -58,9 +73,7 @@ const ResumeEditorTabs: React.FC<ResumeEditorTabsProps> = ({
             ]}
             onUpdate={handleUpdateSection}
           />
-        </div>
-
-        <div className="grid md:grid-cols-2 gap-6">
+          
           <ResumeSectionEditor
             title="Uddannelse"
             sections={[
@@ -73,7 +86,9 @@ const ResumeEditorTabs: React.FC<ResumeEditorTabsProps> = ({
             ]}
             onUpdate={handleUpdateSection}
           />
-          
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-6">
           <ResumeSectionEditor
             title="Færdigheder"
             sections={[

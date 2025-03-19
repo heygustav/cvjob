@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Resume } from "@/types/resume";
@@ -62,6 +63,9 @@ const ModernTemplate: React.FC<{ data: Resume }> = ({ data }) => (
         )}
         <div>
           <h1 className="text-2xl font-bold text-gray-900">{data.name}</h1>
+          {data.summary && (
+            <p className="mt-2 text-gray-700 italic">{data.summary}</p>
+          )}
           <div className="mt-2 text-gray-600 flex flex-wrap gap-x-4">
             {data.email && <div>{data.email}</div>}
             {data.phone && <div>{data.phone}</div>}
@@ -107,6 +111,9 @@ const ClassicTemplate: React.FC<{ data: Resume }> = ({ data }) => (
         </div>
       )}
       <h1 className="text-2xl font-bold text-gray-900">{data.name}</h1>
+      {data.summary && (
+        <p className="mt-2 text-gray-700 italic max-w-lg mx-auto">{data.summary}</p>
+      )}
       <div className="mt-2 text-gray-600">
         {data.email && <div>{data.email}</div>}
         {data.phone && <div>{data.phone}</div>}
@@ -156,8 +163,11 @@ const CreativeTemplate: React.FC<{ data: Resume }> = ({ data }) => (
             />
           </div>
         )}
-        <h1 className="text-xl font-bold text-indigo-900 mb-4">{data.name}</h1>
-        <div className="text-indigo-800 space-y-2">
+        <h1 className="text-xl font-bold text-indigo-900 mb-2">{data.name}</h1>
+        {data.summary && (
+          <p className="mb-4 text-indigo-800 italic">{data.summary}</p>
+        )}
+        <div className="text-indigo-800 space-y-1">
           {data.email && <div>{data.email}</div>}
           {data.phone && <div>{data.phone}</div>}
           {data.address && <div>{data.address}</div>}
