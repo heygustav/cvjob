@@ -42,6 +42,7 @@ const FormField = <
 
 const useFormField = () => {
   const fieldContext = React.useContext(FormFieldContext)
+  const itemContext = React.useContext(FormItemContext)
   
   // Check if we're inside a form context
   const formContext = useFormContext();
@@ -49,11 +50,11 @@ const useFormField = () => {
   // If not in a form context, return minimal implementation
   if (!formContext) {
     return {
-      id: "",
+      id: itemContext?.id || "",
       name: fieldContext?.name || "",
-      formItemId: "",
-      formDescriptionId: "",
-      formMessageId: "",
+      formItemId: itemContext?.id ? `${itemContext.id}-form-item` : "",
+      formDescriptionId: itemContext?.id ? `${itemContext.id}-form-item-description` : "",
+      formMessageId: itemContext?.id ? `${itemContext.id}-form-item-message` : "",
       error: undefined
     }
   }
