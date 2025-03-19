@@ -21,6 +21,7 @@ export const useProfileData = (): UseProfileDataReturn => {
     experience: "",
     education: "",
     skills: "",
+    summary: "",
   };
 
   // Form handling

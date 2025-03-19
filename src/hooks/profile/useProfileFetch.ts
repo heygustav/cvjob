@@ -37,6 +37,7 @@ export const useProfileFetch = (setFormData: React.Dispatch<React.SetStateAction
           email: data.email || user.email || "",
           phone: data.phone || "",
           address: data.address || "",
+          summary: data.summary || "",
           experience: data.experience || "",
           education: data.education || "",
           skills: data.skills || "",

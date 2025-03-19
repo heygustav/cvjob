@@ -69,7 +69,7 @@ const ResumeBuilder: React.FC = () => {
             email: user.email || "",
             phone: data.phone || "",
             address: data.address || "",
-            summary: data.skills || "",
+            summary: data.summary || "",
             education: data.education || "",
             experience: data.experience || "",
             skills: data.skills || "",

@@ -43,6 +43,7 @@ export const useProfileSubmit = (validateForm: (formData: ProfileState) => boole
         email: formData.email,
         phone: formData.phone,
         address: formData.address,
+        summary: formData.summary,
         experience: formData.experience,
         education: formData.education,
         skills: formData.skills,
