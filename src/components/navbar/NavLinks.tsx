@@ -55,7 +55,7 @@ const NavLinks: React.FC<NavLinksProps> = ({
       {session && (
         <Link to="/resume" className={linkClass}>
           <FileText className="h-4 w-4" />
-          CV Builder
+          CV Generator
         </Link>
       )}
       
