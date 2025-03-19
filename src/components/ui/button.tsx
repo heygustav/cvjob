@@ -10,18 +10,18 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary-800 focus:ring-2",
+        default: "bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary-800 active:scale-[0.98] active:shadow-inner focus:ring-2 focus-visible:ring-offset-2",
         destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/90 active:bg-destructive-900 focus:ring-2",
+          "bg-destructive text-destructive-foreground hover:bg-destructive/90 active:bg-destructive-900 active:scale-[0.98] active:shadow-inner focus:ring-2 focus-visible:ring-offset-2",
         outline:
-          "border border-input bg-background hover:bg-accent hover:text-accent-foreground active:bg-accent/80 focus:ring-2",
+          "border border-input bg-background hover:bg-accent hover:text-accent-foreground active:bg-accent/80 active:scale-[0.98] active:shadow-inner focus:ring-2 focus-visible:ring-offset-2",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80 active:bg-secondary/70 focus:ring-2",
-        ghost: "hover:bg-accent hover:text-accent-foreground active:bg-accent/80 focus:ring-2",
-        link: "text-primary underline-offset-4 hover:underline focus:ring-2",
-        success: "bg-emerald-600 text-white hover:bg-emerald-700 active:bg-emerald-800 focus:ring-2",
-        warning: "bg-amber-500 text-white hover:bg-amber-600 active:bg-amber-700 focus:ring-2",
-        info: "bg-sky-500 text-white hover:bg-sky-600 active:bg-sky-700 focus:ring-2",
+          "bg-secondary text-secondary-foreground hover:bg-secondary/80 active:bg-secondary/70 active:scale-[0.98] active:shadow-inner focus:ring-2 focus-visible:ring-offset-2",
+        ghost: "hover:bg-accent hover:text-accent-foreground active:bg-accent/80 active:scale-[0.98] focus:ring-2 focus-visible:ring-offset-2",
+        link: "text-primary underline-offset-4 hover:underline focus:ring-2 focus-visible:ring-offset-2",
+        success: "bg-emerald-600 text-white hover:bg-emerald-700 active:bg-emerald-800 active:scale-[0.98] active:shadow-inner focus:ring-2 focus-visible:ring-offset-2",
+        warning: "bg-amber-500 text-white hover:bg-amber-600 active:bg-amber-700 active:scale-[0.98] active:shadow-inner focus:ring-2 focus-visible:ring-offset-2",
+        info: "bg-sky-500 text-white hover:bg-sky-600 active:bg-sky-700 active:scale-[0.98] active:shadow-inner focus:ring-2 focus-visible:ring-offset-2",
       },
       size: {
         default: "h-10 px-4 py-2",
