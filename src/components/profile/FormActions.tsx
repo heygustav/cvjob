@@ -18,7 +18,7 @@ const FormActions: React.FC<FormActionsProps> = React.memo(({ isLoading, isFormV
     console.log(`FormActions mount time: ${mountTime.toFixed(2)}ms`);
     
     // End-to-end testing support - mark when component is ready
-    if (window.Cypress) {
+    if (typeof window !== 'undefined' && 'Cypress' in window) {
       // @ts-ignore - For Cypress testing
       window.formActionsReady = true;
     }

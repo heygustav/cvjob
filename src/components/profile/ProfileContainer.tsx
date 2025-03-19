@@ -49,7 +49,7 @@ const ProfileContainer: React.FC<ProfileContainerProps> = ({
     console.log("Viewport dimensions:", window.innerWidth, "x", window.innerHeight);
     
     // For end-to-end testing - track if component is fully mounted
-    if (window.Cypress) {
+    if (typeof window !== 'undefined' && 'Cypress' in window) {
       // @ts-ignore - For Cypress testing
       window.profileContainerReady = true;
     }
