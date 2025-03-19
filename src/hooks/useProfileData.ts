@@ -87,14 +87,8 @@ export const useProfileData = () => {
     setIsLoading(true);
 
     try {
-      console.log("Saving profile data:", {
-        id: user?.id,
-        name: formData.name,
-        email: formData.email,
-        // Not logging all details for privacy
-      });
-      
-      const { error } = await supabase.from("profiles").upsert({
+      // Log the complete request payload for debugging
+      const profileData = {
         id: user?.id,
         name: formData.name,
         email: formData.email,
@@ -104,10 +98,27 @@ export const useProfileData = () => {
         education: formData.education,
         skills: formData.skills,
         updated_at: new Date().toISOString(),
-      });
+      };
+      
+      console.log("About to save profile data with payload:", profileData);
+      
+      // Track network request timing for performance debugging
+      const startTime = performance.now();
+      
+      const { error, data, status } = await supabase.from("profiles").upsert(profileData);
+      
+      const endTime = performance.now();
+      console.log(`Network request completed in ${endTime - startTime}ms with status: ${status}`);
+      console.log("Supabase response data:", data);
 
       if (error) {
         console.error("Error updating profile:", error);
+        console.error("Error details:", {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint
+        });
         throw error;
       }
 

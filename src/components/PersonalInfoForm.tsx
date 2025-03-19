@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { User } from "../lib/types";
 import { useToast } from "@/hooks/use-toast";
@@ -47,6 +46,10 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({
   };
 
   const handleSubmit = (e: React.FormEvent) => {
+    console.log("Form submission in PersonalInfoForm component");
+    console.log("Form action:", (e.target as HTMLFormElement).action);
+    console.log("Form method:", (e.target as HTMLFormElement).method);
+    
     e.preventDefault();
     
     if (!formData.name || !formData.email) {
@@ -58,7 +61,10 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({
       return;
     }
     
+    // Log network activity
+    console.log("Network monitoring: About to call onSave with form data");
     onSave(formData);
+    console.log("Network monitoring: onSave called");
   };
 
   return (

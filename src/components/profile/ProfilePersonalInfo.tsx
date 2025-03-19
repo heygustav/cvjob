@@ -25,12 +25,21 @@ const ProfilePersonalInfo: React.FC<ProfilePersonalInfoProps> = ({
   console.log("ProfilePersonalInfo rendering with formData:", formData);
   console.log("isLoading state:", isLoading);
 
-  const handleSave = (e: FormEvent<HTMLFormElement>) => {
-    console.log("Form submission handler triggered");
+  const handleSave = async (e: FormEvent<HTMLFormElement>) => {
+    console.log("Form submission handler triggered in ProfilePersonalInfo");
+    console.log("Form action:", (e.currentTarget as HTMLFormElement).action);
+    console.log("Form method:", (e.currentTarget as HTMLFormElement).method);
     e.preventDefault(); // Prevent default form submission behavior
     
-    // Submit the form using the passed handler
-    handleSubmit(e);
+    console.log("About to call handleSubmit with form data:", formData);
+    try {
+      // Monitor network activity
+      console.log("Network monitoring: Starting form submission");
+      await handleSubmit(e);
+      console.log("Network monitoring: Form submission completed successfully");
+    } catch (error) {
+      console.error("Network monitoring: Form submission failed with error:", error);
+    }
   };
 
   return (
