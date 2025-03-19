@@ -9,14 +9,26 @@ interface HeroSectionProps {
 
 const HeroSection: React.FC<HeroSectionProps> = ({ session }) => {
   return (
-    <div className="relative isolate pt-6 w-full h-[600px] bg-cover bg-center bg-no-repeat" 
-      style={{
-        backgroundImage: "url('/lovable-uploads/bcb9bf93-379a-47f0-914f-b08a2828bc40.png')"
-      }}
+    <div 
+      className="relative w-full h-[600px] overflow-hidden" 
     >
-      <div className="absolute inset-0 bg-black/40" /> {/* Increased overlay opacity for better readability */}
-      <div className="relative py-12 sm:py-20 z-10 h-full flex items-center">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+      {/* Background image with proper sizing */}
+      <div 
+        className="absolute inset-0 w-full h-full bg-cover bg-center z-0"
+        style={{
+          backgroundImage: "url('/lovable-uploads/bcb9bf93-379a-47f0-914f-b08a2828bc40.png')",
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+        }}
+      />
+      
+      {/* Dark overlay */}
+      <div className="absolute inset-0 bg-black/40 z-10" />
+      
+      {/* Content */}
+      <div className="relative z-20 h-full flex items-center justify-center">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center bg-white/80 backdrop-blur-sm p-8 rounded-lg shadow-sm">
             <div className="flex justify-center items-center mb-6">
               <FileText className="w-20 h-20 text-primary-700" />
