@@ -14,12 +14,12 @@ const HeroSection: React.FC<HeroSectionProps> = ({ session }) => {
     >
       {/* Background image with proper sizing */}
       <div 
-        className="absolute inset-0 w-full h-full bg-cover bg-center z-0"
+        className="absolute inset-0 w-full h-full z-0"
         style={{
           backgroundImage: "url('/lovable-uploads/dc39dd5e-8adb-439a-ae9e-4b391af2afcf.png')",
-          backgroundSize: 'cover',
+          backgroundSize: 'contain', // Changed from 'cover' to 'contain'
           backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
+          backgroundRepeat: 'repeat', // Changed from 'no-repeat' to 'repeat'
         }}
       />
       
