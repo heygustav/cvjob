@@ -12,10 +12,10 @@ const HeroSection: React.FC<HeroSectionProps> = ({ session }) => {
     <div 
       className="relative w-full h-[600px] overflow-hidden" 
     >
-      {/* Background image - simpler approach with img tag for better visibility */}
+      {/* Background image - using a reliable external image URL */}
       <img
-        src="/lovable-uploads/dc39dd5e-8adb-439a-ae9e-4b391af2afcf.png"
-        alt="Background"
+        src="https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?auto=format&fit=crop&w=1920&q=80"
+        alt="Hero background"
         className="absolute inset-0 w-full h-full object-cover z-0"
       />
       
