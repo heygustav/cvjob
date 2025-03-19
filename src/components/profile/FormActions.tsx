@@ -2,6 +2,7 @@
 import React from "react";
 import { Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface FormActionsProps {
   isLoading: boolean;
@@ -15,6 +16,9 @@ const FormActions: React.FC<FormActionsProps> = ({ isLoading }) => {
           type="submit"
           disabled={isLoading}
           className="inline-flex items-center"
+          aria-busy={isLoading}
+          aria-label={isLoading ? "Gemmer profil" : "Gem profil"}
+          data-testid="save-profile-button"
         >
           {isLoading ? (
             <>
@@ -23,6 +27,7 @@ const FormActions: React.FC<FormActionsProps> = ({ isLoading }) => {
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
+                aria-hidden="true"
               >
                 <circle
                   className="opacity-25"
@@ -42,7 +47,7 @@ const FormActions: React.FC<FormActionsProps> = ({ isLoading }) => {
             </>
           ) : (
             <>
-              <Save className="h-4 w-4 mr-2" />
+              <Save className="h-4 w-4 mr-2" aria-hidden="true" />
               Gem profil
             </>
           )}
