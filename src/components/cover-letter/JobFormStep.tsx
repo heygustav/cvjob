@@ -55,7 +55,7 @@ const JobFormStep: React.FC<JobFormStepProps> = ({
       description: DOMPurify.sanitize(formData.description),
       contact_person: formData.contact_person ? DOMPurify.sanitize(formData.contact_person) : "",
       url: formData.url ? DOMPurify.sanitize(formData.url) : "",
-      deadline: formData.deadline ? DOMPurify.sanitize(formData.deadline) : "",
+      deadline: formData.deadline && formData.deadline.trim() !== "" ? DOMPurify.sanitize(formData.deadline) : "",
     };
     
     await onSubmit(sanitizedData);
@@ -70,7 +70,7 @@ const JobFormStep: React.FC<JobFormStepProps> = ({
       description: DOMPurify.sanitize(formData.description),
       contact_person: formData.contact_person ? DOMPurify.sanitize(formData.contact_person) : "",
       url: formData.url ? DOMPurify.sanitize(formData.url) : "",
-      deadline: formData.deadline ? DOMPurify.sanitize(formData.deadline) : "",
+      deadline: formData.deadline && formData.deadline.trim() !== "" ? DOMPurify.sanitize(formData.deadline) : "",
     };
     
     await onSave(sanitizedData);

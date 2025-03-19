@@ -33,7 +33,7 @@ export const useJobForm = ({ initialData, onSubmit, onSave }: UseJobFormProps) =
     description: initialData?.description || "",
     contact_person: initialData?.contact_person || "",
     url: initialData?.url || "",
-    deadline: initialData?.deadline || "",
+    deadline: initialData?.deadline && initialData.deadline.trim() !== "" ? initialData.deadline : "",
   });
   
   const [errors, setErrors] = useState<Record<string, string>>({});

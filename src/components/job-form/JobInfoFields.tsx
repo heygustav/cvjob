@@ -127,7 +127,6 @@ const JobInfoFields: React.FC<JobInfoFieldsProps> = ({
           onChange={onChange}
           disabled={disabled}
           className="block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm placeholder:text-gray-400"
-          placeholder="ÅÅÅÅ-MM-DD"
         />
         <p className="mt-1 text-xs text-gray-400 italic">
           Sidste frist for ansøgning
