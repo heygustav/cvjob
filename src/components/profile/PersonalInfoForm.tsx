@@ -30,8 +30,13 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({
     }));
   };
 
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault(); // This is critical to prevent the default form submission
+    handleSubmit(e);
+  };
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 text-left">
+    <form onSubmit={onSubmit} className="space-y-6 text-left">
       <ResumeUploader onExtractedData={handleExtractedData} />
       
       <PersonalInfoFields formData={formData} handleChange={handleChange} />
