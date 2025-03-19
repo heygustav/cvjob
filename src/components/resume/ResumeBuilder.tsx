@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
@@ -33,7 +32,6 @@ const ResumeBuilder: React.FC = () => {
   const { user } = useAuth();
   const { handleDownloadError } = useDownloadErrorHandler();
 
-  // Fetch profile data when component mounts
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
@@ -66,23 +64,20 @@ const ResumeBuilder: React.FC = () => {
         if (data) {
           console.log("Profile data fetched successfully:", data);
           
-          // Transform the data to match Resume type
           const profileData: Resume = {
             name: data.name || "",
             email: user.email || "",
             phone: data.phone || "",
             address: data.address || "",
-            // Safely handle summary field which might not exist in the database
-            summary: data.summary || "",
+            summary: data.skills || "",
             education: data.education || "",
             experience: data.experience || "",
             skills: data.skills || "",
-            photo: undefined, // Initialize as undefined since it's not in the database
+            photo: undefined,
           };
 
           setResumeData(profileData);
           
-          // Log whether we have complete data
           const hasRequiredFields = profileData.name && profileData.email;
           console.log("Has required profile fields:", hasRequiredFields);
         } else {
