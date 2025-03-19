@@ -72,8 +72,8 @@ const ResumeBuilder: React.FC = () => {
             email: user.email || "",
             phone: data.phone || "",
             address: data.address || "",
-            // Need to access any additional fields that might be in the database
-            summary: typeof data.summary === 'string' ? data.summary : "",
+            // Safely handle summary field which might not exist in the database
+            summary: data.summary || "",
             education: data.education || "",
             experience: data.experience || "",
             skills: data.skills || "",
