@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
@@ -71,7 +72,7 @@ const ResumeBuilder: React.FC = () => {
             email: user.email || "",
             phone: data.phone || "",
             address: data.address || "",
-            summary: data.summary || "",
+            summary: data.summary || "", // Use the summary from the database or empty string if it doesn't exist
             education: data.education || "",
             experience: data.experience || "",
             skills: data.skills || "",

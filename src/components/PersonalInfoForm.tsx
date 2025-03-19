@@ -1,10 +1,11 @@
+
 import React, { useState, ChangeEvent, FormEvent } from "react";
 import { toast } from "sonner";
 import PersonalInfoFields from "./profile/PersonalInfoFields";
-import WorkExperienceField from "./profile/WorkExperienceField";
+import ExperienceField from "./profile/ExperienceField";
 import EducationField from "./profile/EducationField";
 import SkillsField from "./profile/SkillsField";
-import FormActions from "./profile/FormActions";
+import FormActions from "./job-form/FormActions";
 
 export interface PersonalInfoFormData {
   name: string;
@@ -102,28 +103,31 @@ const PersonalInfoForm: React.FC = () => {
         validationErrors={validationErrors}
       />
       
-      <WorkExperienceField 
-        workExperiences={formData.workExperiences}
-        setWorkExperiences={(experiences) => {
+      <ExperienceField 
+        value={formData.workExperiences.join("\n")}
+        onChange={(e) => {
+          const experiences = e.target.value.split("\n").filter(exp => exp.trim() !== "");
           setFormData({ ...formData, workExperiences: experiences });
         }}
       />
       
       <EducationField 
-        education={formData.education}
-        setEducation={(education) => {
-          setFormData({ ...formData, education });
+        value={formData.education.join("\n")}
+        onChange={(e) => {
+          const educations = e.target.value.split("\n").filter(edu => edu.trim() !== "");
+          setFormData({ ...formData, education: educations });
         }}
       />
       
       <SkillsField 
-        skills={formData.skills}
-        setSkills={(skills) => {
-          setFormData({ ...formData, skills });
+        value={formData.skills.join("\n")}
+        onChange={(e) => {
+          const skillsList = e.target.value.split("\n").filter(skill => skill.trim() !== "");
+          setFormData({ ...formData, skills: skillsList });
         }}
       />
       
-      <FormActions isLoading={isSubmitting} isFormValid={isValid} />
+      <FormActions isLoading={isSubmitting} />
     </form>
   );
 };
