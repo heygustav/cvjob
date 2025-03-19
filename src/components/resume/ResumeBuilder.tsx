@@ -11,6 +11,9 @@ import { PersonalInfoFormState } from "@/pages/Profile";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
+import { useDownloadErrorHandler } from "@/utils/download/downloadErrorHandler";
+import { getTextContent } from "@/utils/download/contentExtractor";
+import { jsPDF } from "jspdf";
 
 // Resume templates
 const TEMPLATES = ["modern", "classic", "creative"];
@@ -28,8 +31,10 @@ const ResumeBuilder: React.FC = () => {
     skills: "",
   });
   const [isLoading, setIsLoading] = useState(true);
+  const [isDownloading, setIsDownloading] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
+  const { handleDownloadError } = useDownloadErrorHandler();
 
   // Fetch profile data when component mounts
   useEffect(() => {
@@ -53,8 +58,8 @@ const ResumeBuilder: React.FC = () => {
         if (error) {
           console.error("Error fetching profile:", error);
           toast({
-            title: "Could not load profile data",
-            description: "Please complete your profile information first.",
+            title: "Kunne ikke indlæse profildata",
+            description: "Udfyld venligst dine profiloplysninger først.",
             variant: "destructive",
           });
           setIsLoading(false);
@@ -101,24 +106,86 @@ const ResumeBuilder: React.FC = () => {
     }));
   };
 
-  const handleExport = () => {
-    // For testing only - log the data that would be exported
-    console.log("Exporting resume with data:", resumeData);
-    console.log("Selected template:", selectedTemplate);
-    
-    toast({
-      title: "Resume Export",
-      description: "Your resume would be exported here. This is a test message.",
-    });
-    
-    // In a real implementation, this would generate and download the PDF
+  const handleExport = async () => {
+    try {
+      setIsDownloading(true);
+      
+      // For logging only - log the data that would be exported
+      console.log("Exporting resume with data:", resumeData);
+      console.log("Selected template:", selectedTemplate);
+      
+      // Create a PDF document with jsPDF
+      const doc = new jsPDF();
+      
+      // Add title
+      doc.setFontSize(20);
+      doc.text("CV", 105, 15, { align: "center" });
+      
+      // Add personal info section
+      doc.setFontSize(16);
+      doc.text("Personlige Oplysninger", 20, 30);
+      doc.setFontSize(12);
+      doc.text(`Navn: ${resumeData.name}`, 20, 40);
+      doc.text(`Email: ${resumeData.email}`, 20, 45);
+      if (resumeData.phone) doc.text(`Telefon: ${resumeData.phone}`, 20, 50);
+      if (resumeData.address) doc.text(`Adresse: ${resumeData.address}`, 20, 55);
+      
+      // Add experience section
+      doc.setFontSize(16);
+      doc.text("Erhvervserfaring", 20, 70);
+      doc.setFontSize(12);
+      if (resumeData.experience) {
+        const experienceLines = doc.splitTextToSize(getTextContent(resumeData.experience), 170);
+        doc.text(experienceLines, 20, 80);
+      } else {
+        doc.text("Ingen erhvervserfaring angivet.", 20, 80);
+      }
+      
+      // Add education section
+      const educationYPos = resumeData.experience ? 110 : 80;
+      doc.setFontSize(16);
+      doc.text("Uddannelse", 20, educationYPos);
+      doc.setFontSize(12);
+      if (resumeData.education) {
+        const educationLines = doc.splitTextToSize(getTextContent(resumeData.education), 170);
+        doc.text(educationLines, 20, educationYPos + 10);
+      } else {
+        doc.text("Ingen uddannelse angivet.", 20, educationYPos + 10);
+      }
+      
+      // Add skills section
+      const skillsYPos = resumeData.education ? educationYPos + 40 : educationYPos + 10;
+      doc.setFontSize(16);
+      doc.text("Færdigheder", 20, skillsYPos);
+      doc.setFontSize(12);
+      if (resumeData.skills) {
+        const skillsLines = doc.splitTextToSize(getTextContent(resumeData.skills), 170);
+        doc.text(skillsLines, 20, skillsYPos + 10);
+      } else {
+        doc.text("Ingen færdigheder angivet.", 20, skillsYPos + 10);
+      }
+      
+      // Generate filename and save the PDF
+      const filename = `CV_${resumeData.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+      doc.save(filename);
+      
+      toast({
+        title: "CV Downloadet",
+        description: "Dit CV er blevet downloadet som PDF.",
+      });
+    } catch (error) {
+      console.error("Error exporting resume:", error);
+      handleDownloadError(error, "PDF");
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <span className="ml-2">Loading your profile data...</span>
+        <span className="ml-2">Indlæser dine profildata...</span>
       </div>
     );
   }
@@ -129,11 +196,11 @@ const ResumeBuilder: React.FC = () => {
         <CardContent className="p-6">
           <ResumeHeader 
             title="CV Generator" 
-            subtitle="Create a professional resume from your profile information" 
+            subtitle="Opret et professionelt CV fra dine profiloplysninger" 
           />
 
           <div className="mb-6">
-            <h4 className="text-sm font-medium mb-2">Template Style</h4>
+            <h4 className="text-sm font-medium mb-2">Skabelon</h4>
             <div className="flex space-x-2">
               {TEMPLATES.map((template) => (
                 <Button
@@ -142,7 +209,9 @@ const ResumeBuilder: React.FC = () => {
                   onClick={() => setSelectedTemplate(template)}
                   className="capitalize"
                 >
-                  {template}
+                  {template === "modern" ? "Moderne" : 
+                   template === "classic" ? "Klassisk" : 
+                   template === "creative" ? "Kreativ" : template}
                 </Button>
               ))}
             </div>
@@ -150,29 +219,29 @@ const ResumeBuilder: React.FC = () => {
 
           <Tabs defaultValue="edit" value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="grid grid-cols-2 mb-6">
-              <TabsTrigger value="edit">Edit Content</TabsTrigger>
-              <TabsTrigger value="preview">Preview</TabsTrigger>
+              <TabsTrigger value="edit">Rediger Indhold</TabsTrigger>
+              <TabsTrigger value="preview">Forhåndsvisning</TabsTrigger>
             </TabsList>
 
             <TabsContent value="edit" className="space-y-6">
               <div className="grid md:grid-cols-2 gap-6">
                 <ResumeSectionEditor
-                  title="Personal Information"
+                  title="Personlige Oplysninger"
                   sections={[
-                    { key: "name", label: "Full Name", value: resumeData.name },
+                    { key: "name", label: "Fulde Navn", value: resumeData.name },
                     { key: "email", label: "Email", value: resumeData.email },
-                    { key: "phone", label: "Phone", value: resumeData.phone || "" },
-                    { key: "address", label: "Address", value: resumeData.address || "" },
+                    { key: "phone", label: "Telefon", value: resumeData.phone || "" },
+                    { key: "address", label: "Adresse", value: resumeData.address || "" },
                   ]}
                   onUpdate={handleUpdateSection}
                 />
                 
                 <ResumeSectionEditor
-                  title="Professional Experience"
+                  title="Erhvervserfaring"
                   sections={[
                     { 
                       key: "experience", 
-                      label: "Experience", 
+                      label: "Erfaring", 
                       value: resumeData.experience || "", 
                       multiline: true 
                     },
@@ -183,11 +252,11 @@ const ResumeBuilder: React.FC = () => {
 
               <div className="grid md:grid-cols-2 gap-6">
                 <ResumeSectionEditor
-                  title="Education"
+                  title="Uddannelse"
                   sections={[
                     { 
                       key: "education", 
-                      label: "Education", 
+                      label: "Uddannelse", 
                       value: resumeData.education || "", 
                       multiline: true 
                     },
@@ -196,11 +265,11 @@ const ResumeBuilder: React.FC = () => {
                 />
                 
                 <ResumeSectionEditor
-                  title="Skills"
+                  title="Færdigheder"
                   sections={[
                     { 
                       key: "skills", 
-                      label: "Skills", 
+                      label: "Færdigheder", 
                       value: resumeData.skills || "", 
                       multiline: true 
                     },
@@ -211,7 +280,7 @@ const ResumeBuilder: React.FC = () => {
 
               <div className="flex justify-end">
                 <Button onClick={() => setActiveTab("preview")}>
-                  Preview Resume
+                  Forhåndsvis CV
                 </Button>
               </div>
             </TabsContent>
@@ -224,10 +293,20 @@ const ResumeBuilder: React.FC = () => {
               
               <div className="flex justify-between mt-6">
                 <Button variant="outline" onClick={() => setActiveTab("edit")}>
-                  Back to Edit
+                  Tilbage til Redigering
                 </Button>
-                <Button onClick={handleExport}>
-                  Download Resume
+                <Button 
+                  onClick={handleExport} 
+                  disabled={isDownloading}
+                >
+                  {isDownloading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Downloader...
+                    </>
+                  ) : (
+                    "Download CV"
+                  )}
                 </Button>
               </div>
             </TabsContent>
