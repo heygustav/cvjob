@@ -31,16 +31,16 @@ export const exportResumeToPdf = (
         }
       }
       
-      // Add personal info section
+      // Add personal info section with Danish text
       doc.setFontSize(16);
       doc.text("Personlige Oplysninger", resumeData.photo ? 60 : 20, 30);
       doc.setFontSize(12);
       doc.text(`Navn: ${resumeData.name}`, resumeData.photo ? 60 : 20, 40);
-      doc.text(`Email: ${resumeData.email}`, resumeData.photo ? 60 : 20, 45);
+      doc.text(`E-mail: ${resumeData.email}`, resumeData.photo ? 60 : 20, 45);
       if (resumeData.phone) doc.text(`Telefon: ${resumeData.phone}`, resumeData.photo ? 60 : 20, 50);
       if (resumeData.address) doc.text(`Adresse: ${resumeData.address}`, resumeData.photo ? 60 : 20, 55);
       
-      // Add experience section
+      // Add experience section with Danish text
       doc.setFontSize(16);
       doc.text("Erhvervserfaring", 20, contentStartY);
       doc.setFontSize(12);
@@ -51,7 +51,7 @@ export const exportResumeToPdf = (
         doc.text("Ingen erhvervserfaring angivet.", 20, contentStartY + 10);
       }
       
-      // Add education section
+      // Add education section with Danish text
       const educationYPos = resumeData.experience ? contentStartY + 40 : contentStartY + 10;
       doc.setFontSize(16);
       doc.text("Uddannelse", 20, educationYPos);
@@ -63,7 +63,7 @@ export const exportResumeToPdf = (
         doc.text("Ingen uddannelse angivet.", 20, educationYPos + 10);
       }
       
-      // Add skills section
+      // Add skills section with Danish text
       const skillsYPos = resumeData.education ? educationYPos + 40 : educationYPos + 10;
       doc.setFontSize(16);
       doc.text("Færdigheder", 20, skillsYPos);
@@ -75,7 +75,7 @@ export const exportResumeToPdf = (
         doc.text("Ingen færdigheder angivet.", 20, skillsYPos + 10);
       }
       
-      // Save the PDF with the new filename
+      // Save the PDF with Danish filename
       doc.save("Ansoegning.pdf");
       
       resolve();

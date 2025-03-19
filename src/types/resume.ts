@@ -1,6 +1,4 @@
 
-import { JsonValue } from "@supabase/supabase-js";
-
 /**
  * Consolidated Resume type that can be used across all components
  * This type combines all properties from different interfaces used throughout the application
@@ -25,7 +23,7 @@ export interface Resume {
   // Metadata
   created_at?: string;
   updated_at?: string;
-  email_preferences?: JsonValue;
+  email_preferences?: any;
   
   // Template and Styling
   template?: "modern" | "classic" | "creative";
