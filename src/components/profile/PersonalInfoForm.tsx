@@ -25,9 +25,18 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({
   isLoading,
   validationErrors = {}
 }) => {
-  console.log("PersonalInfoForm rendering with data:", formData);
-  console.log("Browser context:", navigator.userAgent);
-  console.log("Viewport size:", window.innerWidth, "x", window.innerHeight);
+  // Performance measurement for renders
+  const renderStartTime = React.useRef(performance.now());
+  
+  React.useEffect(() => {
+    const renderTime = performance.now() - renderStartTime.current;
+    console.log(`PersonalInfoForm render time: ${renderTime.toFixed(2)}ms`);
+    renderStartTime.current = performance.now();
+    
+    console.log("PersonalInfoForm rendering with data:", formData);
+    console.log("Browser context:", navigator.userAgent);
+    console.log("Viewport size:", window.innerWidth, "x", window.innerHeight);
+  });
   
   // Track invalid/valid fields for testing
   React.useEffect(() => {
@@ -38,16 +47,16 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({
     console.log("Form validation state:", requiredFields);
   }, [formData.name, formData.email]);
   
-  const handleExtractedData = (extractedData: Partial<PersonalInfoFormState>) => {
+  const handleExtractedData = React.useCallback((extractedData: Partial<PersonalInfoFormState>) => {
     console.log("Received extracted data from resume:", extractedData);
     console.log("Browser context for resume extraction:", navigator.userAgent);
     setFormData(prev => ({
       ...prev,
       ...extractedData
     }));
-  };
+  }, [setFormData]);
 
-  // Validate if form is ready to submit
+  // Memoize form validation to prevent unnecessary re-calculations
   const isFormValid = React.useMemo(() => {
     return formData.name.trim() !== "" && 
       formData.email.trim() !== "" && 
@@ -55,7 +64,7 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({
       Object.keys(validationErrors).length === 0;
   }, [formData.name, formData.email, validationErrors]);
 
-  const onSubmit = (e: React.FormEvent) => {
+  const onSubmit = React.useCallback((e: React.FormEvent) => {
     console.log("Form submission in PersonalInfoForm");
     console.log("Browser context for submission:", navigator.userAgent);
     e.preventDefault(); // Prevent default form submission behavior
@@ -67,7 +76,7 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({
     }
     
     handleSubmit(e);
-  };
+  }, [isFormValid, handleSubmit]);
 
   return (
     <form onSubmit={onSubmit} className="space-y-6 text-left">
@@ -101,4 +110,5 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({
   );
 };
 
-export default PersonalInfoForm;
+// Wrap component with memo to prevent unnecessary re-renders
+export default React.memo(PersonalInfoForm);

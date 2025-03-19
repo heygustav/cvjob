@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ProfileHeader from "./ProfileHeader";
@@ -11,6 +11,7 @@ import { User } from "@/lib/types";
 import { useSearchParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { PersonalInfoFormState } from "@/pages/Profile";
+import { usePerformanceMonitoring } from "@/hooks/usePerformanceMonitoring";
 
 interface ProfileContainerProps {
   formData: PersonalInfoFormState;
@@ -34,11 +35,36 @@ const ProfileContainer: React.FC<ProfileContainerProps> = ({
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("personal-info");
   
+  // Monitor component performance
+  const { logTiming } = usePerformanceMonitoring({
+    componentName: "ProfileContainer",
+    logUpdate: true
+  });
+  
   // For cross-browser testing
   useEffect(() => {
+    const startTime = logTiming("Initial render started");
+    
     console.log("ProfileContainer rendered in browser:", navigator.userAgent);
     console.log("Viewport dimensions:", window.innerWidth, "x", window.innerHeight);
-  }, []);
+    
+    // For end-to-end testing - track if component is fully mounted
+    if (window.Cypress) {
+      // @ts-ignore - For Cypress testing
+      window.profileContainerReady = true;
+    }
+    
+    logTiming("Initial render completed");
+    
+    // Record page visit - for testing persistence between refreshes
+    const visitCount = parseInt(localStorage.getItem('profileVisitCount') || '0', 10);
+    localStorage.setItem('profileVisitCount', (visitCount + 1).toString());
+    console.log(`This is visit #${visitCount + 1} to the profile page`);
+    
+    return () => {
+      logTiming("Component unmount");
+    };
+  }, [logTiming]);
   
   // Check for subscription success in URL
   useEffect(() => {
@@ -51,6 +77,12 @@ const ProfileContainer: React.FC<ProfileContainerProps> = ({
       setActiveTab("subscription");
     }
   }, [searchParams, toast]);
+
+  // Memoize the tab change handler to prevent unnecessary recreations
+  const handleTabChange = useCallback((value: string) => {
+    logTiming(`Tab changed to ${value}`);
+    setActiveTab(value);
+  }, [logTiming]);
 
   if (!user) {
     return null;
@@ -74,7 +106,7 @@ const ProfileContainer: React.FC<ProfileContainerProps> = ({
       <Tabs 
         defaultValue="personal-info" 
         value={activeTab}
-        onValueChange={setActiveTab}
+        onValueChange={handleTabChange}
         className="w-full mt-8"
       >
         <TabsList className="grid grid-cols-3 mb-8 w-full">
@@ -110,4 +142,4 @@ const ProfileContainer: React.FC<ProfileContainerProps> = ({
   );
 };
 
-export default ProfileContainer;
+export default React.memo(ProfileContainer);

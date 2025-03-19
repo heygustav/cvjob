@@ -50,11 +50,18 @@ const ProfilePersonalInfo: React.FC<ProfilePersonalInfoProps> = ({
     
     console.log("About to call handleSubmit with form data:", formData);
     try {
-      // Monitor network activity
+      // Monitor network activity - using browser-compatible approach
       console.log("Network monitoring: Starting form submission");
       console.log("Browser:", navigator.userAgent);
-      console.log("Network info:", navigator.connection ? 
-        JSON.stringify(navigator.connection) : "Connection info not available");
+      
+      // Safe network info logging that works across browsers
+      const networkInfo = {
+        onLine: navigator.onLine,
+        userAgent: navigator.userAgent,
+        platform: navigator.platform,
+        language: navigator.language
+      };
+      console.log("Network info:", JSON.stringify(networkInfo));
       
       await handleSubmit(e);
       console.log("Network monitoring: Form submission completed successfully");
@@ -64,8 +71,11 @@ const ProfilePersonalInfo: React.FC<ProfilePersonalInfoProps> = ({
     }
   };
 
-  // For cross-browser testing
+  // For cross-browser testing and performance optimization
   React.useEffect(() => {
+    // Performance measurement for component mount
+    const startTime = performance.now();
+    
     console.log("ProfilePersonalInfo rendered in browser:", navigator.userAgent);
     console.log("Viewport dimensions:", window.innerWidth, "x", window.innerHeight);
     
@@ -87,6 +97,9 @@ const ProfilePersonalInfo: React.FC<ProfilePersonalInfoProps> = ({
         console.error("Browser does not support media query listeners");
       }
     }
+    
+    const mountTime = performance.now() - startTime;
+    console.log(`ProfilePersonalInfo mount time: ${mountTime.toFixed(2)}ms`);
     
     return () => {
       try {

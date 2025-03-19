@@ -2,17 +2,26 @@
 import React from "react";
 import { Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 
 interface FormActionsProps {
   isLoading: boolean;
   isFormValid?: boolean;
 }
 
-const FormActions: React.FC<FormActionsProps> = ({ isLoading, isFormValid = true }) => {
-  // For cross-browser testing
+// Using memo to prevent unnecessary re-renders
+const FormActions: React.FC<FormActionsProps> = React.memo(({ isLoading, isFormValid = true }) => {
+  // Performance measurement for mounts
   React.useEffect(() => {
+    const startTime = performance.now();
     console.log("FormActions rendered in browser:", navigator.userAgent);
+    const mountTime = performance.now() - startTime;
+    console.log(`FormActions mount time: ${mountTime.toFixed(2)}ms`);
+    
+    // End-to-end testing support - mark when component is ready
+    if (window.Cypress) {
+      // @ts-ignore - For Cypress testing
+      window.formActionsReady = true;
+    }
   }, []);
 
   return (
@@ -27,6 +36,7 @@ const FormActions: React.FC<FormActionsProps> = ({ isLoading, isFormValid = true
               aria-busy="true"
               aria-label="Gemmer profil"
               data-testid="save-profile-button-loading"
+              data-state="loading"
             >
               <svg
                 className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
@@ -63,6 +73,7 @@ const FormActions: React.FC<FormActionsProps> = ({ isLoading, isFormValid = true
             data-testid="save-profile-button"
             disabled={!isFormValid}
             title={!isFormValid ? "Udfyld venligst alle påkrævede felter korrekt" : "Gem dine profiloplysninger"}
+            data-state={isFormValid ? "enabled" : "disabled"}
           >
             <Save className="h-4 w-4 mr-2" aria-hidden="true" />
             <span>Gem profil</span>
@@ -71,6 +82,8 @@ const FormActions: React.FC<FormActionsProps> = ({ isLoading, isFormValid = true
       </div>
     </div>
   );
-};
+});
+
+FormActions.displayName = "FormActions";
 
 export default FormActions;

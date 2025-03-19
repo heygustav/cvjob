@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -20,34 +20,45 @@ export const useProfileData = () => {
   const [isProfileLoading, setIsProfileLoading] = useState(true);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const { toast } = useToast();
-
+  
+  // Refs for performance tracking
+  const fetchStartTime = useRef<number | null>(null);
+  const saveStartTime = useRef<number | null>(null);
+  
+  // For testing persistence between page refreshes
   useEffect(() => {
-    if (user) {
-      console.log("User is authenticated, fetching profile data", user.id);
-      console.log("Supabase client initialized:", !!supabase);
-      fetchProfile();
-    } else {
-      console.log("No authenticated user found");
-    }
-  }, [user]);
+    // Store last page visit timestamp in localStorage for persistence testing
+    const lastVisit = localStorage.getItem('profileLastVisit');
+    const currentTime = new Date().toISOString();
+    console.log(`Previous profile page visit: ${lastVisit || 'First visit'}`);
+    localStorage.setItem('profileLastVisit', currentTime);
+  }, []);
 
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
+    if (!user?.id) {
+      console.log("No user ID available for fetching profile");
+      setIsProfileLoading(false);
+      return;
+    }
+    
     try {
-      console.log("Fetching profile data for user:", user?.id);
+      console.log("Fetching profile data for user:", user.id);
       console.log("Browser info:", navigator.userAgent);
       setIsProfileLoading(true);
       
+      // Start performance measurement
+      fetchStartTime.current = performance.now();
       console.log("Database connection test - starting query");
-      const startTime = performance.now();
       
       const { data, error, status } = await supabase
         .from("profiles")
         .select("*")
-        .eq("id", user?.id)
+        .eq("id", user.id)
         .single();
 
-      const endTime = performance.now();
-      console.log(`Profile query completed in ${endTime - startTime}ms with status: ${status}`);
+      // End performance measurement
+      const fetchDuration = fetchStartTime.current ? performance.now() - fetchStartTime.current : null;
+      console.log(`Profile query completed in ${fetchDuration?.toFixed(2)}ms with status: ${status}`);
       
       if (error && error.code !== "PGRST116") {
         console.error("Error fetching profile:", error);
@@ -62,16 +73,31 @@ export const useProfileData = () => {
       }
 
       if (data) {
-        console.log("Profile data fetched successfully:", data);
+        console.log("Profile data fetched successfully");
         setFormData({
           name: data.name || "",
-          email: data.email || user?.email || "",
+          email: data.email || user.email || "",
           phone: data.phone || "",
           address: data.address || "",
           experience: data.experience || "",
           education: data.education || "",
           skills: data.skills || "",
         });
+        
+        // Verify persistence by comparing with localStorage cached values
+        const cachedFormData = localStorage.getItem('profileFormData');
+        if (cachedFormData) {
+          try {
+            const parsedCache = JSON.parse(cachedFormData);
+            console.log("Data persistence check - comparing server data with cached data:", 
+              JSON.stringify(parsedCache) === JSON.stringify(data) ? "Matching" : "Different");
+          } catch (e) {
+            console.error("Error parsing cached form data:", e);
+          }
+        }
+        
+        // Cache current form data for persistence testing
+        localStorage.setItem('profileFormData', JSON.stringify(data));
       } else {
         console.log("No profile data found for user - will create on first save");
       }
@@ -90,9 +116,21 @@ export const useProfileData = () => {
     } finally {
       setIsProfileLoading(false);
     }
-  };
+  }, [user, toast]);
 
-  const validateForm = () => {
+  useEffect(() => {
+    if (user) {
+      console.log("User is authenticated, fetching profile data", user.id);
+      console.log("Supabase client initialized:", !!supabase);
+      fetchProfile();
+    } else {
+      console.log("No authenticated user found");
+      setIsProfileLoading(false);
+    }
+  }, [user, fetchProfile]);
+
+  const validateForm = useCallback(() => {
+    console.log("Validating form data");
     const errors: Record<string, string> = {};
     
     // Validate required fields
@@ -113,9 +151,9 @@ export const useProfileData = () => {
     // Set validation errors and return whether the form is valid
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
-  };
+  }, [formData.name, formData.email]);
 
-  const handleChange = (
+  const handleChange = useCallback((
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
@@ -134,9 +172,9 @@ export const useProfileData = () => {
       ...prev,
       [name]: value,
     }));
-  };
+  }, [validationErrors]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     console.log("Form submit triggered");
     console.log("Browser context:", navigator.userAgent);
     e.preventDefault();
@@ -152,12 +190,23 @@ export const useProfileData = () => {
       return;
     }
     
+    if (!user?.id) {
+      console.error("No user ID available for saving profile");
+      toast({
+        title: "Fejl ved opdatering",
+        description: "Bruger-ID mangler. Prøv at logge ind igen.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setIsLoading(true);
+    saveStartTime.current = performance.now();
 
     try {      
       // Log the complete request payload for debugging
       const profileData = {
-        id: user?.id,
+        id: user.id,
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
@@ -168,8 +217,8 @@ export const useProfileData = () => {
         updated_at: new Date().toISOString(),
       };
       
-      console.log("About to save profile data with payload:", profileData);
-      console.log("Current authenticated user:", user?.id);
+      console.log("About to save profile data");
+      console.log("Current authenticated user:", user.id);
       console.log("Database connection status check before saving...");
       
       // Verify database connection with a simple query
@@ -182,13 +231,13 @@ export const useProfileData = () => {
       }
       
       // Track network request timing for performance debugging
-      const startTime = performance.now();
+      console.log("Starting profile save operation");
       
-      const { error, data, status } = await supabase.from("profiles").upsert(profileData);
+      const { error, status } = await supabase.from("profiles").upsert(profileData);
       
-      const endTime = performance.now();
-      console.log(`Profile save completed in ${endTime - startTime}ms with status: ${status}`);
-      console.log("Supabase response data:", data);
+      // End performance measurement
+      const saveDuration = saveStartTime.current ? performance.now() - saveStartTime.current : null;
+      console.log(`Profile save completed in ${saveDuration?.toFixed(2)}ms with status: ${status}`);
 
       if (error) {
         console.error("Error updating profile:", error);
@@ -204,6 +253,10 @@ export const useProfileData = () => {
       }
 
       console.log("Profile updated successfully");
+      
+      // Update localStorage cache for persistence testing
+      localStorage.setItem('profileFormData', JSON.stringify(profileData));
+      
       toast({
         title: "Profil opdateret",
         description: "Dine profiloplysninger er blevet gemt.",
@@ -239,8 +292,9 @@ export const useProfileData = () => {
       });
     } finally {
       setIsLoading(false);
+      saveStartTime.current = null;
     }
-  };
+  }, [formData, user, toast, validateForm, validationErrors]);
 
   return {
     formData,
@@ -249,6 +303,7 @@ export const useProfileData = () => {
     isProfileLoading,
     handleChange,
     handleSubmit,
-    validationErrors
+    validationErrors,
+    refreshProfile: fetchProfile // Exported for end-to-end testing
   };
 };

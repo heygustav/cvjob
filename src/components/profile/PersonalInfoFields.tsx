@@ -11,26 +11,37 @@ interface PersonalInfoFieldsProps {
   validationErrors?: Record<string, string>;
 }
 
-const PersonalInfoFields: React.FC<PersonalInfoFieldsProps> = ({ 
+// Using memo to prevent unnecessary re-renders
+const PersonalInfoFields: React.FC<PersonalInfoFieldsProps> = React.memo(({ 
   formData, 
   handleChange, 
   validationErrors = {} 
 }) => {
+  // Performance monitoring 
+  const renderCount = React.useRef(0);
+  
+  React.useEffect(() => {
+    renderCount.current++;
+    console.log(`PersonalInfoFields rendered ${renderCount.current} time(s)`);
+    console.log("PersonalInfoFields rendered in browser:", navigator.userAgent);
+    console.log("Viewport size:", window.innerWidth, "x", window.innerHeight);
+    
+    // Mark component as ready for end-to-end testing
+    if (window.Cypress) {
+      // @ts-ignore - For Cypress testing
+      window.personalInfoFieldsReady = true;
+    }
+  });
+  
   // Simple form validation
-  const validateEmail = (email: string) => {
+  const validateEmail = React.useCallback((email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return email.trim() === "" || emailRegex.test(email);
-  };
+  }, []);
 
   const isEmailValid = validateEmail(formData.email);
   const hasNameError = !formData.name.trim() || !!validationErrors.name;
   const hasEmailError = !isEmailValid || !!validationErrors.email;
-
-  // For cross-browser testing
-  React.useEffect(() => {
-    console.log("PersonalInfoFields rendered in browser:", navigator.userAgent);
-    console.log("Viewport size:", window.innerWidth, "x", window.innerHeight);
-  }, []);
 
   return (
     <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
@@ -52,6 +63,7 @@ const PersonalInfoFields: React.FC<PersonalInfoFieldsProps> = ({
               aria-required="true"
               aria-invalid={hasNameError}
               aria-describedby={hasNameError ? "name-error" : undefined}
+              data-state={hasNameError ? "invalid" : "valid"}
             />
           </FormControl>
           {hasNameError && (
@@ -80,6 +92,7 @@ const PersonalInfoFields: React.FC<PersonalInfoFieldsProps> = ({
               aria-required="true"
               aria-invalid={hasEmailError}
               aria-describedby={hasEmailError ? "email-error" : undefined}
+              data-state={hasEmailError ? "invalid" : "valid"}
             />
           </FormControl>
           {hasEmailError && (
@@ -132,6 +145,8 @@ const PersonalInfoFields: React.FC<PersonalInfoFieldsProps> = ({
       </div>
     </div>
   );
-};
+});
+
+PersonalInfoFields.displayName = "PersonalInfoFields";
 
 export default PersonalInfoFields;
