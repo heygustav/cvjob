@@ -8,9 +8,14 @@ import { Input } from "@/components/ui/input";
 interface PersonalInfoFieldsProps {
   formData: PersonalInfoFormState;
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  validationErrors?: Record<string, string>;
 }
 
-const PersonalInfoFields: React.FC<PersonalInfoFieldsProps> = ({ formData, handleChange }) => {
+const PersonalInfoFields: React.FC<PersonalInfoFieldsProps> = ({ 
+  formData, 
+  handleChange, 
+  validationErrors = {} 
+}) => {
   // Simple form validation
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -18,6 +23,14 @@ const PersonalInfoFields: React.FC<PersonalInfoFieldsProps> = ({ formData, handl
   };
 
   const isEmailValid = validateEmail(formData.email);
+  const hasNameError = !formData.name.trim() || !!validationErrors.name;
+  const hasEmailError = !isEmailValid || !!validationErrors.email;
+
+  // For cross-browser testing
+  React.useEffect(() => {
+    console.log("PersonalInfoFields rendered in browser:", navigator.userAgent);
+    console.log("Viewport size:", window.innerWidth, "x", window.innerHeight);
+  }, []);
 
   return (
     <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
@@ -34,15 +47,16 @@ const PersonalInfoFields: React.FC<PersonalInfoFieldsProps> = ({ formData, handl
               value={formData.name}
               onChange={handleChange}
               required
-              className={`mt-1 block w-full ${!formData.name.trim() ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''}`}
+              className={`mt-1 block w-full ${hasNameError ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''}`}
               data-testid="profile-name-input"
               aria-required="true"
-              aria-invalid={!formData.name.trim()}
+              aria-invalid={hasNameError}
+              aria-describedby={hasNameError ? "name-error" : undefined}
             />
           </FormControl>
-          {!formData.name.trim() && (
+          {hasNameError && (
             <p className="mt-1 text-sm text-red-600" id="name-error">
-              Navn er påkrævet
+              {validationErrors.name || "Navn er påkrævet"}
             </p>
           )}
         </div>
@@ -61,15 +75,16 @@ const PersonalInfoFields: React.FC<PersonalInfoFieldsProps> = ({ formData, handl
               value={formData.email}
               onChange={handleChange}
               required
-              className={`mt-1 block w-full ${!isEmailValid ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''}`}
+              className={`mt-1 block w-full ${hasEmailError ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''}`}
               data-testid="profile-email-input"
               aria-required="true"
-              aria-invalid={!isEmailValid}
+              aria-invalid={hasEmailError}
+              aria-describedby={hasEmailError ? "email-error" : undefined}
             />
           </FormControl>
-          {!isEmailValid && (
+          {hasEmailError && (
             <p className="mt-1 text-sm text-red-600" id="email-error">
-              Indtast venligst en gyldig email adresse
+              {validationErrors.email || "Indtast venligst en gyldig email adresse"}
             </p>
           )}
         </div>
@@ -90,6 +105,7 @@ const PersonalInfoFields: React.FC<PersonalInfoFieldsProps> = ({ formData, handl
               className="mt-1 block w-full"
               data-testid="profile-phone-input"
               placeholder="f.eks. 12345678"
+              inputMode="tel"
             />
           </FormControl>
         </div>

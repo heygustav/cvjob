@@ -23,6 +23,7 @@ const Profile: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [authStatus, setAuthStatus] = useState<string>("checking");
   const [dbStatus, setDbStatus] = useState<string>("checking");
+  const [browserInfo, setBrowserInfo] = useState<string>("");
   
   const {
     formData,
@@ -31,7 +32,30 @@ const Profile: React.FC = () => {
     isProfileLoading,
     handleChange,
     handleSubmit,
+    validationErrors
   } = useProfileData();
+
+  // Store browser information for debugging
+  useEffect(() => {
+    const info = {
+      userAgent: navigator.userAgent,
+      platform: navigator.platform,
+      viewport: `${window.innerWidth}x${window.innerHeight}`,
+      cookiesEnabled: navigator.cookieEnabled,
+      language: navigator.language
+    };
+    
+    setBrowserInfo(JSON.stringify(info, null, 2));
+    console.log("Browser environment:", info);
+    
+    // Listen for window resize events for responsiveness testing
+    const handleResize = () => {
+      console.log("Window resized:", window.innerWidth, "x", window.innerHeight);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Verify authentication and database connection on mount
   useEffect(() => {
@@ -39,10 +63,12 @@ const Profile: React.FC = () => {
     const checkAuth = async () => {
       try {
         console.log("Checking authentication status...");
+        console.log("Browser: ", navigator.userAgent);
         const { data, error } = await supabase.auth.getSession();
         
         if (error) {
           console.error("Auth check error:", error);
+          console.error("Browser context:", navigator.userAgent);
           setAuthStatus("error");
           setError(`Autentificeringsfejl: ${error.message}`);
           return;
@@ -52,6 +78,7 @@ const Profile: React.FC = () => {
         console.log("Authentication status:", data.session ? "authenticated" : "unauthenticated");
       } catch (err) {
         console.error("Auth check exception:", err);
+        console.error("Browser info:", navigator.userAgent);
         setAuthStatus("error");
       }
     };
@@ -69,6 +96,7 @@ const Profile: React.FC = () => {
         
         if (error) {
           console.error("Database connection error:", error);
+          console.error("Browser context:", navigator.userAgent);
           setDbStatus("error");
           setError(`Databasefejl: ${error.message}`);
           return;
@@ -78,6 +106,7 @@ const Profile: React.FC = () => {
         console.log("Database connection status: connected");
       } catch (err) {
         console.error("Database check exception:", err);
+        console.error("Browser info:", navigator.userAgent);
         setDbStatus("error");
       }
     };
@@ -122,6 +151,14 @@ const Profile: React.FC = () => {
                 <dt className="text-sm font-medium text-gray-500">Databasestatus</dt>
                 <dd className="mt-1 text-sm text-gray-900">{dbStatus}</dd>
               </div>
+              <div className="sm:col-span-2">
+                <dt className="text-sm font-medium text-gray-500">Browser information</dt>
+                <dd className="mt-1 text-sm text-gray-900 break-words">
+                  <pre className="text-xs bg-gray-100 p-2 rounded overflow-auto max-h-32">
+                    {browserInfo}
+                  </pre>
+                </dd>
+              </div>
             </dl>
           </div>
         </div>
@@ -152,6 +189,7 @@ const Profile: React.FC = () => {
         handleSubmit={handleSubmit}
         setFormData={setFormData}
         isLoading={isLoading}
+        validationErrors={validationErrors}
       />
     </div>
   );

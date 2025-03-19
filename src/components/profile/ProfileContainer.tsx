@@ -18,6 +18,7 @@ interface ProfileContainerProps {
   handleSubmit: (e: React.FormEvent<HTMLFormElement>) => Promise<void>;
   setFormData: React.Dispatch<React.SetStateAction<PersonalInfoFormState>>;
   isLoading: boolean;
+  validationErrors?: Record<string, string>;
 }
 
 const ProfileContainer: React.FC<ProfileContainerProps> = ({
@@ -25,12 +26,19 @@ const ProfileContainer: React.FC<ProfileContainerProps> = ({
   handleChange,
   handleSubmit,
   setFormData,
-  isLoading
+  isLoading,
+  validationErrors = {}
 }) => {
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("personal-info");
+  
+  // For cross-browser testing
+  useEffect(() => {
+    console.log("ProfileContainer rendered in browser:", navigator.userAgent);
+    console.log("Viewport dimensions:", window.innerWidth, "x", window.innerHeight);
+  }, []);
   
   // Check for subscription success in URL
   useEffect(() => {
@@ -84,6 +92,7 @@ const ProfileContainer: React.FC<ProfileContainerProps> = ({
                 handleSubmit={handleSubmit}
                 setFormData={setFormData}
                 isLoading={isLoading}
+                validationErrors={validationErrors}
               />
             </TabsContent>
             

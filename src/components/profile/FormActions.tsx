@@ -6,9 +6,15 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 interface FormActionsProps {
   isLoading: boolean;
+  isFormValid?: boolean;
 }
 
-const FormActions: React.FC<FormActionsProps> = ({ isLoading }) => {
+const FormActions: React.FC<FormActionsProps> = ({ isLoading, isFormValid = true }) => {
+  // For cross-browser testing
+  React.useEffect(() => {
+    console.log("FormActions rendered in browser:", navigator.userAgent);
+  }, []);
+
   return (
     <div className="pt-5">
       <div className="flex justify-end">
@@ -28,6 +34,7 @@ const FormActions: React.FC<FormActionsProps> = ({ isLoading }) => {
                 fill="none"
                 viewBox="0 0 24 24"
                 aria-hidden="true"
+                role="status"
               >
                 <circle
                   className="opacity-25"
@@ -43,7 +50,7 @@ const FormActions: React.FC<FormActionsProps> = ({ isLoading }) => {
                   d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                 ></path>
               </svg>
-              Gemmer...
+              <span className="text-white">Gemmer...</span>
             </Button>
             <span className="sr-only">Gemmer dine profiloplysninger</span>
           </div>
@@ -54,9 +61,11 @@ const FormActions: React.FC<FormActionsProps> = ({ isLoading }) => {
             aria-busy={isLoading}
             aria-label="Gem profil"
             data-testid="save-profile-button"
+            disabled={!isFormValid}
+            title={!isFormValid ? "Udfyld venligst alle påkrævede felter korrekt" : "Gem dine profiloplysninger"}
           >
             <Save className="h-4 w-4 mr-2" aria-hidden="true" />
-            Gem profil
+            <span>Gem profil</span>
           </Button>
         )}
       </div>

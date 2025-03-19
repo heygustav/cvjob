@@ -18,6 +18,7 @@ export const useProfileData = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [isProfileLoading, setIsProfileLoading] = useState(true);
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const { toast } = useToast();
 
   useEffect(() => {
@@ -33,6 +34,7 @@ export const useProfileData = () => {
   const fetchProfile = async () => {
     try {
       console.log("Fetching profile data for user:", user?.id);
+      console.log("Browser info:", navigator.userAgent);
       setIsProfileLoading(true);
       
       console.log("Database connection test - starting query");
@@ -53,7 +55,8 @@ export const useProfileData = () => {
           message: error.message,
           code: error.code,
           details: error.details,
-          hint: error.hint
+          hint: error.hint,
+          browser: navigator.userAgent
         });
         throw error;
       }
@@ -74,6 +77,11 @@ export const useProfileData = () => {
       }
     } catch (error) {
       console.error("Error fetching profile:", error);
+      console.error("Browser environment:", {
+        userAgent: navigator.userAgent,
+        viewport: `${window.innerWidth}x${window.innerHeight}`,
+        platform: navigator.platform
+      });
       toast({
         title: "Fejl ved indlæsning af profil",
         description: "Der opstod en fejl under indlæsning af din profil. Prøv venligst igen.",
@@ -84,11 +92,44 @@ export const useProfileData = () => {
     }
   };
 
+  const validateForm = () => {
+    const errors: Record<string, string> = {};
+    
+    // Validate required fields
+    if (!formData.name.trim()) {
+      errors.name = "Navn er påkrævet";
+    }
+    
+    if (!formData.email.trim()) {
+      errors.email = "Email er påkrævet";
+    } else {
+      // Email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.email)) {
+        errors.email = "Ugyldig email adresse";
+      }
+    }
+    
+    // Set validation errors and return whether the form is valid
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
     console.log(`Field "${name}" changed to: ${value.substring(0, 20)}${value.length > 20 ? '...' : ''}`);
+    
+    // Clear validation error for this field when user makes changes
+    if (validationErrors[name]) {
+      setValidationErrors(prev => {
+        const updated = { ...prev };
+        delete updated[name];
+        return updated;
+      });
+    }
+    
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -97,25 +138,23 @@ export const useProfileData = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     console.log("Form submit triggered");
+    console.log("Browser context:", navigator.userAgent);
     e.preventDefault();
+    
+    // Validate form before submission
+    if (!validateForm()) {
+      console.log("Form validation failed:", validationErrors);
+      toast({
+        title: "Validation fejl",
+        description: "Udfyld venligst alle påkrævede felter korrekt.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setIsLoading(true);
 
-    try {
-      // Validate required fields
-      if (!formData.name.trim()) {
-        throw new Error("Navn er påkrævet");
-      }
-      
-      if (!formData.email.trim()) {
-        throw new Error("Email er påkrævet");
-      }
-      
-      // Email validation
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(formData.email)) {
-        throw new Error("Ugyldig email adresse");
-      }
-      
+    try {      
       // Log the complete request payload for debugging
       const profileData = {
         id: user?.id,
@@ -157,7 +196,9 @@ export const useProfileData = () => {
           message: error.message,
           code: error.code,
           details: error.details,
-          hint: error.hint
+          hint: error.hint,
+          browser: navigator.userAgent,
+          viewport: `${window.innerWidth}x${window.innerHeight}`
         });
         throw error;
       }
@@ -169,9 +210,31 @@ export const useProfileData = () => {
       });
     } catch (error) {
       console.error("Error updating profile:", error);
+      console.error("Browser environment on error:", {
+        userAgent: navigator.userAgent,
+        viewport: `${window.innerWidth}x${window.innerHeight}`,
+        platform: navigator.platform,
+        cookiesEnabled: navigator.cookieEnabled
+      });
+      
+      // Show more specific error messages based on error types
+      let errorMessage = "Der opstod en fejl under opdatering af din profil. Prøv venligst igen.";
+      
+      if (error instanceof Error) {
+        if (error.message.includes("network")) {
+          errorMessage = "Netværksfejl. Kontroller din internetforbindelse og prøv igen.";
+        } else if (error.message.includes("timeout")) {
+          errorMessage = "Serveren svarer ikke. Prøv igen senere.";
+        } else if (error.message.includes("duplicate")) {
+          errorMessage = "Denne email er allerede i brug.";
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
       toast({
         title: "Fejl ved opdatering",
-        description: error instanceof Error ? error.message : "Der opstod en fejl under opdatering af din profil. Prøv venligst igen.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -186,5 +249,6 @@ export const useProfileData = () => {
     isProfileLoading,
     handleChange,
     handleSubmit,
+    validationErrors
   };
 };

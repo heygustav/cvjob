@@ -13,6 +13,7 @@ export interface ProfilePersonalInfoProps {
   handleSubmit: (e: FormEvent<HTMLFormElement>) => Promise<void>;
   setFormData: Dispatch<SetStateAction<PersonalInfoFormState>>;
   isLoading: boolean;
+  validationErrors?: Record<string, string>;
 }
 
 const ProfilePersonalInfo: React.FC<ProfilePersonalInfoProps> = ({ 
@@ -20,10 +21,20 @@ const ProfilePersonalInfo: React.FC<ProfilePersonalInfoProps> = ({
   handleChange, 
   handleSubmit, 
   setFormData, 
-  isLoading 
+  isLoading,
+  validationErrors = {}
 }) => {
   console.log("ProfilePersonalInfo rendering with formData:", formData);
   console.log("isLoading state:", isLoading);
+  console.log("Browser info:", navigator.userAgent);
+
+  // Validate if form is ready to submit
+  const isFormValid = React.useMemo(() => {
+    return formData.name.trim() !== "" && 
+      formData.email.trim() !== "" && 
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) &&
+      Object.keys(validationErrors).length === 0;
+  }, [formData.name, formData.email, validationErrors]);
 
   const handleSave = async (e: FormEvent<HTMLFormElement>) => {
     console.log("Form submission handler triggered in ProfilePersonalInfo");
@@ -31,16 +42,65 @@ const ProfilePersonalInfo: React.FC<ProfilePersonalInfoProps> = ({
     console.log("Form method:", (e.currentTarget as HTMLFormElement).method);
     e.preventDefault(); // Prevent default form submission behavior
     
+    // Additional validation before submission
+    if (!isFormValid) {
+      console.log("Form validation prevented submission");
+      return;
+    }
+    
     console.log("About to call handleSubmit with form data:", formData);
     try {
       // Monitor network activity
       console.log("Network monitoring: Starting form submission");
+      console.log("Browser:", navigator.userAgent);
+      console.log("Network info:", navigator.connection ? 
+        JSON.stringify(navigator.connection) : "Connection info not available");
+      
       await handleSubmit(e);
       console.log("Network monitoring: Form submission completed successfully");
     } catch (error) {
       console.error("Network monitoring: Form submission failed with error:", error);
+      console.error("Browser context on error:", navigator.userAgent);
     }
   };
+
+  // For cross-browser testing
+  React.useEffect(() => {
+    console.log("ProfilePersonalInfo rendered in browser:", navigator.userAgent);
+    console.log("Viewport dimensions:", window.innerWidth, "x", window.innerHeight);
+    
+    // Listen for media query changes for responsive testing
+    const mediaQueryList = window.matchMedia("(max-width: 640px)");
+    const handleMediaQueryChange = (e: MediaQueryListEvent) => {
+      console.log("Media query changed, is mobile:", e.matches);
+    };
+    
+    try {
+      // Modern browsers
+      mediaQueryList.addEventListener("change", handleMediaQueryChange);
+    } catch (e) {
+      // Older browsers
+      try {
+        // @ts-ignore - For older browsers
+        mediaQueryList.addListener(handleMediaQueryChange);
+      } catch (e2) {
+        console.error("Browser does not support media query listeners");
+      }
+    }
+    
+    return () => {
+      try {
+        mediaQueryList.removeEventListener("change", handleMediaQueryChange);
+      } catch (e) {
+        try {
+          // @ts-ignore - For older browsers
+          mediaQueryList.removeListener(handleMediaQueryChange);
+        } catch (e2) {
+          // Silent fail
+        }
+      }
+    };
+  }, []);
 
   return (
     <div className="space-y-6 p-8 text-left">
@@ -52,7 +112,11 @@ const ProfilePersonalInfo: React.FC<ProfilePersonalInfoProps> = ({
       </div>
       
       <form onSubmit={handleSave} className="space-y-6 text-left">
-        <PersonalInfoFields formData={formData} handleChange={handleChange} />
+        <PersonalInfoFields 
+          formData={formData} 
+          handleChange={handleChange} 
+          validationErrors={validationErrors} 
+        />
         
         <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
           <ExperienceField 
@@ -71,7 +135,7 @@ const ProfilePersonalInfo: React.FC<ProfilePersonalInfoProps> = ({
           />
         </div>
 
-        <FormActions isLoading={isLoading} />
+        <FormActions isLoading={isLoading} isFormValid={isFormValid} />
       </form>
     </div>
   );
