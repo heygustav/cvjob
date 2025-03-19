@@ -14,7 +14,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ session }) => {
     >
       {/* Background image - using a cover letter related image from Unsplash */}
       <img
-        src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=1920&q=80"
+        src="https://images.unsplash.com/photo-1517842645767-c639042777db?auto=format&fit=crop&w=1920&q=80"
         alt="Person writing a cover letter"
         className="absolute inset-0 w-full h-full object-cover z-0"
       />

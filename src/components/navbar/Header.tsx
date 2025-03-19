@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../AuthProvider';
 import Icon from "../ui/icon";
 import { Button } from '../ui/button';
+import { UserCircle } from 'lucide-react';
 
 const Header: React.FC = () => {
   const { session } = useAuth();
@@ -40,7 +41,8 @@ const Header: React.FC = () => {
             </>
           ) : (
             <>
-              <Link to="/login" className="text-sm text-foreground hover:text-primary transition-colors">
+              <Link to="/login" className="text-sm text-foreground hover:text-primary transition-colors flex items-center gap-2">
+                <UserCircle className="h-4 w-4" />
                 Log ind / Opret en konto
               </Link>
               <Button variant="default" className="bg-green-600 hover:bg-green-700" asChild>
