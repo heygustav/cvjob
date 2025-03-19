@@ -9,10 +9,18 @@ interface HeroSectionProps {
 
 const HeroSection: React.FC<HeroSectionProps> = ({ session }) => {
   return (
-    <div className="relative isolate pt-6 bg-background">
+    <div 
+      className="relative isolate pt-6"
+      style={{
+        backgroundImage: "url('/lovable-uploads/3a022144-2582-4249-8b4f-cb51ce6c7533.png')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat"
+      }}
+    >
       <div className="py-12 sm:py-20">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="mx-auto max-w-2xl text-center">
+          <div className="mx-auto max-w-2xl text-center bg-white/80 backdrop-blur-sm p-8 rounded-lg shadow-sm">
             <div className="flex justify-center items-center mb-6">
               <FileText className="w-20 h-20 text-primary-700" />
             </div>
