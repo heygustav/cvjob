@@ -13,7 +13,7 @@ const PersonalInfoSummary: React.FC<PersonalInfoSummaryProps> = ({ value, onChan
         htmlFor="summary"
         className="block text-sm font-medium text-gray-700"
       >
-        Short Resume/Summary
+        Kort beskrivelse
       </label>
       <div className="mt-1">
         <textarea
@@ -23,11 +23,11 @@ const PersonalInfoSummary: React.FC<PersonalInfoSummaryProps> = ({ value, onChan
           value={value}
           onChange={onChange}
           className="block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
-          placeholder="A brief summary about yourself..."
+          placeholder="En kort beskrivelse om dig selv..."
         />
       </div>
       <p className="mt-2 text-sm text-gray-500">
-        A short description that will appear under your name in the CV.
+        En kort beskrivelse der vil vises under dit navn i dit CV.
       </p>
     </div>
   );
