@@ -41,7 +41,7 @@ const Header: React.FC = () => {
           ) : (
             <>
               <Link to="/login" className="text-sm text-foreground hover:text-primary transition-colors">
-                Log ind / Opret ansøgning
+                Log ind / Opret en konto
               </Link>
               <Button variant="default" className="bg-green-600 hover:bg-green-700" asChild>
                 <Link to="/signup">Opret konto</Link>

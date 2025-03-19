@@ -77,7 +77,7 @@ const NavLinks: React.FC<NavLinksProps> = ({
         </>
       ) : (
         <Link to="/auth" className={linkClass}>
-          Log ind
+          Log ind / Opret en konto
         </Link>
       )}
     </>
