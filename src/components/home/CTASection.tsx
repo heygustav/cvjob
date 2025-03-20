@@ -40,8 +40,8 @@ const CTASection: React.FC<CTASectionProps> = ({ session }) => {
           <div className="flex items-center justify-center bg-gradient-to-br from-primary-600 to-primary-800 p-6 lg:p-8">
             <img
               className="rounded-lg shadow-xl object-cover h-full w-full max-h-80"
-              src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1280&q=80"
-              alt="Personer der samarbejder om en jobansøgning"
+              src="https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=1280&q=80"
+              alt="Person der arbejder professionelt ved en laptop"
             />
           </div>
         </div>
