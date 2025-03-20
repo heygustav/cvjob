@@ -2,9 +2,11 @@
 // Export client-side CV parser
 export * from './resume/clientParser';
 
-// Export types and utilities
+// Export types with correct syntax for isolatedModules
 export type { ProcessResult, ParsedResumeData, RawResumeData } from './resume/types';
+
+// Export utilities
 export { exportResume, ResumeFormat } from './resume/pdfExporter';
 
-// Add the processPdfFile export that's being imported elsewhere
+// Export the processPdfFile function
 export { processPdfFile } from './resume/resumeService';
