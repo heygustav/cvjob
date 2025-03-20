@@ -40,14 +40,14 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({ data }) => (
       <div className="md:w-2/3">
         {data.experience && (
           <div className="mb-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-2 border-b border-gray-900 pb-1">Experience</h2>
+            <h2 className="text-lg font-medium text-gray-900 mb-2 border-b border-gray-900 pb-1">Erhvervserfaring</h2>
             <div className="whitespace-pre-line text-gray-700">{data.experience}</div>
           </div>
         )}
         
         {data.education && (
           <div>
-            <h2 className="text-lg font-medium text-gray-900 mb-2 border-b border-gray-900 pb-1">Education</h2>
+            <h2 className="text-lg font-medium text-gray-900 mb-2 border-b border-gray-900 pb-1">Uddannelse</h2>
             <div className="whitespace-pre-line text-gray-700">{data.education}</div>
           </div>
         )}
