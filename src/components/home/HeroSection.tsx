@@ -12,29 +12,29 @@ const HeroSection: React.FC<HeroSectionProps> = ({ session }) => {
     <div 
       className="relative w-full h-[600px] overflow-hidden" 
     >
-      {/* Background image - using a cover letter related image from Unsplash */}
+      {/* Background image - using a more professional office/workplace image from Unsplash */}
       <img
-        src="https://images.unsplash.com/photo-1517842645767-c639042777db?auto=format&fit=crop&w=1920&q=80"
-        alt="Person writing a cover letter"
+        src="https://images.unsplash.com/photo-1472396961693-142e6e269027?auto=format&fit=crop&w=1920&q=80"
+        alt="Professionelt kontormiljø"
         className="absolute inset-0 w-full h-full object-cover z-0"
       />
       
-      {/* Dark overlay - lighter opacity */}
-      <div className="absolute inset-0 bg-black/20 z-10" />
+      {/* Dark overlay - lighter opacity for clarity */}
+      <div className="absolute inset-0 bg-black/40 z-10" />
       
       {/* Content */}
       <div className="relative z-20 h-full flex items-center justify-center">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-2xl text-center bg-white/80 backdrop-blur-sm p-8 rounded-lg shadow-sm">
+          <div className="mx-auto max-w-2xl text-center bg-white/90 backdrop-blur-sm p-8 rounded-lg shadow-md">
             <div className="flex justify-center items-center mb-6">
-              <FileText className="w-20 h-20 text-primary-700" />
+              <FileText className="w-16 h-16 text-primary-700" />
             </div>
-            <h1 className="text-4xl font-bold tracking-tight text-primary-800 sm:text-6xl">
-              Ansøgninger skrevet med kunstig intelligens
+            <h1 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-5xl">
+              Professionelle ansøgninger skrevet med AI
             </h1>
-            <p className="mt-6 text-lg leading-8 text-muted-foreground">
-              CVJob hjælper dig med at generere personlige og overbevisende ansøgninger
-              til job, du er interesseret i. Kom i gang på få minutter.
+            <p className="mt-6 text-lg leading-8 text-gray-600">
+              CVJob hjælper dig med at skabe målrettede og overbevisende ansøgninger
+              til de stillinger, du søger. Kom godt i gang med jobsøgningen.
             </p>
             <div className="mt-10 flex items-center justify-center gap-x-6">
               {session ? (
@@ -56,7 +56,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ session }) => {
                 to={session ? "/dashboard" : "#how-it-works"}
                 className="text-sm font-semibold leading-6 text-primary hover:text-primary-700 transition-colors"
               >
-                {session ? "Gemte ansøgninger" : "Se hvordan det virker"} <span aria-hidden="true">→</span>
+                {session ? "Se dine ansøgninger" : "Sådan fungerer det"} <span aria-hidden="true">→</span>
               </Link>
             </div>
           </div>
