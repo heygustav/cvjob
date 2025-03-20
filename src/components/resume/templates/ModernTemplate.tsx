@@ -14,7 +14,7 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({ data }) => (
           <img 
             src={data.photo} 
             alt="Profilbillede" 
-            className="w-24 h-24 object-cover rounded-md"
+            className="w-20 h-20 object-cover rounded-md mt-1"
           />
         )}
         <div>
@@ -33,21 +33,24 @@ const ModernTemplate: React.FC<ModernTemplateProps> = ({ data }) => (
     
     {data.experience && (
       <div className="mb-6">
-        <h2 className="text-lg font-medium text-gray-900 mb-2 border-b border-gray-900 pb-1">Erhvervserfaring</h2>
+        <h2 className="text-lg font-medium text-gray-900 mb-2 pb-1">Erhvervserfaring</h2>
+        <div className="border-t border-black pt-2 mt-1 mb-3"></div>
         <div className="whitespace-pre-line text-gray-700">{data.experience}</div>
       </div>
     )}
     
     {data.education && (
       <div className="mb-6">
-        <h2 className="text-lg font-medium text-gray-900 mb-2 border-b border-gray-900 pb-1">Uddannelse</h2>
+        <h2 className="text-lg font-medium text-gray-900 mb-2 pb-1">Uddannelse</h2>
+        <div className="border-t border-black pt-2 mt-1 mb-3"></div>
         <div className="whitespace-pre-line text-gray-700">{data.education}</div>
       </div>
     )}
     
     {data.skills && (
       <div>
-        <h2 className="text-lg font-medium text-gray-900 mb-2 border-b border-gray-900 pb-1">Kompetencer</h2>
+        <h2 className="text-lg font-medium text-gray-900 mb-2 pb-1">Kompetencer</h2>
+        <div className="border-t border-black pt-2 mt-1 mb-3"></div>
         <div className="whitespace-pre-line text-gray-700">{data.skills}</div>
       </div>
     )}
