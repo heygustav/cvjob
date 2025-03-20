@@ -14,6 +14,7 @@ export interface RawResumeData {
   skills?: ParsedSection[] | string;
   education?: ParsedSection[] | string;
   experience?: ParsedSection[] | string;
+  summary?: string; // Add the missing summary field
   languages?: string[];
   photo?: string;
   confidence?: {
