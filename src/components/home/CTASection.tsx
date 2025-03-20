@@ -39,7 +39,7 @@ const CTASection: React.FC<CTASectionProps> = ({ session }) => {
           </div>
           <div className="aspect-w-5 aspect-h-3 -mt-6 md:aspect-w-2 md:aspect-h-1">
             <img
-              className="translate-x-0 translate-y-6 transform rounded-md object-cover object-center mx-4 my-4 lg:mx-8 lg:my-8"
+              className="translate-x-0 translate-y-6 transform rounded-md object-cover object-center mx-6 my-6 lg:mx-10 lg:my-10"
               src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1920&q=80"
               alt="Jobansøgning app screenshot"
             />

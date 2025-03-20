@@ -12,10 +12,10 @@ const HeroSection: React.FC<HeroSectionProps> = ({ session }) => {
     <div 
       className="relative w-full h-[600px] overflow-hidden" 
     >
-      {/* Background image - using a more relevant cover letter/writing image from Unsplash */}
+      {/* Background image - using a different relevant cover letter/writing image from Unsplash */}
       <img
-        src="https://images.unsplash.com/photo-1512486130939-2c4f79935e4f?auto=format&fit=crop&w=1920&q=80"
-        alt="Skrivebord med papirer og computer"
+        src="https://images.unsplash.com/photo-1501504905252-473c47e087f8?auto=format&fit=crop&w=1920&q=80"
+        alt="Person skriver på computer ved et skrivebord"
         className="absolute inset-0 w-full h-full object-cover z-0"
       />
       
