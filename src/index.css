@@ -266,3 +266,18 @@
   white-space: nowrap;
   border-width: 0;
 }
+
+/* Celebration emoji pattern */
+.celebration-emoji-pattern {
+  background-repeat: repeat;
+  animation: subtle-float 20s ease-in-out infinite;
+}
+
+@keyframes subtle-float {
+  0%, 100% {
+    background-position: 0 0;
+  }
+  50% {
+    background-position: 20px 20px;
+  }
+}

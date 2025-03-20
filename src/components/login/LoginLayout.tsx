@@ -10,8 +10,16 @@ interface LoginLayoutProps {
 
 const LoginLayout: React.FC<LoginLayoutProps> = ({ children, redirectUrl }) => {
   return (
-    <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-gray-50">
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+    <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-gray-50 relative overflow-hidden">
+      {/* Celebration emoji background pattern */}
+      <div className="absolute inset-0 z-0 opacity-10 pointer-events-none celebration-emoji-pattern" 
+           style={{
+             backgroundImage: `url("data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='50%25' y='50%25' font-size='60' text-anchor='middle' dominant-baseline='middle' transform='rotate(15 60 60)'%3E🎉%3C/text%3E%3C/svg%3E")`,
+             backgroundSize: '120px 120px'
+           }}>
+      </div>
+      
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md relative z-10">
         <Card className="shadow-lg border border-gray-100 overflow-hidden">
           <div className="bg-gradient-to-r from-primary-600 via-primary-700 to-primary-800 p-6 sm:p-8">
             <h2 className="text-center text-3xl font-bold tracking-tight text-white">
