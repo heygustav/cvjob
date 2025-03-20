@@ -1,54 +1,165 @@
 
-import { PersonalInfoFormState } from '@/pages/Profile';
-import { ProcessResult } from './types';
-import { parseResumeText } from './textParser';
-import { calculateConfidence } from './confidenceCalculator';
-import { extractTextFromFile } from './extractors/fileFormatHandler';
+import { Resume } from '@/types/resume';
+import { ProcessResult, ParsedResumeData, RawResumeData } from './types';
+import DOMPurify from 'dompurify';
 
 /**
- * Process a resume file on the client side
- * @param file The file to process (PDF or DOCX)
- * @returns A ProcessResult with the extracted data or error information
+ * Client-side parsing and processing of resume data
+ * Follows ATS-friendly formatting guidelines
  */
-export const processPdfFile = async (file: File): Promise<ProcessResult> => {
+export const processResumeData = (data: RawResumeData): ProcessResult => {
   try {
-    let extractedText: string;
+    // Extract validated data
+    const extractedFields: string[] = [];
+    const validatedData: Partial<Resume> = {};
+    const confidence: Record<string, number> = {};
     
-    try {
-      extractedText = await extractTextFromFile(file);
-      console.log("Extracted text from file:", extractedText.substring(0, 200) + "...");
-    } catch (error) {
-      console.error("Error processing file:", error);
-      return {
-        success: false,
-        error: error.message || 'Kunne ikke læse filen. Kontrollér filen eller udfyld oplysningerne manuelt.'
-      };
+    // Process essential fields with proper sanitization
+    if (data.name) {
+      validatedData.name = DOMPurify.sanitize(data.name);
+      extractedFields.push('name');
+      confidence['name'] = 1.0;
     }
     
-    // Parse the extracted text to get structured data
-    const extractedData = parseResumeText(extractedText);
-    
-    if (Object.keys(extractedData).length === 0) {
-      return {
-        success: false,
-        error: 'Kunne ikke finde relevante oplysninger i dokumentet. Venligst udfyld oplysningerne manuelt.'
-      };
+    if (data.email) {
+      validatedData.email = DOMPurify.sanitize(data.email);
+      extractedFields.push('email');
+      confidence['email'] = 1.0;
     }
     
-    // Return the extracted data
+    if (data.phone) {
+      validatedData.phone = DOMPurify.sanitize(data.phone);
+      extractedFields.push('phone');
+      confidence['phone'] = 0.95;
+    }
+    
+    if (data.address) {
+      validatedData.address = DOMPurify.sanitize(data.address);
+      extractedFields.push('address');
+      confidence['address'] = 0.90;
+    }
+    
+    // Process sections in ATS-friendly format (simple text without complex formatting)
+    if (data.skills) {
+      // Convert array of sections to formatted text
+      if (Array.isArray(data.skills)) {
+        validatedData.skills = formatSectionContent(data.skills);
+        confidence['skills'] = calculateSectionConfidence(data.skills);
+      } else {
+        validatedData.skills = DOMPurify.sanitize(data.skills);
+        confidence['skills'] = 0.85;
+      }
+      extractedFields.push('skills');
+    }
+    
+    if (data.education) {
+      if (Array.isArray(data.education)) {
+        validatedData.education = formatSectionContent(data.education);
+        confidence['education'] = calculateSectionConfidence(data.education);
+      } else {
+        validatedData.education = DOMPurify.sanitize(data.education);
+        confidence['education'] = 0.85;
+      }
+      extractedFields.push('education');
+    }
+    
+    if (data.experience) {
+      if (Array.isArray(data.experience)) {
+        validatedData.experience = formatSectionContent(data.experience);
+        confidence['experience'] = calculateSectionConfidence(data.experience);
+      } else {
+        validatedData.experience = DOMPurify.sanitize(data.experience);
+        confidence['experience'] = 0.85;
+      }
+      extractedFields.push('experience');
+    }
+    
+    // Process summary for professional resume section
+    if (data.summary) {
+      validatedData.summary = DOMPurify.sanitize(data.summary);
+      extractedFields.push('summary');
+      confidence['summary'] = 0.85;
+    }
+    
+    // Process photo if available
+    if (data.photo) {
+      validatedData.photo = data.photo;
+      extractedFields.push('photo');
+    }
+    
+    // Process languages in ATS-friendly format
+    if (data.languages && Array.isArray(data.languages)) {
+      validatedData.languages = data.languages;
+      extractedFields.push('languages');
+      confidence['languages'] = 0.85;
+    }
+    
     return {
       success: true,
       data: {
-        validatedData: extractedData,
-        extractedFields: Object.keys(extractedData),
-        confidence: calculateConfidence(extractedData, extractedText)
+        validatedData,
+        extractedFields,
+        confidence
       }
     };
-  } catch (error: any) {
-    console.error('Error processing resume:', error);
+  } catch (error) {
+    console.error('Error processing resume data:', error);
     return {
       success: false,
-      error: error.message || 'Der opstod en fejl under behandling af filen'
+      error: 'Kunne ikke behandle CV-data. Prøv igen eller kontakt support.'
     };
   }
+};
+
+/**
+ * Format section content according to ATS guidelines
+ * - Use simple bullet points
+ * - Maintain consistent line spacing
+ * - Focus on content readability
+ */
+const formatSectionContent = (sections: { text: string; confidence: number }[]): string => {
+  return sections
+    .map(section => {
+      // Sanitize and clean up the text
+      const sanitizedText = DOMPurify.sanitize(section.text);
+      
+      // Format as bullet points if not already formatted
+      if (!sanitizedText.trim().startsWith('-') && !sanitizedText.trim().startsWith('•')) {
+        return `- ${sanitizedText}`;
+      }
+      
+      return sanitizedText;
+    })
+    .join('\n\n');
+};
+
+/**
+ * Calculate average confidence for a section
+ */
+const calculateSectionConfidence = (sections: { text: string; confidence: number }[]): number => {
+  if (!sections.length) return 0;
+  
+  const total = sections.reduce((sum, section) => sum + section.confidence, 0);
+  return total / sections.length;
+};
+
+/**
+ * Convert summary sections to a concise professional summary
+ * - Limit to 3-4 sentences
+ * - Focus on key skills and experience
+ */
+export const formatProfessionalSummary = (summary: string): string => {
+  if (!summary) return '';
+  
+  // Sanitize input
+  const sanitizedSummary = DOMPurify.sanitize(summary);
+  
+  // Split into sentences
+  const sentences = sanitizedSummary.split(/[.!?]+/).filter(s => s.trim().length > 0);
+  
+  // Limit to 3-4 sentences
+  const limitedSentences = sentences.slice(0, 4);
+  
+  // Join back with proper punctuation
+  return limitedSentences.map(s => `${s.trim()}.`).join(' ');
 };

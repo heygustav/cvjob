@@ -2,7 +2,7 @@
 import { jsPDF } from "jspdf";
 import { getTextContent } from '@/utils/download/contentExtractor';
 import { Resume } from '@/types/resume';
-import { Document, Packer, Paragraph, TextRun, HeadingLevel, BorderStyle } from "docx";
+import { Document, Packer, Paragraph, TextRun, HeadingLevel, BorderStyle, AlignmentType, LevelFormat, convertInchesToTwip } from "docx";
 
 export type ResumeFormat = "pdf" | "docx";
 
@@ -30,152 +30,160 @@ export const exportResume = (
 
 const exportResumeToPdf = (resumeData: Resume): void => {
   try {
-    // Create a PDF document with jsPDF
-    const doc = new jsPDF();
+    // Create a PDF document with jsPDF - A4 format
+    const doc = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4"
+    });
     
-    // Set font to Times New Roman
-    doc.setFont("times", "normal");
+    // Default formatting settings
+    // Set font to Arial (ATS-friendly)
+    doc.setFont("helvetica", "normal");
     
-    // Add title
-    doc.setFontSize(20);
-    doc.text("Curriculum Vitae", 105, 15, { align: "center" });
-    
-    let yPosition = 30;
+    // Set margins - 2cm (20mm) margins on all sides
     const margin = 20;
-    const textWidth = 170;
+    const pageWidth = 210; // A4 width in mm
+    const textWidth = pageWidth - (margin * 2);
     
-    // Add photo if available
-    if (resumeData.photo) {
-      try {
-        doc.addImage(resumeData.photo, 'JPEG', margin, yPosition, 30, 30);
-        
-        // Personal info next to photo
-        doc.setFontSize(16);
-        doc.text("Personlige Oplysninger", 60, yPosition);
-        // Add underline for heading
-        doc.setDrawColor(0);
-        doc.line(60, yPosition + 1, 150, yPosition + 1);
-        
-        doc.setFontSize(12);
-        doc.text(`Navn: ${resumeData.name}`, 60, yPosition + 10);
-        doc.text(`E-mail: ${resumeData.email}`, 60, yPosition + 15);
-        if (resumeData.phone) doc.text(`Telefon: ${resumeData.phone}`, 60, yPosition + 20);
-        if (resumeData.address) doc.text(`Adresse: ${resumeData.address}`, 60, yPosition + 25);
-        
-        yPosition += 40; // Move position below the photo section
-      } catch (err) {
-        console.error("Error adding image to PDF:", err);
-        
-        // If photo fails, just do regular personal info
-        doc.setFontSize(16);
-        doc.text("Personlige Oplysninger", margin, yPosition);
-        // Add underline for heading
-        doc.setDrawColor(0);
-        doc.line(margin, yPosition + 1, margin + 90, yPosition + 1);
-        
-        doc.setFontSize(12);
-        doc.text(`Navn: ${resumeData.name}`, margin, yPosition + 10);
-        doc.text(`E-mail: ${resumeData.email}`, margin, yPosition + 15);
-        if (resumeData.phone) doc.text(`Telefon: ${resumeData.phone}`, margin, yPosition + 20);
-        if (resumeData.address) doc.text(`Adresse: ${resumeData.address}`, margin, yPosition + 25);
-        
-        yPosition += 30;
-      }
-    } else {
-      // No photo, just do regular personal info
-      doc.setFontSize(16);
-      doc.text("Personlige Oplysninger", margin, yPosition);
-      // Add underline for heading
-      doc.setDrawColor(0);
-      doc.line(margin, yPosition + 1, margin + 90, yPosition + 1);
-      
-      doc.setFontSize(12);
-      doc.text(`Navn: ${resumeData.name}`, margin, yPosition + 10);
-      doc.text(`E-mail: ${resumeData.email}`, margin, yPosition + 15);
-      if (resumeData.phone) doc.text(`Telefon: ${resumeData.phone}`, margin, yPosition + 20);
-      if (resumeData.address) doc.text(`Adresse: ${resumeData.address}`, margin, yPosition + 25);
-      
-      yPosition += 30;
-    }
+    // Start position
+    let yPosition = margin;
     
-    // Add summary if available
+    // CONTACT INFORMATION SECTION
+    // Name in larger font size and bold
+    doc.setFontSize(16);
+    doc.setFont("helvetica", "bold");
+    doc.text(resumeData.name, margin, yPosition);
+    yPosition += 8;
+    
+    // Contact details in regular font
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "normal");
+    
+    const contactFields = [];
+    if (resumeData.email) contactFields.push(`Email: ${resumeData.email}`);
+    if (resumeData.phone) contactFields.push(`Telefon: ${resumeData.phone}`);
+    if (resumeData.address) contactFields.push(`Adresse: ${resumeData.address}`);
+    
+    contactFields.forEach(field => {
+      doc.text(field, margin, yPosition);
+      yPosition += 5;
+    });
+    
+    yPosition += 5;
+    
+    // PROFESSIONAL SUMMARY SECTION
     if (resumeData.summary) {
-      yPosition += 10;
-      doc.setFontSize(16);
-      doc.text("Kort Resume", margin, yPosition);
-      // Add underline for heading
-      doc.setDrawColor(0);
-      doc.line(margin, yPosition + 1, margin + 60, yPosition + 1);
+      // Section title
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text("PROFESSIONELT RESUMÉ", margin, yPosition);
+      yPosition += 6;
       
-      doc.setFontSize(12);
+      // Underline
+      doc.setDrawColor(0);
+      doc.line(margin, yPosition, pageWidth - margin, yPosition);
+      yPosition += 6;
+      
+      // Summary content
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "normal");
       
       const summaryLines = doc.splitTextToSize(getTextContent(resumeData.summary), textWidth);
-      doc.text(summaryLines, margin, yPosition + 10);
+      doc.text(summaryLines, margin, yPosition);
       
-      yPosition += 10 + (summaryLines.length * 7); // Adjust position based on text height
+      yPosition += (summaryLines.length * 5) + 10;
     }
     
-    // Add experience section with Danish text
-    yPosition += 10;
-    doc.setFontSize(16);
-    doc.text("Erhvervserfaring", margin, yPosition);
-    // Add underline for heading
-    doc.setDrawColor(0);
-    doc.line(margin, yPosition + 1, margin + 70, yPosition + 1);
-    
-    doc.setFontSize(12);
+    // EXPERIENCE SECTION
     if (resumeData.experience) {
-      const experienceLines = doc.splitTextToSize(getTextContent(resumeData.experience), textWidth);
-      doc.text(experienceLines, margin, yPosition + 10);
+      // Check if we need a page break
+      if (yPosition > 270) {
+        doc.addPage();
+        yPosition = margin;
+      }
       
-      yPosition += 10 + (experienceLines.length * 7); // Adjust position based on text height
-    } else {
-      doc.text("Ingen erhvervserfaring angivet.", margin, yPosition + 10);
-      yPosition += 20;
+      // Section title
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text("ERHVERVSERFARING", margin, yPosition);
+      yPosition += 6;
+      
+      // Underline
+      doc.setDrawColor(0);
+      doc.line(margin, yPosition, pageWidth - margin, yPosition);
+      yPosition += 6;
+      
+      // Experience content
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "normal");
+      
+      const experienceContent = formatContentForAts(resumeData.experience);
+      const experienceLines = doc.splitTextToSize(experienceContent, textWidth);
+      doc.text(experienceLines, margin, yPosition);
+      
+      yPosition += (experienceLines.length * 5) + 10;
     }
     
-    // Add education section with Danish text
-    yPosition += 10;
-    doc.setFontSize(16);
-    doc.text("Uddannelse", margin, yPosition);
-    // Add underline for heading
-    doc.setDrawColor(0);
-    doc.line(margin, yPosition + 1, margin + 50, yPosition + 1);
-    
-    doc.setFontSize(12);
+    // EDUCATION SECTION
     if (resumeData.education) {
-      const educationLines = doc.splitTextToSize(getTextContent(resumeData.education), textWidth);
-      doc.text(educationLines, margin, yPosition + 10);
+      // Check if we need a page break
+      if (yPosition > 270) {
+        doc.addPage();
+        yPosition = margin;
+      }
       
-      yPosition += 10 + (educationLines.length * 7); // Adjust position based on text height
-    } else {
-      doc.text("Ingen uddannelse angivet.", margin, yPosition + 10);
-      yPosition += 20;
+      // Section title
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text("UDDANNELSE", margin, yPosition);
+      yPosition += 6;
+      
+      // Underline
+      doc.setDrawColor(0);
+      doc.line(margin, yPosition, pageWidth - margin, yPosition);
+      yPosition += 6;
+      
+      // Education content
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "normal");
+      
+      const educationContent = formatContentForAts(resumeData.education);
+      const educationLines = doc.splitTextToSize(educationContent, textWidth);
+      doc.text(educationLines, margin, yPosition);
+      
+      yPosition += (educationLines.length * 5) + 10;
     }
     
-    // Check if we need a new page before adding skills
-    if (yPosition > 250) {
-      doc.addPage();
-      yPosition = 20; // Reset position for new page
-    }
-    
-    // Add skills section with Danish text
-    yPosition += 10;
-    doc.setFontSize(16);
-    doc.text("Kompetencer", margin, yPosition);
-    // Add underline for heading
-    doc.setDrawColor(0);
-    doc.line(margin, yPosition + 1, margin + 60, yPosition + 1);
-    
-    doc.setFontSize(12);
+    // SKILLS SECTION
     if (resumeData.skills) {
-      const skillsLines = doc.splitTextToSize(getTextContent(resumeData.skills), textWidth);
-      doc.text(skillsLines, margin, yPosition + 10);
-    } else {
-      doc.text("Ingen kompetencer angivet.", margin, yPosition + 10);
+      // Check if we need a page break
+      if (yPosition > 270) {
+        doc.addPage();
+        yPosition = margin;
+      }
+      
+      // Section title
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text("KOMPETENCER", margin, yPosition);
+      yPosition += 6;
+      
+      // Underline
+      doc.setDrawColor(0);
+      doc.line(margin, yPosition, pageWidth - margin, yPosition);
+      yPosition += 6;
+      
+      // Skills content
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "normal");
+      
+      const skillsContent = formatContentForAts(resumeData.skills);
+      const skillsLines = doc.splitTextToSize(skillsContent, textWidth);
+      doc.text(skillsLines, margin, yPosition);
     }
     
-    // Save the PDF with simplified filename
+    // Save the PDF with a standardized filename
     doc.save("CV.pdf");
   } catch (error) {
     console.error("Error exporting PDF:", error);
@@ -185,51 +193,59 @@ const exportResumeToPdf = (resumeData: Resume): void => {
 
 const exportResumeToDocx = (resumeData: Resume): void => {
   try {
-    // Create paragraphs for the document
+    // Create paragraphs for the document with ATS-friendly formatting
     const paragraphs = [];
     
-    // Add title
+    // CONTACT INFORMATION SECTION
+    // Name in larger font and bold
     paragraphs.push(
       new Paragraph({
-        text: "Curriculum Vitae",
+        text: resumeData.name,
         heading: HeadingLevel.HEADING_1,
-        alignment: "center",
-      })
-    );
-    
-    // Personal Info Section
-    paragraphs.push(
-      new Paragraph({
-        text: "Personlige Oplysninger",
-        heading: HeadingLevel.HEADING_2,
-        border: {
-          bottom: {
-            color: "000000",
-            size: 1,
-            style: BorderStyle.SINGLE,
-          },
+        spacing: {
+          after: 200, // 10pt
         },
       })
     );
     
-    paragraphs.push(new Paragraph({ text: `Navn: ${resumeData.name}` }));
-    paragraphs.push(new Paragraph({ text: `E-mail: ${resumeData.email}` }));
+    // Contact information
+    if (resumeData.email) {
+      paragraphs.push(new Paragraph({ 
+        children: [
+          new TextRun({ text: "Email: ", bold: true }),
+          new TextRun(resumeData.email)
+        ],
+        spacing: { after: 100 }
+      }));
+    }
+    
     if (resumeData.phone) {
-      paragraphs.push(new Paragraph({ text: `Telefon: ${resumeData.phone}` }));
+      paragraphs.push(new Paragraph({ 
+        children: [
+          new TextRun({ text: "Telefon: ", bold: true }),
+          new TextRun(resumeData.phone)
+        ],
+        spacing: { after: 100 }
+      }));
     }
+    
     if (resumeData.address) {
-      paragraphs.push(new Paragraph({ text: `Adresse: ${resumeData.address}` }));
+      paragraphs.push(new Paragraph({ 
+        children: [
+          new TextRun({ text: "Adresse: ", bold: true }),
+          new TextRun(resumeData.address)
+        ],
+        spacing: { after: 200 }
+      }));
     }
     
-    // Add empty paragraph for spacing
-    paragraphs.push(new Paragraph({}));
-    
-    // Summary Section
+    // PROFESSIONAL SUMMARY SECTION
     if (resumeData.summary) {
       paragraphs.push(
         new Paragraph({
-          text: "Kort Resume",
+          text: "PROFESSIONELT RESUMÉ",
           heading: HeadingLevel.HEADING_2,
+          spacing: { after: 100 },
           border: {
             bottom: {
               color: "000000",
@@ -240,17 +256,18 @@ const exportResumeToDocx = (resumeData: Resume): void => {
         })
       );
       
-      paragraphs.push(new Paragraph({ text: getTextContent(resumeData.summary) }));
-      
-      // Add empty paragraph for spacing
-      paragraphs.push(new Paragraph({}));
+      paragraphs.push(new Paragraph({ 
+        text: getTextContent(resumeData.summary), 
+        spacing: { after: 300 }
+      }));
     }
     
-    // Experience Section
+    // EXPERIENCE SECTION
     paragraphs.push(
       new Paragraph({
-        text: "Erhvervserfaring",
+        text: "ERHVERVSERFARING",
         heading: HeadingLevel.HEADING_2,
+        spacing: { after: 100 },
         border: {
           bottom: {
             color: "000000",
@@ -262,19 +279,44 @@ const exportResumeToDocx = (resumeData: Resume): void => {
     );
     
     if (resumeData.experience) {
-      paragraphs.push(new Paragraph({ text: getTextContent(resumeData.experience) }));
+      const experienceContent = formatContentForAts(resumeData.experience);
+      
+      // Split by lines for proper formatting
+      const lines = experienceContent.split('\n');
+      lines.forEach(line => {
+        const trimmedLine = line.trim();
+        if (trimmedLine.startsWith('-') || trimmedLine.startsWith('•')) {
+          // It's a bullet point
+          paragraphs.push(new Paragraph({
+            text: trimmedLine.substring(1).trim(),
+            bullet: {
+              level: 0
+            },
+            spacing: { after: 80 }
+          }));
+        } else if (trimmedLine) {
+          // Regular paragraph
+          paragraphs.push(new Paragraph({
+            text: trimmedLine,
+            spacing: { after: 100 }
+          }));
+        }
+      });
     } else {
-      paragraphs.push(new Paragraph({ text: "Ingen erhvervserfaring angivet." }));
+      paragraphs.push(new Paragraph({ 
+        text: "Ingen erhvervserfaring angivet.",
+        spacing: { after: 300 }
+      }));
     }
     
-    // Add empty paragraph for spacing
-    paragraphs.push(new Paragraph({}));
+    paragraphs.push(new Paragraph({ text: "", spacing: { after: 100 } }));
     
-    // Education Section
+    // EDUCATION SECTION
     paragraphs.push(
       new Paragraph({
-        text: "Uddannelse",
+        text: "UDDANNELSE",
         heading: HeadingLevel.HEADING_2,
+        spacing: { after: 100 },
         border: {
           bottom: {
             color: "000000",
@@ -286,19 +328,44 @@ const exportResumeToDocx = (resumeData: Resume): void => {
     );
     
     if (resumeData.education) {
-      paragraphs.push(new Paragraph({ text: getTextContent(resumeData.education) }));
+      const educationContent = formatContentForAts(resumeData.education);
+      
+      // Split by lines for proper formatting
+      const lines = educationContent.split('\n');
+      lines.forEach(line => {
+        const trimmedLine = line.trim();
+        if (trimmedLine.startsWith('-') || trimmedLine.startsWith('•')) {
+          // It's a bullet point
+          paragraphs.push(new Paragraph({
+            text: trimmedLine.substring(1).trim(),
+            bullet: {
+              level: 0
+            },
+            spacing: { after: 80 }
+          }));
+        } else if (trimmedLine) {
+          // Regular paragraph
+          paragraphs.push(new Paragraph({
+            text: trimmedLine,
+            spacing: { after: 100 }
+          }));
+        }
+      });
     } else {
-      paragraphs.push(new Paragraph({ text: "Ingen uddannelse angivet." }));
+      paragraphs.push(new Paragraph({ 
+        text: "Ingen uddannelse angivet.",
+        spacing: { after: 300 }
+      }));
     }
     
-    // Add empty paragraph for spacing
-    paragraphs.push(new Paragraph({}));
+    paragraphs.push(new Paragraph({ text: "", spacing: { after: 100 } }));
     
-    // Skills Section
+    // SKILLS SECTION
     paragraphs.push(
       new Paragraph({
-        text: "Kompetencer",
+        text: "KOMPETENCER",
         heading: HeadingLevel.HEADING_2,
+        spacing: { after: 100 },
         border: {
           bottom: {
             color: "000000",
@@ -310,16 +377,79 @@ const exportResumeToDocx = (resumeData: Resume): void => {
     );
     
     if (resumeData.skills) {
-      paragraphs.push(new Paragraph({ text: getTextContent(resumeData.skills) }));
+      const skillsContent = formatContentForAts(resumeData.skills);
+      
+      // Split by lines for proper formatting
+      const lines = skillsContent.split('\n');
+      lines.forEach(line => {
+        const trimmedLine = line.trim();
+        if (trimmedLine.startsWith('-') || trimmedLine.startsWith('•')) {
+          // It's a bullet point
+          paragraphs.push(new Paragraph({
+            text: trimmedLine.substring(1).trim(),
+            bullet: {
+              level: 0
+            },
+            spacing: { after: 80 }
+          }));
+        } else if (trimmedLine) {
+          // Regular paragraph
+          paragraphs.push(new Paragraph({
+            text: trimmedLine,
+            spacing: { after: 100 }
+          }));
+        }
+      });
     } else {
-      paragraphs.push(new Paragraph({ text: "Ingen kompetencer angivet." }));
+      paragraphs.push(new Paragraph({ 
+        text: "Ingen kompetencer angivet.",
+        spacing: { after: 100 }
+      }));
     }
     
-    // Create document
+    // Create document with ATS-friendly formatting
     const doc = new Document({
+      styles: {
+        default: {
+          document: {
+            run: {
+              font: "Arial",
+              size: 22, // 11pt
+            },
+            paragraph: {
+              spacing: {
+                line: 276, // 1.15 spacing
+              },
+            },
+          },
+          heading1: {
+            run: {
+              font: "Arial",
+              size: 32, // 16pt
+              bold: true,
+            },
+          },
+          heading2: {
+            run: {
+              font: "Arial",
+              size: 28, // 14pt
+              bold: true,
+            },
+          },
+        },
+      },
       sections: [
         {
-          properties: {},
+          properties: {
+            page: {
+              margin: {
+                top: convertInchesToTwip(0.8),
+                right: convertInchesToTwip(0.8),
+                bottom: convertInchesToTwip(0.8),
+                left: convertInchesToTwip(0.8),
+              },
+            },
+          },
           children: paragraphs,
         },
       ],
@@ -340,4 +470,39 @@ const exportResumeToDocx = (resumeData: Resume): void => {
     console.error("Error exporting DOCX:", error);
     throw error;
   }
+};
+
+/**
+ * Format content to be ATS-friendly:
+ * - Ensures proper bullet points
+ * - Removes excessive whitespace
+ * - Normalizes line breaks
+ */
+const formatContentForAts = (content: string): string => {
+  if (!content) return '';
+  
+  // Get clean text content
+  const cleanContent = getTextContent(content);
+  
+  // Normalize line breaks
+  const normalizedContent = cleanContent.replace(/\r\n/g, '\n');
+  
+  // Process line by line
+  const lines = normalizedContent.split('\n');
+  const processedLines = lines.map(line => {
+    const trimmed = line.trim();
+    
+    // Skip empty lines
+    if (!trimmed) return '';
+    
+    // Standardize bullet points
+    if (trimmed.startsWith('•') || trimmed.startsWith('*') || trimmed.startsWith('-')) {
+      return `- ${trimmed.substring(1).trim()}`;
+    }
+    
+    return trimmed;
+  });
+  
+  // Remove empty lines and join
+  return processedLines.filter(line => line).join('\n');
 };
