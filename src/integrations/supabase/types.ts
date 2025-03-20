@@ -91,6 +91,7 @@ export type Database = {
           email: string | null
           email_preferences: Json | null
           experience: string | null
+          has_completed_onboarding: boolean | null
           id: string
           name: string | null
           phone: string | null
@@ -105,6 +106,7 @@ export type Database = {
           email?: string | null
           email_preferences?: Json | null
           experience?: string | null
+          has_completed_onboarding?: boolean | null
           id: string
           name?: string | null
           phone?: string | null
@@ -119,6 +121,7 @@ export type Database = {
           email?: string | null
           email_preferences?: Json | null
           experience?: string | null
+          has_completed_onboarding?: boolean | null
           id?: string
           name?: string | null
           phone?: string | null
