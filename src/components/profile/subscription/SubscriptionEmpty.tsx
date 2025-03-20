@@ -5,10 +5,9 @@ import { SubscriptionStatus } from "@/services/subscription/types";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Bug } from "lucide-react";
+import { Bug, Loader2 } from "lucide-react";
 import { createCheckoutSession } from "@/services/subscription/subscriptionService";
 import { useToast } from "@/hooks/use-toast";
-import { LoadingSpinner } from "@/components/LoadingSpinner";
 
 interface SubscriptionEmptyProps {
   user: User;
@@ -28,6 +27,7 @@ const SubscriptionEmpty: React.FC<SubscriptionEmptyProps> = ({
   const handleSubscribe = async () => {
     setIsUpdating(true);
     try {
+      console.log("Creating checkout session for user:", user.id);
       const options = {
         userId: user.id,
         returnUrl: `${window.location.origin}/profile?subscription=success`,
@@ -36,6 +36,7 @@ const SubscriptionEmpty: React.FC<SubscriptionEmptyProps> = ({
       };
 
       const { url } = await createCheckoutSession(options);
+      console.log("Redirecting to checkout URL:", url);
       window.location.href = url;
     } catch (error) {
       console.error("Error creating checkout session:", error);
@@ -90,7 +91,7 @@ const SubscriptionEmpty: React.FC<SubscriptionEmptyProps> = ({
           onClick={handleSubscribe}
           disabled={isUpdating}
         >
-          {isUpdating ? <LoadingSpinner size="sm" className="mr-2" /> : null}
+          {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Opret abonnement - 99 DKK/måned
         </Button>
         <Button 

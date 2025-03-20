@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from "react";
 import { User } from "@/lib/types";
 import { useSubscription } from "@/hooks/useSubscription";
-import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import SubscriptionLoading from "./SubscriptionLoading";
 import SubscriptionError from "./SubscriptionError";
@@ -51,6 +50,7 @@ const SubscriptionInfo: React.FC<SubscriptionInfoProps> = ({ user }) => {
       
       // Refresh the subscription status
       if (user?.id) {
+        console.log("Refreshing subscription status after successful checkout");
         fetchSubscriptionStatus(user.id);
       }
     }
@@ -60,6 +60,7 @@ const SubscriptionInfo: React.FC<SubscriptionInfoProps> = ({ user }) => {
     if (!user?.id) return;
     
     setIsRefreshing(true);
+    console.log("Manually refreshing subscription status");
     try {
       await fetchSubscriptionStatus(user.id);
       toast({
