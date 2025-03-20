@@ -37,11 +37,11 @@ const CTASection: React.FC<CTASectionProps> = ({ session }) => {
               </div>
             </div>
           </div>
-          <div className="flex items-center justify-center p-8 md:p-10 lg:p-0">
+          <div className="flex items-center justify-center bg-gradient-to-br from-primary-600 to-primary-800 p-6 lg:p-8">
             <img
-              className="rounded-lg shadow-lg object-cover max-h-80 w-full"
-              src="https://images.unsplash.com/photo-1518085250887-2f95a8b011cb?auto=format&fit=crop&w=1280&q=80"
-              alt="Person der skriver jobansøgning på laptop"
+              className="rounded-lg shadow-xl object-cover h-full w-full max-h-80"
+              src="https://images.unsplash.com/photo-1586281380117-5a60ae2050cc?auto=format&fit=crop&w=1280&q=80"
+              alt="Person der skriver jobansøgning ved skrivebord"
             />
           </div>
         </div>
