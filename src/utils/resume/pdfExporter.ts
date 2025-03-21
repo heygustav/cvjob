@@ -1,4 +1,3 @@
-
 import { jsPDF } from "jspdf";
 import { getTextContent } from '@/utils/download/contentExtractor';
 import { Resume } from '@/types/resume';
@@ -96,7 +95,70 @@ const exportResumeToPdf = (resumeData: Resume): void => {
     }
     
     // EXPERIENCE SECTION
-    if (resumeData.experience) {
+    if (resumeData.structuredExperience && resumeData.structuredExperience.length > 0) {
+      // Check if we need a page break
+      if (yPosition > 270) {
+        doc.addPage();
+        yPosition = margin;
+      }
+      
+      // Section title
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text("ERHVERVSERFARING", margin, yPosition);
+      yPosition += 6;
+      
+      // Underline
+      doc.setDrawColor(0);
+      doc.line(margin, yPosition, pageWidth - margin, yPosition);
+      yPosition += 6;
+      
+      // Structured Experience content - ATS optimized
+      doc.setFontSize(11);
+      
+      resumeData.structuredExperience.forEach((exp) => {
+        // Position in bold
+        doc.setFont("helvetica", "bold");
+        doc.text(exp.position, margin, yPosition);
+        
+        // Date on the right side
+        const dateText = `${exp.fromDate} - ${exp.toDate || 'Nu'}`;
+        const dateWidth = doc.getTextWidth(dateText);
+        doc.setFont("helvetica", "normal");
+        doc.text(dateText, pageWidth - margin - dateWidth, yPosition);
+        
+        yPosition += 5;
+        
+        // Organization
+        doc.text(exp.organization, margin, yPosition);
+        yPosition += 6;
+        
+        // Bullet points with proper indentation for ATS
+        if (exp.bulletPoints && exp.bulletPoints.length > 0) {
+          exp.bulletPoints.forEach(point => {
+            if (!point.trim()) return; // Skip empty bullet points
+            
+            const bulletText = `• ${point}`;
+            const bulletLines = doc.splitTextToSize(bulletText, textWidth - 5);
+            
+            // First line with bullet
+            doc.text(bulletLines[0], margin, yPosition);
+            
+            // Any additional wrapped lines need proper indentation
+            if (bulletLines.length > 1) {
+              for (let i = 1; i < bulletLines.length; i++) {
+                yPosition += 5;
+                doc.text(bulletLines[i], margin + 3, yPosition); // Indent wrapped lines
+              }
+            }
+            
+            yPosition += 5;
+          });
+        }
+        
+        yPosition += 5; // Space between experiences
+      });
+    } else if (resumeData.experience) {
       // Check if we need a page break
       if (yPosition > 270) {
         doc.addPage();
@@ -126,7 +188,70 @@ const exportResumeToPdf = (resumeData: Resume): void => {
     }
     
     // EDUCATION SECTION
-    if (resumeData.education) {
+    if (resumeData.structuredEducation && resumeData.structuredEducation.length > 0) {
+      // Check if we need a page break
+      if (yPosition > 270) {
+        doc.addPage();
+        yPosition = margin;
+      }
+      
+      // Section title
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text("UDDANNELSE", margin, yPosition);
+      yPosition += 6;
+      
+      // Underline
+      doc.setDrawColor(0);
+      doc.line(margin, yPosition, pageWidth - margin, yPosition);
+      yPosition += 6;
+      
+      // Structured Education content
+      doc.setFontSize(11);
+      
+      resumeData.structuredEducation.forEach((edu) => {
+        // Education in bold
+        doc.setFont("helvetica", "bold");
+        doc.text(edu.education, margin, yPosition);
+        
+        // Date on the right side
+        const dateText = `${edu.fromDate} - ${edu.toDate || 'Nu'}`;
+        const dateWidth = doc.getTextWidth(dateText);
+        doc.setFont("helvetica", "normal");
+        doc.text(dateText, pageWidth - margin - dateWidth, yPosition);
+        
+        yPosition += 5;
+        
+        // School
+        doc.text(edu.school, margin, yPosition);
+        yPosition += 6;
+        
+        // Bullet points with proper indentation for ATS
+        if (edu.bulletPoints && edu.bulletPoints.length > 0) {
+          edu.bulletPoints.forEach(point => {
+            if (!point.trim()) return; // Skip empty bullet points
+            
+            const bulletText = `• ${point}`;
+            const bulletLines = doc.splitTextToSize(bulletText, textWidth - 5);
+            
+            // First line with bullet
+            doc.text(bulletLines[0], margin, yPosition);
+            
+            // Any additional wrapped lines need proper indentation
+            if (bulletLines.length > 1) {
+              for (let i = 1; i < bulletLines.length; i++) {
+                yPosition += 5;
+                doc.text(bulletLines[i], margin + 3, yPosition); // Indent wrapped lines
+              }
+            }
+            
+            yPosition += 5;
+          });
+        }
+        
+        yPosition += 5; // Space between education entries
+      });
+    } else if (resumeData.education) {
       // Check if we need a page break
       if (yPosition > 270) {
         doc.addPage();
@@ -156,7 +281,90 @@ const exportResumeToPdf = (resumeData: Resume): void => {
     }
     
     // SKILLS SECTION
-    if (resumeData.skills) {
+    if (resumeData.structuredSkills && resumeData.structuredSkills.length > 0) {
+      // Check if we need a page break
+      if (yPosition > 270) {
+        doc.addPage();
+        yPosition = margin;
+      }
+      
+      // Section title
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text("KOMPETENCER", margin, yPosition);
+      yPosition += 6;
+      
+      // Underline
+      doc.setDrawColor(0);
+      doc.line(margin, yPosition, pageWidth - margin, yPosition);
+      yPosition += 6;
+      
+      // Skills content
+      doc.setFontSize(11);
+      
+      // Create a more ATS-friendly skill layout
+      const skillColumns = 2;
+      const skillsPerColumn = Math.ceil(resumeData.structuredSkills.length / skillColumns);
+      const columnWidth = (textWidth - 10) / skillColumns;
+      
+      for (let i = 0; i < skillsPerColumn; i++) {
+        for (let j = 0; j < skillColumns; j++) {
+          const index = i + (j * skillsPerColumn);
+          if (index < resumeData.structuredSkills.length) {
+            const skill = resumeData.structuredSkills[index];
+            const skillText = `${skill.skill} (${skill.years} år)`;
+            
+            if (skillText.trim()) {
+              doc.setFont("helvetica", "normal");
+              doc.text(skillText, margin + (j * columnWidth), yPosition);
+            }
+          }
+        }
+        yPosition += 5;
+      }
+      
+      yPosition += 5; // Add space after skills
+      
+      // If there are bullet points under skills, add them in a list format
+      const skillsWithBullets = resumeData.structuredSkills.filter(
+        skill => skill.bulletPoints && skill.bulletPoints.length > 0
+      );
+      
+      if (skillsWithBullets.length > 0) {
+        yPosition += 3;
+        doc.text("Uddybning af nøglekompetencer:", margin, yPosition);
+        yPosition += 5;
+        
+        skillsWithBullets.forEach(skill => {
+          if (skill.bulletPoints && skill.bulletPoints.length > 0) {
+            doc.setFont("helvetica", "bold");
+            doc.text(skill.skill + ":", margin, yPosition);
+            yPosition += 5;
+            doc.setFont("helvetica", "normal");
+            
+            skill.bulletPoints.forEach(point => {
+              if (!point.trim()) return; // Skip empty bullet points
+              
+              const bulletText = `• ${point}`;
+              const bulletLines = doc.splitTextToSize(bulletText, textWidth - 5);
+              
+              // First line with bullet
+              doc.text(bulletLines[0], margin, yPosition);
+              
+              // Any additional wrapped lines need proper indentation
+              if (bulletLines.length > 1) {
+                for (let i = 1; i < bulletLines.length; i++) {
+                  yPosition += 5;
+                  doc.text(bulletLines[i], margin + 3, yPosition); // Indent wrapped lines
+                }
+              }
+              
+              yPosition += 5;
+            });
+          }
+        });
+      }
+    } else if (resumeData.skills) {
       // Check if we need a page break
       if (yPosition > 270) {
         doc.addPage();
@@ -182,6 +390,14 @@ const exportResumeToPdf = (resumeData: Resume): void => {
       const skillsLines = doc.splitTextToSize(skillsContent, textWidth);
       doc.text(skillsLines, margin, yPosition);
     }
+    
+    // Add metadata for better ATS parsing
+    doc.setProperties({
+      title: `CV - ${resumeData.name}`,
+      subject: "Curriculum Vitae",
+      keywords: `CV, resume, ${resumeData.name}${resumeData.structuredSkills ? ', ' + resumeData.structuredSkills.map(s => s.skill).join(', ') : ''}`,
+      creator: "CV Builder Application"
+    });
     
     // Save the PDF with a standardized filename
     doc.save("CV.pdf");
@@ -479,30 +695,16 @@ const exportResumeToDocx = (resumeData: Resume): void => {
  * - Normalizes line breaks
  */
 const formatContentForAts = (content: string): string => {
-  if (!content) return '';
+  // Remove excess whitespace which can confuse ATS
+  let formattedContent = content.trim().replace(/\s+/g, ' ');
   
-  // Get clean text content
-  const cleanContent = getTextContent(content);
+  // Ensure bullet points are properly formatted for ATS
+  formattedContent = formattedContent.replace(/•/g, '\n• ');
+  formattedContent = formattedContent.replace(/\*\s/g, '\n• ');
+  formattedContent = formattedContent.replace(/-\s/g, '\n• ');
   
-  // Normalize line breaks
-  const normalizedContent = cleanContent.replace(/\r\n/g, '\n');
+  // Ensure there's only one bullet point character at the start of each line
+  formattedContent = formattedContent.replace(/\n\s*•\s*•\s*/g, '\n• ');
   
-  // Process line by line
-  const lines = normalizedContent.split('\n');
-  const processedLines = lines.map(line => {
-    const trimmed = line.trim();
-    
-    // Skip empty lines
-    if (!trimmed) return '';
-    
-    // Standardize bullet points
-    if (trimmed.startsWith('•') || trimmed.startsWith('*') || trimmed.startsWith('-')) {
-      return `- ${trimmed.substring(1).trim()}`;
-    }
-    
-    return trimmed;
-  });
-  
-  // Remove empty lines and join
-  return processedLines.filter(line => line).join('\n');
+  return formattedContent;
 };

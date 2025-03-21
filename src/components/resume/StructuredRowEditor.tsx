@@ -115,7 +115,7 @@ export default function StructuredRowEditor<T extends GenericEntry>({
 
       {entries.length === 0 ? (
         <div className="text-center py-4 text-muted-foreground border rounded-md">
-          Ingen indgange tilføjet endnu
+          Intet tilføjet endnu
         </div>
       ) : (
         <div className="space-y-4">
@@ -206,32 +206,52 @@ export default function StructuredRowEditor<T extends GenericEntry>({
 
               {expandedRowId === entry.id && (
                 <div className="space-y-3 pt-2">
-                  <div className="font-medium text-sm">
-                    Punkter (maksimalt 3)
+                  <div className="flex justify-between items-center">
+                    <div className="font-medium text-sm">
+                      Key Points (max 3)
+                    </div>
+                    <span className="text-xs text-gray-500">
+                      Use action verbs, numbers & achievements
+                    </span>
                   </div>
+                  
                   {entry.bulletPoints.map((point, index) => (
                     <div
                       key={`${entry.id}-bullet-${index}`}
-                      className="flex gap-2"
+                      className="space-y-1"
                     >
-                      <Textarea
-                        value={point}
-                        onChange={(e) =>
-                          updateBulletPoint(entry.id, index, e.target.value)
-                        }
-                        rows={2}
-                        className="flex-1"
-                      />
-                      <Button
-                        onClick={() => removeBulletPoint(entry.id, index)}
-                        variant="ghost"
-                        size="icon"
-                        className="h-10 w-10 flex-shrink-0"
-                      >
-                        <Trash className="h-4 w-4" />
-                      </Button>
+                      <div className="flex gap-2">
+                        <Textarea
+                          value={point}
+                          onChange={(e) =>
+                            updateBulletPoint(entry.id, index, e.target.value)
+                          }
+                          placeholder={[
+                            "Used [tool/skill] to [action] resulting in [quantifiable result]",
+                            "Achieved [result] by implementing [action/strategy]",
+                            "Led [project/team] that delivered [outcome] under [conditions]"
+                          ][index % 3]}
+                          rows={2}
+                          className="flex-1"
+                        />
+                        <Button
+                          onClick={() => removeBulletPoint(entry.id, index)}
+                          variant="ghost"
+                          size="icon"
+                          className="h-10 w-10 flex-shrink-0"
+                        >
+                          <Trash className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      
+                      {index === 0 && (
+                        <div className="text-xs text-gray-500 px-2">
+                          <span className="font-medium">ATS Tip:</span> Use specific action verbs, include measurable achievements, and mention relevant technologies or skills.
+                        </div>
+                      )}
                     </div>
                   ))}
+                  
                   {entry.bulletPoints.length < 3 && (
                     <Button
                       onClick={() => addBulletPoint(entry.id)}
@@ -240,7 +260,7 @@ export default function StructuredRowEditor<T extends GenericEntry>({
                       className="w-full mt-2"
                     >
                       <Plus className="h-4 w-4 mr-2" />
-                      Tilføj punkt
+                      Add Point
                     </Button>
                   )}
                 </div>
