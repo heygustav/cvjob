@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -89,6 +90,7 @@ export const useAuthLogic = (
     try {
       console.log("Attempting to sign up with email:", email);
       
+      // For signup, we're using the standard flow which may require captcha
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -96,6 +98,7 @@ export const useAuthLogic = (
           data: {
             name: name || '',
           },
+          // The captcha will be automatically handled by Supabase when required
         },
       });
       
@@ -107,6 +110,12 @@ export const useAuthLogic = (
           toast({
             title: "Oprettelse fejlede",
             description: "Denne email er allerede i brug. Prøv at logge ind i stedet.",
+            variant: "destructive",
+          });
+        } else if (error.message.includes('captcha verification')) {
+          toast({
+            title: "Captcha fejlede",
+            description: "Captcha verifikation fejlede. Prøv venligst igen.",
             variant: "destructive",
           });
         } else {

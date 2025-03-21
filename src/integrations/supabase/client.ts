@@ -27,7 +27,7 @@ export const supabase = createClient<Database>(
       autoRefreshToken: true,
       persistSession: true,
       detectSessionInUrl: true,
-      flowType: 'implicit', // Changed from 'pkce' to 'implicit' to avoid CAPTCHA issues
+      flowType: 'implicit', // Using implicit flow to avoid CAPTCHA issues with login
       storage: {
         getItem: (key) => {
           try {

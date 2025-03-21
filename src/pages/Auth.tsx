@@ -62,19 +62,11 @@ const Auth = () => {
       const errorMessage = err instanceof Error ? err.message : 'Der opstod en uventet fejl';
       setError(errorMessage);
       
-      // Show user-friendly error for non-existent user
-      if (errorMessage.includes('Invalid login credentials') || 
-          errorMessage.includes('Invalid email or password') ||
-          errorMessage.includes('captcha verification process failed')) {
-        toast({
-          title: isSignUp ? "Oprettelse fejlede" : "Login fejlede",
-          description: isSignUp 
-            ? "Denne email er muligvis allerede i brug" 
-            : "Kunne ikke logge ind. Prøv igen eller opret en ny konto.",
-          variant: "destructive",
-        });
-      } else {
-        // Generic error message for any other error
+      // Error handling moved to authLogic.ts to centralize error handling
+      // Only display a generic error for any edge cases that weren't caught
+      if (!errorMessage.includes('Invalid login credentials') && 
+          !errorMessage.includes('Invalid email') && 
+          !errorMessage.includes('captcha verification')) {
         toast({
           title: "Fejl ved godkendelse",
           description: errorMessage,
