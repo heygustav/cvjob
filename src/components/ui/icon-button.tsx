@@ -15,6 +15,11 @@ const IconButton: React.FC<IconButtonProps> = ({
   children,
   ...props
 }) => {
+  // Convert any non-string aria-label to string for type safety
+  const ariaLabel = typeof props["aria-label"] === 'string' 
+    ? props["aria-label"] 
+    : title || (typeof children === 'string' ? children : undefined);
+
   // When using asChild, we need to make sure we're passing the icon as a prop to the child
   if (props.asChild && children) {
     // Clone the child element and add the icon
@@ -27,7 +32,7 @@ const IconButton: React.FC<IconButtonProps> = ({
         child.props.className
       ),
       title,
-      "aria-label": title || typeof children === 'string' ? children : undefined,
+      "aria-label": ariaLabel,
       children: (
         <>
           {icon}
@@ -46,7 +51,7 @@ const IconButton: React.FC<IconButtonProps> = ({
         className
       )}
       title={title}
-      aria-label={title || typeof children === 'string' ? children : undefined}
+      aria-label={ariaLabel}
       {...props}
     >
       {/* If it's an icon-only button, add aria-hidden to the icon */}

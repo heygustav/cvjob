@@ -33,7 +33,10 @@ const LetterActions: React.FC<LetterActionsProps> = ({
   onDownloadTxt,
   isDownloading
 }) => {
-  const letterTitle = letter.title || "ansøgning";
+  // Generate a descriptive name for the letter based on job info
+  const letterDescriptiveName = job 
+    ? `ansøgning til ${job.title || 'stillingen'}`
+    : "ansøgning";
   
   return (
     <div className="flex justify-end space-x-2">
@@ -42,7 +45,7 @@ const LetterActions: React.FC<LetterActionsProps> = ({
         size="sm"
         icon={<FileEdit className="h-4 w-4" />}
         asChild
-        title={`Rediger ${letterTitle}`}
+        title={`Rediger ${letterDescriptiveName}`}
       >
         <Link to={`/ansoegning?letterId=${letter.id}&step=2`} />
       </IconButton>
@@ -54,8 +57,8 @@ const LetterActions: React.FC<LetterActionsProps> = ({
             size="sm"
             icon={<Download className="h-4 w-4" />}
             disabled={isDownloading}
-            title={`Download ${letterTitle}`}
-            aria-label={`Download ${letterTitle}`}
+            title={`Download ${letterDescriptiveName}`}
+            aria-label={`Download ${letterDescriptiveName}`}
           />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="bg-white shadow-lg border border-gray-200">
@@ -88,8 +91,8 @@ const LetterActions: React.FC<LetterActionsProps> = ({
         size="sm"
         icon={<Trash2 className="h-4 w-4 text-red-500" />}
         onClick={() => onDelete(letter.id)}
-        title={`Slet ${letterTitle}`}
-        aria-label={`Slet ${letterTitle}`}
+        title={`Slet ${letterDescriptiveName}`}
+        aria-label={`Slet ${letterDescriptiveName}`}
       />
     </div>
   );
