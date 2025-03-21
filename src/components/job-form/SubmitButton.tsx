@@ -44,7 +44,7 @@ const SubmitButton: React.FC<SubmitButtonProps> = ({
       type="submit"
       disabled={isLoading || isSuccess}
       className={cn(
-        "px-4 py-2 h-10 rounded-md shadow-sm text-sm font-medium text-white w-full sm:w-auto flex items-center justify-center gap-2 transition-all duration-300 focus:outline-none focus:ring-0",
+        "px-4 py-2 h-10 rounded-md shadow-sm text-sm font-medium text-white w-full sm:w-auto flex items-center justify-center gap-2 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
         isSuccess 
           ? "bg-green-600 w-12 h-10 sm:w-12" 
           : "bg-primary hover:bg-primary/90 active:bg-primary-800",
@@ -57,14 +57,19 @@ const SubmitButton: React.FC<SubmitButtonProps> = ({
             ? "Ansøgning genereret" 
             : "Generer ansøgning nu"
       }
+      aria-busy={isLoading}
+      aria-live={isLoading ? "polite" : "off"}
     >
       {isLoading ? (
         <>
-          <Loader2 className="h-4 w-4 animate-spin" />
-          <span className="whitespace-nowrap">Genererer ansøgning... {elapsedTime}</span>
+          <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+          <span className="whitespace-nowrap">
+            Genererer ansøgning... 
+            <span className="sr-only">Forløbet tid:</span> {elapsedTime}
+          </span>
         </>
       ) : isSuccess ? (
-        <Check className="h-5 w-5 mx-auto animate-scale-in text-white" />
+        <Check className="h-5 w-5 mx-auto animate-scale-in text-white" aria-hidden="true" />
       ) : (
         "Generer ansøgning nu"
       )}

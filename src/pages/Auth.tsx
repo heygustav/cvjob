@@ -6,6 +6,7 @@ import AuthLayout from '@/components/auth/AuthLayout';
 import { useAuth } from '@/components/AuthProvider';
 import { useToast } from '@/hooks/use-toast';
 import ErrorDisplay from '@/components/ErrorDisplay';
+import { AlertTriangle } from 'lucide-react';
 
 const Auth = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -39,13 +40,21 @@ const Auth = () => {
   useEffect(() => {
     if (isAuthenticated) {
       console.log("User is authenticated, redirecting to:", redirectUrl || '/dashboard');
+      
+      // Show success toast when authenticated
+      toast({
+        title: "Logget ind",
+        description: "Du er nu logget ind",
+        variant: "default",
+      });
+      
       if (redirectUrl) {
         navigate(redirectUrl);
       } else {
         navigate('/dashboard');
       }
     }
-  }, [isAuthenticated, navigate, redirectUrl]);
+  }, [isAuthenticated, navigate, redirectUrl, toast]);
 
   const toggleMode = () => {
     setIsSignUp(!isSignUp);
@@ -84,25 +93,36 @@ const Auth = () => {
   const pageTitle = isSignUp ? 'Opret konto' : 'Log ind på din konto';
 
   return (
-    <AuthLayout title={pageTitle} redirectUrl={redirectUrl}>
-      {error && (
-        <div className="mb-4">
-          <ErrorDisplay 
-            title={isSignUp ? "Kunne ikke oprette konto" : "Kunne ikke logge ind"} 
-            message={error}
-            phase="user-fetch"
-          />
-        </div>
-      )}
-      
-      <AuthForm
-        isSignUp={isSignUp}
-        onSubmit={handleSubmit}
-        isLoading={isLoading}
-        attemptCount={attemptCount}
-        toggleMode={toggleMode}
-      />
-    </AuthLayout>
+    <div role="main" aria-labelledby="auth-title">
+      <AuthLayout title={pageTitle} redirectUrl={redirectUrl}>
+        {error && (
+          <div className="mb-4" aria-live="assertive">
+            <ErrorDisplay 
+              title={isSignUp ? "Kunne ikke oprette konto" : "Kunne ikke logge ind"} 
+              message={error}
+              phase="user-fetch"
+              icon={<AlertTriangle className="h-5 w-5 text-red-500" aria-hidden="true" />}
+            />
+          </div>
+        )}
+        
+        <AuthForm
+          isSignUp={isSignUp}
+          onSubmit={handleSubmit}
+          isLoading={isLoading}
+          attemptCount={attemptCount}
+          toggleMode={toggleMode}
+        />
+        
+        {attemptCount > 3 && (
+          <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-md" aria-live="polite">
+            <p className="text-sm text-amber-800">
+              Har du problemer med at logge ind? Prøv at rydde cookies og cache eller kontakt support.
+            </p>
+          </div>
+        )}
+      </AuthLayout>
+    </div>
   );
 };
 

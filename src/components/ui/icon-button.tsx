@@ -22,11 +22,12 @@ const IconButton: React.FC<IconButtonProps> = ({
     return React.cloneElement(child, {
       ...props,
       className: cn(
-        "flex items-center gap-2",
+        "flex items-center gap-2 transition-colors",
         className,
         child.props.className
       ),
       title,
+      "aria-label": title,
       children: (
         <>
           {icon}
@@ -40,14 +41,16 @@ const IconButton: React.FC<IconButtonProps> = ({
   return (
     <Button
       className={cn(
-        "flex items-center justify-center gap-2",
-        !children && "h-8 w-8 p-0",
+        "flex items-center justify-center gap-2 transition-colors",
+        !children && "h-9 w-9 p-0",
         className
       )}
       title={title}
+      aria-label={title}
       {...props}
     >
-      {icon}
+      {/* If it's an icon-only button, add aria-hidden to the icon */}
+      {!children ? React.cloneElement(icon as React.ReactElement, { "aria-hidden": "true" }) : icon}
       {children}
     </Button>
   );
