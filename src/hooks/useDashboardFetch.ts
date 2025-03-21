@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback, useRef } from "react";
 import { JobPosting, CoverLetter } from "@/lib/types";
 import { supabase } from "@/integrations/supabase/client";
@@ -78,14 +79,14 @@ export const useDashboardFetch = () => {
         // Fetch job postings with specific columns for better performance
         supabase
           .from("job_postings")
-          .select("id, title, company, description, status, location, created_at, updated_at, url")
+          .select("id, title, company, description, location, created_at, updated_at, url, user_id, contact_person, deadline")
           .eq("user_id", userId)
           .order("created_at", { ascending: false }),
           
         // Fetch cover letters with specific columns
         supabase
           .from("cover_letters")
-          .select("id, title, content, job_posting_id, created_at, updated_at")
+          .select("id, content, job_posting_id, created_at, updated_at, user_id")
           .eq("user_id", userId)
           .order("created_at", { ascending: false })
       ]);
@@ -151,4 +152,4 @@ export const useDashboardFetch = () => {
     setJobPostings,
     setCoverLetters
   };
-}; 
+};

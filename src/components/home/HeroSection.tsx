@@ -28,7 +28,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ session }) => {
           src="https://images.unsplash.com/photo-1517842645767-c639042777db?auto=format&fit=crop&w=800&q=80"
           alt=""
           className="absolute inset-0 w-full h-full object-cover z-0"
-          fetchpriority="high"
+          fetchPriority="high"
           aria-hidden="true"
         />
       </picture>

@@ -45,9 +45,12 @@ const DialogContent = React.forwardRef<
         e.preventDefault()
         // Find the first focusable element and focus it
         setTimeout(() => {
-          const focusableElements = 'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
-          const firstFocusable = ref.current?.querySelector(focusableElements) as HTMLElement
-          firstFocusable?.focus()
+          // Safely check if ref is an object with a current property
+          if (ref && typeof ref !== 'function' && ref.current) {
+            const focusableElements = 'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+            const firstFocusable = ref.current.querySelector(focusableElements) as HTMLElement
+            firstFocusable?.focus()
+          }
         }, 0)
       }}
       onEscapeKeyDown={(e) => {
