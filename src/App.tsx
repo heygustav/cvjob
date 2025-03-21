@@ -7,7 +7,7 @@ import BackToTop from './components/BackToTop';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { LoadingSpinner } from './components/LoadingSpinner';
 import { useToast } from './hooks/use-toast';
-import ProtectedRoute from './components/ProtectedRoute';
+import ProtectedRoute from './components/ProtectedRoute.jsx';
 import './App.css';
 
 // Lazy load pages for better initial load performance
