@@ -8,13 +8,15 @@ interface ErrorDisplayProps {
   message: string;
   onRetry?: () => void;
   phase?: 'job-save' | 'user-fetch' | 'generation' | 'letter-save' | 'cv-parsing';
+  icon?: React.ReactNode;
 }
 
 const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
   title,
   message,
   onRetry,
-  phase
+  phase,
+  icon
 }) => {
   // Get more specific help text based on the phase
   const getHelpText = () => {
@@ -42,7 +44,11 @@ const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
     >
       <div className="flex flex-col space-y-4">
         <div className="flex items-start">
-          <AlertCircle className="h-5 w-5 text-red-600 mr-3 mt-0.5 flex-shrink-0" aria-hidden="true" />
+          {icon ? (
+            <span className="mr-3 mt-0.5 flex-shrink-0">{icon}</span>
+          ) : (
+            <AlertCircle className="h-5 w-5 text-red-600 mr-3 mt-0.5 flex-shrink-0" aria-hidden="true" />
+          )}
           <div>
             <h3 className="text-base font-semibold text-red-800">{title}</h3>
             <p className="text-sm text-red-700 mt-2">{message}</p>
