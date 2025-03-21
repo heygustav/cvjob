@@ -1,4 +1,3 @@
-
 /**
  * Consolidated Resume type that can be used across all components
  * This type combines all properties from different interfaces used throughout the application
@@ -14,10 +13,15 @@ export interface Resume {
   // Short Summary
   summary: string;
   
-  // Resume Content Sections
+  // Resume Content Sections - old format
   experience: string;
   education: string;
   skills: string;
+  
+  // New structured formats
+  structuredExperience?: ExperienceEntry[];
+  structuredEducation?: EducationEntry[];
+  structuredSkills?: SkillEntry[];
   
   // Optional Properties
   photo?: string;
@@ -35,6 +39,40 @@ export interface Resume {
   confidence?: {
     [key: string]: number;
   };
+}
+
+/**
+ * Structured experience entry
+ */
+export interface ExperienceEntry {
+  id: string;
+  position: string;
+  organization: string;
+  fromDate: string;
+  toDate: string;
+  bulletPoints: string[];
+}
+
+/**
+ * Structured education entry
+ */
+export interface EducationEntry {
+  id: string;
+  education: string;
+  school: string;
+  fromDate: string;
+  toDate: string;
+  bulletPoints: string[];
+}
+
+/**
+ * Structured skill entry
+ */
+export interface SkillEntry {
+  id: string;
+  skill: string;
+  years: string;
+  bulletPoints: string[];
 }
 
 /**

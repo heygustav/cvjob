@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -7,8 +6,9 @@ import ResumeSectionEditor from "./ResumeSectionEditor";
 import ResumePreview from "./ResumePreview";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import { Resume } from "@/types/resume";
+import { Resume, ExperienceEntry, EducationEntry, SkillEntry } from "@/types/resume";
 import { ResumeFormat } from "@/utils/resume/pdfExporter";
+import { ExperienceEditor, EducationEditor, SkillEditor } from "./StructuredSections";
 
 interface ResumeEditorTabsProps {
   activeTab: string;
@@ -16,6 +16,9 @@ interface ResumeEditorTabsProps {
   resumeData: Resume;
   selectedTemplate: string;
   handleUpdateSection: (section: keyof Resume, value: string) => void;
+  handleUpdateStructuredExperience: (experiences: ExperienceEntry[]) => void;
+  handleUpdateStructuredEducation: (educations: EducationEntry[]) => void;
+  handleUpdateStructuredSkills: (skills: SkillEntry[]) => void;
   handleExport: (format: ResumeFormat) => void;
   isDownloading: boolean;
 }
@@ -26,6 +29,9 @@ const ResumeEditorTabs: React.FC<ResumeEditorTabsProps> = ({
   resumeData,
   selectedTemplate,
   handleUpdateSection,
+  handleUpdateStructuredExperience,
+  handleUpdateStructuredEducation,
+  handleUpdateStructuredSkills,
   handleExport,
   isDownloading
 }) => {
@@ -58,46 +64,24 @@ const ResumeEditorTabs: React.FC<ResumeEditorTabsProps> = ({
           />
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6">
-          <ResumeSectionEditor
-            title="Erhvervserfaring"
-            sections={[
-              { 
-                key: "experience", 
-                label: "Erfaring", 
-                value: resumeData.experience || "", 
-                multiline: true 
-              },
-            ]}
-            onUpdate={handleUpdateSection}
-          />
-          
-          <ResumeSectionEditor
-            title="Uddannelse"
-            sections={[
-              { 
-                key: "education", 
-                label: "Uddannelse", 
-                value: resumeData.education || "", 
-                multiline: true 
-              },
-            ]}
-            onUpdate={handleUpdateSection}
+        <div className="space-y-6">
+          <ExperienceEditor 
+            experiences={resumeData.structuredExperience || []}
+            onUpdate={handleUpdateStructuredExperience}
           />
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6">
-          <ResumeSectionEditor
-            title="Kompetencer"
-            sections={[
-              { 
-                key: "skills", 
-                label: "Kompetencer", 
-                value: resumeData.skills || "", 
-                multiline: true 
-              },
-            ]}
-            onUpdate={handleUpdateSection}
+        <div className="space-y-6">
+          <EducationEditor
+            educations={resumeData.structuredEducation || []}
+            onUpdate={handleUpdateStructuredEducation}
+          />
+        </div>
+
+        <div className="space-y-6">
+          <SkillEditor
+            skills={resumeData.structuredSkills || []}
+            onUpdate={handleUpdateStructuredSkills}
           />
         </div>
 

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import ResumeHeader from "./ResumeHeader";
@@ -10,8 +9,9 @@ import { useDownloadErrorHandler } from "@/utils/download/downloadErrorHandler";
 import TemplateSelector from "./TemplateSelector";
 import PhotoUploader from "./PhotoUploader";
 import { exportResume, ResumeFormat } from "@/utils/resume/pdfExporter";
-import { Resume } from "@/types/resume";
+import { Resume, ExperienceEntry, EducationEntry, SkillEntry } from "@/types/resume";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { v4 as uuidv4 } from "uuid";
 
 const ResumeBuilder: React.FC = () => {
   const [activeTab, setActiveTab] = useState("edit");
@@ -22,10 +22,13 @@ const ResumeBuilder: React.FC = () => {
     phone: "",
     address: "",
     summary: "",
-    education: "",
     experience: "",
+    education: "",
     skills: "",
     photo: undefined,
+    structuredExperience: [],
+    structuredEducation: [],
+    structuredSkills: [],
   });
   const [isLoading, setIsLoading] = useState(true);
   const [isDownloading, setIsDownloading] = useState(false);
@@ -71,10 +74,13 @@ const ResumeBuilder: React.FC = () => {
             phone: data.phone || "",
             address: data.address || "",
             summary: data.summary || "",
-            education: data.education || "",
             experience: data.experience || "",
+            education: data.education || "",
             skills: data.skills || "",
             photo: undefined,
+            structuredExperience: data.structuredExperience || [],
+            structuredEducation: data.structuredEducation || [],
+            structuredSkills: data.structuredSkills || [],
           };
 
           setResumeData(profileData);
@@ -98,6 +104,27 @@ const ResumeBuilder: React.FC = () => {
     setResumeData((prev) => ({
       ...prev,
       [section]: value,
+    }));
+  };
+
+  const handleUpdateStructuredExperience = (experiences: ExperienceEntry[]) => {
+    setResumeData(prev => ({
+      ...prev,
+      structuredExperience: experiences
+    }));
+  };
+
+  const handleUpdateStructuredEducation = (educations: EducationEntry[]) => {
+    setResumeData(prev => ({
+      ...prev,
+      structuredEducation: educations
+    }));
+  };
+
+  const handleUpdateStructuredSkills = (skills: SkillEntry[]) => {
+    setResumeData(prev => ({
+      ...prev,
+      structuredSkills: skills
     }));
   };
 
@@ -159,6 +186,9 @@ const ResumeBuilder: React.FC = () => {
             resumeData={resumeData}
             selectedTemplate={selectedTemplate}
             handleUpdateSection={handleUpdateSection}
+            handleUpdateStructuredExperience={handleUpdateStructuredExperience}
+            handleUpdateStructuredEducation={handleUpdateStructuredEducation}
+            handleUpdateStructuredSkills={handleUpdateStructuredSkills}
             handleExport={handleExport}
             isDownloading={isDownloading}
           />
