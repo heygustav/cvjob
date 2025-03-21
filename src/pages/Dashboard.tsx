@@ -71,10 +71,10 @@ const Dashboard = () => {
   }
 
   if (dashboardError || subError) {
-    // Convert Error objects to strings for rendering
+    // Convert Error objects to strings for rendering safely
     const errorMessage = dashboardError 
-      ? (dashboardError instanceof Error ? dashboardError.message : String(dashboardError))
-      : (subError instanceof Error ? subError.message : String(subError));
+      ? (typeof dashboardError === 'object' && dashboardError !== null ? String(dashboardError) : dashboardError)
+      : (typeof subError === 'object' && subError !== null ? String(subError) : subError);
       
     return (
       <div className="min-h-screen bg-gray-50 py-12">
