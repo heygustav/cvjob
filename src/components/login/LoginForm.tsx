@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Eye, EyeOff, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -53,6 +54,15 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading }) => {
     onSubmit(email, password);
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !isLoading) {
+      e.preventDefault();
+      if (email && password) {
+        onSubmit(email, password);
+      }
+    }
+  };
+
   return (
     <form className="space-y-6" onSubmit={handleSubmit}>
       <div>
@@ -71,6 +81,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading }) => {
             required
             value={email}
             onChange={handleChange}
+            onKeyDown={handleKeyDown}
             className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-primary focus:outline-none focus:ring-primary sm:text-sm"
             placeholder="dig@eksempel.dk"
           />
@@ -93,6 +104,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading }) => {
             required
             value={password}
             onChange={handleChange}
+            onKeyDown={handleKeyDown}
             className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-primary focus:outline-none focus:ring-primary sm:text-sm"
             placeholder="••••••••"
           />

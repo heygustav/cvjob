@@ -4,7 +4,9 @@ import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useValidation } from './useValidation';
+import { useToast } from '@/hooks/use-toast';
 import DOMPurify from 'dompurify';
+import { Eye, EyeOff } from 'lucide-react';
 
 interface AuthFormProps {
   isSignUp: boolean;
@@ -23,7 +25,13 @@ const AuthForm: React.FC<AuthFormProps> = ({
 }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const { errors, validateForm } = useValidation();
+  const { toast } = useToast();
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,7 +44,19 @@ const AuthForm: React.FC<AuthFormProps> = ({
       return;
     }
     
-    await onSubmit(sanitizedEmail, sanitizedPassword);
+    try {
+      await onSubmit(sanitizedEmail, sanitizedPassword);
+    } catch (error) {
+      // Error handling is managed in the parent component's handleAuthentication function
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !isLoading && attemptCount <= 5) {
+      if (email && password) {
+        handleSubmit(e as any);
+      }
+    }
   };
 
   return (
@@ -58,28 +78,41 @@ const AuthForm: React.FC<AuthFormProps> = ({
             placeholder="E-mail"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            onKeyDown={handleKeyDown}
           />
           {errors.email && (
             <p className="mt-1 text-sm text-red-500">{errors.email}</p>
           )}
         </div>
-        <div>
+        <div className="relative">
           <label htmlFor="password" className="sr-only">
             Adgangskode
           </label>
           <Input
             id="password"
             name="password"
-            type="password"
+            type={showPassword ? "text" : "password"}
             autoComplete={isSignUp ? 'new-password' : 'current-password'}
             required
             className={`rounded-none relative block w-full px-3 py-2 border ${
               errors.password ? 'border-red-500' : 'border-gray-300'
-            } placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm`}
+            } placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm pr-10`}
             placeholder="Adgangskode"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            onKeyDown={handleKeyDown}
           />
+          <button
+            type="button"
+            className="absolute inset-y-0 right-0 pr-3 flex items-center"
+            onClick={togglePasswordVisibility}
+          >
+            {showPassword ? (
+              <EyeOff className="h-4 w-4 text-gray-400" />
+            ) : (
+              <Eye className="h-4 w-4 text-gray-400" />
+            )}
+          </button>
           {errors.password && (
             <p className="mt-1 text-sm text-red-500">{errors.password}</p>
           )}

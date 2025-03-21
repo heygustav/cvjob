@@ -24,10 +24,37 @@ export const useAuthLogic = (
       
       if (error) {
         console.error("Sign in error:", error.message);
+        
+        // Show specific error message depending on the error type
+        if (error.message.includes('Invalid login credentials')) {
+          toast({
+            title: "Login fejlede",
+            description: "Email eller adgangskode er forkert. Prøv igen eller opret en ny konto.",
+            variant: "destructive",
+          });
+        } else if (error.message.includes('Email not confirmed')) {
+          toast({
+            title: "Email ikke bekræftet",
+            description: "Bekræft venligst din email før du logger ind.",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Login fejlede",
+            description: error.message,
+            variant: "destructive",
+          });
+        }
+        
         throw error;
       }
       
       console.log("Sign in successful, redirectUrl:", redirectUrl);
+      
+      toast({
+        title: "Login succesfuldt",
+        description: "Du er nu logget ind",
+      });
       
       if (redirectUrl) {
         navigate(redirectUrl);
@@ -38,12 +65,6 @@ export const useAuthLogic = (
       return { error: null, data };
     } catch (error) {
       console.error("Sign in error:", error);
-      
-      toast({
-        title: "Login fejlede",
-        description: error instanceof Error ? error.message : "Der opstod en fejl ved login",
-        variant: "destructive",
-      });
       
       setAttemptCount(attemptCount + 1);
       
@@ -70,6 +91,22 @@ export const useAuthLogic = (
       
       if (error) {
         console.error("Sign up error:", error.message);
+        
+        // Handle specific error messages
+        if (error.message.includes('already registered')) {
+          toast({
+            title: "Oprettelse fejlede",
+            description: "Denne email er allerede i brug. Prøv at logge ind i stedet.",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Oprettelse fejlede",
+            description: error.message,
+            variant: "destructive",
+          });
+        }
+        
         throw error;
       }
       
@@ -80,21 +117,22 @@ export const useAuthLogic = (
           title: "Bekræft din email",
           description: "Vi har sendt dig en email med et link til at bekræfte din konto.",
         });
-      } else if (redirectUrl) {
-        navigate(redirectUrl);
       } else {
-        navigate('/profile');
+        toast({
+          title: "Konto oprettet",
+          description: "Din konto er nu oprettet, og du er logget ind",
+        });
+        
+        if (redirectUrl) {
+          navigate(redirectUrl);
+        } else {
+          navigate('/profile');
+        }
       }
       
       return { error: null, data };
     } catch (error) {
       console.error("Sign up error:", error);
-      
-      toast({
-        title: "Oprettelse fejlede",
-        description: error instanceof Error ? error.message : "Der opstod en fejl ved oprettelse af konto",
-        variant: "destructive",
-      });
       
       setAttemptCount(attemptCount + 1);
       
@@ -112,11 +150,24 @@ export const useAuthLogic = (
       
       if (error) {
         console.error("Sign out error:", error.message);
+        
+        toast({
+          title: "Log ud fejlede",
+          description: error.message,
+          variant: "destructive",
+        });
+        
         throw error;
       }
       
       console.log("Sign out successful");
       resetAttemptCount();
+      
+      toast({
+        title: "Log ud",
+        description: "Du er nu logget ud",
+      });
+      
       navigate('/login');
     } catch (error) {
       console.error("Sign out error:", error);
@@ -133,6 +184,10 @@ export const useAuthLogic = (
     async (email: string, password: string, isSignUp: boolean, name?: string) => {
       if (isLoading) {
         console.log("Authentication in progress, please wait");
+        toast({
+          title: "Vent venligst",
+          description: "Behandler din anmodning...",
+        });
         return;
       }
       
@@ -146,12 +201,8 @@ export const useAuthLogic = (
         }
       } catch (error) {
         console.error("Authentication error:", error);
-        
-        toast({
-          title: `${isSignUp ? 'Oprettelse' : 'Login'} fejlede`,
-          description: error instanceof Error ? error.message : `Der opstod en fejl ved ${isSignUp ? 'oprettelse af konto' : 'login'}`,
-          variant: "destructive",
-        });
+        // Toast messages are shown in signIn and signUp functions
+        throw error; // Re-throw to let the calling component handle it
       }
     },
     [isLoading, signIn, signUp, toast]
