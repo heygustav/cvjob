@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -17,6 +16,11 @@ export const useAuthLogic = (
   const signIn = useCallback(async (email: string, password: string) => {
     try {
       console.log("Attempting to sign in with email:", email);
+      
+      // Add this to debug authentication issues
+      const authState = await supabase.auth.getSession();
+      console.log("Current auth state before signing in:", authState);
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -36,6 +40,12 @@ export const useAuthLogic = (
           toast({
             title: "Email ikke bekræftet",
             description: "Bekræft venligst din email før du logger ind.",
+            variant: "destructive",
+          });
+        } else if (error.message.includes('captcha verification')) {
+          toast({
+            title: "Login fejlede",
+            description: "Der opstod en fejl med verifikation. Prøv igen om et øjeblik.",
             variant: "destructive",
           });
         } else {

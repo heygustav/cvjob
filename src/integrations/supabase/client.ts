@@ -27,8 +27,7 @@ export const supabase = createClient<Database>(
       autoRefreshToken: true,
       persistSession: true,
       detectSessionInUrl: true,
-      // Use the dynamic site URL for redirects
-      flowType: 'pkce',
+      flowType: 'implicit', // Changed from 'pkce' to 'implicit' to avoid CAPTCHA issues
       storage: {
         getItem: (key) => {
           try {

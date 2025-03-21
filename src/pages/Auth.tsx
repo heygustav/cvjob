@@ -53,6 +53,7 @@ const Auth = () => {
 
   const handleSubmit = async (email: string, password: string) => {
     setError(null); // Clear previous errors
+    console.log("Auth page: handling submit with", email);
     
     try {
       await handleAuthentication(email, password, isSignUp);
@@ -63,12 +64,20 @@ const Auth = () => {
       
       // Show user-friendly error for non-existent user
       if (errorMessage.includes('Invalid login credentials') || 
-          errorMessage.includes('Invalid email or password')) {
+          errorMessage.includes('Invalid email or password') ||
+          errorMessage.includes('captcha verification process failed')) {
         toast({
           title: isSignUp ? "Oprettelse fejlede" : "Login fejlede",
           description: isSignUp 
             ? "Denne email er muligvis allerede i brug" 
-            : "Email eller adgangskode er forkert. Prøv igen eller opret en ny konto.",
+            : "Kunne ikke logge ind. Prøv igen eller opret en ny konto.",
+          variant: "destructive",
+        });
+      } else {
+        // Generic error message for any other error
+        toast({
+          title: "Fejl ved godkendelse",
+          description: errorMessage,
           variant: "destructive",
         });
       }
