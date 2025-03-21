@@ -20,12 +20,7 @@ export const useSignIn = (options: SignInOptions) => {
     try {
       console.log("Attempting to sign in with email:", email);
       
-      // Add this to debug authentication issues
-      const authState = await supabase.auth.getSession();
-      console.log("Current auth state before signing in:", authState);
-      
-      // Clear any previous sessions to avoid conflicts
-      await supabase.auth.signOut();
+      // Do NOT call signOut here as it can interfere with the authentication flow
       
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -50,8 +45,8 @@ export const useSignIn = (options: SignInOptions) => {
           });
         } else if (error.message.includes('captcha verification')) {
           toast({
-            title: "Login fejlede",
-            description: "Der opstod en fejl med CAPTCHA. Prøv igen om et øjeblik eller ryd dine cookies og genindlæs siden.",
+            title: "CAPTCHA fejlede",
+            description: "Du skal åbne siden i en browser og ikke i en indlejret visning for at logge ind. Prøv at rydde cookies og cache.",
             variant: "destructive",
           });
         } else {

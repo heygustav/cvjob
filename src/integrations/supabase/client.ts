@@ -13,7 +13,7 @@ const getSiteUrl = () => {
     return `${window.location.protocol}//${window.location.host}`;
   }
   // In development, use localhost with the correct port
-  return 'http://localhost:8080';
+  return 'http://localhost:3000';
 };
 
 // Import the supabase client like this:
@@ -27,8 +27,8 @@ export const supabase = createClient<Database>(
       autoRefreshToken: true,
       persistSession: true,
       detectSessionInUrl: true,
-      flowType: 'pkce', // Changed from 'implicit' to 'pkce' for better security and to avoid CAPTCHA issues
-      storage: localStorage // Explicitly define storage to ensure consistent behavior
+      flowType: 'implicit', // Use implicit flow to avoid CAPTCHA issues
+      storage: localStorage
     },
     global: {
       headers: {
