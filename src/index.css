@@ -335,6 +335,24 @@
       opacity: 1; 
     }
   }
+
+  /* Apply borders to all elements and buttons */
+  button, 
+  .btn,
+  [role="button"],
+  a.button,
+  [type="button"],
+  [type="submit"],
+  [type="reset"],
+  .card,
+  .form-control,
+  input, 
+  select, 
+  textarea,
+  [role="textbox"],
+  [contenteditable="true"] {
+    border: 1px solid hsl(var(--border));
+  }
 }
 
 /* For our gradient header */

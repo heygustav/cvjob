@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import IconButton from "@/components/ui/icon-button";
@@ -6,7 +5,7 @@ import { Link } from "react-router-dom";
 import { Plus, RefreshCw, Loader2 } from "lucide-react";
 
 interface DashboardActionsProps {
-  activeTab: "letters" | "jobs";
+  activeTab: "letters" | "jobs" | "companies";
   isRefreshing: boolean;
   onRefresh: () => void;
 }
@@ -41,6 +40,18 @@ const DashboardActions: React.FC<DashboardActionsProps> = ({
         >
           <Link to="/job/new">
             Tilføj jobopslag
+          </Link>
+        </IconButton>
+      ) : activeTab === "companies" ? (
+        <IconButton 
+          variant="default" 
+          size="sm" 
+          asChild
+          icon={<Plus className="h-4 w-4" />}
+          title="Tilføj virksomhed"
+        >
+          <Link to="/company/new">
+            Tilføj virksomhed
           </Link>
         </IconButton>
       ) : (

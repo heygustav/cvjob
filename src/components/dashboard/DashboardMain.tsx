@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import DashboardActions from "@/components/dashboard/DashboardActions";
@@ -9,10 +8,12 @@ import { SubscriptionStatus } from "@/services/subscription/types";
 interface DashboardMainProps {
   jobPostings: any[];
   coverLetters: any[];
+  companies: any[];
   isDeleting: boolean;
   isRefreshing: boolean;
   onJobDelete: (id: string) => void;
   onLetterDelete: (id: string) => void;
+  onCompanyDelete: (id: string) => void;
   onRefresh: () => void;
   findJobForLetter: (jobPostingId: string) => any | undefined;
   subscriptionStatus?: SubscriptionStatus;
@@ -21,22 +22,25 @@ interface DashboardMainProps {
 const DashboardMain: React.FC<DashboardMainProps> = ({
   jobPostings,
   coverLetters,
+  companies,
   isDeleting,
   isRefreshing,
   onJobDelete,
   onLetterDelete,
+  onCompanyDelete,
   onRefresh,
   findJobForLetter,
   subscriptionStatus
 }) => {
-  const [activeTab, setActiveTab] = useState<"letters" | "jobs">("letters");
+  const [activeTab, setActiveTab] = useState<"letters" | "jobs" | "companies">("letters");
 
-  const handleTabChange = (tab: "letters" | "jobs") => {
+  const handleTabChange = (tab: "letters" | "jobs" | "companies") => {
     setActiveTab(tab);
   };
 
   const jobCount = jobPostings.length;
   const letterCount = coverLetters.length;
+  const companyCount = companies.length;
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
@@ -44,6 +48,7 @@ const DashboardMain: React.FC<DashboardMainProps> = ({
         <DashboardHeader 
           jobCount={jobCount}
           letterCount={letterCount}
+          companyCount={companyCount}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           isLoading={isRefreshing}
@@ -72,9 +77,11 @@ const DashboardMain: React.FC<DashboardMainProps> = ({
           onTabChange={handleTabChange}
           jobPostings={jobPostings}
           coverLetters={coverLetters}
+          companies={companies}
           isDeleting={isDeleting}
           onJobDelete={onJobDelete}
           onLetterDelete={onLetterDelete}
+          onCompanyDelete={onCompanyDelete}
           findJobForLetter={findJobForLetter}
         />
       </main>

@@ -29,11 +29,13 @@ const Dashboard = () => {
   const {
     jobPostings,
     coverLetters,
+    companies,
     isLoading,
     isDeleting,
     isRefreshing,
     deleteJobPosting,
     deleteCoverLetter,
+    deleteCompany,
     refreshData,
     findJobForLetter,
     error: dashboardError
@@ -132,10 +134,12 @@ const Dashboard = () => {
       <DashboardMain
         jobPostings={processJobPostings()}
         coverLetters={coverLetters}
+        companies={companies}
         isDeleting={isDeleting}
         isRefreshing={isRefreshing}
         onJobDelete={deleteJobPosting}
         onLetterDelete={deleteCoverLetter}
+        onCompanyDelete={deleteCompany}
         onRefresh={refreshData}
         findJobForLetter={findJobForLetter}
         subscriptionStatus={subscriptionStatus || undefined}

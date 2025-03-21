@@ -1,11 +1,14 @@
-import React, { lazy, Suspense, memo } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import React, { lazy, Suspense, memo, useEffect } from 'react';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './components/AuthProvider';
 import AuthCallback from './components/auth/AuthCallback';
 import Navbar from './components/navbar/Navbar';
 import BackToTop from './components/BackToTop';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { LoadingSpinner } from './components/LoadingSpinner';
+import { useToast } from './hooks/use-toast';
+import ProtectedRoute from './components/ProtectedRoute';
+import './App.css';
 
 // Lazy load pages for better initial load performance
 const Index = lazy(() => import('./pages/Index'));
@@ -19,29 +22,37 @@ const NotFound = lazy(() => import('./pages/NotFound'));
 const Profile = lazy(() => import('./pages/Profile'));
 const ProfileQuiz = lazy(() => import('./pages/ProfileQuiz'));
 const Resume = lazy(() => import('./pages/Resume'));
+const CompanyForm = lazy(() => import('./pages/CompanyForm'));
 
 // Fallback loading component for lazy loading
 const PageLoadingFallback = () => (
-  <div className="flex justify-center items-center h-[70vh]">
+  <div className="w-full flex justify-center items-center py-24">
     <LoadingSpinner message="Indlæser side..." />
   </div>
 );
 
-// Protected route component
-const ProtectedRoute = memo(({ children }: { children: React.ReactNode }) => {
-  const { session } = useAuth();
-  
-  if (!session) {
-    return <Navigate to="/login" replace />;
-  }
-  
-  return <>{children}</>;
-});
-
-ProtectedRoute.displayName = 'ProtectedRoute';
-
 // Layout component that includes the Navbar
 const MainLayout = memo(({ children }: { children: React.ReactNode }) => {
+  const location = useLocation();
+  const { toast } = useToast();
+  const { session } = useAuth();
+  
+  // Scroll to top when route changes
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
+
+  // Show welcome toast on homepage
+  useEffect(() => {
+    if (location.pathname === '/' && !sessionStorage.getItem('welcomed')) {
+      toast({
+        title: "Velkommen til CVjob",
+        description: "Scroll ned for at se vores funktioner og hvordan du kommer i gang.",
+      });
+      sessionStorage.setItem('welcomed', 'true');
+    }
+  }, [location.pathname, toast]);
+
   return (
     <>
       <a href="#main-content" className="skip-to-content">
@@ -102,6 +113,30 @@ const AppRoutes = memo(() => {
             <MainLayout>
               <Suspense fallback={<PageLoadingFallback />}>
                 <Dashboard />
+              </Suspense>
+            </MainLayout>
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/company/new" 
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <Suspense fallback={<PageLoadingFallback />}>
+                <CompanyForm />
+              </Suspense>
+            </MainLayout>
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/company/:id/edit" 
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <Suspense fallback={<PageLoadingFallback />}>
+                <CompanyForm />
               </Suspense>
             </MainLayout>
           </ProtectedRoute>

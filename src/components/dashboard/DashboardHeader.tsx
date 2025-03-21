@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
@@ -8,8 +7,9 @@ import { useNavigate } from "react-router-dom";
 interface DashboardHeaderProps {
   jobCount: number;
   letterCount: number;
-  activeTab: 'jobs' | 'letters';
-  setActiveTab: (tab: 'jobs' | 'letters') => void;
+  companyCount: number;
+  activeTab: 'jobs' | 'letters' | 'companies';
+  setActiveTab: (tab: 'jobs' | 'letters' | 'companies') => void;
   isLoading: boolean;
   subscriptionStatus?: {
     canGenerate: boolean;
@@ -21,6 +21,7 @@ interface DashboardHeaderProps {
 const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   jobCount,
   letterCount,
+  companyCount,
   activeTab,
   setActiveTab,
   isLoading,
@@ -36,7 +37,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
       <div className="text-left"> 
         <h1 className="text-2xl font-bold tracking-tight text-gray-900">Dashboard</h1>
         <p className="text-muted-foreground mt-1">
-          Administrer dine jobopslag og ansøgninger
+          Administrer dine jobopslag, virksomheder og ansøgninger
         </p>
         
         {/* Add a quick summary of available items */}
@@ -46,6 +47,9 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           </div>
           <div className="bg-indigo-50 text-indigo-800 px-4 py-2 rounded-md border border-indigo-200">
             <span className="font-semibold">{jobCount}</span> jobopslag
+          </div>
+          <div className="bg-green-50 text-green-800 px-4 py-2 rounded-md border border-green-200">
+            <span className="font-semibold">{companyCount}</span> virksomhed{companyCount !== 1 ? 'er' : ''}
           </div>
         </div>
       </div>
