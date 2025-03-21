@@ -38,6 +38,16 @@ const LetterListComponent: React.FC<LetterListComponentProps> = ({
     setLetterToDelete(null);
   };
 
+  // Find job info for the letter to delete
+  const letterToDeleteJob = letterToDelete 
+    ? findJobForLetter(coverLetters.find(letter => letter.id === letterToDelete)?.job_posting_id || '')
+    : undefined;
+  
+  // Get a descriptive name for the letter based on job info
+  const letterDescriptiveName = letterToDeleteJob 
+    ? `ansøgning til ${letterToDeleteJob.title || 'stillingen'}`
+    : "ansøgning";
+
   return (
     <div className="overflow-hidden">
       <LetterTable 
@@ -55,6 +65,7 @@ const LetterListComponent: React.FC<LetterListComponentProps> = ({
         isDeleting={isDeleting}
         onConfirm={confirmDelete}
         onCancel={cancelDelete}
+        letterTitle={letterDescriptiveName}
       />
     </div>
   );

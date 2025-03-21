@@ -1,3 +1,4 @@
+
 import React, { lazy, Suspense, useMemo, memo } from 'react';
 import { LucideProps } from 'lucide-react';
 import dynamicIconImports from 'lucide-react/dynamicIconImports';
@@ -13,7 +14,7 @@ import {
 
 // Create a more performant loading fallback with memo
 const IconFallback = memo(() => (
-  <div className="w-6 h-6 bg-gray-200 rounded animate-pulse" />
+  <div className="w-6 h-6 bg-gray-200 rounded animate-pulse" aria-hidden="true" />
 ));
 
 // Export the IconName type for use in other components
@@ -22,6 +23,7 @@ export type IconName = keyof typeof dynamicIconImports;
 interface IconProps extends Omit<LucideProps, 'ref'> {
   name: IconName | string;
   dynamic?: boolean;
+  title?: string;
 }
 
 // Pre-define static icons for immediate use without dynamic imports
@@ -57,13 +59,21 @@ const staticIconsMap = {
  * - Static loading: imports icons at build time (better for frequently used icons)
  * - Dynamic loading: imports icons at runtime (better for rarely used icons)
  */
-const Icon = memo(({ name, dynamic = false, size = 24, ...props }: IconProps) => {
+const Icon = memo(({ name, dynamic = false, size = 24, title, ...props }: IconProps) => {
   // Convert PascalCase to kebab-case for consistent name handling
   const normalizedName = useMemo(() => {
     return typeof name === 'string' 
       ? name.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase() 
       : name;
   }, [name]);
+
+  // Prepare aria props for accessibility
+  const ariaProps = title ? {
+    role: 'img',
+    'aria-label': title,
+  } : {
+    'aria-hidden': 'true' as 'true',
+  };
 
   // Use dynamic import for on-demand loading
   if (dynamic) {
@@ -82,7 +92,7 @@ const Icon = memo(({ name, dynamic = false, size = 24, ...props }: IconProps) =>
 
     return (
       <Suspense fallback={<IconFallback />}>
-        <DynamicIcon size={size} {...props} />
+        <DynamicIcon size={size} {...ariaProps} {...props} />
       </Suspense>
     );
   }
@@ -90,7 +100,7 @@ const Icon = memo(({ name, dynamic = false, size = 24, ...props }: IconProps) =>
   // For static imports, use the pre-defined icon map
   const StaticIcon = staticIconsMap[name] || staticIconsMap[normalizedName] || HelpCircle;
   
-  return <StaticIcon size={size} {...props} />;
+  return <StaticIcon size={size} {...ariaProps} {...props} />;
 });
 
 // DisplayName for better debugging

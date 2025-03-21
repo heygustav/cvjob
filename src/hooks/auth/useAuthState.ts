@@ -11,9 +11,11 @@ export const useAuthState = (): [AuthState, AuthActions] => {
     isLoading,
     redirectUrl,
     attemptCount,
+    isNewUser,
     setRedirectUrl,
     resetAttemptCount,
-    setAttemptCount
+    setAttemptCount,
+    setIsNewUser
   } = useAuthSession();
 
   // Compute isAuthenticated from session and user
@@ -35,7 +37,8 @@ export const useAuthState = (): [AuthState, AuthActions] => {
     isAuthenticated,
     redirectUrl,
     attemptCount,
-  }), [session, user, isLoading, isAuthenticated, redirectUrl, attemptCount]);
+    isNewUser,
+  }), [session, user, isLoading, isAuthenticated, redirectUrl, attemptCount, isNewUser]);
 
   // Create actions object
   const actions: AuthActions = useMemo(() => ({
@@ -45,7 +48,8 @@ export const useAuthState = (): [AuthState, AuthActions] => {
     handleAuthentication,
     setRedirectUrl,
     resetAttemptCount,
-  }), [signIn, signUp, signOut, handleAuthentication, setRedirectUrl, resetAttemptCount]);
+    setIsNewUser,
+  }), [signIn, signUp, signOut, handleAuthentication, setRedirectUrl, resetAttemptCount, setIsNewUser]);
 
   return [state, actions];
 };

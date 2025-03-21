@@ -17,6 +17,7 @@ interface DeleteLetterDialogProps {
   isDeleting: boolean;
   onConfirm: () => void;
   onCancel: () => void;
+  letterTitle?: string; // Add letterTitle prop
 }
 
 const DeleteLetterDialog: React.FC<DeleteLetterDialogProps> = ({
@@ -24,16 +25,17 @@ const DeleteLetterDialog: React.FC<DeleteLetterDialogProps> = ({
   isDeleting,
   onConfirm,
   onCancel,
+  letterTitle = "ansøgning" // Default value
 }) => {
   return (
     <AlertDialog open={isOpen} onOpenChange={(open) => !open && onCancel()}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle className="text-left">
-            Slet ansøgning
+            Slet {letterTitle}
           </AlertDialogTitle>
           <AlertDialogDescription className="text-left">
-            Er du sikker på, at du vil slette denne ansøgning? 
+            Er du sikker på, at du vil slette denne {letterTitle}? 
             Denne handling kan ikke fortrydes.
           </AlertDialogDescription>
         </AlertDialogHeader>

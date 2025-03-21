@@ -55,17 +55,29 @@ const Navbar: React.FC = () => {
     };
   }, [isOpen]);
 
+<<<<<<< HEAD
   // Handle keyboard navigation - close menu on ESC
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
+=======
+  // Handle ESC key to close menu
+  useEffect(() => {
+    const handleEscKey = (event: KeyboardEvent) => {
+>>>>>>> 406a3ab4372735afacba8bd5f963daf3483bad78
       if (event.key === 'Escape' && isOpen) {
         setIsOpen(false);
       }
     };
 
+<<<<<<< HEAD
     document.addEventListener('keydown', handleKeyDown);
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
+=======
+    document.addEventListener('keydown', handleEscKey);
+    return () => {
+      document.removeEventListener('keydown', handleEscKey);
+>>>>>>> 406a3ab4372735afacba8bd5f963daf3483bad78
     };
   }, [isOpen]);
 
@@ -104,6 +116,11 @@ const Navbar: React.FC = () => {
           tabIndex={-1}
         />
       )}
+      
+      {/* Skip to main content link */}
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-1/2 focus:-translate-x-1/2 focus:z-[100] focus:px-4 focus:py-2 focus:bg-white focus:text-primary focus:font-medium focus:rounded-md focus:shadow-md">
+        Spring til hovedindhold
+      </a>
     </header>
   );
 };

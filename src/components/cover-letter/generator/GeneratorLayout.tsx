@@ -50,9 +50,14 @@ export const GeneratorLayout: React.FC<GeneratorLayoutProps> = ({
             className="w-full"
           >
             <div className="flex items-center justify-between">
-              <TabsList className="grid w-full max-w-md grid-cols-2">
-                <TabsTrigger value="step-1" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                  <PencilIcon className="h-4 w-4 mr-2" />
+              <TabsList className="grid w-full max-w-md grid-cols-2" aria-label="Ansøgningsgenerator trin">
+                <TabsTrigger 
+                  value="step-1" 
+                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                  aria-selected={step === 1}
+                  aria-controls="panel-joboplysninger"
+                >
+                  <PencilIcon className="h-4 w-4 mr-2" aria-hidden="true" />
                   <span className="hidden sm:inline">Joboplysninger</span>
                   <span className="sm:hidden">Job</span>
                 </TabsTrigger>
@@ -63,8 +68,10 @@ export const GeneratorLayout: React.FC<GeneratorLayoutProps> = ({
                     "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground",
                     !hasGeneratedLetter && "cursor-not-allowed opacity-50"
                   )}
+                  aria-selected={step === 2}
+                  aria-controls="panel-ansoegning"
                 >
-                  <FileTextIcon className="h-4 w-4 mr-2" />
+                  <FileTextIcon className="h-4 w-4 mr-2" aria-hidden="true" />
                   <span className="hidden sm:inline">Ansøgning</span>
                   <span className="sm:hidden">Brev</span>
                 </TabsTrigger>
@@ -76,8 +83,9 @@ export const GeneratorLayout: React.FC<GeneratorLayoutProps> = ({
                   size="sm" 
                   onClick={() => setStep(1)}
                   className="hidden sm:flex items-center h-10 px-4"
+                  aria-label="Tilbage til joboplysninger"
                 >
-                  <ChevronLeftIcon className="h-4 w-4 mr-2" />
+                  <ChevronLeftIcon className="h-4 w-4 mr-2" aria-hidden="true" />
                   Tilbage til jobinfo
                 </Button>
               )}
@@ -86,7 +94,13 @@ export const GeneratorLayout: React.FC<GeneratorLayoutProps> = ({
         </div>
         
         <CardContent className="p-0">
-          {children}
+          <div 
+            id={step === 1 ? "panel-joboplysninger" : "panel-ansoegning"}
+            role="tabpanel"
+            aria-labelledby={`step-${step}`}
+          >
+            {children}
+          </div>
         </CardContent>
       </Card>
     </div>

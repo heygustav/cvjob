@@ -28,7 +28,12 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
   findJobForLetter,
 }) => {
   return (
-    <div className="bg-white shadow-sm rounded-lg overflow-hidden border-0">
+    <div 
+      className="bg-white shadow-sm rounded-lg overflow-hidden border-0"
+      role="tabpanel"
+      id={activeTab === "letters" ? "panel-letters" : "panel-jobs"}
+      aria-labelledby={activeTab === "letters" ? "tab-letters" : "tab-jobs"}
+    >
       <div className="p-6">
         {activeTab === "letters" ? (
           coverLetters.length > 0 ? (
@@ -70,17 +75,17 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
               onJobDelete={onJobDelete}
             />
           ) : (
-            <div className="flex flex-col items-start py-12 px-4 text-left">
-  <div className="rounded-full bg-gray-100 p-5 mb-5">
-    <Briefcase className="h-8 w-8 text-gray-400" />
-  </div>
-  <h3 className="text-lg font-medium text-gray-900 mb-2">
-    Ingen jobopslag endnu
-  </h3>
-  <p className="text-gray-500 max-w-md mb-6">
-    Du har ikke tilføjet nogen jobopslag endnu. Tilføj dit første jobopslag for at komme i gang.
-  </p>
-</div>
+            <div className="flex flex-col items-start py-12 px-4 text-left" aria-live="polite">
+              <div className="rounded-full bg-gray-100 p-5 mb-5">
+                <Briefcase className="h-8 w-8 text-gray-400" aria-hidden="true" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                Ingen jobopslag endnu
+              </h3>
+              <p className="text-gray-500 max-w-md mb-6">
+                Du har ikke tilføjet nogen jobopslag endnu. Tilføj dit første jobopslag for at komme i gang.
+              </p>
+            </div>
           )
         )}
       </div>

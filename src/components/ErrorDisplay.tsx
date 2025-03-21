@@ -7,13 +7,15 @@ interface ErrorDisplayProps {
   message: string;
   onRetry?: () => void;
   phase?: 'job-save' | 'user-fetch' | 'generation' | 'letter-save' | 'cv-parsing';
+  icon?: React.ReactNode;
 }
 
 const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
   title,
   message,
   onRetry,
-  phase
+  phase,
+  icon
 }) => {
   // Get more specific help text based on the phase
   const getHelpText = () => {
@@ -55,6 +57,7 @@ const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
     >
       <div className="flex flex-col space-y-4">
         <div className="flex items-start">
+<<<<<<< HEAD
           <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 mr-3 mt-0.5 flex-shrink-0" aria-hidden="true" />
           <div className="space-y-2">
             <AlertTitle id="error-title" className="text-base font-semibold text-red-800 dark:text-red-300">
@@ -67,6 +70,17 @@ const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
               <HelpCircle className="h-4 w-4 text-red-500 dark:text-red-400 mr-2 mt-0.5 flex-shrink-0" aria-hidden="true" />
               <p className="text-xs text-red-600 dark:text-red-400">{getHelpText()}</p>
             </div>
+=======
+          {icon ? (
+            <span className="mr-3 mt-0.5 flex-shrink-0" aria-hidden="true">{icon}</span>
+          ) : (
+            <AlertCircle className="h-5 w-5 text-red-600 mr-3 mt-0.5 flex-shrink-0" aria-hidden="true" />
+          )}
+          <div>
+            <h3 className="text-base font-semibold text-red-800">{title}</h3>
+            <p className="text-sm text-red-700 mt-2">{message}</p>
+            <p className="text-xs text-red-600 mt-3 pb-1">{getHelpText()}</p>
+>>>>>>> 406a3ab4372735afacba8bd5f963daf3483bad78
           </div>
         </div>
         

@@ -84,21 +84,43 @@ const Dashboard = () => {
 
   // Render loading state
   if (isLoading || isSubLoading) {
+<<<<<<< HEAD
     return <DashboardLoading timeout={loadingTimeout} />;
+=======
+    return (
+      <div aria-live="polite" aria-busy="true">
+        <DashboardLoading />
+      </div>
+    );
+>>>>>>> 406a3ab4372735afacba8bd5f963daf3483bad78
   }
 
   // Render error state
   if (dashboardError || subError) {
+    // Convert Error objects to strings for rendering safely
+    const errorMessage = dashboardError 
+      ? (typeof dashboardError === 'object' && dashboardError !== null ? String(dashboardError) : dashboardError)
+      : (typeof subError === 'object' && subError !== null ? String(subError) : subError);
+      
+    // Make sure errorMessage is always a string before rendering
+    const errorDisplayMessage = typeof errorMessage === 'string' 
+      ? errorMessage 
+      : "Der opstod en fejl ved indlæsning af data. Prøv igen senere.";
+      
     return (
       <div className="min-h-screen bg-gray-50 py-12">
         <div className="container">
           <Alert variant="destructive" className="mb-6">
-            <AlertCircle className="h-4 w-4" />
+            <AlertCircle className="h-4 w-4" aria-hidden="true" />
             <AlertTitle>Der opstod en fejl</AlertTitle>
             <AlertDescription>
+<<<<<<< HEAD
               {(dashboardError || subError) ? 
                 "Der opstod et problem ved indlæsning af dine data." : 
                 "Der opstod en fejl ved indlæsning af data. Prøv igen senere."}
+=======
+              {errorDisplayMessage}
+>>>>>>> 406a3ab4372735afacba8bd5f963daf3483bad78
             </AlertDescription>
           </Alert>
           
@@ -106,7 +128,7 @@ const Dashboard = () => {
             onClick={handleRetry}
             className="flex items-center gap-2"
           >
-            <RefreshCw className="h-4 w-4" />
+            <RefreshCw className="h-4 w-4" aria-hidden="true" />
             Prøv igen
           </Button>
         </div>

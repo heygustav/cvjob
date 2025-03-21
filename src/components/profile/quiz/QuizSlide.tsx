@@ -20,8 +20,8 @@ const QuizSlide: React.FC<QuizSlideProps> = ({
   children,
 }) => {
   return (
-    <div className="max-w-md mx-auto bg-white rounded-lg shadow-sm p-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <h2 className="text-xl font-semibold text-gray-900 mb-2">{title}</h2>
+    <div className="max-w-md mx-auto bg-white rounded-lg shadow-sm p-6 animate-in fade-in slide-in-from-bottom-4 duration-500" role="dialog" aria-labelledby="quiz-title">
+      <h2 id="quiz-title" className="text-xl font-semibold text-gray-900 mb-2">{title}</h2>
       {description && <p className="text-sm text-gray-500 mb-4">{description}</p>}
       
       <div className="mb-6">
@@ -32,11 +32,14 @@ const QuizSlide: React.FC<QuizSlideProps> = ({
         <Button 
           variant="ghost" 
           onClick={onSkip}
-          className="text-gray-500 hover:text-gray-700"
+          className="text-gray-500 hover:text-gray-700 focus:ring-2 focus:ring-primary focus:ring-offset-2"
         >
           Spring over
         </Button>
-        <Button onClick={onNext}>
+        <Button 
+          onClick={onNext}
+          className="focus:ring-2 focus:ring-primary focus:ring-offset-2"
+        >
           {isLast ? "Afslut" : "Næste"}
         </Button>
       </div>

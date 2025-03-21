@@ -17,14 +17,16 @@ const DashboardActions: React.FC<DashboardActionsProps> = ({
   onRefresh,
 }) => {
   return (
-    <div className="flex flex-wrap gap-3 justify-start">
+    <div className="flex flex-wrap gap-3 justify-start mb-2">
       <IconButton 
         variant="outline" 
         size="sm" 
         onClick={onRefresh} 
         disabled={isRefreshing}
         icon={isRefreshing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-        title="Opdater"
+        title="Opdater data"
+        aria-label="Opdater data"
+        aria-busy={isRefreshing}
       >
         Opdater
       </IconButton>

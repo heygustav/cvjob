@@ -35,42 +35,49 @@ const DashboardMain: React.FC<DashboardMainProps> = ({
     setActiveTab(tab);
   };
 
+  const jobCount = jobPostings.length;
+  const letterCount = coverLetters.length;
+
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
-      <DashboardHeader 
-        jobCount={jobPostings.length}
-        letterCount={coverLetters.length}
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        isLoading={isRefreshing}
-        subscriptionStatus={subscriptionStatus}
-      />
+      <header>
+        <DashboardHeader 
+          jobCount={jobCount}
+          letterCount={letterCount}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          isLoading={isRefreshing}
+          subscriptionStatus={subscriptionStatus}
+        />
+      </header>
 
-      <div className="mb-6">
-        <TabNav
+      <main id="main-content">
+        <div className="mb-6" role="navigation">
+          <TabNav
+            activeTab={activeTab}
+            onTabChange={handleTabChange}
+          />
+        </div>
+
+        <div className="flex justify-start mb-4">
+          <DashboardActions 
+            activeTab={activeTab}
+            isRefreshing={isRefreshing}
+            onRefresh={onRefresh}
+          />
+        </div>
+
+        <DashboardContent 
           activeTab={activeTab}
           onTabChange={handleTabChange}
+          jobPostings={jobPostings}
+          coverLetters={coverLetters}
+          isDeleting={isDeleting}
+          onJobDelete={onJobDelete}
+          onLetterDelete={onLetterDelete}
+          findJobForLetter={findJobForLetter}
         />
-      </div>
-
-      <div className="flex justify-start mb-6">
-  <DashboardActions 
-    activeTab={activeTab}
-    isRefreshing={isRefreshing}
-    onRefresh={onRefresh}
-  />
-</div>
-
-      <DashboardContent 
-        activeTab={activeTab}
-        onTabChange={handleTabChange}
-        jobPostings={jobPostings}
-        coverLetters={coverLetters}
-        isDeleting={isDeleting}
-        onJobDelete={onJobDelete}
-        onLetterDelete={onLetterDelete}
-        findJobForLetter={findJobForLetter}
-      />
+      </main>
     </div>
   );
 };

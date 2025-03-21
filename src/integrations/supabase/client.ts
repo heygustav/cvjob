@@ -13,7 +13,7 @@ const getSiteUrl = () => {
     return `${window.location.protocol}//${window.location.host}`;
   }
   // In development, use localhost with the correct port
-  return 'http://localhost:8080';
+  return 'http://localhost:3000';
 };
 
 // Import the supabase client like this:
@@ -27,33 +27,8 @@ export const supabase = createClient<Database>(
       autoRefreshToken: true,
       persistSession: true,
       detectSessionInUrl: true,
-      // Use the dynamic site URL for redirects
-      flowType: 'pkce',
-      storage: {
-        getItem: (key) => {
-          try {
-            return Promise.resolve(localStorage.getItem(key));
-          } catch (error) {
-            return Promise.resolve(null);
-          }
-        },
-        setItem: (key, value) => {
-          try {
-            localStorage.setItem(key, value);
-            return Promise.resolve();
-          } catch (error) {
-            return Promise.resolve();
-          }
-        },
-        removeItem: (key) => {
-          try {
-            localStorage.removeItem(key);
-            return Promise.resolve();
-          } catch (error) {
-            return Promise.resolve();
-          }
-        },
-      }
+      flowType: 'implicit', // Use implicit flow to avoid CAPTCHA issues
+      storage: localStorage
     },
     global: {
       headers: {

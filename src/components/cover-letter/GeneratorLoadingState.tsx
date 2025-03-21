@@ -27,12 +27,20 @@ export const GeneratorLoadingState: React.FC<GeneratorLoadingStateProps> = ({
         </p>
       </div>
 
-      <div className="flex flex-col items-center justify-center py-12">
+      <div 
+        className="flex flex-col items-center justify-center py-12"
+        role="status" 
+        aria-live="polite"
+        aria-busy="true"
+      >
         <LoadingSpinner 
           progress={70}
           message={generationPhase || "Genererer din ansøgning..."}
           size="md"
         />
+        <p className="sr-only">
+          Genererer din ansøgning. Fase: {generationPhase || "Indlæser..."}
+        </p>
       </div>
     </div>
   );

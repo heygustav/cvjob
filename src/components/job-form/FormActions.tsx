@@ -19,7 +19,7 @@ const FormActions: React.FC<FormActionsProps> = ({
   elapsedTime = ""
 }) => {
   return (
-    <div className="flex justify-between items-center">
+    <div className="flex justify-between items-center flex-wrap gap-4">
       <div>
         {showSaveButton && (
           <SaveButton 
