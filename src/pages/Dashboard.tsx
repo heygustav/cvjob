@@ -76,6 +76,11 @@ const Dashboard = () => {
       ? (typeof dashboardError === 'object' && dashboardError !== null ? String(dashboardError) : dashboardError)
       : (typeof subError === 'object' && subError !== null ? String(subError) : subError);
       
+    // Make sure errorMessage is always a string before rendering
+    const errorDisplayMessage = typeof errorMessage === 'string' 
+      ? errorMessage 
+      : "Der opstod en fejl ved indlæsning af data. Prøv igen senere.";
+      
     return (
       <div className="min-h-screen bg-gray-50 py-12">
         <div className="container">
@@ -83,7 +88,7 @@ const Dashboard = () => {
             <AlertCircle className="h-4 w-4" aria-hidden="true" />
             <AlertTitle>Der opstod en fejl</AlertTitle>
             <AlertDescription>
-              {errorMessage || "Der opstod en fejl ved indlæsning af data. Prøv igen senere."}
+              {errorDisplayMessage}
             </AlertDescription>
           </Alert>
           
