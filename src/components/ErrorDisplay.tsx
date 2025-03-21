@@ -45,7 +45,7 @@ const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
       <div className="flex flex-col space-y-4">
         <div className="flex items-start">
           {icon ? (
-            <span className="mr-3 mt-0.5 flex-shrink-0">{icon}</span>
+            <span className="mr-3 mt-0.5 flex-shrink-0" aria-hidden="true">{icon}</span>
           ) : (
             <AlertCircle className="h-5 w-5 text-red-600 mr-3 mt-0.5 flex-shrink-0" aria-hidden="true" />
           )}

@@ -27,7 +27,7 @@ const IconButton: React.FC<IconButtonProps> = ({
         child.props.className
       ),
       title,
-      "aria-label": title,
+      "aria-label": title || typeof children === 'string' ? children : undefined,
       children: (
         <>
           {icon}
@@ -41,12 +41,12 @@ const IconButton: React.FC<IconButtonProps> = ({
   return (
     <Button
       className={cn(
-        "flex items-center justify-center gap-2 transition-colors",
+        "flex items-center justify-center gap-2 transition-colors focus:ring-2 focus:ring-offset-2 focus:ring-primary focus:outline-none",
         !children && "h-9 w-9 p-0",
         className
       )}
       title={title}
-      aria-label={title}
+      aria-label={title || typeof children === 'string' ? children : undefined}
       {...props}
     >
       {/* If it's an icon-only button, add aria-hidden to the icon */}

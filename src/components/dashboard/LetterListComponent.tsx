@@ -38,6 +38,11 @@ const LetterListComponent: React.FC<LetterListComponentProps> = ({
     setLetterToDelete(null);
   };
 
+  // Find the letter title for the dialog
+  const letterTitle = letterToDelete 
+    ? coverLetters.find(letter => letter.id === letterToDelete)?.title || "ansøgning"
+    : "ansøgning";
+
   return (
     <div className="overflow-hidden">
       <LetterTable 
@@ -55,6 +60,7 @@ const LetterListComponent: React.FC<LetterListComponentProps> = ({
         isDeleting={isDeleting}
         onConfirm={confirmDelete}
         onCancel={cancelDelete}
+        letterTitle={letterTitle}
       />
     </div>
   );

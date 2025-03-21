@@ -25,6 +25,7 @@ const TabNav: React.FC<TabNavProps> = ({ activeTab, onTabChange }) => {
           id="tab-letters"
           aria-selected={activeTab === "letters"}
           aria-controls="panel-letters"
+          tabIndex={activeTab === "letters" ? 0 : -1}
         >
           <File className="h-5 w-5 mr-2 flex-shrink-0" aria-hidden="true" /> 
           <span>Ansøgninger</span>
@@ -42,6 +43,7 @@ const TabNav: React.FC<TabNavProps> = ({ activeTab, onTabChange }) => {
           id="tab-jobs"
           aria-selected={activeTab === "jobs"}
           aria-controls="panel-jobs"
+          tabIndex={activeTab === "jobs" ? 0 : -1}
         >
           <Briefcase className="h-5 w-5 mr-2 flex-shrink-0" aria-hidden="true" /> 
           <span>Jobopslag</span>

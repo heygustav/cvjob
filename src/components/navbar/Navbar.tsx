@@ -56,6 +56,20 @@ const Navbar: React.FC = () => {
     };
   }, [isOpen]);
 
+  // Handle ESC key to close menu
+  useEffect(() => {
+    const handleEscKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isOpen) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('keydown', handleEscKey);
+    return () => {
+      document.removeEventListener('keydown', handleEscKey);
+    };
+  }, [isOpen]);
+
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
       scrolled 
@@ -87,6 +101,11 @@ const Navbar: React.FC = () => {
           aria-hidden="true"
         />
       )}
+      
+      {/* Skip to main content link */}
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-1/2 focus:-translate-x-1/2 focus:z-[100] focus:px-4 focus:py-2 focus:bg-white focus:text-primary focus:font-medium focus:rounded-md focus:shadow-md">
+        Spring til hovedindhold
+      </a>
     </header>
   );
 };

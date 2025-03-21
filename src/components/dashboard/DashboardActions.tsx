@@ -17,7 +17,7 @@ const DashboardActions: React.FC<DashboardActionsProps> = ({
   onRefresh,
 }) => {
   return (
-    <div className="flex flex-wrap gap-3 justify-start">
+    <div className="flex flex-wrap gap-3 justify-start mb-2">
       <IconButton 
         variant="outline" 
         size="sm" 

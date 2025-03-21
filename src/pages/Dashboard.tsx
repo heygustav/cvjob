@@ -63,7 +63,11 @@ const Dashboard = () => {
   };
 
   if (isLoading || isSubLoading) {
-    return <DashboardLoading />;
+    return (
+      <div aria-live="polite" aria-busy="true">
+        <DashboardLoading />
+      </div>
+    );
   }
 
   if (dashboardError || subError) {
@@ -71,7 +75,7 @@ const Dashboard = () => {
       <div className="min-h-screen bg-gray-50 py-12">
         <div className="container">
           <Alert variant="destructive" className="mb-6">
-            <AlertCircle className="h-4 w-4" />
+            <AlertCircle className="h-4 w-4" aria-hidden="true" />
             <AlertTitle>Der opstod en fejl</AlertTitle>
             <AlertDescription>
               {dashboardError || subError || "Der opstod en fejl ved indlæsning af data. Prøv igen senere."}
@@ -82,7 +86,7 @@ const Dashboard = () => {
             onClick={handleRetry}
             className="flex items-center gap-2"
           >
-            <RefreshCw className="h-4 w-4" />
+            <RefreshCw className="h-4 w-4" aria-hidden="true" />
             Prøv igen
           </Button>
         </div>

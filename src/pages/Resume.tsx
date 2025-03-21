@@ -29,8 +29,15 @@ const Resume: React.FC = () => {
   return (
     <div className="bg-gray-50 min-h-screen py-8">
       <div className="container mx-auto px-4">
-        <ResumeGuide />
-        <ResumeBuilder />
+        <header className="mb-6">
+          <h1 className="text-2xl font-bold tracking-tight text-gray-900">CV Builder</h1>
+          <p className="text-muted-foreground">Opret et professionelt CV, der får dig til at skille dig ud</p>
+        </header>
+        
+        <main>
+          <ResumeGuide />
+          <ResumeBuilder />
+        </main>
       </div>
     </div>
   );

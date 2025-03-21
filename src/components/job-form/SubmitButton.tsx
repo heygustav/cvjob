@@ -44,7 +44,7 @@ const SubmitButton: React.FC<SubmitButtonProps> = ({
       type="submit"
       disabled={isLoading || isSuccess}
       className={cn(
-        "px-4 py-2 h-10 rounded-md shadow-sm text-sm font-medium text-white w-full sm:w-auto flex items-center justify-center gap-2 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
+        "px-4 py-2 h-10 rounded-md shadow-sm text-sm font-medium text-white w-full sm:w-auto flex items-center justify-center gap-2 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
         isSuccess 
           ? "bg-green-600 w-12 h-10 sm:w-12" 
           : "bg-primary hover:bg-primary/90 active:bg-primary-800",
