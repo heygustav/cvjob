@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Trash, CalendarIcon } from "lucide-react";
-import { v4 as uuidv4 } from "uuid";
+import { generateUUID } from "@/utils/uuid";
 import {
   Popover,
   PopoverContent,

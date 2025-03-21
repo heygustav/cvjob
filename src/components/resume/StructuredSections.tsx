@@ -1,6 +1,6 @@
 import React from "react";
 import StructuredRowEditor from "./StructuredRowEditor";
-import { v4 as uuidv4 } from "uuid";
+import { generateUUID } from "@/utils/uuid";
 import { ExperienceEntry, EducationEntry, SkillEntry } from "@/types/resume";
 
 interface ExperienceEditorProps {
@@ -13,7 +13,7 @@ export const ExperienceEditor: React.FC<ExperienceEditorProps> = ({
   onUpdate,
 }) => {
   const createExperience = (): ExperienceEntry => ({
-    id: uuidv4(),
+    id: generateUUID(),
     position: "",
     organization: "",
     fromDate: "",
@@ -47,7 +47,7 @@ export const EducationEditor: React.FC<EducationEditorProps> = ({
   onUpdate,
 }) => {
   const createEducation = (): EducationEntry => ({
-    id: uuidv4(),
+    id: generateUUID(),
     education: "",
     school: "",
     fromDate: "",
@@ -81,7 +81,7 @@ export const SkillEditor: React.FC<SkillEditorProps> = ({
   onUpdate,
 }) => {
   const createSkill = (): SkillEntry => ({
-    id: uuidv4(),
+    id: generateUUID(),
     skill: "",
     years: "",
     bulletPoints: [],
