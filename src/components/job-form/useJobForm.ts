@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { JobFormData } from "@/services/coverLetter/types";
@@ -33,7 +32,7 @@ export const useJobForm = ({ initialData, onSubmit, onSave }: UseJobFormProps) =
     description: initialData?.description || "",
     contact_person: initialData?.contact_person || "",
     url: initialData?.url || "",
-    deadline: initialData?.deadline ? initialData.deadline : "",
+    deadline: "",
   });
   
   const [errors, setErrors] = useState<Record<string, string>>({});

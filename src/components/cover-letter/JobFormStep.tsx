@@ -1,4 +1,3 @@
-
 import React from "react";
 import { User, JobPosting } from "@/lib/types";
 import { JobFormData } from "@/services/coverLetter/types";
@@ -109,7 +108,7 @@ const JobFormStep: React.FC<JobFormStepProps> = ({
             progress={generationProgress?.progress || 0}
             elapsed={1500}
             phase={generationPhase || 'generation'} 
-            message={generationProgress?.message || "Genererer din ansøgning..."}
+            message={generationProgress?.message || (generationPhase === 'generation' ? "Vent venligst..." : "Genererer din ansøgning...")}
             onRetry={resetError}
           />
         </div>

@@ -1,4 +1,3 @@
-
 import React from "react";
 import { LoadingState } from "@/hooks/coverLetter/types";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
@@ -35,11 +34,11 @@ export const GeneratorLoadingState: React.FC<GeneratorLoadingStateProps> = ({
       >
         <LoadingSpinner 
           progress={70}
-          message={generationPhase || "Genererer din ansøgning..."}
+          message={generationPhase === 'generation' || !generationPhase ? "Vent venligst..." : generationPhase}
           size="md"
         />
         <p className="sr-only">
-          Genererer din ansøgning. Fase: {generationPhase || "Indlæser..."}
+          Genererer din ansøgning. Fase: {generationPhase === 'generation' || !generationPhase ? "Vent venligst..." : generationPhase}
         </p>
       </div>
     </div>
