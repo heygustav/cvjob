@@ -71,6 +71,11 @@ const Dashboard = () => {
   }
 
   if (dashboardError || subError) {
+    // Convert Error objects to strings for rendering
+    const errorMessage = dashboardError 
+      ? (dashboardError instanceof Error ? dashboardError.message : String(dashboardError))
+      : (subError instanceof Error ? subError.message : String(subError));
+      
     return (
       <div className="min-h-screen bg-gray-50 py-12">
         <div className="container">
@@ -78,7 +83,7 @@ const Dashboard = () => {
             <AlertCircle className="h-4 w-4" aria-hidden="true" />
             <AlertTitle>Der opstod en fejl</AlertTitle>
             <AlertDescription>
-              {dashboardError || subError || "Der opstod en fejl ved indlæsning af data. Prøv igen senere."}
+              {errorMessage || "Der opstod en fejl ved indlæsning af data. Prøv igen senere."}
             </AlertDescription>
           </Alert>
           
