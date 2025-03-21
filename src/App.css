@@ -230,7 +230,7 @@
 
 /* For our gradient header */
 .gradient-header {
-  background: linear-gradient(to right, hsl(var(--gradient-start)), hsl(var(--gradient-middle)), hsl(var(--gradient-end)));
+  background: linear-gradient(to bottom, hsl(var(--gradient-start)), hsl(var(--gradient-middle)), hsl(var(--gradient-end)));
 }
 
 /* Page transitions */
