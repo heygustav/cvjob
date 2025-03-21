@@ -84,15 +84,11 @@ const Dashboard = () => {
 
   // Render loading state
   if (isLoading || isSubLoading) {
-<<<<<<< HEAD
-    return <DashboardLoading timeout={loadingTimeout} />;
-=======
     return (
       <div aria-live="polite" aria-busy="true">
-        <DashboardLoading />
+        <DashboardLoading timeout={loadingTimeout} />
       </div>
     );
->>>>>>> 406a3ab4372735afacba8bd5f963daf3483bad78
   }
 
   // Render error state
@@ -114,13 +110,7 @@ const Dashboard = () => {
             <AlertCircle className="h-4 w-4" aria-hidden="true" />
             <AlertTitle>Der opstod en fejl</AlertTitle>
             <AlertDescription>
-<<<<<<< HEAD
-              {(dashboardError || subError) ? 
-                "Der opstod et problem ved indlæsning af dine data." : 
-                "Der opstod en fejl ved indlæsning af data. Prøv igen senere."}
-=======
               {errorDisplayMessage}
->>>>>>> 406a3ab4372735afacba8bd5f963daf3483bad78
             </AlertDescription>
           </Alert>
           
