@@ -76,10 +76,10 @@ export const useDashboardFetch = () => {
       
       // Use Promise.all for parallel requests - more efficient
       const [jobResponse, letterResponse] = await Promise.all([
-        // Fetch job postings with specific columns for better performance
+        // Fetch job postings with specific columns that exist in the database
         supabase
           .from("job_postings")
-          .select("id, title, company, description, location, created_at, updated_at, url, user_id, contact_person, deadline")
+          .select("id, title, company, description, contact_person, deadline, created_at, updated_at, url, user_id")
           .eq("user_id", userId)
           .order("created_at", { ascending: false }),
           
