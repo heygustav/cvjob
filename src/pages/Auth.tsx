@@ -5,7 +5,7 @@ import AuthForm from '@/components/auth/AuthForm';
 import AuthLayout from '@/components/auth/AuthLayout';
 import { useAuth } from '@/components/AuthProvider';
 import { useToast } from '@/hooks/use-toast';
-import { ErrorDisplay } from '@/components/ErrorDisplay';
+import ErrorDisplay from '@/components/ErrorDisplay';
 
 const Auth = () => {
   const [isSignUp, setIsSignUp] = useState(false);
