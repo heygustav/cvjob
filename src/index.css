@@ -53,35 +53,35 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
 
-    --primary: 201 96% 32%; /* #0369a1 - More vibrant blue for better contrast */
-    --primary-foreground: 0 0% 98%;
+    --primary: 221 83% 53%;
+    --primary-foreground: 210 40% 98%;
 
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222 47% 11%;
 
     --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted-foreground: 215.4 25% 26.9%;
 
     --accent: 210 40% 96.1%;
-    --accent-foreground: 222 47% 11%;
+    --accent-foreground: 222 67% 11%;
 
-    --destructive: 0 84.2% 60.2%; /* Brighter red for better visibility */
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 201 96% 32%; /* #0369a1 - matching primary */
+    --ring: 221 83% 53%;
 
     --radius: 0.5rem;
 
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 240 5.9% 10%;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 222 67% 11%;
+    --sidebar-primary: 221 83% 53%;
+    --sidebar-primary-foreground: 210 40% 98%;
+    --sidebar-accent: 210 40% 96.1%;
+    --sidebar-accent-foreground: 222 47% 11%;
+    --sidebar-border: 214.3 31.8% 91.4%;
+    --sidebar-ring: 221 83% 53%;
 
     --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     
@@ -97,6 +97,7 @@
     transition-property: background-color, border-color, color, fill, stroke;
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     transition-duration: 150ms;
+    box-sizing: border-box;
   }
 
   /* Disable transitions for users who prefer reduced motion */
@@ -104,9 +105,9 @@
     *,
     *::before,
     *::after {
-      transition-duration: 0.01ms !important;
       animation-duration: 0.01ms !important;
       animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
     }
   }
@@ -122,32 +123,32 @@
     --popover: 222 47% 11%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 201 96% 32%; /* #0369a1 - More vibrant blue for dark mode */
-    --primary-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222 47% 11%;
 
-    --secondary: 217 32% 17%;
+    --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 217 32% 17%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 25% 80%;
 
-    --accent: 217 32% 17%;
+    --accent: 217.2 32.6% 17.5%;
     --accent-foreground: 210 40% 98%;
 
-    --destructive: 0 72.8% 50.6%; /* Brighter red for dark mode */
+    --destructive: 0 62.8% 50.6%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 217 32% 17%;
-    --input: 217 32% 17%;
-    --ring: 201 96% 32%; /* #0369a1 - matching primary */
-
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 48%;
+    
     --sidebar-background: 222 47% 11%;
     --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 210 40% 98%;
+    --sidebar-primary: 217.2 91.2% 59.8%;
     --sidebar-primary-foreground: 222 47% 11%;
-    --sidebar-accent: 217 32% 17%;
+    --sidebar-accent: 217.2 32.6% 17.5%;
     --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 217 32% 17%;
+    --sidebar-border: 217.2 32.6% 17.5%;
     --sidebar-ring: 224.3 76.3% 48%;
     
     --gradient-start: 201 96% 32%; /* #0369a1 - primary */
@@ -158,6 +159,8 @@
   /* Fix dark mode flash */
   html.dark {
     color-scheme: dark;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
   }
 
   /* Improve focus styles for better accessibility */
@@ -169,10 +172,12 @@
   /* Larger touch targets for better mobile UX */
   @media (max-width: 640px) {
     button, 
+    .btn,
     [role="button"],
-    input[type="submit"],
-    input[type="reset"],
-    input[type="button"] {
+    a.button,
+    [type="button"],
+    [type="submit"],
+    [type="reset"] {
       min-height: 44px;
       min-width: 44px;
       padding: 0.5rem 1rem;
@@ -180,34 +185,40 @@
     
     input, 
     select, 
-    textarea {
+    textarea, 
+    .form-control,
+    [role="textbox"],
+    [contenteditable="true"] {
       min-height: 44px;
-      padding: 0.5rem;
+      padding: 0.5rem 0.75rem;
     }
   }
-}
 
-@layer base {
+  /* Global style reset with better defaults */
   * {
-    @apply border-border;
+    -webkit-tap-highlight-color: transparent;
   }
-  
+
   html, body {
-    @apply antialiased;
-    font-feature-settings: "ss01", "ss03", "cv01", "cv02", "cv03";
+    height: 100%;
+    text-rendering: optimizeSpeed;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     scroll-behavior: smooth;
-    touch-action: manipulation; /* Improves touch behavior on mobile */
-    -webkit-tap-highlight-color: transparent; /* Removes tap highlight on iOS */
+    overflow-x: hidden;
+    /* Improve readability with optimum line length */
+    max-width: 100vw;
   }
-  
+
   body {
-    @apply bg-background text-foreground;
-    font-family: var(--font-sans);
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    font-feature-settings: "kern", "liga", "calt";
+    font-variant-ligatures: common-ligatures;
+    font-variant-numeric: tabular-nums;
+    /* Ensure line height meets WCAG 2.1 requirements */
     line-height: 1.5;
-    overflow-x: hidden; /* Prevent horizontal overflow on mobile */
-    width: 100%;
   }
 
   /* Improved focus styles for accessibility */
@@ -217,54 +228,91 @@
 
   /* Skip to content link for keyboard users */
   .skip-to-content {
-    @apply sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-white focus:text-blue-600 focus:font-medium focus:rounded-md focus:shadow-md;
+    @apply sr-only focus:not-sr-only focus:absolute focus:z-50 focus:bg-background focus:text-foreground focus:px-4 focus:py-2 focus:rounded focus:shadow-md focus:top-4 focus:left-1/2 focus:-translate-x-1/2;
   }
 
   .glass-morphism {
-    @apply bg-white/70 backdrop-blur-md border border-white/20;
+    @apply bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border border-gray-200 dark:border-gray-800;
   }
 
   .neo-morphism {
-    @apply bg-gray-50 shadow-[8px_8px_16px_#d9d9d9,-8px_-8px_16px_#ffffff];
+    @apply bg-white dark:bg-gray-900 shadow-[4px_4px_10px_rgba(0,0,0,0.1),-4px_-4px_10px_rgba(255,255,255,0.7)] dark:shadow-[4px_4px_10px_rgba(0,0,0,0.3),-4px_-4px_10px_rgba(40,40,40,0.2)];
   }
 
   .text-balance {
     text-wrap: balance;
   }
 
-  /* Mobile optimized inputs to prevent zoom */
+  /* Font size adjustment for better readability on small screens */
   @media (max-width: 640px) {
+    html {
+      font-size: 93.75%; /* 15px base */
+    }
+    
     input, select, textarea, button {
-      font-size: 16px;
+      font-size: 1rem; /* Ensure readable font size on mobile */
     }
   }
 
-  /* Accessibility-friendly subtle animations */
+  /* Improved print styles for better document printing */
+  @media print {
+    body {
+      font-size: 12pt;
+      line-height: 1.3;
+    }
+    
+    a[href]::after {
+      content: " (" attr(href) ")";
+      color: #555;
+      font-size: 0.9em;
+    }
+    
+    nav, .sidebar, button, .btn, .action-buttons {
+      display: none !important;
+    }
+    
+    .print-only {
+      display: block !important;
+    }
+    
+    .no-print {
+      display: none !important;
+    }
+    
+    @page {
+      margin: 1.5cm;
+    }
+  }
+
+  /* Skip animation for users who prefer reduced motion */
   @media (prefers-reduced-motion: no-preference) {
     .fade-in {
-      animation: fadeIn 0.6s ease-in-out;
+      animation: fadeIn 0.5s ease-in-out;
     }
-
+    
     .slide-up {
       animation: slideUp 0.5s ease-out;
     }
-
+    
     .scale-in {
-      animation: scaleIn 0.4s ease-out;
+      animation: scaleIn 0.3s ease-out;
     }
   }
 
   /* Font optimization classes */
   .font-optimized {
+    font-display: swap;
     text-rendering: optimizeSpeed;
   }
-  
+
   .font-critical {
-    font-display: block;
-  }
-  
-  .font-non-critical {
     font-display: swap;
+    text-rendering: optimizeLegibility;
+  }
+
+  .font-non-critical {
+    font-display: optional;
+    text-rendering: optimizeSpeed;
   }
 
   @keyframes fadeIn {
@@ -273,39 +321,50 @@
   }
 
   @keyframes slideUp {
-    from { transform: translateY(20px); opacity: 0; }
+    from { transform: translateY(10px); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }
   }
 
   @keyframes scaleIn {
-    from { transform: scale(0.95); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
+    from { 
+      transform: scale(0.95);
+      opacity: 0; 
+    }
+    to { 
+      transform: scale(1);
+      opacity: 1; 
+    }
   }
 }
 
 /* For our gradient header */
 .gradient-header {
-  background: linear-gradient(to right, hsl(var(--gradient-start)), hsl(var(--gradient-middle)), hsl(var(--gradient-end)));
+  background: linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0) 100%);
+  backdrop-filter: blur(5px);
 }
 
 /* Page transitions */
 @media (prefers-reduced-motion: no-preference) {
   .page-enter {
     opacity: 0;
+    transform: translateY(8px);
   }
-
+  
   .page-enter-active {
     opacity: 1;
-    transition: opacity 300ms;
+    transform: translateY(0);
+    transition: opacity 300ms, transform 300ms;
   }
-
+  
   .page-exit {
     opacity: 1;
+    transform: translateY(0);
   }
-
+  
   .page-exit-active {
     opacity: 0;
-    transition: opacity 300ms;
+    transform: translateY(-8px);
+    transition: opacity 300ms, transform 300ms;
   }
 }
 
@@ -322,17 +381,25 @@
   border-width: 0;
 }
 
+.sr-only-focusable:not(:focus) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
 /* Celebration emoji pattern */
 .celebration-emoji-pattern {
-  background-repeat: repeat;
-  animation: subtle-float 20s ease-in-out infinite;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cpath d='M30 30l10-10 10 10-10 10-10-10zm-10 0l10-10 10 10-10 10-10-10z' stroke='%23333' stroke-width='0.5'/%3E%3C/g%3E%3C/svg%3E");
+  opacity: 0.05;
 }
 
 @keyframes subtle-float {
-  0%, 100% {
-    background-position: 0 0;
-  }
-  50% {
-    background-position: 20px 20px;
-  }
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
 }

@@ -1,23 +1,34 @@
-import React from 'react';
+import React, { lazy, Suspense, memo } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import Index from './pages/Index';
-import Login from './pages/Login';
-import Signup from './pages/Signup';
-import Auth from './pages/Auth';
-import Dashboard from './pages/Dashboard';
-import CoverLetter from './pages/CoverLetter';
-import CoverLetterGenerator from './pages/CoverLetterGenerator';
-import NotFound from './pages/NotFound';
 import { AuthProvider, useAuth } from './components/AuthProvider';
 import AuthCallback from './components/auth/AuthCallback';
-import Profile from './pages/Profile';
-import ProfileQuiz from './pages/ProfileQuiz';
-import Resume from './pages/Resume';
 import Navbar from './components/navbar/Navbar';
 import BackToTop from './components/BackToTop';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import { LoadingSpinner } from './components/LoadingSpinner';
+
+// Lazy load pages for better initial load performance
+const Index = lazy(() => import('./pages/Index'));
+const Login = lazy(() => import('./pages/Login'));
+const Signup = lazy(() => import('./pages/Signup'));
+const Auth = lazy(() => import('./pages/Auth'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const CoverLetter = lazy(() => import('./pages/CoverLetter'));
+const CoverLetterGenerator = lazy(() => import('./pages/CoverLetterGenerator'));
+const NotFound = lazy(() => import('./pages/NotFound'));
+const Profile = lazy(() => import('./pages/Profile'));
+const ProfileQuiz = lazy(() => import('./pages/ProfileQuiz'));
+const Resume = lazy(() => import('./pages/Resume'));
+
+// Fallback loading component for lazy loading
+const PageLoadingFallback = () => (
+  <div className="flex justify-center items-center h-[70vh]">
+    <LoadingSpinner message="Indlæser side..." />
+  </div>
+);
 
 // Protected route component
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+const ProtectedRoute = memo(({ children }: { children: React.ReactNode }) => {
   const { session } = useAuth();
   
   if (!session) {
@@ -25,10 +36,12 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }
   
   return <>{children}</>;
-};
+});
+
+ProtectedRoute.displayName = 'ProtectedRoute';
 
 // Layout component that includes the Navbar
-const MainLayout = ({ children }: { children: React.ReactNode }) => {
+const MainLayout = memo(({ children }: { children: React.ReactNode }) => {
   return (
     <>
       <a href="#main-content" className="skip-to-content">
@@ -36,31 +49,61 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
       </a>
       <Navbar />
       <main id="main-content" className="pt-16 min-h-[calc(100vh-4rem)]">
-        {children}
+        <ErrorBoundary>
+          {children}
+        </ErrorBoundary>
       </main>
       <BackToTop threshold={300} showLabel />
     </>
   );
-};
+});
 
-const AppRoutes = () => {
+MainLayout.displayName = 'MainLayout';
+
+const AppRoutes = memo(() => {
   const { session } = useAuth();
   
   return (
     <Routes>
-      <Route path="/" element={<MainLayout><Index /></MainLayout>} />
-      <Route path="/login" element={<Login onLogin={() => {}} />} />
-      <Route path="/signup" element={<Signup onSignup={() => {}} />} />
-      <Route path="/auth" element={<Auth />} />
+      <Route path="/" element={
+        <MainLayout>
+          <Suspense fallback={<PageLoadingFallback />}>
+            <Index />
+          </Suspense>
+        </MainLayout>
+      } />
+      <Route path="/login" element={
+        <Suspense fallback={<PageLoadingFallback />}>
+          <Login onLogin={() => {}} />
+        </Suspense>
+      } />
+      <Route path="/signup" element={
+        <Suspense fallback={<PageLoadingFallback />}>
+          <Signup onSignup={() => {}} />
+        </Suspense>
+      } />
+      <Route path="/auth" element={
+        <Suspense fallback={<PageLoadingFallback />}>
+          <Auth />
+        </Suspense>
+      } />
       <Route path="/auth/callback" element={<AuthCallback />} />
-      <Route path="/profile-quiz" element={<ProfileQuiz />} />
+      <Route path="/profile-quiz" element={
+        <Suspense fallback={<PageLoadingFallback />}>
+          <ProfileQuiz />
+        </Suspense>
+      } />
       
       {/* Protected Routes */}
       <Route 
         path="/dashboard" 
         element={
           <ProtectedRoute>
-            <MainLayout><Dashboard /></MainLayout>
+            <MainLayout>
+              <Suspense fallback={<PageLoadingFallback />}>
+                <Dashboard />
+              </Suspense>
+            </MainLayout>
           </ProtectedRoute>
         } 
       />
@@ -68,7 +111,11 @@ const AppRoutes = () => {
         path="/cover-letter/:id?" 
         element={
           <ProtectedRoute>
-            <MainLayout><CoverLetter userId={session?.user?.id || ''} /></MainLayout>
+            <MainLayout>
+              <Suspense fallback={<PageLoadingFallback />}>
+                <CoverLetter userId={session?.user?.id || ''} />
+              </Suspense>
+            </MainLayout>
           </ProtectedRoute>
         } 
       />
@@ -76,7 +123,11 @@ const AppRoutes = () => {
         path="/ansoegning" 
         element={
           <ProtectedRoute>
-            <MainLayout><CoverLetterGenerator /></MainLayout>
+            <MainLayout>
+              <Suspense fallback={<PageLoadingFallback />}>
+                <CoverLetterGenerator />
+              </Suspense>
+            </MainLayout>
           </ProtectedRoute>
         } 
       />
@@ -84,7 +135,11 @@ const AppRoutes = () => {
         path="/cover-letter/generator" 
         element={
           <ProtectedRoute>
-            <MainLayout><CoverLetterGenerator /></MainLayout>
+            <MainLayout>
+              <Suspense fallback={<PageLoadingFallback />}>
+                <CoverLetterGenerator />
+              </Suspense>
+            </MainLayout>
           </ProtectedRoute>
         } 
       />
@@ -92,7 +147,11 @@ const AppRoutes = () => {
         path="/profile" 
         element={
           <ProtectedRoute>
-            <MainLayout><Profile /></MainLayout>
+            <MainLayout>
+              <Suspense fallback={<PageLoadingFallback />}>
+                <Profile />
+              </Suspense>
+            </MainLayout>
           </ProtectedRoute>
         } 
       />
@@ -100,17 +159,29 @@ const AppRoutes = () => {
         path="/resume" 
         element={
           <ProtectedRoute>
-            <MainLayout><Resume /></MainLayout>
+            <MainLayout>
+              <Suspense fallback={<PageLoadingFallback />}>
+                <Resume />
+              </Suspense>
+            </MainLayout>
           </ProtectedRoute>
         } 
       />
       
-      <Route path="*" element={<MainLayout><NotFound /></MainLayout>} />
+      <Route path="*" element={
+        <MainLayout>
+          <Suspense fallback={<PageLoadingFallback />}>
+            <NotFound />
+          </Suspense>
+        </MainLayout>
+      } />
     </Routes>
   );
-};
+});
 
-const App = () => {
+AppRoutes.displayName = 'AppRoutes';
+
+const App = memo(() => {
   return (
     <AuthProvider>
       <div className="flex flex-col min-h-screen bg-background text-foreground antialiased">
@@ -118,6 +189,8 @@ const App = () => {
       </div>
     </AuthProvider>
   );
-};
+});
+
+App.displayName = 'App';
 
 export default App;

@@ -55,29 +55,17 @@ const Navbar: React.FC = () => {
     };
   }, [isOpen]);
 
-<<<<<<< HEAD
   // Handle keyboard navigation - close menu on ESC
   useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-=======
-  // Handle ESC key to close menu
-  useEffect(() => {
     const handleEscKey = (event: KeyboardEvent) => {
->>>>>>> 406a3ab4372735afacba8bd5f963daf3483bad78
       if (event.key === 'Escape' && isOpen) {
         setIsOpen(false);
       }
     };
 
-<<<<<<< HEAD
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-=======
     document.addEventListener('keydown', handleEscKey);
     return () => {
       document.removeEventListener('keydown', handleEscKey);
->>>>>>> 406a3ab4372735afacba8bd5f963daf3483bad78
     };
   }, [isOpen]);
 
