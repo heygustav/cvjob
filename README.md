@@ -1,69 +1,155 @@
-# Welcome to your Lovable project
+# CVJob - Cover Letter & Resume Generator
 
-## Project info
+## Project Overview
 
-**URL**: https://lovable.dev/projects/984090b0-1bb9-436c-b8ee-2b24c79094eb
+CVJob is a web application that helps users create professional cover letters and manage their job applications. The application features a user-friendly interface for generating customized cover letters, profile management, and job application tracking.
 
-## How can I edit this code?
+## Technology Stack
 
-There are several ways of editing your application.
+- **Frontend Framework**: React with TypeScript
+- **Build Tool**: Vite
+- **UI Components**: shadcn-ui (Radix UI)
+- **Styling**: Tailwind CSS
+- **Backend/Database**: Supabase
+- **Authentication**: Supabase Auth
+- **State Management**: React Context API & React Query
+- **Routing**: React Router
+- **Form Handling**: React Hook Form with Zod validation
+- **Document Generation**: docx, jspdf
 
-**Use Lovable**
+## Project Structure
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/984090b0-1bb9-436c-b8ee-2b24c79094eb) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+```
+cvjob/
+├── src/                    # Source code
+│   ├── components/         # Reusable UI components
+│   ├── hooks/              # Custom React hooks
+│   ├── lib/                # Utilities and helper functions
+│   ├── pages/              # Page components
+│   │   ├── Index.tsx       # Landing page
+│   │   ├── Dashboard.tsx   # User dashboard
+│   │   ├── CoverLetter.tsx # Cover letter viewer
+│   │   ├── CoverLetterGenerator.tsx # Cover letter generation
+│   │   ├── Profile.tsx     # User profile management
+│   │   ├── Resume.tsx      # Resume management
+│   │   ├── Auth.tsx        # Authentication page
+│   │   ├── Login.tsx       # Login page
+│   │   ├── Signup.tsx      # Signup page
+│   │   └── ...             # Other pages
+│   ├── services/           # API and service integrations
+│   ├── types/              # TypeScript type definitions
+│   ├── utils/              # Utility functions
+│   ├── integrations/       # Third-party integrations
+│   ├── App.tsx             # Main application component
+│   ├── main.tsx            # Application entry point
+│   └── index.css           # Global styles
+├── public/                 # Static assets
+├── supabase/               # Supabase configuration and functions
+├── scripts/                # Build and utility scripts
+├── tailwind.config.ts      # Tailwind CSS configuration
+├── tsconfig.json           # TypeScript configuration
+├── vite.config.ts          # Vite configuration
+└── package.json            # Dependencies and scripts
 ```
 
-**Edit a file directly in GitHub**
+## Features
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+- **User Authentication**: Secure login and registration with Supabase
+- **Cover Letter Generator**: AI-assisted cover letter creation
+- **Profile Management**: User profile creation and management
+- **Job Application Tracking**: Track application status and history
+- **Document Export**: Export cover letters in various formats
+- **Responsive Design**: Mobile-friendly interface
 
-**Use GitHub Codespaces**
+## Setup and Installation
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### Prerequisites
 
-## What technologies are used for this project?
+- Node.js (v16 or higher)
+- npm or bun package manager
 
-This project is built with .
+### Local Development
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+1. Clone the repository:
+   ```sh
+   git clone <repository-url>
+   cd cvjob
+   ```
 
-## How can I deploy this project?
+2. Install dependencies:
+   ```sh
+   npm install
+   # or
+   bun install
+   ```
 
-Simply open [Lovable](https://lovable.dev/projects/984090b0-1bb9-436c-b8ee-2b24c79094eb) and click on Share -> Publish.
+3. Set up environment variables:
+   - Create a `.env` file in the root directory
+   - Add necessary Supabase credentials and API keys
 
-## I want to use a custom domain - is that possible?
+4. Start the development server:
+   ```sh
+   npm run dev
+   # or
+   bun run dev
+   ```
 
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+5. Open [http://localhost:5173](http://localhost:5173) in your browser
+
+## Development Guidelines
+
+### Code Style
+
+- Follow TypeScript best practices
+- Use functional components with hooks
+- Implement proper error handling
+- Write meaningful comments for complex logic
+
+### Components
+
+- Keep components small and focused
+- Use composition over inheritance
+- Leverage shadcn-ui components when possible
+- Implement proper prop validation
+
+### State Management
+
+- Use React Query for server state
+- Use Context API for global application state
+- Use local state for component-specific state
+
+## API Integration
+
+The application uses Supabase for backend services:
+
+- **Authentication**: User login, registration, and session management
+- **Database**: Storing user profiles, job applications, and cover letters
+- **Storage**: Storing document templates and user uploads
+- **Functions**: Server-side logic for document generation
+
+## Deployment
+
+This project can be deployed using:
+
+1. **Lovable Platform**: Open [Lovable](https://lovable.dev/projects/984090b0-1bb9-436c-b8ee-2b24c79094eb) and click on Share -> Publish
+
+2. **Manual Deployment**:
+   - Netlify
+   - Vercel
+   - GitHub Pages
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/your-feature-name`
+3. Commit your changes: `git commit -m 'Add some feature'`
+4. Push to the branch: `git push origin feature/your-feature-name`
+5. Submit a pull request
+
+## License
+
+[MIT License](LICENSE)
+
+## Contact
+
+For questions or support, reach out to the project maintainers.

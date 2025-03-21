@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "../AuthProvider";
@@ -56,12 +55,29 @@ const Navbar: React.FC = () => {
     };
   }, [isOpen]);
 
+  // Handle keyboard navigation - close menu on ESC
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isOpen) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen]);
+
   return (
-    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-      scrolled 
-        ? "bg-white/90 backdrop-blur-md shadow-md dark:bg-gray-900/90" 
-        : "bg-transparent"
-    }`}>
+    <header 
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        scrolled 
+          ? "bg-white/90 backdrop-blur-md shadow-md dark:bg-gray-900/90" 
+          : "bg-transparent"
+      }`}
+      role="banner"
+    >
       <div className="gradient-header transition-all duration-300">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
@@ -82,9 +98,10 @@ const Navbar: React.FC = () => {
       {/* Overlay to close menu when clicking outside */}
       {isOpen && (
         <div 
-          className="md:hidden fixed inset-0 bg-black/20 backdrop-blur-sm z-30"
+          className="md:hidden fixed inset-0 bg-black/20 backdrop-blur-sm z-30 transition-opacity duration-300"
           onClick={() => setIsOpen(false)}
           aria-hidden="true"
+          tabIndex={-1}
         />
       )}
     </header>

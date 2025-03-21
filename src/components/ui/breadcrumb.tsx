@@ -1,15 +1,23 @@
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
-import { ChevronRight, MoreHorizontal } from "lucide-react"
+import { ChevronRight, MoreHorizontal, Home } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
 const Breadcrumb = React.forwardRef<
   HTMLElement,
   React.ComponentPropsWithoutRef<"nav"> & {
-    separator?: React.ReactNode
+    separator?: React.ReactNode;
+    showHomeIcon?: boolean;
   }
->(({ ...props }, ref) => <nav ref={ref} aria-label="breadcrumb" {...props} />)
+>(({ className, showHomeIcon = false, ...props }, ref) => (
+  <nav 
+    ref={ref} 
+    aria-label="breadcrumb" 
+    className={cn("mb-4", className)}
+    {...props} 
+  />
+))
 Breadcrumb.displayName = "Breadcrumb"
 
 const BreadcrumbList = React.forwardRef<
@@ -42,17 +50,30 @@ BreadcrumbItem.displayName = "BreadcrumbItem"
 const BreadcrumbLink = React.forwardRef<
   HTMLAnchorElement,
   React.ComponentPropsWithoutRef<"a"> & {
-    asChild?: boolean
+    asChild?: boolean;
+    isHome?: boolean;
   }
->(({ asChild, className, ...props }, ref) => {
+>(({ asChild, className, isHome, children, ...props }, ref) => {
   const Comp = asChild ? Slot : "a"
 
   return (
     <Comp
       ref={ref}
-      className={cn("transition-colors hover:text-foreground", className)}
+      className={cn(
+        "transition-colors hover:text-foreground focus:outline-none focus:underline focus-visible:underline-offset-4 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded px-1 py-0.5",
+        className
+      )}
       {...props}
-    />
+    >
+      {isHome ? (
+        <span className="flex items-center gap-1">
+          <Home className="h-3.5 w-3.5" aria-hidden="true" />
+          <span className="sr-only sm:not-sr-only sm:inline">{children}</span>
+        </span>
+      ) : (
+        children
+      )}
+    </Comp>
   )
 })
 BreadcrumbLink.displayName = "BreadcrumbLink"
@@ -66,7 +87,7 @@ const BreadcrumbPage = React.forwardRef<
     role="link"
     aria-disabled="true"
     aria-current="page"
-    className={cn("font-normal text-foreground", className)}
+    className={cn("font-medium text-foreground truncate max-w-[160px] sm:max-w-none", className)}
     {...props}
   />
 ))
@@ -80,10 +101,10 @@ const BreadcrumbSeparator = ({
   <li
     role="presentation"
     aria-hidden="true"
-    className={cn("[&>svg]:size-3.5", className)}
+    className={cn("[&>svg]:size-3.5 text-muted-foreground/50", className)}
     {...props}
   >
-    {children ?? <ChevronRight />}
+    {children ?? <ChevronRight className="h-3.5 w-3.5" />}
   </li>
 )
 BreadcrumbSeparator.displayName = "BreadcrumbSeparator"
@@ -95,7 +116,7 @@ const BreadcrumbEllipsis = ({
   <span
     role="presentation"
     aria-hidden="true"
-    className={cn("flex h-9 w-9 items-center justify-center", className)}
+    className={cn("flex h-9 w-9 items-center justify-center text-muted-foreground/70", className)}
     {...props}
   >
     <MoreHorizontal className="h-4 w-4" />

@@ -41,7 +41,9 @@
     unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
   }
 
+  /* Prevent flash of incorrect theme with display none until theme is applied */
   :root {
+    color-scheme: light;
     --background: 210 40% 98%; /* #F9FAFB */
     --foreground: 222 47% 11%;
 
@@ -88,7 +90,29 @@
     --gradient-end: 204 96% 22%; /* darker blue */
   }
 
+  /* Apply smooth transitions when theme changes */
+  *,
+  *::before,
+  *::after {
+    transition-property: background-color, border-color, color, fill, stroke;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+  }
+
+  /* Disable transitions for users who prefer reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
   .dark {
+    color-scheme: dark;
     --background: 222 47% 11%;
     --foreground: 210 40% 98%;
 
@@ -129,6 +153,37 @@
     --gradient-start: 201 96% 32%; /* #0369a1 - primary */
     --gradient-middle: 201 85% 27%; /* darker blue */
     --gradient-end: 204 90% 22%; /* darker blue */
+  }
+
+  /* Fix dark mode flash */
+  html.dark {
+    color-scheme: dark;
+  }
+
+  /* Improve focus styles for better accessibility */
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+
+  /* Larger touch targets for better mobile UX */
+  @media (max-width: 640px) {
+    button, 
+    [role="button"],
+    input[type="submit"],
+    input[type="reset"],
+    input[type="button"] {
+      min-height: 44px;
+      min-width: 44px;
+      padding: 0.5rem 1rem;
+    }
+    
+    input, 
+    select, 
+    textarea {
+      min-height: 44px;
+      padding: 0.5rem;
+    }
   }
 }
 

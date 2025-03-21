@@ -1,7 +1,7 @@
-
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
+import { Loader2 } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
@@ -24,10 +24,13 @@ const buttonVariants = cva(
         info: "bg-sky-500 text-white hover:bg-sky-600 active:bg-sky-700 active:scale-[0.98] active:shadow-inner focus:ring-2 focus-visible:ring-offset-2",
       },
       size: {
-        default: "h-10 px-4 py-2",
-        sm: "h-9 rounded-md px-3",
-        lg: "h-11 rounded-md px-8",
-        icon: "h-10 w-10",
+        default: "h-10 px-4 py-2 min-h-[40px]",
+        sm: "h-9 rounded-md px-3 min-h-[36px]",
+        lg: "h-11 rounded-md px-8 min-h-[44px]",
+        icon: "h-10 w-10 min-h-[40px] min-w-[40px]",
+      },
+      mobileFriendly: {
+        true: "sm:h-10 h-11 sm:py-2 py-3 sm:px-4 px-5 min-h-[44px]",
       },
     },
     defaultVariants: {
@@ -40,18 +43,36 @@ const buttonVariants = cva(
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
-  asChild?: boolean
+  asChild?: boolean;
+  isLoading?: boolean;
+  loadingText?: string;
+  mobileFriendly?: boolean;
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
+  ({ className, variant, size, asChild = false, isLoading, loadingText, mobileFriendly, children, disabled, ...props }, ref) => {
     const Comp = asChild ? Slot : "button"
+    
+    const isDisabled = disabled || isLoading;
+    
     return (
       <Comp
-        className={cn(buttonVariants({ variant, size, className }))}
+        className={cn(buttonVariants({ variant, size, mobileFriendly, className }))}
         ref={ref}
+        disabled={isDisabled}
+        aria-busy={isLoading}
+        aria-disabled={isDisabled}
         {...props}
-      />
+      >
+        {isLoading ? (
+          <>
+            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+            {loadingText || children}
+          </>
+        ) : (
+          children
+        )}
+      </Comp>
     )
   }
 )

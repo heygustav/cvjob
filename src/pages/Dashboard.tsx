@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import DashboardLoading from "@/components/dashboard/DashboardLoading";
@@ -10,6 +9,9 @@ import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
+// Constants
+const LOADING_TIMEOUT_MS = 8000; // Reduced from 15s to 8s for better UX
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -40,6 +42,14 @@ const Dashboard = () => {
   // Set a timeout to detect if loading is taking too long
   useEffect(() => {
     if (isLoading || isSubLoading) {
+      // Show initial feedback toast for better UX
+      if (!loadingTimeout) {
+        toast({
+          title: "Indlæser data",
+          description: "Vent venligst mens vi henter dine jobopslag og ansøgninger.",
+        });
+      }
+      
       const timeoutId = setTimeout(() => {
         setLoadingTimeout(true);
         toast({
@@ -47,11 +57,21 @@ const Dashboard = () => {
           description: "Der kan være problemer med serveradgang eller netværksforbindelse.",
           variant: "destructive",
         });
-      }, 15000); // 15 second timeout
+      }, LOADING_TIMEOUT_MS);
       
       return () => clearTimeout(timeoutId);
     }
-  }, [isLoading, isSubLoading, toast]);
+  }, [isLoading, isSubLoading, toast, loadingTimeout]);
+
+  // Process job postings (moved to separate function for clarity)
+  const processJobPostings = () => {
+    return jobPostings.map(job => ({
+      ...job,
+      title: job.title || "Untitled Position",
+      company: job.company || "Unknown Company",
+      description: job.description || "No description provided"
+    }));
+  };
 
   // Handle retry when loading times out or there's an error
   const handleRetry = () => {
@@ -62,10 +82,12 @@ const Dashboard = () => {
     setLoadingTimeout(false);
   };
 
+  // Render loading state
   if (isLoading || isSubLoading) {
-    return <DashboardLoading />;
+    return <DashboardLoading timeout={loadingTimeout} />;
   }
 
+  // Render error state
   if (dashboardError || subError) {
     return (
       <div className="min-h-screen bg-gray-50 py-12">
@@ -74,7 +96,9 @@ const Dashboard = () => {
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Der opstod en fejl</AlertTitle>
             <AlertDescription>
-              {dashboardError || subError || "Der opstod en fejl ved indlæsning af data. Prøv igen senere."}
+              {(dashboardError || subError) ? 
+                "Der opstod et problem ved indlæsning af dine data." : 
+                "Der opstod en fejl ved indlæsning af data. Prøv igen senere."}
             </AlertDescription>
           </Alert>
           
@@ -90,18 +114,11 @@ const Dashboard = () => {
     );
   }
 
-  // Ensure job postings have default values for missing fields
-  const processedJobPostings = jobPostings.map(job => ({
-    ...job,
-    title: job.title || "Untitled Position",
-    company: job.company || "Unknown Company",
-    description: job.description || "No description provided"
-  }));
-
+  // Render main dashboard
   return (
     <div className="min-h-screen bg-gray-50 py-12">
       <DashboardMain
-        jobPostings={processedJobPostings}
+        jobPostings={processJobPostings()}
         coverLetters={coverLetters}
         isDeleting={isDeleting}
         isRefreshing={isRefreshing}

@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -6,27 +5,38 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { AlertCircle, RefreshCw } from "lucide-react";
 
-const DashboardLoading: React.FC = () => {
-  const [isLongLoading, setIsLongLoading] = useState(false);
+interface DashboardLoadingProps {
+  timeout?: boolean;
+}
+
+const DashboardLoading: React.FC<DashboardLoadingProps> = ({ timeout = false }) => {
+  const [isLongLoading, setIsLongLoading] = useState(timeout);
   const [isTimeout, setIsTimeout] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // If loading takes more than 10 seconds, show loading timeout message
+    // If loading takes more than 5 seconds, show loading timeout message (reduced from 10s)
     const longTimeoutId = setTimeout(() => {
       setIsLongLoading(true);
-    }, 10000);
+    }, 5000);
     
-    // If loading takes more than 30 seconds, show timeout message
+    // If loading takes more than 20 seconds, show timeout message (reduced from 30s)
     const timeoutId = setTimeout(() => {
       setIsTimeout(true);
-    }, 30000);
+    }, 20000);
 
     return () => {
       clearTimeout(longTimeoutId);
       clearTimeout(timeoutId);
     };
   }, []);
+
+  // Update internal state when prop changes
+  useEffect(() => {
+    if (timeout) {
+      setIsLongLoading(true);
+    }
+  }, [timeout]);
 
   const handleRefresh = () => {
     window.location.reload();

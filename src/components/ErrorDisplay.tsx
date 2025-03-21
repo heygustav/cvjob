@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { AlertCircle, RefreshCw } from 'lucide-react';
+import { AlertCircle, RefreshCw, HelpCircle } from 'lucide-react';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
 interface ErrorDisplayProps {
@@ -33,37 +32,59 @@ const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
         return "Hvis problemet fortsætter, prøv at genindlæse siden eller kontakt heygustav@icloud.com";
     }
   };
+
+  // Get specific action text based on the error phase
+  const getActionText = () => {
+    switch (phase) {
+      case 'job-save': return "Prøv igen";
+      case 'user-fetch': return "Genindlæs profil";
+      case 'generation': return "Generer igen";
+      case 'letter-save': return "Gem igen";
+      case 'cv-parsing': return "Forsøg igen";
+      default: return "Prøv igen";
+    }
+  };
   
   return (
-    <div 
-      className="mt-6 p-5 bg-red-50 rounded-lg border border-red-200 shadow-sm" 
+    <Alert 
+      variant="destructive" 
+      className="mt-6 bg-red-50 border-red-200 dark:bg-red-950/20 dark:border-red-900/50" 
       role="alert" 
-      aria-live="assertive"
+      aria-labelledby="error-title"
+      aria-describedby="error-description"
     >
       <div className="flex flex-col space-y-4">
         <div className="flex items-start">
-          <AlertCircle className="h-5 w-5 text-red-600 mr-3 mt-0.5 flex-shrink-0" aria-hidden="true" />
-          <div>
-            <h3 className="text-base font-semibold text-red-800">{title}</h3>
-            <p className="text-sm text-red-700 mt-2">{message}</p>
-            <p className="text-xs text-red-600 mt-3 pb-1">{getHelpText()}</p>
+          <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 mr-3 mt-0.5 flex-shrink-0" aria-hidden="true" />
+          <div className="space-y-2">
+            <AlertTitle id="error-title" className="text-base font-semibold text-red-800 dark:text-red-300">
+              {title}
+            </AlertTitle>
+            <AlertDescription id="error-description" className="text-sm text-red-700 dark:text-red-400">
+              {message}
+            </AlertDescription>
+            <div className="flex items-start pt-2">
+              <HelpCircle className="h-4 w-4 text-red-500 dark:text-red-400 mr-2 mt-0.5 flex-shrink-0" aria-hidden="true" />
+              <p className="text-xs text-red-600 dark:text-red-400">{getHelpText()}</p>
+            </div>
           </div>
         </div>
         
         {onRetry && (
-          <div className="flex">
+          <div className="flex mt-2">
             <button
               onClick={onRetry}
-              className="flex items-center px-4 py-2 bg-white border border-red-300 rounded-md text-sm font-medium text-red-700 hover:bg-red-50 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-              aria-label="Prøv igen"
+              type="button"
+              className="flex items-center px-4 py-2 bg-white dark:bg-red-950/30 border border-red-300 dark:border-red-800/50 rounded-md text-sm font-medium text-red-700 dark:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 min-h-[40px]"
+              aria-label={getActionText()}
             >
               <RefreshCw className="h-4 w-4 mr-2" aria-hidden="true" />
-              Prøv igen
+              {getActionText()}
             </button>
           </div>
         )}
       </div>
-    </div>
+    </Alert>
   );
 };
 

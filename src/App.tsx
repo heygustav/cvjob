@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Index from './pages/Index';
@@ -15,6 +14,7 @@ import Profile from './pages/Profile';
 import ProfileQuiz from './pages/ProfileQuiz';
 import Resume from './pages/Resume';
 import Navbar from './components/navbar/Navbar';
+import BackToTop from './components/BackToTop';
 
 // Protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -31,10 +31,14 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 const MainLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
+      <a href="#main-content" className="skip-to-content">
+        Skip to content
+      </a>
       <Navbar />
-      <main className="pt-16">
+      <main id="main-content" className="pt-16 min-h-[calc(100vh-4rem)]">
         {children}
       </main>
+      <BackToTop threshold={300} showLabel />
     </>
   );
 };
@@ -109,7 +113,9 @@ const AppRoutes = () => {
 const App = () => {
   return (
     <AuthProvider>
-      <AppRoutes />
+      <div className="flex flex-col min-h-screen bg-background text-foreground antialiased">
+        <AppRoutes />
+      </div>
     </AuthProvider>
   );
 };
