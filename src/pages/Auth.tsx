@@ -38,6 +38,7 @@ const Auth = () => {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
+      console.log("User is authenticated, redirecting to:", redirectUrl || '/dashboard');
       if (redirectUrl) {
         navigate(redirectUrl);
       } else {
@@ -56,8 +57,12 @@ const Auth = () => {
     console.log("Auth page: handling submit with", email);
     
     try {
+      // Add a clearer log to see if this function is being called
+      console.log("Auth page: attempting authentication with mode:", isSignUp ? "sign-up" : "sign-in");
       await handleAuthentication(email, password, isSignUp);
+      console.log("Auth page: authentication completed successfully");
     } catch (err) {
+      console.error("Auth page: authentication error:", err);
       // This will mostly be handled in authLogic.ts, but we'll add a fallback here
       const errorMessage = err instanceof Error ? err.message : 'Der opstod en uventet fejl';
       setError(errorMessage);

@@ -27,32 +27,8 @@ export const supabase = createClient<Database>(
       autoRefreshToken: true,
       persistSession: true,
       detectSessionInUrl: true,
-      flowType: 'implicit', // Using implicit flow to avoid CAPTCHA issues with login
-      storage: {
-        getItem: (key) => {
-          try {
-            return Promise.resolve(localStorage.getItem(key));
-          } catch (error) {
-            return Promise.resolve(null);
-          }
-        },
-        setItem: (key, value) => {
-          try {
-            localStorage.setItem(key, value);
-            return Promise.resolve();
-          } catch (error) {
-            return Promise.resolve();
-          }
-        },
-        removeItem: (key) => {
-          try {
-            localStorage.removeItem(key);
-            return Promise.resolve();
-          } catch (error) {
-            return Promise.resolve();
-          }
-        },
-      }
+      flowType: 'pkce', // Changed from 'implicit' to 'pkce' for better security and to avoid CAPTCHA issues
+      storage: localStorage // Explicitly define storage to ensure consistent behavior
     },
     global: {
       headers: {

@@ -35,18 +35,23 @@ const AuthForm: React.FC<AuthFormProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Form submitted", { email, password });
     
     // Sanitize inputs
     const sanitizedEmail = DOMPurify.sanitize(email);
     const sanitizedPassword = DOMPurify.sanitize(password);
     
     if (!validateForm(sanitizedEmail, sanitizedPassword)) {
+      console.log("Validation failed", errors);
       return;
     }
+    
+    console.log("Validation passed, attempting to submit", { sanitizedEmail });
     
     try {
       await onSubmit(sanitizedEmail, sanitizedPassword);
     } catch (error) {
+      console.error("Error in form submission:", error);
       // Error handling is managed in the parent component's handleAuthentication function
     }
   };
@@ -54,6 +59,7 @@ const AuthForm: React.FC<AuthFormProps> = ({
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !isLoading && attemptCount <= 5) {
       if (email && password) {
+        console.log("Enter key pressed, submitting form");
         handleSubmit(e as any);
       }
     }
@@ -124,6 +130,7 @@ const AuthForm: React.FC<AuthFormProps> = ({
           type="submit"
           disabled={isLoading || attemptCount > 5}
           className="group relative w-full flex justify-center"
+          onClick={() => console.log("Button clicked", { email, password })}
         >
           {isLoading ? (
             <span className="flex items-center">
