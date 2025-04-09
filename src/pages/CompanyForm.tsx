@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Building, Loader2, ArrowLeft } from "lucide-react";
+import { Company } from "@/lib/types";
 
 const CompanyForm = () => {
   const { id } = useParams();
@@ -42,7 +43,8 @@ const CompanyForm = () => {
       setError(null);
       
       try {
-        const { data, error } = await supabase
+        // Use any type to bypass TypeScript checking for the companies table
+        const { data, error } = await (supabase as any)
           .from('companies')
           .select('*')
           .eq('id', id)
@@ -52,14 +54,15 @@ const CompanyForm = () => {
         if (error) throw error;
         
         if (data) {
+          const company = data as Company;
           setFormData({
-            name: data.name || "",
-            description: data.description || "",
-            website: data.website || "",
-            contact_person: data.contact_person || "",
-            contact_email: data.contact_email || "",
-            contact_phone: data.contact_phone || "",
-            notes: data.notes || "",
+            name: company.name || "",
+            description: company.description || "",
+            website: company.website || "",
+            contact_person: company.contact_person || "",
+            contact_email: company.contact_email || "",
+            contact_phone: company.contact_phone || "",
+            notes: company.notes || "",
           });
         }
       } catch (err) {
@@ -120,7 +123,7 @@ const CompanyForm = () => {
       
       if (isEditing) {
         // Update existing company
-        const { error } = await supabase
+        const { error } = await (supabase as any)
           .from('companies')
           .update(companyData)
           .eq('id', id)
@@ -134,7 +137,7 @@ const CompanyForm = () => {
         });
       } else {
         // Create new company
-        const { error } = await supabase
+        const { error } = await (supabase as any)
           .from('companies')
           .insert({
             ...companyData,
@@ -352,4 +355,4 @@ const CompanyForm = () => {
   );
 };
 
-export default CompanyForm; 
+export default CompanyForm;

@@ -145,9 +145,35 @@ const DanishCVGenerator: React.FC<DanishCVGeneratorProps> = ({ data }) => {
 
 // Eksporter en funktion der genererer CV'et som en HTML-streng
 export const generateDanishCVHTML = (data: Resume): string => {
-  // We instantiate component and call its method directly 
-  const component = new DanishCVGenerator({ data });
-  return component.generateCVHTML ? component.generateCVHTML() : '';
+  // Create a mock React component to get the HTML
+  const generateHTML = () => {
+    // Access the component's method directly
+    const component = DanishCVGenerator({ data });
+    
+    // Generate the HTML string
+    if (typeof component.type === 'function') {
+      const instance = new component.type({ data });
+      // Call the method if it exists
+      if (instance && typeof instance.generateCVHTML === 'function') {
+        return instance.generateCVHTML();
+      }
+    }
+    
+    // Fallback - direct implementation
+    const hasBasicInfo = data.name && data.email;
+    if (!hasBasicInfo) {
+      return '<div>Venligst udfyld basisoplysninger (navn og email)</div>';
+    }
+    
+    return `<div class="danish-cv">
+      <h1>${data.name}</h1>
+      <p>${data.email}</p>
+      <p>${data.phone || ''}</p>
+      <div>${data.summary || ''}</div>
+    </div>`;
+  };
+  
+  return generateHTML();
 };
 
 export default DanishCVGenerator;

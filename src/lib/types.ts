@@ -4,13 +4,22 @@ import { Tables } from "@/integrations/supabase/types";
 
 export type JobPosting = Tables<"job_postings">;
 export type CoverLetter = Tables<"cover_letters">;
-export type Profile = Tables<"profiles">;
+export type Profile = Tables<"profiles"> & {
+  structuredExperience?: any[];
+  structuredEducation?: any[];
+  structuredSkills?: any[];
+};
+
 // Define Company type manually since it might not be in the generated types
 export interface Company {
   id: string;
   name: string;
   description?: string;
+  website?: string;
   contact_person?: string;
+  contact_email?: string;
+  contact_phone?: string;
+  notes?: string;
   created_at?: string;
   updated_at?: string;
   user_id: string;

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -57,10 +56,26 @@ const DanishResume: React.FC = () => {
         }
 
         if (data) {
-          // Handle structured fields with fallbacks
-          const structuredExperience = data.structuredExperience || [];
-          const structuredEducation = data.structuredEducation || [];
-          const structuredSkills = data.structuredSkills || [];
+          // Extract structuredExperience fields safely
+          let structuredExperience: any[] = [];
+          let structuredEducation: any[] = [];
+          let structuredSkills: any[] = [];
+          
+          // Check if we have these fields in the data object
+          if (data.structuredExperience) {
+            structuredExperience = Array.isArray(data.structuredExperience) ? 
+              data.structuredExperience : [];
+          }
+          
+          if (data.structuredEducation) {
+            structuredEducation = Array.isArray(data.structuredEducation) ? 
+              data.structuredEducation : [];
+          }
+          
+          if (data.structuredSkills) {
+            structuredSkills = Array.isArray(data.structuredSkills) ? 
+              data.structuredSkills : [];
+          }
           
           const profileData: Resume = {
             name: data.name || "",
@@ -71,9 +86,9 @@ const DanishResume: React.FC = () => {
             experience: data.experience || "",
             education: data.education || "",
             skills: data.skills || "",
-            structuredExperience: structuredExperience,
-            structuredEducation: structuredEducation,
-            structuredSkills: structuredSkills,
+            structuredExperience,
+            structuredEducation,
+            structuredSkills,
           };
 
           setResumeData(profileData);
