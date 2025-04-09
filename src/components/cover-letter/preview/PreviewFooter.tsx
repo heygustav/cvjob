@@ -3,17 +3,20 @@ import React from "react";
 
 interface PreviewFooterProps {
   wordCount: number;
+  customContent?: React.ReactNode;
 }
 
-const PreviewFooter: React.FC<PreviewFooterProps> = ({ wordCount }) => {
+const PreviewFooter: React.FC<PreviewFooterProps> = ({ wordCount, customContent }) => {
   return (
-    <div className="flex items-center justify-between p-4 border-t border-gray-200 bg-gray-50 text-xs text-gray-500">
-      <p>
-        {wordCount} {wordCount === 1 ? "ord" : "ord"}
-      </p>
-      <p>
-        {/* Additional footer content can be added here if needed */}
-      </p>
+    <div className="p-3 border-t border-gray-200 bg-gray-50 flex justify-between items-center text-xs text-gray-500">
+      <div>
+        {customContent || (
+          <span>Antal ord: {wordCount}</span>
+        )}
+      </div>
+      <div>
+        Genereret af CVJob.dk
+      </div>
     </div>
   );
 };

@@ -3,27 +3,36 @@ import React from "react";
 import { Copy, Edit, FileText, File, FileIcon } from "lucide-react";
 
 interface PreviewHeaderProps {
-  documentTitle: string;
-  isEditing: boolean;
-  isEditable: boolean;
-  onSaveChanges: () => void;
-  onEdit: () => void;
-  onCopy: () => void;
-  onDownloadTxt: () => void;
-  onDownloadDocx: () => void;
-  onDownloadPdf: () => void;
+  documentTitle?: string;
+  isEditing?: boolean;
+  isEditable?: boolean;
+  onSaveChanges?: () => void;
+  onEdit?: () => void;
+  onCopy?: () => void;
+  onDownloadTxt?: () => void;
+  onDownloadDocx?: () => void;
+  onDownloadPdf?: () => void;
+  // Add the missing props from useCoverLetterDocuments
+  isDownloading?: boolean;
+  fileFormat?: string;
+  onDownload?: () => Promise<void>;
+  onFormatChange?: (format: string) => void;
 }
 
 const PreviewHeader: React.FC<PreviewHeaderProps> = ({
-  documentTitle,
-  isEditing,
-  isEditable,
-  onSaveChanges,
-  onEdit,
-  onCopy,
-  onDownloadTxt,
-  onDownloadDocx,
-  onDownloadPdf,
+  documentTitle = "Ansøgning",
+  isEditing = false,
+  isEditable = false,
+  onSaveChanges = () => {},
+  onEdit = () => {},
+  onCopy = () => {},
+  onDownloadTxt = () => {},
+  onDownloadDocx = () => {},
+  onDownloadPdf = () => {},
+  // Added props implementation
+  isDownloading = false,
+  onDownload = async () => {},
+  onFormatChange = () => {}
 }) => {
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-5 border-b border-gray-200 bg-gray-50">

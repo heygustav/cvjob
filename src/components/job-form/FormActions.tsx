@@ -14,14 +14,14 @@ interface FormActionsProps {
 const FormActions: React.FC<FormActionsProps> = ({
   isLoading,
   isSaving = false,
-  showSaveButton = false,
+  showSaveButton = true,
   onSave,
   elapsedTime = ""
 }) => {
   return (
     <div className="flex justify-between items-center flex-wrap gap-4">
       <div>
-        {showSaveButton && (
+        {showSaveButton && onSave && (
           <SaveButton 
             onClick={onSave} 
             disabled={isLoading} 

@@ -8,9 +8,10 @@ interface UrlFieldProps {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   disabled: boolean;
+  error?: string;
 }
 
-const UrlField: React.FC<UrlFieldProps> = ({ value, onChange, disabled }) => {
+const UrlField: React.FC<UrlFieldProps> = ({ value, onChange, disabled, error }) => {
   return (
     <div className="mb-5">
       <div className="space-y-1">
@@ -27,15 +28,21 @@ const UrlField: React.FC<UrlFieldProps> = ({ value, onChange, disabled }) => {
             name="url"
             value={value}
             onChange={onChange}
-            className="w-full pl-10"
+            className={`w-full pl-10 ${error ? "border-red-500" : ""}`}
             placeholder="F.eks. https://eksempel.dk/jobs/marketingansvarlig"
             disabled={disabled}
             aria-describedby="url-description"
           />
         </div>
-        <p id="url-description" className="text-xs text-gray-500 mt-1">
-          Indsæt linket til jobopslaget, hvis du har det
-        </p>
+        {error ? (
+          <p id="url-error" className="text-xs text-red-500 mt-1">
+            {error}
+          </p>
+        ) : (
+          <p id="url-description" className="text-xs text-gray-500 mt-1">
+            Indsæt linket til jobopslaget, hvis du har det
+          </p>
+        )}
       </div>
     </div>
   );

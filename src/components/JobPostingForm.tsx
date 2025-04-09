@@ -37,10 +37,9 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
     onSave,
   });
 
-  const { isExtracting, handleExtract } = useJobExtraction(formData, (extractedData) => {
+  const { isExtracting, extractInfoFromDescription } = useJobExtraction(formData, (extractedData) => {
     // Update form data with extracted information
-    const updatedFormData = { ...formData, ...extractedData };
-    Object.entries(updatedFormData).forEach(([key, value]) => {
+    Object.entries(extractedData).forEach(([key, value]) => {
       const input = document.getElementById(key) as HTMLInputElement | HTMLTextAreaElement;
       if (input) {
         input.value = value as string;
@@ -66,7 +65,7 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
         value={formData.description}
         onChange={handleChange}
         disabled={isLoading}
-        onExtract={handleExtract}
+        onExtract={extractInfoFromDescription}
         isExtracting={isExtracting}
         error={errors.description}
         onKeywordClick={onKeywordClick}
@@ -76,7 +75,6 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
         value={formData.url}
         onChange={handleChange}
         disabled={isLoading}
-        error={errors.url}
       />
 
       <FormActions

@@ -29,8 +29,9 @@ export const PreviewStep: React.FC<PreviewStepProps> = ({
     <div className="space-y-6">
       <div className="bg-white rounded-lg border">
         <CoverLetterPreview 
+          letter={generatedLetter}
           content={safeContent}
-          onEdit={handleSafeEdit}
+          onEditContent={handleSafeEdit}
           isEditable={true}
         />
       </div>

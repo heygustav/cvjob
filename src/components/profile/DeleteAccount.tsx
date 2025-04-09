@@ -73,9 +73,9 @@ const DeleteAccount: React.FC<DeleteAccountProps> = ({ userId, onAccountDeleted 
         
       if (lettersError) throw lettersError;
       
-      // Fetch user's job listings
+      // Fetch user's job postings
       const { data: jobs, error: jobsError } = await supabase
-        .from("job_listings")
+        .from("job_postings")
         .select("*")
         .eq("user_id", userId);
         

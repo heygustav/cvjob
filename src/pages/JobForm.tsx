@@ -172,7 +172,6 @@ const JobForm = () => {
               onSave={handleSave}
               initialData={job} 
               isLoading={isSubmitting}
-              isSaving={isSaving}
             />
           )}
         </div>

@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { JobFormData } from "@/services/coverLetter/types";
 import DOMPurify from "dompurify";
 
-export const useJobExtraction = (formData: JobFormData, setFormData: React.Dispatch<React.SetStateAction<JobFormData>>) => {
+export const useJobExtraction = (formData: JobFormData, setFormData: (data: JobFormData) => void) => {
   const [isExtracting, setIsExtracting] = useState(false);
   const { toast } = useToast();
 

@@ -3,29 +3,31 @@ import React from "react";
 import DOMPurify from "dompurify";
 
 interface PreviewContentProps {
-  isEditing: boolean;
-  editedContent: string;
-  onTextChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  content: string;
+  isEditing?: boolean;
+  editedContent?: string;
+  onTextChange?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   company?: string;
   jobTitle?: string;
   contactPerson?: string;
-  formattedDate: string;
+  formattedDate?: string;
 }
 
 const PreviewContent: React.FC<PreviewContentProps> = ({
-  isEditing,
-  editedContent,
-  onTextChange,
-  company,
-  jobTitle,
-  contactPerson,
-  formattedDate,
+  content,
+  isEditing = false,
+  editedContent = "",
+  onTextChange = () => {},
+  company = "",
+  jobTitle = "",
+  contactPerson = "",
+  formattedDate = new Date().toLocaleDateString(),
 }) => {
   // Sanitize all user inputs to prevent XSS attacks
   const sanitizedCompany = company ? DOMPurify.sanitize(company) : "Virksomhed";
   const sanitizedJobTitle = jobTitle ? DOMPurify.sanitize(jobTitle) : "stillingen";
   const sanitizedContactPerson = contactPerson ? DOMPurify.sanitize(contactPerson) : "";
-  const sanitizedContent = DOMPurify.sanitize(editedContent);
+  const sanitizedContent = DOMPurify.sanitize(content);
 
   return (
     <>
