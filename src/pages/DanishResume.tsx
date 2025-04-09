@@ -8,6 +8,7 @@ import { LoadingSpinner } from "@/components/LoadingSpinner";
 import DanishCVGenerator from "@/components/resume/DanishCVGenerator";
 import { Resume } from "@/types/resume";
 import { Download, Copy, FileText } from "lucide-react";
+import { Profile } from "@/lib/types";
 
 const DanishResume: React.FC = () => {
   const [resumeData, setResumeData] = useState<Resume>({
@@ -56,42 +57,34 @@ const DanishResume: React.FC = () => {
         }
 
         if (data) {
+          // Cast data to Profile type to get TypeScript support for the structured fields
+          const profileData = data as Profile;
+          
           // Extract structuredExperience fields safely
-          let structuredExperience: any[] = [];
-          let structuredEducation: any[] = [];
-          let structuredSkills: any[] = [];
+          let structuredExperience = profileData.structuredExperience || [];
+          let structuredEducation = profileData.structuredEducation || [];
+          let structuredSkills = profileData.structuredSkills || [];
           
-          // Check if we have these fields in the data object
-          if (data.structuredExperience) {
-            structuredExperience = Array.isArray(data.structuredExperience) ? 
-              data.structuredExperience : [];
-          }
+          // Ensure these are arrays even if they're not in the database
+          if (!Array.isArray(structuredExperience)) structuredExperience = [];
+          if (!Array.isArray(structuredEducation)) structuredEducation = [];
+          if (!Array.isArray(structuredSkills)) structuredSkills = [];
           
-          if (data.structuredEducation) {
-            structuredEducation = Array.isArray(data.structuredEducation) ? 
-              data.structuredEducation : [];
-          }
-          
-          if (data.structuredSkills) {
-            structuredSkills = Array.isArray(data.structuredSkills) ? 
-              data.structuredSkills : [];
-          }
-          
-          const profileData: Resume = {
-            name: data.name || "",
+          const resumeDataFromProfile: Resume = {
+            name: profileData.name || "",
             email: user.email || "",
-            phone: data.phone || "",
-            address: data.address || "",
-            summary: data.summary || "",
-            experience: data.experience || "",
-            education: data.education || "",
-            skills: data.skills || "",
+            phone: profileData.phone || "",
+            address: profileData.address || "",
+            summary: profileData.summary || "",
+            experience: profileData.experience || "",
+            education: profileData.education || "",
+            skills: profileData.skills || "",
             structuredExperience,
             structuredEducation,
             structuredSkills,
           };
 
-          setResumeData(profileData);
+          setResumeData(resumeDataFromProfile);
         }
       } catch (err) {
         console.error("Uventet fejl ved hentning af profil:", err);

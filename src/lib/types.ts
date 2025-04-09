@@ -1,13 +1,14 @@
 
 import { User as SupabaseUser } from "@supabase/supabase-js";
 import { Tables } from "@/integrations/supabase/types";
+import { ExperienceEntry, EducationEntry, SkillEntry } from "@/types/resume";
 
 export type JobPosting = Tables<"job_postings">;
 export type CoverLetter = Tables<"cover_letters">;
 export type Profile = Tables<"profiles"> & {
-  structuredExperience?: any[];
-  structuredEducation?: any[];
-  structuredSkills?: any[];
+  structuredExperience?: ExperienceEntry[];
+  structuredEducation?: EducationEntry[];
+  structuredSkills?: SkillEntry[];
 };
 
 // Define Company type manually since it might not be in the generated types
