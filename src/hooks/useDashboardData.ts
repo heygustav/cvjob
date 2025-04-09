@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/components/AuthProvider";
-import { useSupabaseClient } from "./useSupabaseClient";
+import { supabase } from "@/integrations/supabase/client";
 
 /**
  * Main dashboard data hook for managing dashboard data
@@ -29,7 +29,6 @@ export const useDashboardData = (): UseDashboardDataResult => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState<any>(null);
   const { user } = useAuth();
-  const supabase = useSupabaseClient();
 
   // Fetch dashboard data
   const fetchData = useCallback(async () => {

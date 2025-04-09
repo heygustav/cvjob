@@ -57,6 +57,11 @@ const DanishResume: React.FC = () => {
         }
 
         if (data) {
+          // Handle structured fields with fallbacks
+          const structuredExperience = data.structuredExperience || [];
+          const structuredEducation = data.structuredEducation || [];
+          const structuredSkills = data.structuredSkills || [];
+          
           const profileData: Resume = {
             name: data.name || "",
             email: user.email || "",
@@ -66,9 +71,9 @@ const DanishResume: React.FC = () => {
             experience: data.experience || "",
             education: data.education || "",
             skills: data.skills || "",
-            structuredExperience: data.structuredExperience || [],
-            structuredEducation: data.structuredEducation || [],
-            structuredSkills: data.structuredSkills || [],
+            structuredExperience: structuredExperience,
+            structuredEducation: structuredEducation,
+            structuredSkills: structuredSkills,
           };
 
           setResumeData(profileData);

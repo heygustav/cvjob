@@ -1,10 +1,20 @@
+
 import { User as SupabaseUser } from "@supabase/supabase-js";
 import { Tables } from "@/integrations/supabase/types";
 
 export type JobPosting = Tables<"job_postings">;
 export type CoverLetter = Tables<"cover_letters">;
 export type Profile = Tables<"profiles">;
-export type Company = Tables<"companies">;
+// Define Company type manually since it might not be in the generated types
+export interface Company {
+  id: string;
+  name: string;
+  description?: string;
+  contact_person?: string;
+  created_at?: string;
+  updated_at?: string;
+  user_id: string;
+}
 
 // Extend the User type to be compatible with Supabase User type
 export interface User extends Partial<SupabaseUser> {

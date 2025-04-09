@@ -1,14 +1,16 @@
+
 import React, { useState } from "react";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import DashboardActions from "@/components/dashboard/DashboardActions";
 import DashboardContent from "@/components/dashboard/DashboardContent";
 import TabNav from "@/components/dashboard/TabNav";
 import { SubscriptionStatus } from "@/services/subscription/types";
+import { Company } from "@/lib/types";
 
 interface DashboardMainProps {
   jobPostings: any[];
   coverLetters: any[];
-  companies: any[];
+  companies: Company[];
   isDeleting: boolean;
   isRefreshing: boolean;
   onJobDelete: (id: string) => void;

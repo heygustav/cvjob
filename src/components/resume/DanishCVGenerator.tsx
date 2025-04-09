@@ -145,11 +145,9 @@ const DanishCVGenerator: React.FC<DanishCVGeneratorProps> = ({ data }) => {
 
 // Eksporter en funktion der genererer CV'et som en HTML-streng
 export const generateDanishCVHTML = (data: Resume): string => {
-  // Vi laver en instance af komponenten for at udnytte dens logik
-  const generator = new DanishCVGenerator({ data });
-  // Her bruger vi en lidt hacky metode til at få HTML'en ud
-  // I en produktionsmiljø ville vi måske bruge server-side rendering
-  return generator.props.data ? generator.generateCVHTML() : '';
+  // We instantiate component and call its method directly 
+  const component = new DanishCVGenerator({ data });
+  return component.generateCVHTML ? component.generateCVHTML() : '';
 };
 
 export default DanishCVGenerator;

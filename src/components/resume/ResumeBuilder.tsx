@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import ResumeHeader from "./ResumeHeader";
@@ -68,6 +69,11 @@ const ResumeBuilder: React.FC = () => {
         if (data) {
           console.log("Profile data fetched successfully:", data);
           
+          // Handle structured fields with fallbacks
+          const structuredExperience = data.structuredExperience || [];
+          const structuredEducation = data.structuredEducation || [];
+          const structuredSkills = data.structuredSkills || [];
+          
           const profileData: Resume = {
             name: data.name || "",
             email: user.email || "",
@@ -78,9 +84,9 @@ const ResumeBuilder: React.FC = () => {
             education: data.education || "",
             skills: data.skills || "",
             photo: undefined,
-            structuredExperience: data.structuredExperience || [],
-            structuredEducation: data.structuredEducation || [],
-            structuredSkills: data.structuredSkills || [],
+            structuredExperience: structuredExperience,
+            structuredEducation: structuredEducation,
+            structuredSkills: structuredSkills,
           };
 
           setResumeData(profileData);
