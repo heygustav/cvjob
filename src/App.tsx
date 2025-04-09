@@ -24,6 +24,7 @@ const ProfileQuiz = lazy(() => import('./pages/ProfileQuiz'));
 const Resume = lazy(() => import('./pages/Resume'));
 const DanishResume = lazy(() => import('./pages/DanishResume'));
 const CompanyForm = lazy(() => import('./pages/CompanyForm'));
+const BrainstormPage = lazy(() => import('./pages/BrainstormPage'));
 
 // Fallback loading component for lazy loading
 const PageLoadingFallback = () => (
@@ -210,6 +211,19 @@ const AppRoutes = memo(() => {
             <MainLayout>
               <Suspense fallback={<PageLoadingFallback />}>
                 <DanishResume />
+              </Suspense>
+            </MainLayout>
+          </ProtectedRoute>
+        } 
+      />
+      
+      <Route 
+        path="/brainstorm" 
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <Suspense fallback={<PageLoadingFallback />}>
+                <BrainstormPage />
               </Suspense>
             </MainLayout>
           </ProtectedRoute>

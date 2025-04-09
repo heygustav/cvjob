@@ -1,105 +1,60 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import { Button } from "../ui/button";
-import {
-  LayoutDashboard,
-  PenTool,
-  UserCircle,
-  LogOut,
-  Home,
-  FileText,
-} from "lucide-react";
 
-interface NavLinksProps {
-  session: any;
-  handleLogout: () => void;
+import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { Session } from '@supabase/supabase-js';
+import { FileText, Home, User, PlusCircle, Briefcase, Layers, Lightbulb } from 'lucide-react';
+
+interface NavLinkProps {
+  to: string;
+  label: string;
+  icon: React.ReactNode;
   isMobile?: boolean;
 }
 
-const NavLinks: React.FC<NavLinksProps> = ({
-  session,
-  handleLogout,
-  isMobile = false,
-}) => {
-  // Base classes with improved accessibility
-  const baseLinkClass = "flex items-center gap-2 rounded-md text-white transition-colors focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary";
+const NavLink: React.FC<NavLinkProps> = ({ to, label, icon, isMobile }) => {
+  const location = useLocation();
+  const isActive = location.pathname === to;
   
-  // Responsive padding with larger touch targets
-  const linkClass = isMobile
-    ? `${baseLinkClass} py-3 px-4 hover:bg-primary-700 w-full min-h-[48px]`
-    : `${baseLinkClass} px-3 py-2 hover:bg-primary-700`;
-
-  const buttonClass = isMobile
-    ? "w-full justify-start gap-2 text-white hover:bg-primary-700 hover:text-white min-h-[48px] px-4 py-3"
-    : "gap-2 text-white hover:bg-primary-700 hover:text-white";
-
+  const baseClasses = "flex items-center gap-2 px-3 py-2 rounded-md transition-colors";
+  const activeClasses = "bg-primary/10 text-primary font-medium";
+  const inactiveClasses = "hover:bg-muted hover:text-foreground";
+  
   return (
-    <>
-      <li>
-        <Link to="/" className={linkClass} aria-label="Go to homepage">
-          <Home className="h-5 w-5" aria-hidden="true" />
-          <span>Forsiden</span>
-        </Link>
-      </li>
-      
-      {session && (
-        <li>
-          <Link to="/dashboard" className={linkClass} aria-label="Go to dashboard">
-            <LayoutDashboard className="h-5 w-5" aria-hidden="true" />
-            <span>Dashboard</span>
-          </Link>
-        </li>
-      )}
-      
-      {session && (
-        <li>
-          <Link to="/ansoegning" className={linkClass} aria-label="Create application">
-            <PenTool className="h-5 w-5" aria-hidden="true" />
-            <span>Opret ansøgning</span>
-          </Link>
-        </li>
-      )}
-      
-      {session && (
-        <li>
-          <Link to="/resume" className={linkClass} aria-label="CV Generator">
-            <FileText className="h-5 w-5" aria-hidden="true" />
-            <span>CV Generator</span>
-          </Link>
-        </li>
-      )}
-      
-      {session ? (
-        <>
-          <li>
-            <Link to="/profile" className={linkClass} aria-label="Go to profile">
-              <UserCircle className="h-5 w-5" aria-hidden="true" />
-              <span>Profil</span>
-            </Link>
-          </li>
-          
-          <li>
-            <Button
-              variant="ghost"
-              onClick={handleLogout}
-              className={buttonClass}
-              aria-label="Log out"
-            >
-              <LogOut className="h-5 w-5" aria-hidden="true" />
-              <span>Log ud</span>
-            </Button>
-          </li>
-        </>
-      ) : (
-        <li>
-          <Link to="/auth" className={linkClass} aria-label="Sign in or create account">
-            <UserCircle className="h-5 w-5" aria-hidden="true" />
-            <span>Log ind / Opret en konto</span>
-          </Link>
-        </li>
-      )}
-    </>
+    <Link 
+      to={to} 
+      className={`${baseClasses} ${isActive ? activeClasses : inactiveClasses} ${isMobile ? 'w-full' : ''}`}
+      aria-current={isActive ? 'page' : undefined}
+    >
+      {icon}
+      <span>{label}</span>
+    </Link>
   );
 };
 
-export default NavLinks;
+export const DesktopNavLinks: React.FC<{ session: Session | null }> = ({ session }) => {
+  if (!session) return null;
+  
+  return (
+    <nav className="hidden md:flex items-center gap-1">
+      <NavLink to="/dashboard" label="Dashboard" icon={<Home className="h-4 w-4" />} />
+      <NavLink to="/resume/dk" label="CV" icon={<FileText className="h-4 w-4" />} />
+      <NavLink to="/ansoegning" label="Ansøgning" icon={<PlusCircle className="h-4 w-4" />} />
+      <NavLink to="/brainstorm" label="Brainstorm" icon={<Lightbulb className="h-4 w-4" />} />
+      <NavLink to="/profile" label="Profil" icon={<User className="h-4 w-4" />} />
+    </nav>
+  );
+};
+
+export const MobileNavLinks: React.FC<{ session: Session | null }> = ({ session }) => {
+  if (!session) return null;
+  
+  return (
+    <nav className="flex flex-col w-full gap-1 mt-4">
+      <NavLink to="/dashboard" label="Dashboard" icon={<Home className="h-5 w-5" />} isMobile />
+      <NavLink to="/resume/dk" label="CV" icon={<FileText className="h-5 w-5" />} isMobile />
+      <NavLink to="/ansoegning" label="Ansøgning" icon={<PlusCircle className="h-5 w-5" />} isMobile />
+      <NavLink to="/brainstorm" label="Brainstorm" icon={<Lightbulb className="h-5 w-5" />} isMobile />
+      <NavLink to="/profile" label="Profil" icon={<User className="h-5 w-5" />} isMobile />
+    </nav>
+  );
+};

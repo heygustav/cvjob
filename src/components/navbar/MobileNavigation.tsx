@@ -1,57 +1,73 @@
+
 import React from "react";
-import { Menu, X } from "lucide-react";
-import NavLinks from "./NavLinks";
+import { Link } from "react-router-dom";
+import { Session } from "@supabase/supabase-js";
+import { Button } from "../ui/button";
+import { Menu, X, LogIn, LogOut } from "lucide-react";
+import { MobileNavLinks } from "./NavLinks";
 
 interface MobileNavigationProps {
   isOpen: boolean;
   toggleMenu: () => void;
-  session: any;
+  session: Session | null;
   handleLogout: () => void;
 }
 
-const MobileNavigation: React.FC<MobileNavigationProps> = ({ 
-  isOpen, 
-  toggleMenu, 
-  session, 
-  handleLogout 
+const MobileNavigation: React.FC<MobileNavigationProps> = ({
+  isOpen,
+  toggleMenu,
+  session,
+  handleLogout,
 }) => {
   return (
-    <>
-      {/* Mobile menu button */}
-      <button
+    <div className="md:hidden">
+      <Button
+        variant="ghost"
+        size="icon"
         onClick={toggleMenu}
-        className="md:hidden flex items-center justify-center p-3 rounded-md text-white hover:bg-primary-800 active:bg-primary-900 transition-colors focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary min-w-[48px] min-h-[48px]"
+        className="relative z-50"
+        aria-label={isOpen ? "Luk menu" : "Åbn menu"}
         aria-expanded={isOpen}
-        aria-label={isOpen ? "Luk hovedmenu" : "Åbn hovedmenu"}
-        aria-controls="mobile-menu"
-        aria-haspopup="true"
       >
-        <span className="sr-only">{isOpen ? "Luk hovedmenu" : "Åbn hovedmenu"}</span>
-        {isOpen ? (
-          <X className="h-6 w-6" aria-hidden="true" />
-        ) : (
-          <Menu className="h-6 w-6" aria-hidden="true" />
-        )}
-      </button>
+        {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+      </Button>
 
-      {/* Mobile menu */}
+      {/* Mobile menu drawer */}
       <div
-        id="mobile-menu"
-        className={`md:hidden fixed left-0 right-0 top-16 z-40 transition-all duration-300 ease-in-out transform ${
-          isOpen 
-            ? "max-h-[calc(100vh-4rem)] opacity-100 translate-y-0" 
-            : "max-h-0 opacity-0 -translate-y-4 pointer-events-none"
-        }`}
-        aria-hidden={!isOpen}
-        role="navigation"
+        className={`fixed inset-0 bg-background z-40 transform transition-transform ease-in-out duration-300 ${
+          isOpen ? "translate-x-0" : "translate-x-full"
+        } md:hidden`}
       >
-        <div className="space-y-1 px-4 py-6 bg-primary-800 border-t border-primary-600 shadow-lg rounded-b-md">
-          <nav aria-label="Mobile navigation">
-            <NavLinks session={session} handleLogout={handleLogout} isMobile={true} />
-          </nav>
+        <div className="flex flex-col h-full p-6 pt-20">
+          <MobileNavLinks session={session} />
+
+          <div className="mt-auto pt-6 border-t">
+            {session ? (
+              <Button
+                variant="ghost"
+                onClick={handleLogout}
+                className="w-full justify-start text-destructive"
+              >
+                <LogOut className="h-5 w-5 mr-2" />
+                Log ud
+              </Button>
+            ) : (
+              <div className="flex flex-col gap-2">
+                <Button asChild variant="outline" className="w-full justify-start">
+                  <Link to="/login">
+                    <LogIn className="h-5 w-5 mr-2" />
+                    Log ind
+                  </Link>
+                </Button>
+                <Button asChild variant="default" className="w-full justify-start">
+                  <Link to="/signup">Tilmeld</Link>
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
