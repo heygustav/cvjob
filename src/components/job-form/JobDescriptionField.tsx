@@ -1,5 +1,7 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { getDanishKeywords } from "@/services/keywords";
+import { Badge } from "@/components/ui/badge";
 
 interface JobDescriptionFieldProps {
   value: string;
@@ -8,6 +10,7 @@ interface JobDescriptionFieldProps {
   onExtract: () => void;
   isExtracting: boolean;
   error?: string;
+  onKeywordClick?: (keyword: string) => void;
 }
 
 const JobDescriptionField: React.FC<JobDescriptionFieldProps> = ({
@@ -17,7 +20,37 @@ const JobDescriptionField: React.FC<JobDescriptionFieldProps> = ({
   onExtract,
   isExtracting,
   error,
+  onKeywordClick
 }) => {
+  const [keywords, setKeywords] = useState<string[]>([]);
+  const [isLoadingKeywords, setIsLoadingKeywords] = useState(false);
+
+  // Extract keywords when job description has enough content
+  useEffect(() => {
+    const extractKeywords = async () => {
+      if (value && value.length > 150 && !isLoadingKeywords) {
+        setIsLoadingKeywords(true);
+        try {
+          const extractedKeywords = await getDanishKeywords(value);
+          setKeywords(extractedKeywords);
+        } catch (error) {
+          console.error("Failed to extract keywords:", error);
+        } finally {
+          setIsLoadingKeywords(false);
+        }
+      }
+    };
+
+    const timer = setTimeout(extractKeywords, 1000);
+    return () => clearTimeout(timer);
+  }, [value]);
+
+  const handleKeywordClick = (keyword: string) => {
+    if (onKeywordClick) {
+      onKeywordClick(keyword);
+    }
+  };
+
   return (
     <div>
       <div className="flex flex-wrap justify-between items-center mb-1 gap-2">
@@ -43,7 +76,7 @@ const JobDescriptionField: React.FC<JobDescriptionFieldProps> = ({
           aria-describedby={error ? "description-error" : "description-description"}
         ></textarea>
         
-        <div className="mt-2 flex justify-start">
+        <div className="mt-2 flex justify-between items-center flex-wrap">
           <button
             type="button"
             onClick={onExtract}
@@ -79,6 +112,32 @@ const JobDescriptionField: React.FC<JobDescriptionFieldProps> = ({
               "Udtræk information"
             )}
           </button>
+          
+          {isLoadingKeywords && (
+            <span className="text-xs text-gray-500 flex items-center ml-2">
+              <svg
+                className="animate-spin mr-1 h-3 w-3 text-gray-500"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
+              </svg>
+              Analyserer nøgleord...
+            </span>
+          )}
         </div>
         
         {error && (
@@ -92,6 +151,25 @@ const JobDescriptionField: React.FC<JobDescriptionFieldProps> = ({
         >
           Kopier og indsæt hele jobopslaget. Systemet vil forsøge at udtrække nøgleinformation automatisk.
         </p>
+
+        {keywords.length > 0 && (
+          <div className="mt-4">
+            <h4 className="text-sm font-medium text-gray-700 mb-2">Relevante søgeord:</h4>
+            <div className="flex flex-wrap gap-2">
+              {keywords.map((keyword, index) => (
+                <Badge 
+                  key={index} 
+                  variant="outline" 
+                  className="cursor-pointer hover:bg-gray-100 transition-colors px-2 py-1"
+                  onClick={() => handleKeywordClick(keyword)}
+                >
+                  {keyword}
+                </Badge>
+              ))}
+            </div>
+            <p className="text-xs text-gray-500 mt-1">Klik på et nøgleord for at bruge det i din ansøgning</p>
+          </div>
+        )}
       </div>
     </div>
   );

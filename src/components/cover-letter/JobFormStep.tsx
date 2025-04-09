@@ -1,4 +1,5 @@
-import React from "react";
+
+import React, { useState } from "react";
 import { User, JobPosting } from "@/lib/types";
 import { JobFormData } from "@/services/coverLetter/types";
 import JobPostingForm from "../JobPostingForm";
@@ -37,6 +38,9 @@ const JobFormStep: React.FC<JobFormStepProps> = ({
   resetError = () => {},
   onSave
 }) => {
+  // State for the letter content editor
+  const [letterContent, setLetterContent] = useState<string>("");
+  
   // Check if this is a saved job that has empty required fields
   const isSavedEmptyJob = selectedJob !== null && 
     (!selectedJob.title || !selectedJob.company || !selectedJob.description);
@@ -75,6 +79,30 @@ const JobFormStep: React.FC<JobFormStepProps> = ({
     await onSave(sanitizedData);
   } : undefined;
 
+  // Handler for keyword click
+  const handleKeywordClick = (keyword: string) => {
+    // Add the keyword to a draft letter or job description
+    // In this implementation, we'll assume we want to store this for later use
+    console.log("Keyword clicked:", keyword);
+    
+    // Add to local storage for now
+    const savedKeywords = JSON.parse(localStorage.getItem('selectedKeywords') || '[]');
+    if (!savedKeywords.includes(keyword)) {
+      savedKeywords.push(keyword);
+      localStorage.setItem('selectedKeywords', JSON.stringify(savedKeywords));
+    }
+    
+    // Show a message to the user
+    const keywordMessage = document.createElement('div');
+    keywordMessage.textContent = `Nøgleord "${keyword}" tilføjet til din liste`;
+    keywordMessage.className = 'fixed bottom-4 right-4 bg-green-100 text-green-800 px-4 py-2 rounded shadow-md';
+    document.body.appendChild(keywordMessage);
+    
+    setTimeout(() => {
+      keywordMessage.remove();
+    }, 3000);
+  };
+
   return (
     <div className="p-4 sm:p-6 md:p-8 text-left">
       {isSavedEmptyJob ? (
@@ -98,8 +126,9 @@ const JobFormStep: React.FC<JobFormStepProps> = ({
       <JobPostingForm
         onSubmit={handleSafeSubmit}
         onSave={handleSafeSave}
-        initialData={selectedJob || undefined}
         isLoading={isLoading}
+        initialData={selectedJob || undefined}
+        onKeywordClick={handleKeywordClick}
       />
       
       {isGenerating && (

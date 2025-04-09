@@ -1,81 +1,88 @@
 
 import React from "react";
-import { JobPosting } from "../lib/types";
-import { JobFormData } from "@/services/coverLetter/types";
-import UrlField from "./job-form/UrlField";
-import JobDescriptionField from "./job-form/JobDescriptionField";
-import JobInfoFields from "./job-form/JobInfoFields";
-import FormActions from "./job-form/FormActions";
-import { useJobExtraction } from "./job-form/useJobExtraction";
 import { useJobForm } from "./job-form/useJobForm";
-import { useTimer } from "./job-form/useTimer";
+import { JobFormData } from "@/services/coverLetter/types";
+import { useJobExtraction } from "./job-form/useJobExtraction";
+import JobInfoFields from "./job-form/JobInfoFields";
+import JobDescriptionField from "./job-form/JobDescriptionField";
+import UrlField from "./job-form/UrlField";
+import FormActions from "./job-form/FormActions";
+import { JobPosting } from "@/lib/types";
 
 interface JobPostingFormProps {
-  onSubmit: (jobData: JobFormData) => void;
-  onSave?: (jobData: JobFormData) => Promise<void>;
-  initialData?: JobPosting;
+  initialData?: JobPosting | JobFormData;
+  onSubmit: (data: JobFormData) => void;
+  onSave?: (data: JobFormData) => Promise<void>;
   isLoading?: boolean;
-  isSaving?: boolean;
+  onKeywordClick?: (keyword: string) => void;
 }
 
 const JobPostingForm: React.FC<JobPostingFormProps> = ({
+  initialData,
   onSubmit,
   onSave,
-  initialData,
   isLoading = false,
-  isSaving = false,
+  onKeywordClick
 }) => {
   const {
     formData,
-    setFormData,
     errors,
+    isSaving,
     handleChange,
     handleSubmit,
-    handleSave
+    handleSave,
   } = useJobForm({
-    initialData,
+    initialData: initialData as JobPosting,
     onSubmit,
     onSave,
   });
-  
-  const { isExtracting, extractInfoFromDescription } = useJobExtraction(formData, setFormData);
-  const { formattedTime } = useTimer(isLoading);
+
+  const { isExtracting, handleExtract } = useJobExtraction(formData, (extractedData) => {
+    // Update form data with extracted information
+    const updatedFormData = { ...formData, ...extractedData };
+    Object.entries(updatedFormData).forEach(([key, value]) => {
+      const input = document.getElementById(key) as HTMLInputElement | HTMLTextAreaElement;
+      if (input) {
+        input.value = value as string;
+        const event = new Event('change', { bubbles: true });
+        input.dispatchEvent(event);
+      }
+    });
+  });
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 text-left">
-      <UrlField 
-        value={formData.url} 
-        onChange={handleChange} 
-        disabled={isLoading} 
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <JobInfoFields
+        title={formData.title}
+        company={formData.company}
+        contactPerson={formData.contact_person}
+        deadline={formData.deadline}
+        errors={errors}
+        onChange={handleChange}
+        disabled={isLoading}
       />
 
-      <div className="space-y-6">
-        <JobDescriptionField 
-          value={formData.description}
-          onChange={handleChange}
-          disabled={isLoading}
-          onExtract={extractInfoFromDescription}
-          isExtracting={isExtracting}
-          error={errors.description}
-        />
+      <JobDescriptionField
+        value={formData.description}
+        onChange={handleChange}
+        disabled={isLoading}
+        onExtract={handleExtract}
+        isExtracting={isExtracting}
+        error={errors.description}
+        onKeywordClick={onKeywordClick}
+      />
 
-        <JobInfoFields 
-          title={formData.title}
-          company={formData.company}
-          contactPerson={formData.contact_person}
-          deadline={formData.deadline}
-          onChange={handleChange}
-          disabled={isLoading}
-          errors={errors}
-        />
-      </div>
+      <UrlField
+        value={formData.url}
+        onChange={handleChange}
+        disabled={isLoading}
+        error={errors.url}
+      />
 
       <FormActions
         isLoading={isLoading}
         isSaving={isSaving}
-        showSaveButton={!!onSave}
-        onSave={handleSave}
-        elapsedTime={formattedTime}
+        onSave={onSave ? handleSave : undefined}
       />
     </form>
   );

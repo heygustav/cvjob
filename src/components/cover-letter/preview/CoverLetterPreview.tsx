@@ -1,104 +1,50 @@
 
-import React, { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
-import PreviewHeader from "./PreviewHeader";
-import PreviewContent from "./PreviewContent";
-import PreviewFooter from "./PreviewFooter";
-import { cleanCoverLetterContent } from "./utils/contentCleaner";
-import { useCoverLetterDocuments } from "./hooks/useCoverLetterDocuments";
+import React from 'react';
+import { CoverLetter } from '@/lib/types';
+import { useAuth } from '@/components/AuthProvider';
+import PreviewHeader from './PreviewHeader';
+import PreviewContent from './PreviewContent';
+import PreviewFooter from './PreviewFooter';
+import { useCoverLetterDocuments } from './hooks/useCoverLetterDocuments';
 
 interface CoverLetterPreviewProps {
-  content: string;
-  jobTitle?: string;
-  company?: string;
-  contactPerson?: string;
-  onEdit?: (content: string) => Promise<void> | void;
-  isEditable?: boolean;
+  letter: CoverLetter;
+  content?: string; // Allow passing custom content for preview
 }
 
-const CoverLetterPreview: React.FC<CoverLetterPreviewProps> = ({
-  content,
-  jobTitle,
-  company,
-  contactPerson, // Use the contactPerson prop
-  onEdit,
-  isEditable = true,
-}) => {
-  const [editedContent, setEditedContent] = useState(content);
-  const [isEditing, setIsEditing] = useState(false);
-  const { toast } = useToast();
+const CoverLetterPreview: React.FC<CoverLetterPreviewProps> = ({ letter, content }) => {
+  const { user } = useAuth();
+  
+  // Use the custom content if provided, otherwise use the letter's content
+  const displayContent = content || letter.content;
+  
+  const {
+    isDownloading,
+    fileFormat,
+    handleDownloadClick,
+    handleFormatChange
+  } = useCoverLetterDocuments(letter, displayContent);
 
-  // Apply content cleaning when component renders
-  useState(() => {
-    const cleanedContent = cleanCoverLetterContent(content, company, jobTitle);
-    setEditedContent(cleanedContent);
-  });
-
-  // Calculate word count
-  const wordCount = editedContent.trim() ? editedContent.trim().split(/\s+/).length : 0;
-
-  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setEditedContent(e.target.value);
-  };
-
-  const handleSaveChanges = () => {
-    if (onEdit) {
-      onEdit(editedContent);
-    }
-    setIsEditing(false);
-    toast({
-      title: "Ændringer gemt",
-      description: "Din ansøgning er blevet opdateret.",
-    });
-  };
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(editedContent);
-    toast({
-      title: "Kopieret til udklipsholder",
-      description: "Ansøgningen er blevet kopieret til din udklipsholder.",
-    });
-  };
-
-  // Use our custom hook for document generation
-  const { 
-    handleDownloadTxt, 
-    handleDownloadPdf, 
-    handleDownloadDocx,
-    formattedDate
-  } = useCoverLetterDocuments(editedContent, company, jobTitle);
-
-  const documentTitle = jobTitle && company
-    ? `Ansøgning til ${jobTitle} hos ${company}`
-    : "Ansøgningsforhåndsvisning";
+  if (!user) {
+    return <div>Log ind for at se din ansøgning</div>;
+  }
 
   return (
-    <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+    <div className="w-full h-full flex flex-col">
       <PreviewHeader 
-        documentTitle={documentTitle}
-        isEditing={isEditing}
-        isEditable={isEditable}
-        onSaveChanges={handleSaveChanges}
-        onEdit={() => setIsEditing(true)}
-        onCopy={handleCopy}
-        onDownloadTxt={handleDownloadTxt}
-        onDownloadDocx={handleDownloadDocx}
-        onDownloadPdf={handleDownloadPdf}
+        isDownloading={isDownloading}
+        fileFormat={fileFormat}
+        onDownload={handleDownloadClick}
+        onFormatChange={handleFormatChange}
       />
       
-      <div className="p-5">
-        <PreviewContent 
-          isEditing={isEditing}
-          editedContent={editedContent}
-          onTextChange={handleTextChange}
-          company={company}
-          jobTitle={jobTitle}
-          contactPerson={contactPerson}
-          formattedDate={formattedDate}
-        />
+      <div className="flex-1 overflow-auto p-6 bg-white">
+        <div className="max-w-3xl mx-auto">
+          <PreviewContent content={displayContent} />
+        </div>
       </div>
       
-      <PreviewFooter wordCount={wordCount} />
+      <PreviewFooter />
     </div>
   );
 };
