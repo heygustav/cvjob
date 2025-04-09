@@ -1,4 +1,3 @@
-
 import { User as SupabaseUser } from "@supabase/supabase-js";
 import { Tables } from "@/integrations/supabase/types";
 import { ExperienceEntry, EducationEntry, SkillEntry } from "@/types/resume";
