@@ -98,7 +98,7 @@ export const deleteUserAccount = async (userId: string): Promise<void> => {
       console.error("Error deleting cover letters:", letterError);
     }
     
-    // Delete all job postings instead of job_listings
+    // Delete all job postings (fixed from job_listings)
     const { error: jobError } = await supabase
       .from("job_postings")
       .delete()

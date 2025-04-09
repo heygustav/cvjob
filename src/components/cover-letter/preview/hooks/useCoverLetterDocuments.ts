@@ -2,6 +2,9 @@
 import { useState } from 'react';
 import { CoverLetter } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
+import { usePdfDownload } from './usePdfDownload';
+import { useDocxDownload } from './useDocxDownload';
+import { useTxtDownload } from './useTxtDownload';
 
 export type FileFormat = 'pdf' | 'docx' | 'txt';
 
@@ -13,6 +16,25 @@ export const useCoverLetterDocuments = (letter: CoverLetter, customContent?: str
   // Use customContent if provided, otherwise use letter.content
   const contentToDownload = customContent || letter.content;
 
+  // Use our specialized hooks
+  const { handleDownloadPdf } = usePdfDownload({
+    company: letter.company,
+    jobTitle: letter.job_title,
+    formattedDate: new Date().toLocaleDateString('da-DK'),
+  });
+
+  const { handleDownloadDocx } = useDocxDownload({
+    company: letter.company,
+    jobTitle: letter.job_title,
+    formattedDate: new Date().toLocaleDateString('da-DK'),
+  });
+
+  const { handleDownloadTxt } = useTxtDownload({
+    company: letter.company,
+    jobTitle: letter.job_title,
+    formattedDate: new Date().toLocaleDateString('da-DK'),
+  });
+
   // Handle download based on selected format
   const handleDownloadClick = async () => {
     if (isDownloading) return;
@@ -20,8 +42,6 @@ export const useCoverLetterDocuments = (letter: CoverLetter, customContent?: str
     setIsDownloading(true);
     
     try {
-      const fileName = `Ansøgning_${new Date().toISOString().split('T')[0]}`;
-      
       switch (fileFormat) {
         case 'pdf':
           await handleDownloadPdf(contentToDownload);
@@ -54,30 +74,10 @@ export const useCoverLetterDocuments = (letter: CoverLetter, customContent?: str
     setFileFormat(format);
   };
 
-  // Placeholder functions that will be implemented with actual download logic
-  const handleDownloadPdf = async (content: string) => {
-    console.log("Download as PDF", content);
-    // PDF download implementation will go here
-  };
-
-  const handleDownloadDocx = async (content: string) => {
-    console.log("Download as DOCX", content);
-    // DOCX download implementation will go here
-  };
-
-  const handleDownloadTxt = async (content: string) => {
-    console.log("Download as TXT", content);
-    // TXT download implementation will go here
-  };
-
   return {
     isDownloading,
     fileFormat,
     handleDownloadClick,
-    handleFormatChange,
-    // Export these methods for direct use if needed
-    handleDownloadPdf,
-    handleDownloadDocx,
-    handleDownloadTxt
+    handleFormatChange
   };
 };

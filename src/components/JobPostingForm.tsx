@@ -75,6 +75,7 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
         value={formData.url}
         onChange={handleChange}
         disabled={isLoading}
+        error={errors.url}
       />
 
       <FormActions

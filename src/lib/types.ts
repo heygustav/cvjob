@@ -4,7 +4,11 @@ import { Tables } from "@/integrations/supabase/types";
 import { ExperienceEntry, EducationEntry, SkillEntry } from "@/types/resume";
 
 export type JobPosting = Tables<"job_postings">;
-export type CoverLetter = Tables<"cover_letters">;
+export type CoverLetter = Tables<"cover_letters"> & {
+  job_title?: string;
+  company?: string;
+  contact_person?: string;
+};
 export type Profile = Tables<"profiles"> & {
   structuredExperience?: ExperienceEntry[];
   structuredEducation?: EducationEntry[];

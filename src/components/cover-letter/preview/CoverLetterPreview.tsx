@@ -63,18 +63,20 @@ const CoverLetterPreview: React.FC<CoverLetterPreviewProps> = ({
       });
   };
 
+  // Extract job information from the letter's associated job (if available)
+  const jobTitle = letter.job_title || "Stilling";
+  const company = letter.company || "Virksomhed";
+  const contactPerson = letter.contact_person || "";
+
   return (
     <div className="w-full h-full flex flex-col">
       <PreviewHeader 
-        documentTitle={`Ansøgning: ${letter.job_title || 'Stilling'} - ${letter.company || 'Virksomhed'}`}
+        documentTitle={`Ansøgning: ${jobTitle} - ${company}`}
         isEditing={isEditing}
         isEditable={isEditable}
         onSaveChanges={handleSaveChanges}
         onEdit={handleEditClick}
         onCopy={handleCopyToClipboard}
-        onDownloadTxt={() => {/* Implement download txt */}}
-        onDownloadDocx={() => {/* Implement download docx */}}
-        onDownloadPdf={() => {/* Implement download pdf */}}
         isDownloading={isDownloading}
         fileFormat={fileFormat}
         onDownload={handleDownloadClick}
@@ -88,9 +90,9 @@ const CoverLetterPreview: React.FC<CoverLetterPreviewProps> = ({
             isEditing={isEditing}
             editedContent={editedContent}
             onTextChange={(e) => setEditedContent(e.target.value)}
-            company={letter.company}
-            jobTitle={letter.job_title}
-            contactPerson={letter.contact_person}
+            company={company}
+            jobTitle={jobTitle}
+            contactPerson={contactPerson}
             formattedDate={new Date().toLocaleDateString('da-DK')}
           />
         </div>
