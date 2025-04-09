@@ -22,6 +22,7 @@ const NotFound = lazy(() => import('./pages/NotFound'));
 const Profile = lazy(() => import('./pages/Profile'));
 const ProfileQuiz = lazy(() => import('./pages/ProfileQuiz'));
 const Resume = lazy(() => import('./pages/Resume'));
+const DanishResume = lazy(() => import('./pages/DanishResume'));
 const CompanyForm = lazy(() => import('./pages/CompanyForm'));
 
 // Fallback loading component for lazy loading
@@ -105,7 +106,6 @@ const AppRoutes = memo(() => {
         </Suspense>
       } />
       
-      {/* Protected Routes */}
       <Route 
         path="/dashboard" 
         element={
@@ -197,6 +197,19 @@ const AppRoutes = memo(() => {
             <MainLayout>
               <Suspense fallback={<PageLoadingFallback />}>
                 <Resume />
+              </Suspense>
+            </MainLayout>
+          </ProtectedRoute>
+        } 
+      />
+      
+      <Route 
+        path="/resume/dk" 
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <Suspense fallback={<PageLoadingFallback />}>
+                <DanishResume />
               </Suspense>
             </MainLayout>
           </ProtectedRoute>
