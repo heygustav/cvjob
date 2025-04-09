@@ -87,22 +87,58 @@ export const updateEmailPreferences = async (
 export const deleteUserAccount = async (userId: string): Promise<void> => {
   console.log("Deleting user account:", userId);
   
-  // First delete the profile data
-  const { error: profileError } = await supabase
-    .from("profiles")
-    .delete()
-    .eq("id", userId);
+  try {
+    // Delete all cover letters
+    const { error: letterError } = await supabase
+      .from("cover_letters")
+      .delete()
+      .eq("user_id", userId);
+    
+    if (letterError) {
+      console.error("Error deleting cover letters:", letterError);
+    }
+    
+    // Delete all job listings
+    const { error: jobError } = await supabase
+      .from("job_listings")
+      .delete()
+      .eq("user_id", userId);
+    
+    if (jobError) {
+      console.error("Error deleting job listings:", jobError);
+    }
+    
+    // Delete user files if any exist in storage
+    const { data: files, error: filesError } = await supabase
+      .storage
+      .from('user_files')
+      .list(userId);
+    
+    if (!filesError && files && files.length > 0) {
+      const filePaths = files.map(file => `${userId}/${file.name}`);
+      await supabase.storage.from('user_files').remove(filePaths);
+    }
+    
+    // Delete the profile data
+    const { error: profileError } = await supabase
+      .from("profiles")
+      .delete()
+      .eq("id", userId);
 
-  if (profileError) {
-    console.error("Error deleting profile:", profileError);
-    throw profileError;
-  }
+    if (profileError) {
+      console.error("Error deleting profile:", profileError);
+      throw profileError;
+    }
 
-  // Then delete the user account
-  const { error: authError } = await supabase.auth.admin.deleteUser(userId);
+    // Delete the user account
+    const { error: authError } = await supabase.auth.admin.deleteUser(userId);
 
-  if (authError) {
-    console.error("Error deleting user account:", authError);
-    throw authError;
+    if (authError) {
+      console.error("Error deleting user account:", authError);
+      throw authError;
+    }
+  } catch (error) {
+    console.error("Error in account deletion process:", error);
+    throw error;
   }
 };

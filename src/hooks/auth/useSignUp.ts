@@ -26,6 +26,8 @@ export const useSignUp = (options: SignUpOptions) => {
         options: {
           data: {
             name: name || '',
+            gdpr_accepted: true,
+            gdpr_acceptance_date: new Date().toISOString(),
           },
           // The captcha will be automatically handled by Supabase when required
         },

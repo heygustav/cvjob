@@ -16,7 +16,14 @@ const Signup: React.FC<SignupProps> = ({ onSignup }) => {
     email: string;
     password: string;
     confirmPassword: string;
+    terms: boolean;
+    gdpr: boolean;
   }) => {
+    // Ensure both checkboxes are checked
+    if (!formData.terms || !formData.gdpr) {
+      return;
+    }
+    
     await handleAuthentication(formData.email, formData.password, true, formData.name);
     // If successful, the AuthProvider will automatically redirect
     // and we can call onSignup with the user ID later if needed

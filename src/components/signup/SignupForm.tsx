@@ -11,6 +11,8 @@ interface SignupFormData {
   email: string;
   password: string;
   confirmPassword: string;
+  terms: boolean;
+  gdpr: boolean;
 }
 
 interface SignupFormProps {
@@ -24,14 +26,16 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSubmit, isLoading }) => {
     email: "",
     password: "",
     confirmPassword: "",
+    terms: false,
+    gdpr: false
   });
   const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: DOMPurify.sanitize(value),
+      [name]: type === 'checkbox' ? checked : DOMPurify.sanitize(value),
     }));
   };
 
@@ -41,6 +45,9 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSubmit, isLoading }) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.terms || !formData.gdpr) {
+      return; // Don't submit if terms or GDPR not accepted
+    }
     onSubmit(formData);
   };
 
@@ -86,7 +93,17 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSubmit, isLoading }) => {
         confirmationValue={formData.password}
       />
 
-      <TermsCheckbox />
+      <div onChange={handleChange}>
+        <TermsCheckbox />
+      </div>
+
+      <div className="bg-blue-50 p-4 rounded-md border border-blue-100 text-sm">
+        <p className="text-blue-800">
+          <strong>GDPR information:</strong> Vi behandler kun dine data for at levere vores tjenester. 
+          Du kan til enhver tid se, rette eller slette alle dine personoplysninger via din profil.
+          <a href="/gdpr-info" className="text-primary ml-1 font-medium hover:underline">Læs mere om GDPR</a>
+        </p>
+      </div>
 
       <SubmitButton isLoading={isLoading} />
     </form>

@@ -25,6 +25,7 @@ const Resume = lazy(() => import('./pages/Resume'));
 const DanishResume = lazy(() => import('./pages/DanishResume'));
 const CompanyForm = lazy(() => import('./pages/CompanyForm'));
 const BrainstormPage = lazy(() => import('./pages/BrainstormPage'));
+const GDPRInfoPage = lazy(() => import('./pages/GDPRInfoPage'));
 
 // Fallback loading component for lazy loading
 const PageLoadingFallback = () => (
@@ -105,6 +106,14 @@ const AppRoutes = memo(() => {
         <Suspense fallback={<PageLoadingFallback />}>
           <ProfileQuiz />
         </Suspense>
+      } />
+      
+      <Route path="/gdpr-info" element={
+        <MainLayout>
+          <Suspense fallback={<PageLoadingFallback />}>
+            <GDPRInfoPage />
+          </Suspense>
+        </MainLayout>
       } />
       
       <Route 
