@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { FileText, ArrowRight } from 'lucide-react';
@@ -14,7 +13,6 @@ const HeroSection: React.FC<HeroSectionProps> = ({ session }) => {
       className="relative w-full min-h-[600px] overflow-hidden" 
       aria-labelledby="hero-heading"
     >
-      {/* Background image with responsive sizes, lazy loading and proper alt text */}
       <picture>
         <source 
           media="(min-width: 1024px)" 
@@ -28,15 +26,13 @@ const HeroSection: React.FC<HeroSectionProps> = ({ session }) => {
           src="https://images.unsplash.com/photo-1517842645767-c639042777db?auto=format&fit=crop&w=800&q=80"
           alt=""
           className="absolute inset-0 w-full h-full object-cover z-0"
-          fetchPriority="high"
+          fetchpriority="high"
           aria-hidden="true"
         />
       </picture>
       
-      {/* Dark overlay with improved contrast for accessibility */}
       <div className="absolute inset-0 bg-black/40 z-10" />
       
-      {/* Content */}
       <div className="relative z-20 h-full flex items-center justify-center py-16 sm:py-24">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm p-6 sm:p-8 rounded-lg shadow-md">
