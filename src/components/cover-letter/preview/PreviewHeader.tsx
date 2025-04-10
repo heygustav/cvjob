@@ -1,6 +1,7 @@
 
 import React from "react";
 import { Copy, Edit, FileText, File, FileIcon } from "lucide-react";
+import { FileFormat } from "./hooks/useCoverLetterDocuments";
 
 interface PreviewHeaderProps {
   documentTitle?: string;
@@ -9,9 +10,6 @@ interface PreviewHeaderProps {
   onSaveChanges?: () => void;
   onEdit?: () => void;
   onCopy?: () => void;
-  onDownloadTxt?: () => void;
-  onDownloadDocx?: () => void;
-  onDownloadPdf?: () => void;
   // Add the missing props from useCoverLetterDocuments
   isDownloading?: boolean;
   fileFormat?: string;
@@ -26,14 +24,27 @@ const PreviewHeader: React.FC<PreviewHeaderProps> = ({
   onSaveChanges = () => {},
   onEdit = () => {},
   onCopy = () => {},
-  onDownloadTxt = () => {},
-  onDownloadDocx = () => {},
-  onDownloadPdf = () => {},
   // Added props implementation
   isDownloading = false,
+  fileFormat = "pdf",
   onDownload = async () => {},
   onFormatChange = () => {}
 }) => {
+  const handleDownloadPdf = () => {
+    onFormatChange("pdf");
+    onDownload();
+  };
+
+  const handleDownloadDocx = () => {
+    onFormatChange("docx");
+    onDownload();
+  };
+
+  const handleDownloadTxt = () => {
+    onFormatChange("txt");
+    onDownload();
+  };
+
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-5 border-b border-gray-200 bg-gray-50">
       <h2 className="text-base sm:text-lg font-medium text-gray-900 mb-2 sm:mb-0 truncate">
@@ -71,28 +82,31 @@ const PreviewHeader: React.FC<PreviewHeaderProps> = ({
               <span className="hidden sm:inline">Kopier</span>
             </button>
             <button
-              onClick={onDownloadTxt}
+              onClick={handleDownloadTxt}
               className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-0 transition-colors"
               title="Download som tekstfil"
               aria-label="Download som tekstfil"
+              disabled={isDownloading}
             >
               <FileText className="h-4 w-4 sm:mr-2" aria-hidden="true" />
               <span className="hidden sm:inline">Tekst</span>
             </button>
             <button
-              onClick={onDownloadDocx}
+              onClick={handleDownloadDocx}
               className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-0 transition-colors"
               title="Download som Word-dokument"
               aria-label="Download som Word-dokument"
+              disabled={isDownloading}
             >
               <File className="h-4 w-4 sm:mr-2" aria-hidden="true" />
               <span className="hidden sm:inline">Word</span>
             </button>
             <button
-              onClick={onDownloadPdf}
+              onClick={handleDownloadPdf}
               className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-0 transition-colors"
               title="Download som PDF"
               aria-label="Download som PDF"
+              disabled={isDownloading}
             >
               <FileIcon className="h-4 w-4 sm:mr-2" aria-hidden="true" />
               <span className="hidden sm:inline">PDF</span>

@@ -1,6 +1,5 @@
 
 import React from "react";
-import DOMPurify from "dompurify";
 
 interface PreviewContentProps {
   content: string;
@@ -10,7 +9,7 @@ interface PreviewContentProps {
   company?: string;
   jobTitle?: string;
   contactPerson?: string;
-  formattedDate?: string;
+  formattedDate: string;
 }
 
 const PreviewContent: React.FC<PreviewContentProps> = ({
@@ -18,53 +17,44 @@ const PreviewContent: React.FC<PreviewContentProps> = ({
   isEditing = false,
   editedContent = "",
   onTextChange = () => {},
-  company = "",
-  jobTitle = "",
+  company = "Virksomhed",
+  jobTitle = "Stilling",
   contactPerson = "",
-  formattedDate = new Date().toLocaleDateString(),
+  formattedDate
 }) => {
-  // Sanitize all user inputs to prevent XSS attacks
-  const sanitizedCompany = company ? DOMPurify.sanitize(company) : "Virksomhed";
-  const sanitizedJobTitle = jobTitle ? DOMPurify.sanitize(jobTitle) : "stillingen";
-  const sanitizedContactPerson = contactPerson ? DOMPurify.sanitize(contactPerson) : "";
-  const sanitizedContent = DOMPurify.sanitize(content);
+  // Format the content to display properly with line breaks
+  const formattedContent = () => {
+    return { __html: content.replace(/\n/g, '<br />') };
+  };
 
-  return (
-    <>
-      {isEditing ? (
+  if (isEditing) {
+    return (
+      <div className="relative mt-4">
         <textarea
+          className="w-full min-h-[500px] p-4 border border-gray-300 rounded-md focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
           value={editedContent}
           onChange={onTextChange}
-          className="w-full h-96 p-4 border border-gray-300 rounded-md focus:border-blue-500 focus:ring-blue-500 font-serif text-base transition-colors"
-          aria-label="Rediger ansøgningstekst"
-          placeholder="Skriv eller rediger din ansøgningstekst her..."
         />
-      ) : (
-        <div className="flex flex-col h-96 border border-gray-200 rounded-md p-6">
-          <header className="flex justify-between mb-8">
-            <div className="font-serif text-left">
-              <p className="font-bold">{sanitizedCompany}</p>
-              {/* Only render this line if contactPerson exists */}
-              {sanitizedContactPerson && (
-                <p className="font-bold">Att.: Rekrutteringsansvarlig {sanitizedContactPerson}</p>
-              )}
-              <p className="font-bold">Ansøgning til {sanitizedJobTitle}</p>
-            </div>
-            <div className="font-serif text-right">
-              <p className="font-bold" aria-label="Dato for ansøgning">{formattedDate}</p>
-            </div>
-          </header>
-          <article 
-            className="prose max-w-none font-serif whitespace-pre-line text-base leading-snug overflow-auto flex-grow border border-gray-100 rounded p-4 shadow-inner text-left" 
-            tabIndex={0} 
-            aria-label="Ansøgningstekst"
-            role="document"
-            style={{ lineHeight: "1.0" }}
-            dangerouslySetInnerHTML={{ __html: sanitizedContent }}
-          />
+      </div>
+    );
+  }
+
+  return (
+    <div className="letter-container space-y-6">
+      <div className="letter-header space-y-1 mb-8">
+        <div className="text-right">{formattedDate}</div>
+      </div>
+
+      {contactPerson && (
+        <div className="greeting">
+          <p>Kære {contactPerson},</p>
         </div>
       )}
-    </>
+
+      <div className="letter-body prose prose-sm max-w-none">
+        <div dangerouslySetInnerHTML={formattedContent()} />
+      </div>
+    </div>
   );
 };
 

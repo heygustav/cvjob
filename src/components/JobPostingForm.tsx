@@ -14,6 +14,7 @@ interface JobPostingFormProps {
   onSubmit: (data: JobFormData) => void;
   onSave?: (data: JobFormData) => Promise<void>;
   isLoading?: boolean;
+  isSaving?: boolean;
   onKeywordClick?: (keyword: string) => void;
 }
 
@@ -22,12 +23,13 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
   onSubmit,
   onSave,
   isLoading = false,
+  isSaving = false,
   onKeywordClick
 }) => {
   const {
     formData,
     errors,
-    isSaving,
+    isSaving: formIsSaving,
     handleChange,
     handleSubmit,
     handleSave,
@@ -72,7 +74,7 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
       />
 
       <UrlField
-        value={formData.url}
+        value={formData.url || ""}
         onChange={handleChange}
         disabled={isLoading}
         error={errors.url}
@@ -80,7 +82,7 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
 
       <FormActions
         isLoading={isLoading}
-        isSaving={isSaving}
+        isSaving={isSaving || formIsSaving}
         onSave={onSave ? handleSave : undefined}
       />
     </form>

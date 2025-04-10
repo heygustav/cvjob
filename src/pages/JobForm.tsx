@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import JobPostingForm from "@/components/JobPostingForm";
@@ -171,6 +172,7 @@ const JobForm = () => {
               onSave={handleSave}
               initialData={job} 
               isLoading={isSubmitting}
+              isSaving={isSaving}
             />
           )}
         </div>
