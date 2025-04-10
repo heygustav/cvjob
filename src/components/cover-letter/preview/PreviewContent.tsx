@@ -1,7 +1,7 @@
 
 import React from "react";
 
-interface PreviewContentProps {
+export interface PreviewContentProps {
   content: string;
   isEditing?: boolean;
   editedContent?: string;
@@ -23,7 +23,7 @@ const PreviewContent: React.FC<PreviewContentProps> = ({
   formattedDate
 }) => {
   // Format the content to display properly with line breaks
-  const formattedContent = () => {
+  const getFormattedContent = () => {
     return { __html: content.replace(/\n/g, '<br />') };
   };
 
@@ -34,6 +34,7 @@ const PreviewContent: React.FC<PreviewContentProps> = ({
           className="w-full min-h-[500px] p-4 border border-gray-300 rounded-md focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
           value={editedContent}
           onChange={onTextChange}
+          aria-label="Rediger ansøgningstekst"
         />
       </div>
     );
@@ -42,7 +43,7 @@ const PreviewContent: React.FC<PreviewContentProps> = ({
   return (
     <div className="letter-container space-y-6">
       <div className="letter-header space-y-1 mb-8">
-        <div className="text-right">{formattedDate}</div>
+        <div className="text-right" aria-label="Dato">{formattedDate}</div>
       </div>
 
       {contactPerson && (
@@ -52,7 +53,10 @@ const PreviewContent: React.FC<PreviewContentProps> = ({
       )}
 
       <div className="letter-body prose prose-sm max-w-none">
-        <div dangerouslySetInnerHTML={formattedContent()} />
+        <div 
+          dangerouslySetInnerHTML={getFormattedContent()} 
+          aria-label="Ansøgningstekst"
+        />
       </div>
     </div>
   );
