@@ -1,15 +1,12 @@
-import React, { useState } from "react";
+
+import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
-import ResumeSectionEditor from "./ResumeSectionEditor";
-import ResumePreview from "./ResumePreview";
-import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
 import { Resume, ExperienceEntry, EducationEntry, SkillEntry } from "@/types/resume";
 import { ResumeFormat } from "@/utils/resume/pdfExporter";
-import { ExperienceEditor, EducationEditor, SkillEditor } from "./StructuredSections";
-import AtsOptimizer from "./AtsOptimizer";
+import EditTab from "./tabs/EditTab";
+import PreviewTab from "./tabs/PreviewTab";
+import AtsTab from "./tabs/AtsTab";
+import { FileText, Eye, BarChart2 } from "lucide-react";
 
 interface ResumeEditorTabsProps {
   activeTab: string;
@@ -36,126 +33,47 @@ const ResumeEditorTabs: React.FC<ResumeEditorTabsProps> = ({
   handleExport,
   isDownloading
 }) => {
-  const [exportFormat, setExportFormat] = useState<ResumeFormat>("pdf");
-
   return (
     <Tabs defaultValue="edit" value={activeTab} onValueChange={setActiveTab}>
       <TabsList className="grid grid-cols-3 mb-6">
-        <TabsTrigger value="edit">Rediger Indhold</TabsTrigger>
-        <TabsTrigger value="preview">Forhåndsvisning</TabsTrigger>
-        <TabsTrigger value="ats">ATS Optimering</TabsTrigger>
+        <TabsTrigger value="edit" className="flex items-center gap-2">
+          <FileText className="h-4 w-4" />
+          <span className="hidden sm:inline">Rediger Indhold</span>
+          <span className="sm:hidden">Rediger</span>
+        </TabsTrigger>
+        <TabsTrigger value="preview" className="flex items-center gap-2">
+          <Eye className="h-4 w-4" />
+          <span className="hidden sm:inline">Forhåndsvisning</span>
+          <span className="sm:hidden">Vis</span>
+        </TabsTrigger>
+        <TabsTrigger value="ats" className="flex items-center gap-2">
+          <BarChart2 className="h-4 w-4" />
+          <span className="hidden sm:inline">ATS Optimering</span>
+          <span className="sm:hidden">ATS</span>
+        </TabsTrigger>
       </TabsList>
 
-      <TabsContent value="edit" className="space-y-6">
-        <div className="grid md:grid-cols-2 gap-6">
-          <ResumeSectionEditor
-            title="Personlige Oplysninger"
-            sections={[
-              { key: "name", label: "Fulde Navn", value: resumeData.name },
-              { key: "email", label: "Email", value: resumeData.email },
-              { key: "phone", label: "Telefon", value: resumeData.phone || "" },
-              { key: "address", label: "Adresse", value: resumeData.address || "" },
-              { 
-                key: "summary", 
-                label: "Kort beskrivelse", 
-                value: resumeData.summary || "", 
-                multiline: true 
-              },
-            ]}
-            onUpdate={handleUpdateSection}
-          />
-        </div>
-
-        <div className="space-y-6">
-          <ExperienceEditor 
-            experiences={resumeData.structuredExperience || []}
-            onUpdate={handleUpdateStructuredExperience}
-          />
-        </div>
-
-        <div className="space-y-6">
-          <EducationEditor
-            educations={resumeData.structuredEducation || []}
-            onUpdate={handleUpdateStructuredEducation}
-          />
-        </div>
-
-        <div className="space-y-6">
-          <SkillEditor
-            skills={resumeData.structuredSkills || []}
-            onUpdate={handleUpdateStructuredSkills}
-          />
-        </div>
+      <TabsContent value="edit">
+        <EditTab 
+          resumeData={resumeData}
+          handleUpdateSection={handleUpdateSection}
+          handleUpdateStructuredExperience={handleUpdateStructuredExperience}
+          handleUpdateStructuredEducation={handleUpdateStructuredEducation}
+          handleUpdateStructuredSkills={handleUpdateStructuredSkills}
+        />
       </TabsContent>
 
       <TabsContent value="preview">
-        <div className="space-y-6">
-          <ResumePreview 
-            data={resumeData} 
-            template={selectedTemplate as "modern" | "classic" | "creative"} 
-          />
-          
-          <div className="space-y-4">
-            <div className="border-t pt-4">
-              <h3 className="text-lg font-medium mb-4">Eksporter CV</h3>
-              
-              <RadioGroup 
-                value={exportFormat}
-                onValueChange={(value) => setExportFormat(value as ResumeFormat)}
-                className="flex space-x-4 mb-4"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="pdf" id="pdf" />
-                  <Label htmlFor="pdf">PDF</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="docx" id="docx" />
-                  <Label htmlFor="docx">DOCX</Label>
-                </div>
-              </RadioGroup>
-              
-              <Button 
-                onClick={() => handleExport(exportFormat)}
-                disabled={isDownloading}
-                className="w-full"
-              >
-                {isDownloading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Eksporterer...
-                  </>
-                ) : (
-                  `Download som ${exportFormat.toUpperCase()}`
-                )}
-              </Button>
-            </div>
-          </div>
-        </div>
+        <PreviewTab
+          resumeData={resumeData}
+          templateName={selectedTemplate}
+          handleExport={handleExport}
+          isDownloading={isDownloading}
+        />
       </TabsContent>
       
       <TabsContent value="ats">
-        <div className="space-y-6">
-          <div className="bg-muted/40 p-4 rounded-md mb-6">
-            <h3 className="text-lg font-medium mb-2">ATS Optimization</h3>
-            <p className="text-sm text-muted-foreground">
-              Applicant Tracking Systems (ATS) are software used by employers to scan and filter resumes.
-              Use this tool to check how well your resume might perform with these systems and get tailored advice.
-            </p>
-          </div>
-          
-          <AtsOptimizer resumeData={resumeData} />
-          
-          <div className="border-t pt-4 mt-6">
-            <h4 className="font-medium mb-3">ATS Tips</h4>
-            <ul className="list-disc pl-5 space-y-1 text-sm text-muted-foreground">
-              <li>Use standard section headings (Experience, Education, Skills)</li>
-              <li>Apply proper formatting with consistent spacing</li>
-              <li>Include relevant keywords from the job description</li>
-              <li>Use a clean, simple layout without complex tables or graphics</li>
-              <li>Save your resume as a simple PDF or DOCX format</li>
-            </ul>
-          </div>
-        </div>
+        <AtsTab resumeData={resumeData} />
       </TabsContent>
     </Tabs>
   );
