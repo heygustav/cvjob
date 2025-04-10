@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { FileText, ArrowRight } from 'lucide-react';
@@ -26,7 +27,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ session }) => {
           src="https://images.unsplash.com/photo-1517842645767-c639042777db?auto=format&fit=crop&w=800&q=80"
           alt=""
           className="absolute inset-0 w-full h-full object-cover z-0"
-          fetchpriority="high"
+          {...({ fetchpriority: "high" } as React.HTMLProps<HTMLImageElement>)}
           aria-hidden="true"
         />
       </picture>
