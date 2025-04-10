@@ -12,7 +12,7 @@ const Resume: React.FC = () => {
         <header className="mb-6 flex justify-between items-center flex-wrap gap-4">
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-gray-900">CV Builder</h1>
-            <p className="text-muted-foreground">Create a professional resume that helps you stand out</p>
+            <p className="text-muted-foreground">Opret et professionelt CV, der hjælper dig med at skille dig ud</p>
           </div>
           
           <Link to="/resume/dk">

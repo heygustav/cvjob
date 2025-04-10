@@ -48,7 +48,7 @@ const ResumeEditorTabs: React.FC<ResumeEditorTabsProps> = ({
         </TabsTrigger>
         <TabsTrigger value="ats" className="flex items-center gap-2">
           <BarChart2 className="h-4 w-4" />
-          <span className="hidden sm:inline">ATS Optimering</span>
+          <span className="hidden sm:inline">ATS-optimering</span>
           <span className="sm:hidden">ATS</span>
         </TabsTrigger>
       </TabsList>

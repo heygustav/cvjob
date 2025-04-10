@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -47,17 +48,17 @@ const AtsOptimizer: React.FC<AtsOptimizerProps> = ({ resumeData }) => {
       <div className="space-y-4">
         <div className="flex items-center gap-2 mb-4">
           <Search className="h-5 w-5 text-gray-500" />
-          <h3 className="text-lg font-medium">ATS Optimization Analysis</h3>
+          <h3 className="text-lg font-medium">ATS-optimeringsanalyse</h3>
         </div>
 
         <div className="mb-4">
           <p className="text-sm text-gray-500 mb-2">
-            Paste a job description to analyze your resume for ATS compatibility and get personalized recommendations.
+            Indsæt et jobopslag for at analysere dit CV for ATS-kompatibilitet og få personlige anbefalinger.
           </p>
           <Textarea 
             value={jobDescription}
             onChange={(e) => setJobDescription(e.target.value)}
-            placeholder="Paste job description here..."
+            placeholder="Indsæt jobopslag her..."
             rows={4}
             className="resize-none"
           />
@@ -68,14 +69,14 @@ const AtsOptimizer: React.FC<AtsOptimizerProps> = ({ resumeData }) => {
           disabled={analyzing || (!resumeData.name && !resumeData.summary)}
           className="w-full"
         >
-          {analyzing ? "Analyzing..." : "Analyze Resume"}
+          {analyzing ? "Analyserer..." : "Analyser CV"}
         </Button>
 
         {results && (
           <div className="mt-6 space-y-4">
             <div className="space-y-2">
               <div className="flex justify-between">
-                <span className="text-sm font-medium">ATS Compatibility Score</span>
+                <span className="text-sm font-medium">ATS-kompatibilitetsscore</span>
                 <span className="text-sm font-bold">{results.score}%</span>
               </div>
               <Progress 
@@ -88,7 +89,7 @@ const AtsOptimizer: React.FC<AtsOptimizerProps> = ({ resumeData }) => {
             <div className="space-y-2">
               <h4 className="text-sm font-semibold flex items-center gap-1">
                 <AlertTriangle className="h-4 w-4 text-amber-500" />
-                Recommendations
+                Anbefalinger
               </h4>
               <ul className="list-disc pl-5 space-y-1 text-sm">
                 {results.recommendations.map((rec, i) => (
@@ -101,7 +102,7 @@ const AtsOptimizer: React.FC<AtsOptimizerProps> = ({ resumeData }) => {
               <div className="space-y-2">
                 <h4 className="text-sm font-semibold flex items-center gap-1">
                   <CheckCircle className="h-4 w-4 text-green-500" />
-                  Keywords Found ({results.keywordsFound.length})
+                  Fundne nøgleord ({results.keywordsFound.length})
                 </h4>
                 <div className="flex flex-wrap gap-1">
                   {results.keywordsFound.map((keyword, i) => (
@@ -120,7 +121,7 @@ const AtsOptimizer: React.FC<AtsOptimizerProps> = ({ resumeData }) => {
               <div className="space-y-2">
                 <h4 className="text-sm font-semibold flex items-center gap-1">
                   <AlertTriangle className="h-4 w-4 text-red-500" />
-                  Missing Keywords ({results.keywordsMissing.length})
+                  Manglende nøgleord ({results.keywordsMissing.length})
                 </h4>
                 <div className="flex flex-wrap gap-1">
                   {results.keywordsMissing.slice(0, 15).map((keyword, i) => (
@@ -133,7 +134,7 @@ const AtsOptimizer: React.FC<AtsOptimizerProps> = ({ resumeData }) => {
                   ))}
                   {results.keywordsMissing.length > 15 && (
                     <span className="text-xs text-gray-500">
-                      +{results.keywordsMissing.length - 15} more
+                      +{results.keywordsMissing.length - 15} flere
                     </span>
                   )}
                 </div>
@@ -146,4 +147,4 @@ const AtsOptimizer: React.FC<AtsOptimizerProps> = ({ resumeData }) => {
   );
 };
 
-export default AtsOptimizer; 
+export default AtsOptimizer;
