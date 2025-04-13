@@ -11,27 +11,51 @@ interface DataCache {
   coverLetters: CoverLetter[];
 }
 
+// Centralized state interface for better type safety
+interface DashboardState {
+  jobPostings: JobPosting[];
+  coverLetters: CoverLetter[];
+  isLoading: boolean;
+  isRefreshing: boolean;
+  error: Error | null;
+}
+
+// Define cache constants
+const CACHE_EXPIRATION = 5 * 60 * 1000; // 5 minutes
+const DEBOUNCE_DELAY = 100; // 100ms
+
 /**
  * Hook for fetching dashboard data (jobs and cover letters) with optimizations:
  * - Debounced fetching to prevent rapid successive calls
  * - Cache for preventing duplicate fetches in short time periods
- * - Better error handling with structured errors
+ * - Unified state management
  */
 export const useDashboardFetch = () => {
-  const [jobPostings, setJobPostings] = useState<JobPosting[]>([]);
-  const [coverLetters, setCoverLetters] = useState<CoverLetter[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+  // State using a single state object for related data
+  const [state, setState] = useState<DashboardState>({
+    jobPostings: [],
+    coverLetters: [],
+    isLoading: true,
+    isRefreshing: false,
+    error: null
+  });
+  
   const { toast } = useToast();
   
-  // Use a ref for caching data to avoid unnecessary re-renders
+  // Use refs for values that shouldn't trigger re-renders
   const cacheRef = useRef<DataCache | null>(null);
   const debounceTimerRef = useRef<number | null>(null);
   
-  // Cache expiration time in milliseconds (5 minutes)
-  const CACHE_EXPIRATION = 5 * 60 * 1000;
+  // Setters for individual properties
+  const setJobPostings = useCallback((jobPostings: JobPosting[]) => {
+    setState(prev => ({ ...prev, jobPostings }));
+  }, []);
   
+  const setCoverLetters = useCallback((coverLetters: CoverLetter[]) => {
+    setState(prev => ({ ...prev, coverLetters }));
+  }, []);
+  
+  // Fetch data with improved error handling and caching
   const fetchData = useCallback(async (showRefreshingState = false, bypassCache = false) => {
     try {
       // Clear any pending debounce timers
@@ -41,7 +65,7 @@ export const useDashboardFetch = () => {
       }
       
       if (showRefreshingState) {
-        setIsRefreshing(true);
+        setState(prev => ({ ...prev, isRefreshing: true }));
       }
       
       // Check if we have valid cached data and not forcing refresh
@@ -51,13 +75,14 @@ export const useDashboardFetch = () => {
         cacheRef.current && 
         now - cacheRef.current.timestamp < CACHE_EXPIRATION
       ) {
-        setJobPostings(cacheRef.current.jobPostings);
-        setCoverLetters(cacheRef.current.coverLetters);
-        setError(null);
-        setIsLoading(false);
-        if (showRefreshingState) {
-          setIsRefreshing(false);
-        }
+        setState(prev => ({
+          ...prev, 
+          jobPostings: cacheRef.current!.jobPostings,
+          coverLetters: cacheRef.current!.coverLetters,
+          error: null,
+          isLoading: false,
+          isRefreshing: showRefreshingState ? false : prev.isRefreshing
+        }));
         return;
       }
       
@@ -104,33 +129,40 @@ export const useDashboardFetch = () => {
         coverLetters: letterData
       };
       
-      setJobPostings(jobData);
-      setCoverLetters(letterData);
-      setError(null);
+      // Update state in a single operation
+      setState(prev => ({
+        ...prev,
+        jobPostings: jobData,
+        coverLetters: letterData,
+        error: null,
+        isLoading: false,
+        isRefreshing: showRefreshingState ? false : prev.isRefreshing
+      }));
     } catch (err) {
       console.error("Error fetching dashboard data:", err);
       const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
-      setError(err instanceof Error ? err : new Error(errorMessage));
+      
+      setState(prev => ({ 
+        ...prev, 
+        error: err instanceof Error ? err : new Error(errorMessage),
+        isLoading: false,
+        isRefreshing: showRefreshingState ? false : prev.isRefreshing
+      }));
       
       toast({
         title: "Fejl ved indlæsning",
         description: `Der opstod en fejl: ${errorMessage}`,
         variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
-      if (showRefreshingState) {
-        setIsRefreshing(false);
-      }
     }
   }, [toast]);
 
   // Initial data fetch with debounce
   useEffect(() => {
-    // Debounce initial load by 100ms to prevent multiple rapid fetches
+    // Debounce initial load to prevent multiple rapid fetches
     debounceTimerRef.current = window.setTimeout(() => {
       fetchData();
-    }, 100);
+    }, DEBOUNCE_DELAY);
     
     return () => {
       if (debounceTimerRef.current) {
@@ -143,11 +175,14 @@ export const useDashboardFetch = () => {
   const refreshData = useCallback(() => fetchData(true, true), [fetchData]);
 
   return {
-    jobPostings,
-    coverLetters,
-    isLoading,
-    isRefreshing,
-    error,
+    // Data from state
+    jobPostings: state.jobPostings,
+    coverLetters: state.coverLetters,
+    isLoading: state.isLoading,
+    isRefreshing: state.isRefreshing,
+    error: state.error,
+    
+    // Actions
     refreshData,
     setJobPostings,
     setCoverLetters
