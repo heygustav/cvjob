@@ -78,7 +78,7 @@ export const useDashboardFetch = () => {
       }
       
       // Use Promise.all for parallel requests - more efficient
-      const [jobResponse, letterResponse, companiesResponse] = await Promise.all([
+      const [jobResponse, letterResponse] = await Promise.all([
         // Fetch job postings with specific columns that exist in the database
         supabase
           .from("job_postings")
@@ -91,17 +91,7 @@ export const useDashboardFetch = () => {
           .from("cover_letters")
           .select("id, content, job_posting_id, created_at, updated_at, user_id")
           .eq("user_id", userId)
-          .order("created_at", { ascending: false }),
-          
-        // Custom fetch for companies - using custom query to handle table not in schema
-        // This is a workaround for TypeScript type issues
-        fetch(`${supabase.supabaseUrl}/rest/v1/companies?user_id=eq.${userId}&order=created_at.desc`, {
-          headers: {
-            'apikey': supabase.supabaseKey,
-            'Authorization': `Bearer ${supabase.supabaseKey}`,
-            'Content-Type': 'application/json'
-          }
-        }).then(res => res.json())
+          .order("created_at", { ascending: false })
       ]);
       
       if (jobResponse.error) throw new Error(`Job data error: ${jobResponse.error.message}`);
@@ -110,22 +100,40 @@ export const useDashboardFetch = () => {
       const jobData = jobResponse.data || [];
       const letterData = letterResponse.data || [];
       
-      // Process company data to match the Company interface
-      const companiesData: Company[] = Array.isArray(companiesResponse) 
-        ? companiesResponse.map(company => ({
-            id: company.id,
-            name: company.name || '',
-            description: company.description,
-            website: company.website,
-            contact_person: company.contact_person,
-            contact_email: company.contact_email,
-            contact_phone: company.contact_phone,
-            notes: company.notes,
-            created_at: company.created_at,
-            updated_at: company.updated_at,
-            user_id: company.user_id
-          }))
-        : [];
+      // Fetch companies using a different approach - using the REST endpoint
+      // This approach avoids TypeScript errors while still allowing access to the companies table
+      const companiesResponse = await fetch(`${process.env.SUPABASE_URL || 'https://zfyzkiseykwvpckavbxd.supabase.co'}/rest/v1/companies?user_id=eq.${userId}&order=created_at.desc`, {
+        headers: {
+          'apikey': process.env.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpmeXpraXNleWt3dnBja2F2YnhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA2NTkwNzUsImV4cCI6MjA1NjIzNTA3NX0.0rRP9DivmbBLv9f0ZM90BUy7j_LQ5dTvxY1dJ5FGWXM',
+          'Authorization': `Bearer ${process.env.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpmeXpraXNleWt3dnBja2F2YnhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA2NTkwNzUsImV4cCI6MjA1NjIzNTA3NX0.0rRP9DivmbBLv9f0ZM90BUy7j_LQ5dTvxY1dJ5FGWXM'}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      let companiesData: Company[] = [];
+      
+      if (!companiesResponse.ok) {
+        console.error("Error fetching companies:", await companiesResponse.text());
+      } else {
+        const companiesJson = await companiesResponse.json();
+        
+        // Process company data to match the Company interface
+        companiesData = Array.isArray(companiesJson) 
+          ? companiesJson.map(company => ({
+              id: company.id,
+              name: company.name || '',
+              description: company.description,
+              website: company.website,
+              contact_person: company.contact_person,
+              contact_email: company.contact_email,
+              contact_phone: company.contact_phone,
+              notes: company.notes,
+              created_at: company.created_at,
+              updated_at: company.updated_at,
+              user_id: company.user_id
+            }))
+          : [];
+      }
       
       // Update the cache
       cacheRef.current = {
