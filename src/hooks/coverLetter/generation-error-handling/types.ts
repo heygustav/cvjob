@@ -17,6 +17,6 @@ export interface GenerationErrorResult {
 }
 
 export interface TypedError extends Error {
-  phase?: 'job-save' | 'user-fetch' | 'generation' | 'letter-save';
+  phase?: 'job-save' | 'user-fetch' | 'generation' | 'letter-save' | 'api-rate-limit' | 'auth-error' | 'service-unavailable';
   recoverable?: boolean;
 }
