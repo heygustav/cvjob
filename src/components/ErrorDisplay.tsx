@@ -7,7 +7,7 @@ interface ErrorDisplayProps {
   title: string;
   message: string;
   onRetry?: () => void;
-  phase?: 'job-save' | 'user-fetch' | 'generation' | 'letter-save' | 'cv-parsing' | 'network' | 'timeout' | 'auth';
+  phase?: 'job-save' | 'user-fetch' | 'generation' | 'letter-save' | 'cv-parsing' | 'network' | 'timeout' | 'auth' | 'api-rate-limit' | 'service-unavailable' | 'auth-error';
   icon?: React.ReactNode;
 }
 
@@ -37,6 +37,12 @@ const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
         return "Serveren reagerer langsomt. Prøv igen senere, eller kontakt support hvis problemet fortsætter.";
       case 'auth':
         return "Din session er muligvis udløbet. Prøv at logge ud og ind igen.";
+      case 'api-rate-limit':
+        return "Du har foretaget for mange anmodninger på kort tid. Vent venligst nogle minutter og prøv igen.";
+      case 'service-unavailable':
+        return "Tjenesten er midlertidigt utilgængelig. Prøv igen senere.";
+      case 'auth-error':
+        return "Der opstod en fejl med din autorisation. Prøv at logge ud og ind igen.";
       default:
         return "Hvis problemet fortsætter, prøv at genindlæse siden eller kontakt heygustav@icloud.com";
     }
@@ -53,6 +59,9 @@ const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
       case 'network': return "Kontroller forbindelse";
       case 'timeout': return "Prøv igen";
       case 'auth': return "Log ind igen";
+      case 'api-rate-limit': return "Prøv igen senere";
+      case 'service-unavailable': return "Prøv igen senere";
+      case 'auth-error': return "Log ind igen";
       default: return "Prøv igen";
     }
   };
@@ -65,13 +74,14 @@ const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
     
     switch (phase) {
       case 'network':
-        return <WifiOff className="h-5 w-5 text-red-600 dark:text-red-400 mr-3 mt-0.5 flex-shrink-0" aria-hidden="true" />;
+        return <WifiOff className="h-5 w-5 text-red-600 dark:text-red-400" aria-hidden="true" />;
       case 'timeout':
-        return <Clock className="h-5 w-5 text-red-600 dark:text-red-400 mr-3 mt-0.5 flex-shrink-0" aria-hidden="true" />;
+        return <Clock className="h-5 w-5 text-red-600 dark:text-red-400" aria-hidden="true" />;
       case 'auth':
-        return <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400 mr-3 mt-0.5 flex-shrink-0" aria-hidden="true" />;
+      case 'auth-error':
+        return <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" aria-hidden="true" />;
       default:
-        return <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 mr-3 mt-0.5 flex-shrink-0" aria-hidden="true" />;
+        return <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400" aria-hidden="true" />;
     }
   };
   
@@ -80,6 +90,8 @@ const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
       variant="destructive" 
       className="mt-6 bg-red-50 border-red-200 dark:bg-red-950/20 dark:border-red-900/50" 
       role="alert" 
+      aria-live="assertive"
+      aria-atomic="true"
       aria-labelledby="error-title"
       aria-describedby="error-description"
     >
@@ -95,7 +107,7 @@ const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
             </AlertDescription>
             <div className="flex items-start pt-2">
               <HelpCircle className="h-4 w-4 text-red-500 dark:text-red-400 mr-2 mt-0.5 flex-shrink-0" aria-hidden="true" />
-              <p className="text-xs text-red-600 dark:text-red-400">{getHelpText()}</p>
+              <p className="text-xs text-red-600 dark:text-red-400" id="error-help-text">{getHelpText()}</p>
             </div>
           </div>
         </div>
@@ -107,6 +119,7 @@ const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
               type="button"
               className="flex items-center px-4 py-2 bg-white dark:bg-red-950/30 border border-red-300 dark:border-red-800/50 rounded-md text-sm font-medium text-red-700 dark:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 min-h-[40px]"
               aria-label={getActionText()}
+              aria-describedby="error-help-text"
             >
               <RefreshCw className="h-4 w-4 mr-2" aria-hidden="true" />
               {getActionText()}
