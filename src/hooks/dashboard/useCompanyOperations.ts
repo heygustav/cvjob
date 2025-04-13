@@ -8,10 +8,10 @@ import { useToast } from "@/hooks/use-toast";
  * Hook for company operations (delete)
  */
 export const useCompanyOperations = (
-  companies: Company[],
+  initialCompanies: Company[],
   userId?: string
 ) => {
-  const [companies, setCompanies] = useState<Company[]>(companies);
+  const [companies, setCompanies] = useState<Company[]>(initialCompanies);
   const { toast } = useToast();
 
   const deleteCompany = async (id: string) => {
@@ -59,6 +59,7 @@ export const useCompanyOperations = (
   };
 
   return {
-    deleteCompany
+    deleteCompany,
+    companies
   };
 };

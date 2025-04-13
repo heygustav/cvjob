@@ -40,7 +40,7 @@ export const useDashboardData = () => {
   );
 
   // Use the company operations hook for company-related actions
-  const { deleteCompany } = useCompanyOperations(
+  const { deleteCompany, companies: managedCompanies } = useCompanyOperations(
     companies,
     user?.id
   );
@@ -51,7 +51,7 @@ export const useDashboardData = () => {
   return {
     jobPostings,
     coverLetters,
-    companies,
+    companies: managedCompanies, // Use the companies from the operations hook
     isLoading,
     isRefreshing,
     isDeleting,
