@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { JobPosting, CoverLetter, Company } from "@/lib/types";
+import { JobPosting, CoverLetter } from "@/lib/types";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -9,70 +9,54 @@ interface DataCache {
   timestamp: number;
   jobPostings: JobPosting[];
   coverLetters: CoverLetter[];
-  companies: Company[];
 }
-
-// Centralized state interface for better type safety
-interface DashboardState {
-  jobPostings: JobPosting[];
-  coverLetters: CoverLetter[];
-  companies: Company[];
-  isLoading: boolean;
-  isRefreshing: boolean;
-  error: Error | null;
-}
-
-// Define cache constants
-const CACHE_EXPIRATION = 5 * 60 * 1000; // 5 minutes
-const DEBOUNCE_DELAY = 100; // 100ms
 
 /**
- * Hook for fetching dashboard data (jobs, cover letters, and companies) with optimizations:
+ * Hook for fetching dashboard data (jobs and cover letters) with optimizations:
  * - Debounced fetching to prevent rapid successive calls
  * - Cache for preventing duplicate fetches in short time periods
- * - Unified state management
+ * - Better error handling with structured errors
  */
 export const useDashboardFetch = () => {
-  // State using a single state object for related data
-  const [state, setState] = useState<DashboardState>({
-    jobPostings: [],
-    coverLetters: [],
-    companies: [],
-    isLoading: true,
-    isRefreshing: false,
-    error: null
-  });
-  
+  const [jobPostings, setJobPostings] = useState<JobPosting[]>([]);
+  const [coverLetters, setCoverLetters] = useState<CoverLetter[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
   const { toast } = useToast();
   
-  // Use refs for values that shouldn't trigger re-renders
+  // Use a ref for caching data to avoid unnecessary re-renders
   const cacheRef = useRef<DataCache | null>(null);
   const debounceTimerRef = useRef<number | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
   
-  // Setters for individual properties
-  const setJobPostings = useCallback((jobPostings: JobPosting[]) => {
-    setState(prev => ({ ...prev, jobPostings }));
+  // Cache expiration time in milliseconds (5 minutes)
+  const CACHE_EXPIRATION = 5 * 60 * 1000;
+  
+  // Clean up function to abort any pending requests
+  const cleanupRequests = useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    
+    if (debounceTimerRef.current) {
+      window.clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
+    }
   }, []);
   
-  const setCoverLetters = useCallback((coverLetters: CoverLetter[]) => {
-    setState(prev => ({ ...prev, coverLetters }));
-  }, []);
-  
-  const setCompanies = useCallback((companies: Company[]) => {
-    setState(prev => ({ ...prev, companies }));
-  }, []);
-  
-  // Fetch data with improved error handling and caching
   const fetchData = useCallback(async (showRefreshingState = false, bypassCache = false) => {
     try {
-      // Clear any pending debounce timers
-      if (debounceTimerRef.current) {
-        window.clearTimeout(debounceTimerRef.current);
-        debounceTimerRef.current = null;
-      }
+      // Clean up any pending requests
+      cleanupRequests();
+      
+      // Create a new abort controller for this request
+      abortControllerRef.current = new AbortController();
+      const signal = abortControllerRef.current.signal;
       
       if (showRefreshingState) {
-        setState(prev => ({ ...prev, isRefreshing: true }));
+        setIsRefreshing(true);
       }
       
       // Check if we have valid cached data and not forcing refresh
@@ -82,16 +66,19 @@ export const useDashboardFetch = () => {
         cacheRef.current && 
         now - cacheRef.current.timestamp < CACHE_EXPIRATION
       ) {
-        setState(prev => ({
-          ...prev, 
-          jobPostings: cacheRef.current!.jobPostings,
-          coverLetters: cacheRef.current!.coverLetters,
-          companies: cacheRef.current!.companies,
-          error: null,
-          isLoading: false,
-          isRefreshing: showRefreshingState ? false : prev.isRefreshing
-        }));
+        setJobPostings(cacheRef.current.jobPostings);
+        setCoverLetters(cacheRef.current.coverLetters);
+        setError(null);
+        setIsLoading(false);
+        if (showRefreshingState) {
+          setIsRefreshing(false);
+        }
         return;
+      }
+      
+      // Check for offline status
+      if (!navigator.onLine) {
+        throw new Error("Du er offline. Tjek din internetforbindelse og prøv igen.");
       }
       
       // Get user ID from session
@@ -107,8 +94,13 @@ export const useDashboardFetch = () => {
         throw new Error("User not authenticated");
       }
       
+      // Set up timeout for requests
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error("Forespørgslen tog for lang tid. Prøv igen senere.")), 20000);
+      });
+      
       // Use Promise.all for parallel requests - more efficient
-      const [jobResponse, letterResponse, companyResponse] = await Promise.all([
+      const dataPromise = Promise.all([
         // Fetch job postings with specific columns that exist in the database
         supabase
           .from("job_postings")
@@ -121,90 +113,128 @@ export const useDashboardFetch = () => {
           .from("cover_letters")
           .select("id, content, job_posting_id, created_at, updated_at, user_id")
           .eq("user_id", userId)
-          .order("created_at", { ascending: false }),
-          
-        // Fetch companies
-        (supabase as any)
-          .from('companies')
-          .select('*')
-          .eq('user_id', userId)
-          .order('created_at', { ascending: false })
+          .order("created_at", { ascending: false })
       ]);
+      
+      // Race the data promise against the timeout
+      const [jobResponse, letterResponse] = await Promise.race([dataPromise, timeoutPromise]) as [any, any];
+      
+      if (signal.aborted) {
+        // Request was aborted, don't update state
+        return;
+      }
       
       if (jobResponse.error) throw new Error(`Job data error: ${jobResponse.error.message}`);
       if (letterResponse.error) throw new Error(`Letter data error: ${letterResponse.error.message}`);
       
       const jobData = jobResponse.data || [];
       const letterData = letterResponse.data || [];
-      const companyData = companyResponse.error ? [] : companyResponse.data || [];
       
       // Update the cache
       cacheRef.current = {
         timestamp: now,
         jobPostings: jobData,
-        coverLetters: letterData,
-        companies: companyData
+        coverLetters: letterData
       };
       
-      // Update state in a single operation
-      setState(prev => ({
-        ...prev,
-        jobPostings: jobData,
-        coverLetters: letterData,
-        companies: companyData,
-        error: null,
-        isLoading: false,
-        isRefreshing: showRefreshingState ? false : prev.isRefreshing
-      }));
+      setJobPostings(jobData);
+      setCoverLetters(letterData);
+      setError(null);
     } catch (err) {
       console.error("Error fetching dashboard data:", err);
-      const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
       
-      setState(prev => ({ 
-        ...prev, 
-        error: err instanceof Error ? err : new Error(errorMessage),
-        isLoading: false,
-        isRefreshing: showRefreshingState ? false : prev.isRefreshing
-      }));
+      // Don't update state if the request was aborted
+      if (abortControllerRef.current?.signal.aborted) {
+        return;
+      }
       
+      // Create more user-friendly error messages based on error type
+      let errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
+      let error = err instanceof Error ? err : new Error(errorMessage);
+      
+      // Check for network errors
+      if (!navigator.onLine) {
+        errorMessage = "Du er offline. Tjek din internetforbindelse og prøv igen.";
+        error = new Error(errorMessage);
+      } else if (errorMessage.includes("timeout") || errorMessage.includes("timed out")) {
+        errorMessage = "Forbindelsen til serveren tog for lang tid. Prøv igen senere.";
+        error = new Error(errorMessage);
+      } else if (errorMessage.includes("fetch")) {
+        errorMessage = "Kunne ikke oprette forbindelse til serveren. Tjek din internetforbindelse og prøv igen.";
+        error = new Error(errorMessage);
+      }
+      
+      setError(error);
+      
+      // Show toast with user-friendly message
       toast({
         title: "Fejl ved indlæsning",
-        description: `Der opstod en fejl: ${errorMessage}`,
+        description: errorMessage,
         variant: "destructive",
       });
+      
+      // If we have cached data, use it as a fallback
+      if (cacheRef.current) {
+        console.log("Using cached data as fallback due to fetch error");
+        setJobPostings(cacheRef.current.jobPostings);
+        setCoverLetters(cacheRef.current.coverLetters);
+      }
+    } finally {
+      setIsLoading(false);
+      if (showRefreshingState) {
+        setIsRefreshing(false);
+      }
+      
+      // Clear the abort controller
+      abortControllerRef.current = null;
     }
-  }, [toast]);
+  }, [toast, cleanupRequests]);
 
   // Initial data fetch with debounce
   useEffect(() => {
-    // Debounce initial load to prevent multiple rapid fetches
+    // Debounce initial load by 100ms to prevent multiple rapid fetches
     debounceTimerRef.current = window.setTimeout(() => {
       fetchData();
-    }, DEBOUNCE_DELAY);
+    }, 100);
     
     return () => {
-      if (debounceTimerRef.current) {
-        window.clearTimeout(debounceTimerRef.current);
-      }
+      cleanupRequests();
     };
-  }, [fetchData]);
+  }, [fetchData, cleanupRequests]);
+
+  // Add network status listener
+  useEffect(() => {
+    const handleOnline = () => {
+      console.log("Network is back online, refreshing data");
+      
+      // Show toast notification
+      toast({
+        title: "Forbindelse genetableret",
+        description: "Du er online igen. Data opdateres.",
+      });
+      
+      // Refresh data after a short delay to ensure connection is stable
+      setTimeout(() => fetchData(true, true), 1000);
+    };
+    
+    window.addEventListener('online', handleOnline);
+    
+    return () => {
+      window.removeEventListener('online', handleOnline);
+    };
+  }, [fetchData, toast]);
 
   // Function to manually refresh data - bypass cache
   const refreshData = useCallback(() => fetchData(true, true), [fetchData]);
 
   return {
-    // Data from state
-    jobPostings: state.jobPostings,
-    coverLetters: state.coverLetters,
-    companies: state.companies,
-    isLoading: state.isLoading,
-    isRefreshing: state.isRefreshing,
-    error: state.error,
-    
-    // Actions
+    jobPostings,
+    coverLetters,
+    isLoading,
+    isRefreshing,
+    error,
     refreshData,
     setJobPostings,
-    setCoverLetters,
-    setCompanies
+    setCoverLetters
   };
 };

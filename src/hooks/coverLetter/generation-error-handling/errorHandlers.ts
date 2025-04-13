@@ -75,6 +75,21 @@ export const handleTypedError = (error: TypedError): GenerationErrorResult => {
       result.title = "Fejl ved gemning";
       result.description = error.message || "Ansøgningen blev genereret, men kunne ikke gemmes.";
       break;
+    case 'api-rate-limit':
+      result.title = "Hastighedsbegrænsning";
+      result.description = error.message || "For mange anmodninger på kort tid. Vent et øjeblik og prøv igen.";
+      result.recoverable = true;
+      break;
+    case 'auth-error':
+      result.title = "Godkendelsesfejl";
+      result.description = error.message || "Din session er udløbet. Log venligst ind igen.";
+      result.recoverable = false;
+      break;
+    case 'service-unavailable':
+      result.title = "Tjeneste utilgængelig";
+      result.description = error.message || "Tjenesten er midlertidigt utilgængelig. Prøv igen senere.";
+      result.recoverable = false;
+      break;
   }
   
   return result;
@@ -86,17 +101,39 @@ export const handleStandardError = (error: Error): GenerationErrorResult => {
   let title = "Fejl ved generering";
   let description = error.message || "Der opstod en ukendt fejl. Prøv venligst igen.";
   
-  // Check for common network errors
-  if (error.message.includes('network') || error.message.includes('connection')) {
+  // Check for network errors
+  if (!navigator.onLine) {
+    title = "Netværksfejl";
+    description = "Du er offline. Tjek din internetforbindelse og prøv igen.";
+    recoverable = true;
+  } 
+  // Check for more specific network errors
+  else if (error.message.includes('network') || error.message.includes('connection') || 
+           error.message.includes('forbindelse') || error.message.includes('netværk')) {
     title = "Netværksfejl";
     description = "Der er problemer med din internetforbindelse. Tjek din forbindelse og prøv igen.";
+    recoverable = true;
   } 
-  
   // Check for server errors
-  else if (error.message.includes('500') || error.message.includes('server')) {
+  else if (error.message.includes('500') || error.message.includes('server') || 
+           error.message.includes('unavailable') || error.message.includes('utilgængelig')) {
     title = "Serverfejl";
     description = "Der er problemer med vores server. Prøv igen senere.";
     recoverable = false;
+  }
+  // Check for authorization errors
+  else if (error.message.includes('401') || error.message.includes('auth') || 
+           error.message.includes('login') || error.message.includes('unauthorized') ||
+           error.message.includes('uautoriseret')) {
+    title = "Godkendelsesfejl";
+    description = "Din session er muligvis udløbet. Prøv at logge ind igen.";
+    recoverable = false;
+  }
+  // Check for timeout errors
+  else if (error.message.includes('timeout') || error.message.includes('timed out')) {
+    title = "Timeout fejl";
+    description = "Anmodningen tog for lang tid. Tjek din internetforbindelse eller prøv igen senere.";
+    recoverable = true;
   }
   
   return { title, description, recoverable };

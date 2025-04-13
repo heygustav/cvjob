@@ -1,12 +1,13 @@
+
 import React from 'react';
-import { AlertCircle, RefreshCw, HelpCircle } from 'lucide-react';
+import { AlertCircle, RefreshCw, HelpCircle, WifiOff, AlertTriangle, Clock } from 'lucide-react';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
 interface ErrorDisplayProps {
   title: string;
   message: string;
   onRetry?: () => void;
-  phase?: 'job-save' | 'user-fetch' | 'generation' | 'letter-save' | 'cv-parsing';
+  phase?: 'job-save' | 'user-fetch' | 'generation' | 'letter-save' | 'cv-parsing' | 'network' | 'timeout' | 'auth';
   icon?: React.ReactNode;
 }
 
@@ -30,6 +31,12 @@ const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
         return "Din ansøgning blev genereret, men kunne ikke gemmes. Prøv at kopiere teksten manuelt.";
       case 'cv-parsing':
         return "Der opstod en fejl ved analyse af dit CV. Kontroller at filen er i PDF-format og ikke er for stor (max 2MB). Prøv at uploade igen eller udfyld oplysningerne manuelt.";
+      case 'network':
+        return "Tjek din internetforbindelse. Sørg for, at du er forbundet til et stabilt netværk og prøv igen.";
+      case 'timeout':
+        return "Serveren reagerer langsomt. Prøv igen senere, eller kontakt support hvis problemet fortsætter.";
+      case 'auth':
+        return "Din session er muligvis udløbet. Prøv at logge ud og ind igen.";
       default:
         return "Hvis problemet fortsætter, prøv at genindlæse siden eller kontakt heygustav@icloud.com";
     }
@@ -43,7 +50,28 @@ const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
       case 'generation': return "Generer igen";
       case 'letter-save': return "Gem igen";
       case 'cv-parsing': return "Forsøg igen";
+      case 'network': return "Kontroller forbindelse";
+      case 'timeout': return "Prøv igen";
+      case 'auth': return "Log ind igen";
       default: return "Prøv igen";
+    }
+  };
+
+  // Select appropriate icon based on the error phase
+  const getIcon = () => {
+    if (icon) {
+      return icon;
+    }
+    
+    switch (phase) {
+      case 'network':
+        return <WifiOff className="h-5 w-5 text-red-600 dark:text-red-400 mr-3 mt-0.5 flex-shrink-0" aria-hidden="true" />;
+      case 'timeout':
+        return <Clock className="h-5 w-5 text-red-600 dark:text-red-400 mr-3 mt-0.5 flex-shrink-0" aria-hidden="true" />;
+      case 'auth':
+        return <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400 mr-3 mt-0.5 flex-shrink-0" aria-hidden="true" />;
+      default:
+        return <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 mr-3 mt-0.5 flex-shrink-0" aria-hidden="true" />;
     }
   };
   
@@ -57,11 +85,7 @@ const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
     >
       <div className="flex flex-col space-y-4">
         <div className="flex items-start">
-          {icon ? (
-            <span className="mr-3 mt-0.5 flex-shrink-0" aria-hidden="true">{icon}</span>
-          ) : (
-            <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 mr-3 mt-0.5 flex-shrink-0" aria-hidden="true" />
-          )}
+          <span className="mr-3 mt-0.5 flex-shrink-0" aria-hidden="true">{getIcon()}</span>
           <div className="space-y-2">
             <AlertTitle id="error-title" className="text-base font-semibold text-red-800 dark:text-red-300">
               {title}
