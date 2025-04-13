@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { JobPosting, CoverLetter } from "@/lib/types";
+import { JobPosting, CoverLetter, Company } from "@/lib/types";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -9,12 +9,14 @@ interface DataCache {
   timestamp: number;
   jobPostings: JobPosting[];
   coverLetters: CoverLetter[];
+  companies: Company[];
 }
 
 // Centralized state interface for better type safety
 interface DashboardState {
   jobPostings: JobPosting[];
   coverLetters: CoverLetter[];
+  companies: Company[];
   isLoading: boolean;
   isRefreshing: boolean;
   error: Error | null;
@@ -25,7 +27,7 @@ const CACHE_EXPIRATION = 5 * 60 * 1000; // 5 minutes
 const DEBOUNCE_DELAY = 100; // 100ms
 
 /**
- * Hook for fetching dashboard data (jobs and cover letters) with optimizations:
+ * Hook for fetching dashboard data (jobs, cover letters, and companies) with optimizations:
  * - Debounced fetching to prevent rapid successive calls
  * - Cache for preventing duplicate fetches in short time periods
  * - Unified state management
@@ -35,6 +37,7 @@ export const useDashboardFetch = () => {
   const [state, setState] = useState<DashboardState>({
     jobPostings: [],
     coverLetters: [],
+    companies: [],
     isLoading: true,
     isRefreshing: false,
     error: null
@@ -53,6 +56,10 @@ export const useDashboardFetch = () => {
   
   const setCoverLetters = useCallback((coverLetters: CoverLetter[]) => {
     setState(prev => ({ ...prev, coverLetters }));
+  }, []);
+  
+  const setCompanies = useCallback((companies: Company[]) => {
+    setState(prev => ({ ...prev, companies }));
   }, []);
   
   // Fetch data with improved error handling and caching
@@ -79,6 +86,7 @@ export const useDashboardFetch = () => {
           ...prev, 
           jobPostings: cacheRef.current!.jobPostings,
           coverLetters: cacheRef.current!.coverLetters,
+          companies: cacheRef.current!.companies,
           error: null,
           isLoading: false,
           isRefreshing: showRefreshingState ? false : prev.isRefreshing
@@ -100,7 +108,7 @@ export const useDashboardFetch = () => {
       }
       
       // Use Promise.all for parallel requests - more efficient
-      const [jobResponse, letterResponse] = await Promise.all([
+      const [jobResponse, letterResponse, companyResponse] = await Promise.all([
         // Fetch job postings with specific columns that exist in the database
         supabase
           .from("job_postings")
@@ -113,7 +121,14 @@ export const useDashboardFetch = () => {
           .from("cover_letters")
           .select("id, content, job_posting_id, created_at, updated_at, user_id")
           .eq("user_id", userId)
-          .order("created_at", { ascending: false })
+          .order("created_at", { ascending: false }),
+          
+        // Fetch companies
+        (supabase as any)
+          .from('companies')
+          .select('*')
+          .eq('user_id', userId)
+          .order('created_at', { ascending: false })
       ]);
       
       if (jobResponse.error) throw new Error(`Job data error: ${jobResponse.error.message}`);
@@ -121,12 +136,14 @@ export const useDashboardFetch = () => {
       
       const jobData = jobResponse.data || [];
       const letterData = letterResponse.data || [];
+      const companyData = companyResponse.error ? [] : companyResponse.data || [];
       
       // Update the cache
       cacheRef.current = {
         timestamp: now,
         jobPostings: jobData,
-        coverLetters: letterData
+        coverLetters: letterData,
+        companies: companyData
       };
       
       // Update state in a single operation
@@ -134,6 +151,7 @@ export const useDashboardFetch = () => {
         ...prev,
         jobPostings: jobData,
         coverLetters: letterData,
+        companies: companyData,
         error: null,
         isLoading: false,
         isRefreshing: showRefreshingState ? false : prev.isRefreshing
@@ -178,6 +196,7 @@ export const useDashboardFetch = () => {
     // Data from state
     jobPostings: state.jobPostings,
     coverLetters: state.coverLetters,
+    companies: state.companies,
     isLoading: state.isLoading,
     isRefreshing: state.isRefreshing,
     error: state.error,
@@ -185,6 +204,7 @@ export const useDashboardFetch = () => {
     // Actions
     refreshData,
     setJobPostings,
-    setCoverLetters
+    setCoverLetters,
+    setCompanies
   };
 };

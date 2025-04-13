@@ -1,10 +1,10 @@
+
 import React, { useEffect, useState } from "react";
-import { useDashboardData } from "@/hooks/useDashboardData";
+import { useDashboardData } from "@/hooks/dashboard";
 import DashboardLoading from "@/components/dashboard/DashboardLoading";
 import DashboardMain from "@/components/dashboard/DashboardMain";
 import { useAuth } from "@/components/AuthProvider";
 import { useSubscription } from "@/hooks/useSubscription";
-import { SubscriptionStatus } from "@/services/subscription/types";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, RefreshCw } from "lucide-react";
