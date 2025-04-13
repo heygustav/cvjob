@@ -1,10 +1,12 @@
-import React, { lazy, Suspense, useState, useEffect, useMemo, useCallback, memo } from 'react';
+
+import React, { lazy, Suspense, useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../components/AuthProvider';
 import HeroSection from '../components/home/HeroSection';
 import FeaturesSection from '../components/home/FeaturesSection';
 import { Session } from '@supabase/supabase-js';
+import { usePerformanceMonitoring } from '@/hooks/usePerformanceMonitoring';
 
-// Lazy load non-critical components
+// Lazy load non-critical components with better error handling
 const HowItWorksSection = lazy(() => import('../components/home/HowItWorksSection'));
 const TestimonialsSection = lazy(() => import('../components/home/TestimonialsSection'));
 const CTASection = lazy(() => import('../components/home/CTASection'));
@@ -17,72 +19,73 @@ const SectionPlaceholder = () => (
   </div>
 );
 
-// Factory function for Intersection Observer based lazy loading
-const createLazyComponent = (Component: React.LazyExoticComponent<any>) => {
-  return memo(({ ...props }: Record<string, any>) => {
-    const [isVisible, setIsVisible] = useState(false);
-    const ref = React.useRef<HTMLDivElement>(null);
+// Optimized LazyComponent with IntersectionObserver
+const LazyComponent = ({ component: Component, threshold = 0.1, rootMargin = '100px', ...props }) => {
+  const [isVisible, setIsVisible] = useState(false);
+  const ref = React.useRef(null);
 
-    // Setup intersection observer only once
-    useEffect(() => {
-      if (!ref.current) return;
-      
-      const observer = new IntersectionObserver(
-        (entries) => {
-          if (entries[0].isIntersecting) {
-            setIsVisible(true);
-            observer.disconnect();
-          }
-        },
-        { 
-          threshold: 0.1,
-          rootMargin: '100px' // Load when element is 100px from viewport
+  useEffect(() => {
+    if (!ref.current || typeof IntersectionObserver === 'undefined') {
+      setIsVisible(true); // Fallback for browsers that don't support IntersectionObserver
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
         }
-      );
-      
-      observer.observe(ref.current);
-      
-      return () => observer.disconnect();
-    }, []);
-
-    return (
-      <div ref={ref} className="min-h-[100px]">
-        {isVisible ? (
-          <Suspense fallback={<SectionPlaceholder />}>
-            <Component {...props} />
-          </Suspense>
-        ) : <SectionPlaceholder />}
-      </div>
+      },
+      { threshold, rootMargin }
     );
-  });
+
+    observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [threshold, rootMargin]);
+
+  return (
+    <div ref={ref} className="min-h-[100px]">
+      {isVisible ? (
+        <Suspense fallback={<SectionPlaceholder />}>
+          <Component {...props} />
+        </Suspense>
+      ) : <SectionPlaceholder />}
+    </div>
+  );
 };
 
-// Create optimized lazy components
-const LazyHowItWorksSection = createLazyComponent(HowItWorksSection);
-const LazyTestimonialsSection = createLazyComponent(TestimonialsSection);
-const LazyCTASection = createLazyComponent(CTASection);
-const LazyFooterSection = createLazyComponent(FooterSection);
-
-// Define props interfaces for components
+// Interface for section props
 interface SectionProps {
   session?: Session | null;
 }
 
-// Memoize the entire component for better performance
-const Index = memo(() => {
-  // Use optional chaining with session to prevent errors
+const Index = () => {
   const { session } = useAuth() || {};
+  const { logTiming } = usePerformanceMonitoring({
+    componentName: 'IndexPage',
+    logRender: true,
+    logMount: true
+  });
 
-  // Set document title, meta description and canonical for SEO
+  // Simplified SEO updates
   useEffect(() => {
-    // SEO updates - only run once
+    logTiming('Starting SEO updates');
     document.title = "CVJob | AI-Drevet Jobansøgningsgenerator til Personlige Ansøgninger";
     
-    // Set meta tags in a more efficient way
-    const updateMetaTag = (selector: string, attribute: string, value: string) => {
+    const metaTags = [
+      { selector: 'meta[name="description"]', attr: 'content', value: 'Skab professionelle, personlige jobansøgninger på få minutter med CVJob\'s AI-drevne værktøj. Få flere jobsamtaler med mindre indsats.' },
+      { selector: 'link[rel="canonical"]', attr: 'href', value: 'https://cvjob.dk' },
+      { selector: 'meta[property="og:title"]', attr: 'content', value: 'CVJob | AI-Drevet Jobansøgningsgenerator til Personlige Ansøgninger' },
+      { selector: 'meta[property="og:description"]', attr: 'content', value: 'Skab professionelle, personlige jobansøgninger på få minutter med CVJob\'s AI-drevne værktøj. Spild mindre tid på ansøgninger, få flere jobsamtaler.' },
+      { selector: 'meta[property="og:url"]', attr: 'content', value: 'https://cvjob.dk' }
+    ];
+    
+    // Apply meta tags in a more efficient way
+    metaTags.forEach(({ selector, attr, value }) => {
       let tag = document.querySelector(selector);
       if (!tag) {
-        tag = document.createElement(selector === 'link[rel="canonical"]' ? 'link' : 'meta');
+        tag = document.createElement(selector.includes('link') ? 'link' : 'meta');
         if (selector.includes('property=')) {
           tag.setAttribute('property', selector.match(/property="([^"]+)"/)![1]);
         } else if (selector.includes('name=')) {
@@ -92,38 +95,30 @@ const Index = memo(() => {
         }
         document.head.appendChild(tag);
       }
-      tag.setAttribute(attribute, value);
-    };
+      tag.setAttribute(attr, value);
+    });
     
-    // Update all meta tags at once
-    updateMetaTag('meta[name="description"]', 'content', 'Skab professionelle, personlige jobansøgninger på få minutter med CVJob\'s AI-drevne værktøj. Få flere jobsamtaler med mindre indsats.');
-    updateMetaTag('link[rel="canonical"]', 'href', 'https://cvjob.dk');
-    updateMetaTag('meta[property="og:title"]', 'content', 'CVJob | AI-Drevet Jobansøgningsgenerator til Personlige Ansøgninger');
-    updateMetaTag('meta[property="og:description"]', 'content', 'Skab professionelle, personlige jobansøgninger på få minutter med CVJob\'s AI-drevne værktøj. Spild mindre tid på ansøgninger, få flere jobsamtaler.');
-    updateMetaTag('meta[property="og:url"]', 'content', 'https://cvjob.dk');
-  }, []);
+    logTiming('SEO updates completed');
+  }, [logTiming]);
 
-  // Memoize the session prop to prevent unnecessary re-renders
-  const sessionProp = useMemo(() => session, [session]);
+  // Memoize session for performance
+  const memoizedSession = useMemo(() => session, [session]);
 
   return (
     <div className="bg-background">
       <main>
         {/* Critical components loaded eagerly */}
-        <HeroSection session={sessionProp} />
+        <HeroSection session={memoizedSession} />
         <FeaturesSection />
         
-        {/* Non-critical components loaded lazily with intersection observer */}
-        <LazyHowItWorksSection session={sessionProp} />
-        <LazyTestimonialsSection />
-        <LazyCTASection session={sessionProp} />
+        {/* Non-critical components loaded lazily with optimized loader */}
+        <LazyComponent component={HowItWorksSection} session={memoizedSession} />
+        <LazyComponent component={TestimonialsSection} />
+        <LazyComponent component={CTASection} session={memoizedSession} />
       </main>
-      <LazyFooterSection />
+      <LazyComponent component={FooterSection} rootMargin="200px" />
     </div>
   );
-});
-
-// Add displayName for debugging
-Index.displayName = 'IndexPage';
+};
 
 export default Index;
