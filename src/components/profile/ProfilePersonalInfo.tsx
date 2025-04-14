@@ -1,16 +1,16 @@
 
-import React, { ChangeEvent, FormEvent } from "react";
+import React from "react";
 import { PersonalInfoFormState } from "@/pages/Profile";
 import PersonalInfoFields from "./PersonalInfoFields";
 import ExperienceField from "./ExperienceField";
 import EducationField from "./EducationField";
 import SkillsField from "./SkillsField";
-import FormActions from "./FormActions";
+import ProfileFormLayout from "./ProfileFormLayout";
 
 export interface ProfilePersonalInfoProps {
   formData: PersonalInfoFormState;
-  handleChange: (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
-  handleSubmit: (e: FormEvent<HTMLFormElement>) => Promise<void>;
+  handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  handleSubmit: (e: React.FormEvent<HTMLFormElement>) => Promise<void>;
   setFormData: React.Dispatch<React.SetStateAction<PersonalInfoFormState>>;
   isLoading: boolean;
   validationErrors?: Record<string, string>;
@@ -31,48 +31,37 @@ const ProfilePersonalInfo: React.FC<ProfilePersonalInfoProps> = ({
       Object.keys(validationErrors).length === 0;
   }, [formData.name, formData.email, validationErrors]);
 
-  const handleSave = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!isFormValid) return;
-    await handleSubmit(e);
-  };
-
   return (
-    <div className="space-y-6 p-8 text-left">
-      <div>
-        <h3 className="text-lg font-medium text-gray-900">Personlige oplysninger</h3>
-        <p className="text-sm text-muted-foreground mt-1">
-          Disse oplysninger bruges til at generere dine ansøgninger
-        </p>
-      </div>
+    <ProfileFormLayout
+      title="Personlige oplysninger"
+      description="Disse oplysninger bruges til at generere dine ansøgninger"
+      onSubmit={handleSubmit}
+      isLoading={isLoading}
+      isFormValid={isFormValid}
+    >
+      <PersonalInfoFields 
+        formData={formData} 
+        handleChange={handleChange} 
+        validationErrors={validationErrors} 
+      />
       
-      <form onSubmit={handleSave} className="space-y-6 text-left">
-        <PersonalInfoFields 
-          formData={formData} 
-          handleChange={handleChange} 
-          validationErrors={validationErrors} 
+      <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+        <ExperienceField 
+          value={formData.experience || ""} 
+          onChange={handleChange} 
         />
         
-        <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
-          <ExperienceField 
-            value={formData.experience || ""} 
-            onChange={handleChange} 
-          />
-          
-          <EducationField 
-            value={formData.education || ""} 
-            onChange={handleChange} 
-          />
-          
-          <SkillsField 
-            value={formData.skills || ""} 
-            onChange={handleChange} 
-          />
-        </div>
-
-        <FormActions isLoading={isLoading} isFormValid={isFormValid} />
-      </form>
-    </div>
+        <EducationField 
+          value={formData.education || ""} 
+          onChange={handleChange} 
+        />
+        
+        <SkillsField 
+          value={formData.skills || ""} 
+          onChange={handleChange} 
+        />
+      </div>
+    </ProfileFormLayout>
   );
 };
 

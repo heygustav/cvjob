@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import DOMPurify from "dompurify";
 import TextInput from "./TextInput";
 import PasswordInput from "./PasswordInput";
@@ -31,25 +31,25 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSubmit, isLoading }) => {
   });
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : DOMPurify.sanitize(value),
     }));
-  };
+  }, []);
 
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
+  const togglePasswordVisibility = useCallback(() => {
+    setShowPassword(prev => !prev);
+  }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.terms || !formData.gdpr) {
       return; // Don't submit if terms or GDPR not accepted
     }
     onSubmit(formData);
-  };
+  }, [formData, onSubmit]);
 
   return (
     <form className="space-y-6" onSubmit={handleSubmit}>
@@ -110,4 +110,4 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSubmit, isLoading }) => {
   );
 };
 
-export default SignupForm;
+export default React.memo(SignupForm);

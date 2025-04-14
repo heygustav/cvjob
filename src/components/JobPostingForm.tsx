@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useCallback } from "react";
 import { useJobForm } from "./job-form/useJobForm";
 import { JobFormData } from "@/services/coverLetter/types";
 import { useJobExtraction } from "./job-form/useJobExtraction";
@@ -39,7 +39,7 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
     onSave,
   });
 
-  const { isExtracting, extractInfoFromDescription } = useJobExtraction(formData, (extractedData) => {
+  const handleSuccess = useCallback((extractedData: Partial<JobFormData>) => {
     // Update form data with extracted information
     Object.entries(extractedData).forEach(([key, value]) => {
       const input = document.getElementById(key) as HTMLInputElement | HTMLTextAreaElement;
@@ -49,7 +49,9 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
         input.dispatchEvent(event);
       }
     });
-  });
+  }, []);
+
+  const { isExtracting, extractInfoFromDescription } = useJobExtraction(formData, handleSuccess);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -89,4 +91,4 @@ const JobPostingForm: React.FC<JobPostingFormProps> = ({
   );
 };
 
-export default JobPostingForm;
+export default React.memo(JobPostingForm);

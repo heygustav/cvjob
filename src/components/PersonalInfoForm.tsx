@@ -1,21 +1,11 @@
 
-import React, { useState, ChangeEvent, FormEvent } from "react";
+import React from "react";
 import { toast } from "sonner";
 import PersonalInfoFields from "./profile/PersonalInfoFields";
 import ExperienceField from "./profile/ExperienceField";
 import EducationField from "./profile/EducationField";
 import SkillsField from "./profile/SkillsField";
-import FormActions from "./job-form/FormActions";
-
-export interface PersonalInfoFormData {
-  name: string;
-  phone: string;
-  address: string;
-  workExperiences: string[];
-  education: string[];
-  skills: string[];
-  summary?: string;
-}
+import ProfileFormLayout from "./profile/ProfileFormLayout";
 
 export interface PersonalInfoFormState {
   name: string;
@@ -28,7 +18,7 @@ export interface PersonalInfoFormState {
 }
 
 const PersonalInfoForm: React.FC = () => {
-  const [formData, setFormData] = useState<PersonalInfoFormState>({
+  const [formData, setFormData] = React.useState<PersonalInfoFormState>({
     name: "",
     phone: "",
     address: "",
@@ -38,8 +28,8 @@ const PersonalInfoForm: React.FC = () => {
     skills: [],
   });
 
-  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [validationErrors, setValidationErrors] = React.useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const validateForm = (): boolean => {
     let errors: Record<string, string> = {};
@@ -58,7 +48,7 @@ const PersonalInfoForm: React.FC = () => {
     return Object.keys(errors).length === 0;
   };
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
@@ -72,7 +62,7 @@ const PersonalInfoForm: React.FC = () => {
     }));
   };
 
-  const handleSubmit = async (event: FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
     if (!validateForm()) {
@@ -96,7 +86,13 @@ const PersonalInfoForm: React.FC = () => {
   const isValid = Object.keys(validationErrors).length === 0 && formData.name !== "" && formData.phone !== "";
   
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
+    <ProfileFormLayout
+      title="Personlige oplysninger"
+      description="Opdater dine personlige oplysninger."
+      onSubmit={handleSubmit}
+      isLoading={isSubmitting}
+      isFormValid={isValid}
+    >
       <PersonalInfoFields 
         formData={formData} 
         handleChange={handleChange} 
@@ -126,9 +122,7 @@ const PersonalInfoForm: React.FC = () => {
           setFormData({ ...formData, skills: skillsList });
         }}
       />
-      
-      <FormActions isLoading={isSubmitting} />
-    </form>
+    </ProfileFormLayout>
   );
 };
 

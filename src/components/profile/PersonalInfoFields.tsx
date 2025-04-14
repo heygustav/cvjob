@@ -9,6 +9,7 @@ export interface PersonalInfoFieldsProps {
     phone: string;
     address: string;
     summary?: string;
+    email?: string;
   };
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   validationErrors: Record<string, string>;
@@ -74,6 +75,32 @@ const PersonalInfoFields: React.FC<PersonalInfoFieldsProps> = ({
                 </p>
               )}
             </div>
+            
+            {formData.email !== undefined && (
+              <div className="sm:col-span-3">
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Email
+                </label>
+                <div className="mt-1">
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
+                  />
+                </div>
+                {validationErrors.email && (
+                  <p className="mt-2 text-sm text-red-600">
+                    {validationErrors.email}
+                  </p>
+                )}
+              </div>
+            )}
 
             <div className="sm:col-span-6">
               <label
@@ -105,4 +132,4 @@ const PersonalInfoFields: React.FC<PersonalInfoFieldsProps> = ({
   );
 };
 
-export default PersonalInfoFields;
+export default React.memo(PersonalInfoFields);

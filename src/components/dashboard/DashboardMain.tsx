@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import DashboardActions from "@/components/dashboard/DashboardActions";
 import DashboardContent from "@/components/dashboard/DashboardContent";
@@ -36,9 +36,9 @@ const DashboardMain: React.FC<DashboardMainProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<"letters" | "jobs" | "companies">("letters");
 
-  const handleTabChange = (tab: "letters" | "jobs" | "companies") => {
+  const handleTabChange = useCallback((tab: "letters" | "jobs" | "companies") => {
     setActiveTab(tab);
-  };
+  }, []);
 
   const jobCount = jobPostings.length;
   const letterCount = coverLetters.length;
@@ -91,4 +91,4 @@ const DashboardMain: React.FC<DashboardMainProps> = ({
   );
 };
 
-export default DashboardMain;
+export default React.memo(DashboardMain);

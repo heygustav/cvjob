@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useCallback } from "react";
 import { Link } from "react-router-dom";
 import { Session } from "@supabase/supabase-js";
 import { Button } from "../ui/button";
@@ -15,6 +15,11 @@ const DesktopNavigation: React.FC<DesktopNavigationProps> = ({
   session, 
   handleLogout 
 }) => {
+  const onLogout = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    handleLogout();
+  }, [handleLogout]);
+
   return (
     <div className="hidden md:flex items-center gap-2 lg:gap-4">
       {/* Navigation links for authenticated users */}
@@ -25,7 +30,7 @@ const DesktopNavigation: React.FC<DesktopNavigationProps> = ({
         <Button 
           variant="ghost" 
           size="sm"
-          onClick={handleLogout} 
+          onClick={onLogout} 
           className="text-foreground hover:bg-destructive/10 hover:text-destructive whitespace-nowrap text-xs lg:text-sm"
         >
           <LogOut className="h-4 w-4 mr-1 lg:mr-2 flex-shrink-0" />
@@ -48,4 +53,4 @@ const DesktopNavigation: React.FC<DesktopNavigationProps> = ({
   );
 };
 
-export default DesktopNavigation;
+export default React.memo(DesktopNavigation);

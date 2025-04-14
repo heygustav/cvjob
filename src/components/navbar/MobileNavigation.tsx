@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useCallback } from "react";
 import { Link } from "react-router-dom";
 import { Session } from "@supabase/supabase-js";
 import { Button } from "../ui/button";
@@ -19,6 +19,11 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
   session,
   handleLogout,
 }) => {
+  const onLogout = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    handleLogout();
+  }, [handleLogout]);
+
   return (
     <div className="md:hidden">
       <Button
@@ -48,7 +53,7 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
             {session ? (
               <Button
                 variant="ghost"
-                onClick={handleLogout}
+                onClick={onLogout}
                 className="w-full justify-start text-destructive min-h-[44px]"
               >
                 <LogOut className="h-5 w-5 mr-2" />
@@ -74,4 +79,4 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
   );
 };
 
-export default MobileNavigation;
+export default React.memo(MobileNavigation);
