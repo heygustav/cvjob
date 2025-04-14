@@ -16,7 +16,7 @@ const DesktopNavigation: React.FC<DesktopNavigationProps> = ({
   handleLogout 
 }) => {
   return (
-    <div className="hidden md:flex items-center gap-4">
+    <div className="hidden md:flex items-center gap-2 lg:gap-4">
       {/* Navigation links for authenticated users */}
       <DesktopNavLinks session={session} />
 
@@ -26,20 +26,20 @@ const DesktopNavigation: React.FC<DesktopNavigationProps> = ({
           variant="ghost" 
           size="sm"
           onClick={handleLogout} 
-          className="text-foreground hover:bg-destructive/10 hover:text-destructive"
+          className="text-foreground hover:bg-destructive/10 hover:text-destructive whitespace-nowrap text-xs lg:text-sm"
         >
-          <LogOut className="h-4 w-4 mr-2" />
-          Log ud
+          <LogOut className="h-4 w-4 mr-1 lg:mr-2 flex-shrink-0" />
+          <span>Log ud</span>
         </Button>
       ) : (
-        <div className="flex items-center gap-2">
-          <Button asChild variant="ghost" size="sm">
+        <div className="flex items-center gap-1 lg:gap-2">
+          <Button asChild variant="ghost" size="sm" className="whitespace-nowrap text-xs lg:text-sm">
             <Link to="/login">
-              <LogIn className="h-4 w-4 mr-2" />
-              Log ind
+              <LogIn className="h-4 w-4 mr-1 lg:mr-2 flex-shrink-0" />
+              <span>Log ind</span>
             </Link>
           </Button>
-          <Button asChild variant="default" size="sm">
+          <Button asChild variant="default" size="sm" className="whitespace-nowrap text-xs lg:text-sm">
             <Link to="/signup">Tilmeld</Link>
           </Button>
         </div>

@@ -45,7 +45,7 @@ const DashboardMain: React.FC<DashboardMainProps> = ({
   const companyCount = companies.length;
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
+    <div className="max-w-6xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
       <header>
         <DashboardHeader 
           jobCount={jobCount}
@@ -58,15 +58,15 @@ const DashboardMain: React.FC<DashboardMainProps> = ({
         />
       </header>
 
-      <main id="main-content">
-        <div className="mb-6" role="navigation">
+      <main id="main-content" className="focus:outline-none" tabIndex={-1}>
+        <div className="mb-4 sm:mb-6 overflow-x-auto" role="navigation">
           <TabNav
             activeTab={activeTab}
             onTabChange={handleTabChange}
           />
         </div>
 
-        <div className="flex justify-start mb-4">
+        <div className="flex justify-start mb-4 overflow-x-auto pb-2">
           <DashboardActions 
             activeTab={activeTab}
             isRefreshing={isRefreshing}

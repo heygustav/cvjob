@@ -1,15 +1,18 @@
+
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "../AuthProvider";
 import NavbarLogo from "./NavbarLogo";
 import DesktopNavigation from "./DesktopNavigation";
 import MobileNavigation from "./MobileNavigation";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
   const { session, signOut } = useAuth();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -69,6 +72,21 @@ const Navbar: React.FC = () => {
     };
   }, [isOpen]);
 
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (isMobile) {
+      if (isOpen) {
+        document.body.style.overflow = 'hidden';
+      } else {
+        document.body.style.overflow = '';
+      }
+      
+      return () => {
+        document.body.style.overflow = '';
+      };
+    }
+  }, [isOpen, isMobile]);
+
   return (
     <header 
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
@@ -79,7 +97,7 @@ const Navbar: React.FC = () => {
       role="banner"
     >
       <div className="gradient-header transition-all duration-300">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="container mx-auto px-3 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <NavbarLogo />
             <DesktopNavigation session={session} handleLogout={handleLogout} />
@@ -105,7 +123,7 @@ const Navbar: React.FC = () => {
         />
       )}
       
-      {/* Skip to main content link */}
+      {/* Skip to main content link - Make more visible on focus */}
       <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-1/2 focus:-translate-x-1/2 focus:z-[100] focus:px-4 focus:py-2 focus:bg-white focus:text-primary focus:font-medium focus:rounded-md focus:shadow-md">
         Spring til hovedindhold
       </a>

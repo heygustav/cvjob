@@ -98,26 +98,26 @@ const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
       <div className="flex flex-col space-y-4">
         <div className="flex items-start">
           <span className="mr-3 mt-0.5 flex-shrink-0" aria-hidden="true">{getIcon()}</span>
-          <div className="space-y-2">
-            <AlertTitle id="error-title" className="text-base font-semibold text-red-800 dark:text-red-300">
+          <div className="space-y-2 flex-1 min-w-0">
+            <AlertTitle id="error-title" className="text-base font-semibold text-red-800 dark:text-red-300 break-words">
               {title}
             </AlertTitle>
-            <AlertDescription id="error-description" className="text-sm text-red-700 dark:text-red-400">
+            <AlertDescription id="error-description" className="text-sm text-red-700 dark:text-red-400 break-words">
               {message}
             </AlertDescription>
             <div className="flex items-start pt-2">
               <HelpCircle className="h-4 w-4 text-red-500 dark:text-red-400 mr-2 mt-0.5 flex-shrink-0" aria-hidden="true" />
-              <p className="text-xs text-red-600 dark:text-red-400" id="error-help-text">{getHelpText()}</p>
+              <p className="text-xs text-red-600 dark:text-red-400 break-words" id="error-help-text">{getHelpText()}</p>
             </div>
           </div>
         </div>
         
         {onRetry && (
-          <div className="flex mt-2">
+          <div className="flex justify-center sm:justify-start mt-2 w-full">
             <button
               onClick={onRetry}
               type="button"
-              className="flex items-center px-4 py-2 bg-white dark:bg-red-950/30 border border-red-300 dark:border-red-800/50 rounded-md text-sm font-medium text-red-700 dark:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 min-h-[40px]"
+              className="flex items-center justify-center w-full sm:w-auto px-4 py-2 bg-white dark:bg-red-950/30 border border-red-300 dark:border-red-800/50 rounded-md text-sm font-medium text-red-700 dark:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 min-h-[44px]"
               aria-label={getActionText()}
               aria-describedby="error-help-text"
             >
