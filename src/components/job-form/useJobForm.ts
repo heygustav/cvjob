@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { JobFormData } from "@/services/coverLetter/types";
@@ -33,7 +34,7 @@ export const useJobForm = ({ initialData, onSubmit, onSave }: UseJobFormProps) =
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const { toast } = useToast();
   
-  const { validateForm, errors } = useFormValidation<JobFormData>(jobFormSchema);
+  const { validateForm, errors, clearFieldError } = useFormValidation<JobFormData>(jobFormSchema);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -49,18 +50,14 @@ export const useJobForm = ({ initialData, onSubmit, onSave }: UseJobFormProps) =
     }));
     
     if (errors[name]) {
-      setErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors[name];
-        return newErrors;
-      });
+      clearFieldError(name);
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!validateForm()) {
+    if (!validateForm(formData)) {
       toast({
         title: "Fejl i formular",
         description: "Udfyld venligst alle påkrævede felter korrekt.",
