@@ -2,20 +2,15 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { JobFormData } from "@/services/coverLetter/types";
 import { JobPosting } from "@/lib/types";
-import { z } from "zod";
+import { useFormValidation, commonSchemas } from '@/hooks/useFormValidation';
+import { z } from 'zod';
 
-// Define Zod schema for validation
 const jobFormSchema = z.object({
   title: z.string().min(1, "Jobtitel er påkrævet"),
   company: z.string().min(1, "Virksomhedsnavn er påkrævet"),
   description: z.string().min(100, "Jobbeskrivelse skal være på mindst 100 tegn"),
   contact_person: z.string().optional(),
-  url: z.string()
-    .optional()
-    .refine(
-      (val) => !val || /^https?:\/\/.+/.test(val),
-      "URL skal starte med http:// eller https://"
-    ),
+  url: commonSchemas.website,
   deadline: z.string().optional(),
 });
 
@@ -35,9 +30,10 @@ export const useJobForm = ({ initialData, onSubmit, onSave }: UseJobFormProps) =
     deadline: "",
   });
   
-  const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const { toast } = useToast();
+  
+  const { validateForm, errors } = useFormValidation<JobFormData>(jobFormSchema);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -58,31 +54,6 @@ export const useJobForm = ({ initialData, onSubmit, onSave }: UseJobFormProps) =
         delete newErrors[name];
         return newErrors;
       });
-    }
-  };
-
-  const validateForm = (): boolean => {
-    try {
-      // Use Zod to validate the form data
-      jobFormSchema.parse(formData);
-      setErrors({});
-      return true;
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        // Convert Zod validation errors to our format
-        const newErrors: Record<string, string> = {};
-        error.errors.forEach((err) => {
-          if (err.path) {
-            newErrors[err.path[0].toString()] = err.message;
-          }
-        });
-        setErrors(newErrors);
-      } else {
-        // Handle unexpected errors
-        console.error("Validation error:", error);
-        setErrors({ form: "Der opstod en uventet fejl ved validering" });
-      }
-      return false;
     }
   };
 
@@ -143,7 +114,6 @@ export const useJobForm = ({ initialData, onSubmit, onSave }: UseJobFormProps) =
 
   return {
     formData,
-    setFormData,
     errors,
     isSaving,
     handleChange,

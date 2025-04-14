@@ -1,39 +1,22 @@
 
-import { useState, useCallback } from "react";
-import { ProfileState, ValidationErrors } from "./types";
+import { useFormValidation, commonSchemas } from '@/hooks/useFormValidation';
+import { z } from 'zod';
+import type { ProfileState } from './types';
+
+const profileSchema = z.object({
+  name: commonSchemas.name,
+  email: commonSchemas.email,
+  phone: commonSchemas.phone.optional(),
+  address: z.string().optional(),
+  experience: z.string().optional(),
+  education: z.string().optional(),
+  skills: z.string().optional(),
+  summary: z.string().optional(),
+});
 
 export const useProfileValidation = () => {
-  const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
-
-  const validateForm = useCallback((formData: ProfileState) => {
-    const errors: ValidationErrors = {};
-    
-    if (!formData.name?.trim()) {
-      errors.name = "Navn er påkrævet";
-    }
-    
-    if (!formData.email?.trim()) {
-      errors.email = "Email er påkrævet";
-    } else {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(formData.email)) {
-        errors.email = "Ugyldig email adresse";
-      }
-    }
-    
-    setValidationErrors(errors);
-    return Object.keys(errors).length === 0;
-  }, []);
-
-  const clearFieldError = useCallback((fieldName: string) => {
-    if (validationErrors[fieldName]) {
-      setValidationErrors(prev => {
-        const updated = { ...prev };
-        delete updated[fieldName];
-        return updated;
-      });
-    }
-  }, [validationErrors]);
+  const { errors: validationErrors, validateForm, clearFieldError } = 
+    useFormValidation<ProfileState>(profileSchema);
 
   return {
     validationErrors,
@@ -41,3 +24,4 @@ export const useProfileValidation = () => {
     clearFieldError
   };
 };
+

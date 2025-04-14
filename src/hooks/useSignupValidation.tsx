@@ -1,40 +1,28 @@
 
-import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
+import { useFormValidation, commonSchemas } from '@/hooks/useFormValidation';
+import { z } from 'zod';
 
-interface SignupFormData {
-  name: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-}
+const signupSchema = z.object({
+  name: commonSchemas.name,
+  email: commonSchemas.email,
+  password: commonSchemas.password,
+  confirmPassword: z.string()
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Adgangskoderne stemmer ikke overens",
+  path: ["confirmPassword"],
+});
 
 export const useSignupValidation = () => {
-  const { toast } = useToast();
-
-  const validateForm = (formData: SignupFormData) => {
-    if (formData.password !== formData.confirmPassword) {
-      toast({
-        title: "Adgangskode fejl",
-        description: "Adgangskoderne stemmer ikke overens",
-        variant: "destructive",
-      });
-      return false;
-    }
-
-    if (formData.password.length < 8) {
-      toast({
-        title: "Adgangskode fejl",
-        description: "Adgangskoden skal være mindst 8 tegn",
-        variant: "destructive",
-      });
-      return false;
-    }
-
-    return true;
-  };
+  const { validateForm, errors } = useFormValidation<{
+    name: string;
+    email: string;
+    password: string;
+    confirmPassword: string;
+  }>(signupSchema);
 
   return {
     validateForm,
+    errors
   };
 };
+
