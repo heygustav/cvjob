@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { User } from "@/lib/types";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useToast } from "@/hooks/use-toast";
@@ -7,6 +7,8 @@ import SubscriptionLoading from "./SubscriptionLoading";
 import SubscriptionError from "./SubscriptionError";
 import SubscriptionEmpty from "./SubscriptionEmpty";
 import SubscriptionActive from "./SubscriptionActive";
+import { withTimeout } from "@/utils/errorHandling";
+import { sanitizeInput } from "@/utils/security";
 
 interface SubscriptionInfoProps {
   user: User;
@@ -15,23 +17,74 @@ interface SubscriptionInfoProps {
 const SubscriptionInfo: React.FC<SubscriptionInfoProps> = ({ user }) => {
   const { subscriptionStatus, isLoading, error, fetchSubscriptionStatus } = useSubscription(user);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [timeoutError, setTimeoutError] = useState<string | null>(null);
+  const [securityError, setSecurityError] = useState(false);
   const { toast } = useToast();
+  const fetchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const mountedRef = useRef(true);
   
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      mountedRef.current = false;
+      if (fetchTimeoutRef.current) {
+        clearTimeout(fetchTimeoutRef.current);
+      }
+    };
+  }, []);
+  
+  // Initial fetch with timeout handling
   useEffect(() => {
     if (user?.id) {
-      fetchSubscriptionStatus(user.id);
+      const fetchWithErrorHandling = async () => {
+        setTimeoutError(null);
+        setSecurityError(false);
+        
+        try {
+          // Use withTimeout utility to handle timeouts consistently
+          await withTimeout(
+            fetchSubscriptionStatus(user.id),
+            15000, // 15 second timeout
+            "Kunne ikke hente abonnementsinformation inden for tidsfristen. Prøv igen senere."
+          );
+        } catch (err) {
+          if (!mountedRef.current) return;
+          
+          console.error("Error fetching subscription with timeout:", err);
+          
+          // Check if it's a security-related error
+          const errorMessage = err instanceof Error ? err.message : String(err);
+          if (
+            errorMessage.toLowerCase().includes("security") || 
+            errorMessage.toLowerCase().includes("csrf") || 
+            errorMessage.toLowerCase().includes("xss") ||
+            errorMessage.toLowerCase().includes("injection")
+          ) {
+            setSecurityError(true);
+            setTimeoutError("Sikkerhedsrelateret fejl ved indlæsning af abonnement.");
+          } else if (errorMessage.includes("timed out") || errorMessage.includes("timeout")) {
+            setTimeoutError("Serveren svarer ikke. Prøv igen senere.");
+          } else {
+            // Sanitize any error messages before displaying them
+            setTimeoutError(sanitizeInput(errorMessage));
+          }
+        }
+      };
+      
+      fetchWithErrorHandling();
     }
   }, [user?.id, fetchSubscriptionStatus]);
 
+  // Handle regular error display
   useEffect(() => {
-    if (error) {
+    if (error && !timeoutError) {
       toast({
         title: "Fejl ved indlæsning af abonnement",
         description: error,
         variant: "destructive",
       });
     }
-  }, [error, toast]);
+  }, [error, toast, timeoutError]);
 
   // Handle URL parameters for subscription success/cancel
   useEffect(() => {
@@ -60,29 +113,78 @@ const SubscriptionInfo: React.FC<SubscriptionInfoProps> = ({ user }) => {
     if (!user?.id) return;
     
     setIsRefreshing(true);
+    setTimeoutError(null);
+    setSecurityError(false);
+    
     console.log("Manually refreshing subscription status");
+    
     try {
-      await fetchSubscriptionStatus(user.id);
+      // Set a timeout for the manual refresh operation
+      const refreshPromise = fetchSubscriptionStatus(user.id);
+      
+      await withTimeout(
+        refreshPromise,
+        15000,
+        "Opdatering tog for lang tid. Serveren kan være optaget. Prøv igen senere."
+      );
+      
       toast({
         title: "Abonnement opdateret",
         description: "Abonnementsstatus er blevet opdateret.",
       });
     } catch (refreshError) {
       console.error("Error refreshing subscription:", refreshError);
-      toast({
-        title: "Fejl ved opdatering",
-        description: "Der opstod en fejl ved opdatering af abonnementsstatus.",
-        variant: "destructive",
-      });
+      
+      // Handle specific error types
+      const errorMessage = refreshError instanceof Error ? refreshError.message : String(refreshError);
+      
+      if (errorMessage.includes("timed out") || errorMessage.includes("timeout")) {
+        toast({
+          title: "Timeout ved opdatering",
+          description: "Opdatering tog for lang tid. Serveren kan være optaget. Prøv igen senere.",
+          variant: "destructive",
+        });
+        setTimeoutError("Timeout ved opdatering af abonnementsinformation");
+      } else if (
+        errorMessage.toLowerCase().includes("security") || 
+        errorMessage.toLowerCase().includes("csrf") || 
+        errorMessage.toLowerCase().includes("xss")
+      ) {
+        setSecurityError(true);
+        toast({
+          title: "Sikkerhedsfejl",
+          description: "Der opstod en sikkerhedsrelateret fejl. Vi arbejder på at løse problemet.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Fejl ved opdatering",
+          description: sanitizeInput(errorMessage) || "Der opstod en fejl ved opdatering af abonnementsstatus.",
+          variant: "destructive",
+        });
+      }
     } finally {
-      setIsRefreshing(false);
+      if (mountedRef.current) {
+        setIsRefreshing(false);
+      }
     }
   };
   
-  if (isLoading) {
+  // Show loading state
+  if (isLoading && !timeoutError) {
     return <SubscriptionLoading />;
   }
 
+  // Show timeout or security error
+  if (timeoutError) {
+    return <SubscriptionError 
+      onRetry={handleRefresh} 
+      message={timeoutError}
+      isSecurity={securityError}
+    />;
+  }
+  
+  // Show regular error
   if (error) {
     return <SubscriptionError onRetry={handleRefresh} />;
   }
