@@ -1,4 +1,5 @@
-import React from "react";
+
+import React, { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -9,6 +10,7 @@ export interface LoadingSpinnerProps {
   size?: "sm" | "md" | "lg";
   fullPage?: boolean;
   ariaLabel?: string;
+  showDelay?: number; // Delay in ms before showing spinner (prevents flashing for quick loads)
 }
 
 export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
@@ -17,8 +19,25 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   className,
   size = "md",
   fullPage = false,
-  ariaLabel
+  ariaLabel,
+  showDelay = 0
 }) => {
+  const [visible, setVisible] = useState(showDelay === 0);
+  
+  useEffect(() => {
+    if (showDelay > 0) {
+      const timer = setTimeout(() => {
+        setVisible(true);
+      }, showDelay);
+      return () => clearTimeout(timer);
+    }
+  }, [showDelay]);
+  
+  // If still in delay period and not visible, render nothing
+  if (!visible) {
+    return null;
+  }
+  
   const sizeClasses = {
     sm: "h-4 w-4",
     md: "h-8 w-8",
@@ -43,7 +62,10 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
       aria-label={accessibilityLabel}
     >
       <Loader2 
-        className={cn("animate-spin text-primary motion-reduce:animate-[spin_1.5s_linear_infinite]", sizeClasses[size])} 
+        className={cn(
+          "animate-spin text-primary motion-reduce:animate-[spin_1.5s_linear_infinite]", 
+          sizeClasses[size]
+        )} 
         aria-hidden="true"
       />
       

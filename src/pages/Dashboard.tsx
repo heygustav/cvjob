@@ -13,12 +13,13 @@ import ErrorDisplay from "@/components/ErrorDisplay";
 import { getErrorMessage } from "@/utils/errorHandling";
 
 // Constants
-const LOADING_TIMEOUT_MS = 8000; // 8 seconds for better UX
+const LOADING_TIMEOUT_MS = 15000; // Extended from 8 seconds to 15 seconds for better UX
 
 const Dashboard = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [loadingTimeout, setLoadingTimeout] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   
   // Pass user object directly since useSubscription now accepts both User types
   const { 
@@ -42,6 +43,17 @@ const Dashboard = () => {
     findJobForLetter,
     error: dashboardError
   } = useDashboardData();
+
+  // Handle initial loading state with a delay to prevent flashing
+  useEffect(() => {
+    if (!isLoading && !isSubLoading) {
+      // Add a small delay before hiding the loading state to ensure smooth transition
+      const timer = setTimeout(() => {
+        setInitialLoading(false);
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [isLoading, isSubLoading]);
 
   // Set a timeout to detect if loading is taking too long
   useEffect(() => {
@@ -87,7 +99,7 @@ const Dashboard = () => {
   };
 
   // Render loading state
-  if (isLoading || isSubLoading) {
+  if (initialLoading || isLoading || isSubLoading) {
     return (
       <div aria-live="polite" aria-busy="true">
         <DashboardLoading timeout={loadingTimeout} />
