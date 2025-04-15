@@ -9,9 +9,8 @@ import { useLocation } from "react-router-dom";
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { session, signOut } = useAuth();
+  const { session, signOut, isLoggingOut } = useAuth();
   const location = useLocation();
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
   
   // Close mobile menu when route changes
   React.useEffect(() => {
@@ -23,7 +22,6 @@ const Navbar: React.FC = () => {
   }, []);
   
   const handleLogout = useCallback(async () => {
-    setIsLoggingOut(true);
     try {
       // Store current path as redirect URL in localStorage
       if (location.pathname !== '/login' && location.pathname !== '/signup') {
@@ -34,8 +32,8 @@ const Navbar: React.FC = () => {
       }
       
       await signOut();
-    } finally {
-      setIsLoggingOut(false);
+    } catch (error) {
+      console.error("Error during logout:", error);
     }
   }, [location.pathname, location.search, signOut]);
   

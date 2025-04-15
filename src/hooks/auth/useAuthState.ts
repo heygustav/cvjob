@@ -26,6 +26,7 @@ export const useAuthState = (): [AuthState, AuthActions] => {
     signIn,
     signUp,
     signOut,
+    isLoggingOut,
     handleAuthentication
   } = useAuthLogic(isLoading, attemptCount, redirectUrl, resetAttemptCount, setAttemptCount);
 
@@ -45,11 +46,12 @@ export const useAuthState = (): [AuthState, AuthActions] => {
     signIn,
     signUp,
     signOut,
+    isLoggingOut,
     handleAuthentication,
     setRedirectUrl,
     resetAttemptCount,
     setIsNewUser,
-  }), [signIn, signUp, signOut, handleAuthentication, setRedirectUrl, resetAttemptCount, setIsNewUser]);
+  }), [signIn, signUp, signOut, isLoggingOut, handleAuthentication, setRedirectUrl, resetAttemptCount, setIsNewUser]);
 
   return [state, actions];
 };

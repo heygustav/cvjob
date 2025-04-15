@@ -27,7 +27,7 @@ export const useAuthLogic = (
   });
 
   // Use the sign-out hook
-  const signOut = useSignOut({
+  const { signOut, isLoading: isLoggingOut } = useSignOut({
     resetAttemptCount
   });
 
@@ -42,6 +42,7 @@ export const useAuthLogic = (
     signIn,
     signUp,
     signOut,
+    isLoggingOut,
     handleAuthentication,
   };
 };

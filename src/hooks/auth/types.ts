@@ -15,6 +15,7 @@ export interface AuthActions {
   signIn: (email: string, password: string) => Promise<{ error: Error | null; data: any }>;
   signUp: (email: string, password: string, name?: string) => Promise<{ error: Error | null; data: any }>;
   signOut: () => Promise<void>;
+  isLoggingOut?: boolean;
   handleAuthentication: (email: string, password: string, isSignUp: boolean, name?: string) => Promise<void>;
   setRedirectUrl: (url: string | null) => void;
   resetAttemptCount: () => void;
