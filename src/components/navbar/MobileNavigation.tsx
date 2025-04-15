@@ -11,6 +11,7 @@ interface MobileNavigationProps {
   toggleMenu: () => void;
   session: Session | null;
   handleLogout: () => void;
+  isLoggingOut: boolean;
 }
 
 const MobileNavigation: React.FC<MobileNavigationProps> = ({
@@ -18,6 +19,7 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
   toggleMenu,
   session,
   handleLogout,
+  isLoggingOut,
 }) => {
   const onLogout = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -54,6 +56,8 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
               <Button
                 variant="ghost"
                 onClick={onLogout}
+                isLoading={isLoggingOut}
+                loadingText="Logger ud..."
                 className="w-full justify-start text-destructive min-h-[44px]"
               >
                 <LogOut className="h-5 w-5 mr-2" />

@@ -3,6 +3,8 @@ import React, { createContext, useContext, useMemo, useEffect, useState } from '
 import { useAuthState, AuthState, AuthActions } from '@/hooks/auth/useAuthState';
 import { supabase } from "@/integrations/supabase/client";
 import { LoadingSpinner } from './LoadingSpinner';
+import { useLocation } from 'react-router-dom';
+import { sanitizeRedirectUrl } from '@/hooks/auth/authUtils';
 
 interface AuthContextType extends AuthState, AuthActions {}
 
@@ -12,6 +14,23 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = React.memo(({ children }) => {
   const [state, actions] = useAuthState();
   const [isInitialized, setIsInitialized] = useState(false);
+  const location = useLocation();
+
+  // Store current location for potential redirects after login
+  useEffect(() => {
+    const isAuthRoute = location.pathname === '/login' || 
+                        location.pathname === '/signup' || 
+                        location.pathname === '/auth' ||
+                        location.pathname.startsWith('/auth/');
+    
+    // Only store the path if it's not an auth route
+    if (!isAuthRoute) {
+      const sanitizedPath = sanitizeRedirectUrl(location.pathname + location.search);
+      if (sanitizedPath) {
+        localStorage.setItem('lastVisitedPath', sanitizedPath);
+      }
+    }
+  }, [location]);
 
   // Initialize auth state
   useEffect(() => {

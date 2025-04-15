@@ -9,11 +9,13 @@ import { DesktopNavLinks } from "./NavLinks";
 interface DesktopNavigationProps {
   session: Session | null;
   handleLogout: () => void;
+  isLoggingOut: boolean;
 }
 
 const DesktopNavigation: React.FC<DesktopNavigationProps> = ({ 
   session, 
-  handleLogout 
+  handleLogout,
+  isLoggingOut
 }) => {
   const onLogout = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -31,6 +33,8 @@ const DesktopNavigation: React.FC<DesktopNavigationProps> = ({
           variant="ghost" 
           size="sm"
           onClick={onLogout} 
+          isLoading={isLoggingOut}
+          loadingText="Logger ud..."
           className="text-foreground hover:bg-destructive/10 hover:text-destructive whitespace-nowrap text-xs lg:text-sm"
         >
           <LogOut className="h-4 w-4 mr-1 lg:mr-2 flex-shrink-0" />

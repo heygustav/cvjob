@@ -1,5 +1,5 @@
 
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -12,8 +12,13 @@ export const useSignOut = (options: SignOutOptions) => {
   const { resetAttemptCount } = options;
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
 
   const signOut = useCallback(async () => {
+    if (isLoading) return; // Prevent multiple clicks
+    
+    setIsLoading(true);
+    
     try {
       console.log("Attempting to sign out");
       const { error } = await supabase.auth.signOut();
@@ -47,8 +52,10 @@ export const useSignOut = (options: SignOutOptions) => {
         description: error instanceof Error ? error.message : "Der opstod en fejl ved log ud",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
-  }, [navigate, resetAttemptCount, toast]);
+  }, [navigate, resetAttemptCount, toast, isLoading]);
 
-  return signOut;
+  return { signOut, isLoading };
 };
