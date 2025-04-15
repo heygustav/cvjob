@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { AlertCircle, RefreshCw, HelpCircle, WifiOff, AlertTriangle, Clock } from 'lucide-react';
+import { AlertCircle, RefreshCw, HelpCircle, WifiOff, AlertTriangle, Clock, ShieldAlert } from 'lucide-react';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { ErrorPhase, getErrorTitle } from '@/utils/errorHandling';
 
@@ -44,6 +44,8 @@ const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
         return "Tjenesten er midlertidigt utilgængelig. Prøv igen senere.";
       case 'auth-error':
         return "Der opstod en fejl med din autorisation. Prøv at logge ud og ind igen.";
+      case 'security-issue':
+        return "Der opstod en sikkerhedsrelateret fejl. Vi arbejder på at løse problemet. Prøv igen senere eller kontakt support.";
       default:
         return "Hvis problemet fortsætter, prøv at genindlæse siden eller kontakt heygustav@icloud.com";
     }
@@ -63,6 +65,7 @@ const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
       case 'api-rate-limit': return "Prøv igen senere";
       case 'service-unavailable': return "Prøv igen senere";
       case 'auth-error': return "Log ind igen";
+      case 'security-issue': return "Prøv igen senere";
       default: return "Prøv igen";
     }
   };
@@ -81,6 +84,8 @@ const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
       case 'auth':
       case 'auth-error':
         return <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" aria-hidden="true" />;
+      case 'security-issue':
+        return <ShieldAlert className="h-5 w-5 text-red-600 dark:text-red-400" aria-hidden="true" />;
       default:
         return <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400" aria-hidden="true" />;
     }

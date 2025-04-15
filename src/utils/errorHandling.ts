@@ -1,4 +1,3 @@
-
 import { toast } from "@/hooks/use-toast";
 
 // Unified error types for consistent handling
@@ -13,7 +12,8 @@ export type ErrorPhase =
   | 'api-rate-limit' 
   | 'service-unavailable' 
   | 'auth-error'
-  | 'cv-parsing';
+  | 'cv-parsing'
+  | 'security-issue';
 
 export interface AppError extends Error {
   phase?: ErrorPhase;
@@ -79,7 +79,7 @@ export function getErrorPhase(error: unknown): ErrorPhase {
     }
   }
   
-  return 'generation'; // Default phase
+  return 'generation';
 }
 
 // Get user-friendly error title based on phase
@@ -96,6 +96,7 @@ export function getErrorTitle(phase: ErrorPhase): string {
     case 'service-unavailable': return 'Tjeneste utilgængelig';
     case 'auth-error': return 'Godkendelsesfejl';
     case 'cv-parsing': return 'Fejl ved CV-analyse';
+    case 'security-issue': return 'Sikkerhedsfejl';
     default: return 'Ukendt fejl';
   }
 }

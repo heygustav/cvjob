@@ -1,4 +1,3 @@
-
 import DOMPurify from 'dompurify';
 
 /**
@@ -19,19 +18,19 @@ export const sanitizeInput = (input: string): string => {
 export const sanitizeObject = <T extends Record<string, any>>(obj: T): T => {
   if (!obj || typeof obj !== 'object') return obj;
   
-  const result = { ...obj };
+  const result = { ...obj } as T;
   
   Object.keys(result).forEach(key => {
-    const value = result[key];
+    const value = result[key as keyof T];
     
     if (typeof value === 'string') {
-      result[key] = sanitizeInput(value);
+      result[key as keyof T] = sanitizeInput(value) as any;
     } else if (typeof value === 'object' && value !== null) {
-      result[key] = sanitizeObject(value);
+      result[key as keyof T] = sanitizeObject(value) as any;
     }
   });
   
-  return result as T;
+  return result;
 };
 
 /**
