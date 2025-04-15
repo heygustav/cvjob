@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useToastMessages } from "../useToastMessages";
 import { handleTypedError, handleStandardError, handleTimeoutError } from "./errorHandlers";
 import { GenerationErrorHandlingProps } from "./types";
+import { isTimeoutError, showErrorToast } from "@/utils/errorHandling";
 
 export const useGenerationErrorHandling = ({
   isMountedRef,
@@ -47,7 +48,7 @@ export const useGenerationErrorHandling = ({
     }
     
     // Check if it was a timeout error
-    if (error instanceof Error && error.message.includes('timed out')) {
+    if (isTimeoutError(error)) {
       console.error("Generation timed out");
       toast(toastMessages.generationTimeout);
       safeSetState(setGenerationError, "Generering tog for lang tid. Prøv igen senere.");
@@ -63,11 +64,7 @@ export const useGenerationErrorHandling = ({
     }
     
     // Display toast with error details
-    toast({
-      title: result.title,
-      description: result.description,
-      variant: "destructive",
-    });
+    showErrorToast(error);
     
     // Set error state for UI to show
     safeSetState(setGenerationError, result.description);

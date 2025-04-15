@@ -2,12 +2,13 @@
 import React from 'react';
 import { AlertCircle, RefreshCw, HelpCircle, WifiOff, AlertTriangle, Clock } from 'lucide-react';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { ErrorPhase, getErrorTitle } from '@/utils/errorHandling';
 
 interface ErrorDisplayProps {
-  title: string;
+  title?: string;
   message: string;
   onRetry?: () => void;
-  phase?: 'job-save' | 'user-fetch' | 'generation' | 'letter-save' | 'cv-parsing' | 'network' | 'timeout' | 'auth' | 'api-rate-limit' | 'service-unavailable' | 'auth-error';
+  phase?: ErrorPhase;
   icon?: React.ReactNode;
 }
 
@@ -84,6 +85,9 @@ const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
         return <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400" aria-hidden="true" />;
     }
   };
+
+  // Use provided title or get a title based on phase
+  const errorTitle = title || (phase ? getErrorTitle(phase) : 'Der opstod en fejl');
   
   return (
     <Alert 
@@ -100,7 +104,7 @@ const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
           <span className="mr-3 mt-0.5 flex-shrink-0" aria-hidden="true">{getIcon()}</span>
           <div className="space-y-2 flex-1 min-w-0">
             <AlertTitle id="error-title" className="text-base font-semibold text-red-800 dark:text-red-300 break-words">
-              {title}
+              {errorTitle}
             </AlertTitle>
             <AlertDescription id="error-description" className="text-sm text-red-700 dark:text-red-400 break-words">
               {message}

@@ -3,6 +3,7 @@ import { useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+import { createAppError, showErrorToast } from '@/utils/errorHandling';
 
 export interface SignInOptions {
   isLoading: boolean;
@@ -30,34 +31,39 @@ export const useSignIn = (options: SignInOptions) => {
       if (error) {
         console.error("Sign in error:", error.message);
         
-        // Show specific error message depending on the error type
+        // Prepare a properly typed error with specific messages
+        let authError;
+        
+        // Handle specific error messages
         if (error.message.includes('Invalid login credentials')) {
-          toast({
-            title: "Login fejlede",
-            description: "Email eller adgangskode er forkert. Prøv igen eller opret en ny konto.",
-            variant: "destructive",
-          });
+          authError = createAppError(
+            "Email eller adgangskode er forkert. Prøv igen eller opret en ny konto.",
+            'auth-error',
+            true
+          );
         } else if (error.message.includes('Email not confirmed')) {
-          toast({
-            title: "Email ikke bekræftet",
-            description: "Bekræft venligst din email før du logger ind.",
-            variant: "destructive",
-          });
+          authError = createAppError(
+            "Bekræft venligst din email før du logger ind.",
+            'auth-error',
+            true
+          );
         } else if (error.message.includes('captcha verification')) {
-          toast({
-            title: "CAPTCHA fejlede",
-            description: "Du skal åbne siden i en browser og ikke i en indlejret visning for at logge ind. Prøv at rydde cookies og cache.",
-            variant: "destructive",
-          });
+          authError = createAppError(
+            "Du skal åbne siden i en browser og ikke i en indlejret visning for at logge ind. Prøv at rydde cookies og cache.",
+            'auth-error',
+            true
+          );
         } else {
-          toast({
-            title: "Login fejlede",
-            description: error.message,
-            variant: "destructive",
-          });
+          authError = createAppError(
+            error.message,
+            'auth-error',
+            true
+          );
         }
         
-        throw error;
+        // Use our standard error toast
+        showErrorToast(authError);
+        throw authError;
       }
       
       console.log("Sign in successful, redirectUrl:", redirectUrl);

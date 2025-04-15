@@ -9,9 +9,11 @@ import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import ErrorDisplay from "@/components/ErrorDisplay";
+import { getErrorMessage } from "@/utils/errorHandling";
 
 // Constants
-const LOADING_TIMEOUT_MS = 8000; // Reduced from 15s to 8s for better UX
+const LOADING_TIMEOUT_MS = 8000; // 8 seconds for better UX
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -95,34 +97,20 @@ const Dashboard = () => {
 
   // Render error state
   if (dashboardError || subError) {
-    // Convert Error objects to strings for rendering safely
+    // Get the error message safely
     const errorMessage = dashboardError 
-      ? (typeof dashboardError === 'object' && dashboardError !== null ? String(dashboardError) : dashboardError)
-      : (typeof subError === 'object' && subError !== null ? String(subError) : subError);
-      
-    // Make sure errorMessage is always a string before rendering
-    const errorDisplayMessage = typeof errorMessage === 'string' 
-      ? errorMessage 
-      : "Der opstod en fejl ved indlæsning af data. Prøv igen senere.";
+      ? getErrorMessage(dashboardError)
+      : getErrorMessage(subError);
       
     return (
       <div className="min-h-screen bg-gray-50 py-12">
         <div className="container">
-          <Alert variant="destructive" className="mb-6">
-            <AlertCircle className="h-4 w-4" aria-hidden="true" />
-            <AlertTitle>Der opstod en fejl</AlertTitle>
-            <AlertDescription>
-              {errorDisplayMessage}
-            </AlertDescription>
-          </Alert>
-          
-          <Button 
-            onClick={handleRetry}
-            className="flex items-center gap-2"
-          >
-            <RefreshCw className="h-4 w-4" aria-hidden="true" />
-            Prøv igen
-          </Button>
+          <ErrorDisplay
+            title="Fejl ved indlæsning af data"
+            message={errorMessage}
+            phase="network"
+            onRetry={handleRetry}
+          />
         </div>
       </div>
     );

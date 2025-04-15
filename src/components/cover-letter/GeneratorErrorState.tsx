@@ -2,21 +2,28 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { AlertTriangleIcon, RefreshCcw } from "lucide-react";
+import { getErrorPhase, getErrorTitle } from "@/utils/errorHandling";
 
 export interface GeneratorErrorStateProps {
   message: string;
   onRetry: () => void;
+  phase?: string;
 }
 
 export const GeneratorErrorState: React.FC<GeneratorErrorStateProps> = ({
   message,
   onRetry,
+  phase,
 }) => {
+  // Determine error phase
+  const errorPhase = phase || getErrorPhase(new Error(message));
+  const title = getErrorTitle(errorPhase as any);
+
   return (
     <div className="container py-8">
       <div className="mb-8">
         <h1 className="text-2xl font-bold tracking-tight">
-          Der opstod en fejl
+          {title}
         </h1>
         <p className="text-muted-foreground">
           Vi kunne ikke generere din ansøgning

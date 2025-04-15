@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { JobPosting, CoverLetter } from "@/lib/types";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { withTimeout, createAppError, showErrorToast } from "@/utils/errorHandling";
 
 // Define a cache interface for memoization
 interface DataCache {
@@ -62,37 +63,66 @@ export const useDashboardFetch = () => {
       }
       
       // Get user ID from session
-      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      const sessionResponse = await withTimeout(
+        supabase.auth.getSession(),
+        10000,
+        'Timeout ved hentning af brugersession'
+      );
       
-      if (sessionError) {
-        throw new Error(`Session error: ${sessionError.message}`);
+      if (sessionResponse.error) {
+        throw createAppError(
+          `Session error: ${sessionResponse.error.message}`,
+          'auth-error',
+          false
+        );
       }
       
-      const userId = sessionData?.session?.user?.id;
+      const userId = sessionResponse.data?.session?.user?.id;
       
       if (!userId) {
-        throw new Error("User not authenticated");
+        throw createAppError(
+          "User not authenticated",
+          'auth-error',
+          false
+        );
       }
       
-      // Use Promise.all for parallel requests - more efficient
-      const [jobResponse, letterResponse] = await Promise.all([
-        // Fetch job postings with specific columns that exist in the database
-        supabase
-          .from("job_postings")
-          .select("id, title, company, description, contact_person, deadline, created_at, updated_at, url, user_id")
-          .eq("user_id", userId)
-          .order("created_at", { ascending: false }),
-          
-        // Fetch cover letters with specific columns
-        supabase
-          .from("cover_letters")
-          .select("id, content, job_posting_id, created_at, updated_at, user_id")
-          .eq("user_id", userId)
-          .order("created_at", { ascending: false })
-      ]);
+      // Use Promise.all with timeout for parallel requests - more efficient
+      const [jobResponse, letterResponse] = await withTimeout(
+        Promise.all([
+          // Fetch job postings with specific columns that exist in the database
+          supabase
+            .from("job_postings")
+            .select("id, title, company, description, contact_person, deadline, created_at, updated_at, url, user_id")
+            .eq("user_id", userId)
+            .order("created_at", { ascending: false }),
+            
+          // Fetch cover letters with specific columns
+          supabase
+            .from("cover_letters")
+            .select("id, content, job_posting_id, created_at, updated_at, user_id")
+            .eq("user_id", userId)
+            .order("created_at", { ascending: false })
+        ]),
+        15000,
+        'Timeout ved hentning af data fra databasen'
+      );
       
-      if (jobResponse.error) throw new Error(`Job data error: ${jobResponse.error.message}`);
-      if (letterResponse.error) throw new Error(`Letter data error: ${letterResponse.error.message}`);
+      if (jobResponse.error) {
+        throw createAppError(
+          `Job data error: ${jobResponse.error.message}`,
+          'job-save',
+          true
+        );
+      }
+      
+      if (letterResponse.error) {
+        throw createAppError(
+          `Letter data error: ${letterResponse.error.message}`,
+          'letter-save',
+          true
+        );
+      }
       
       const jobData = jobResponse.data || [];
       const letterData = letterResponse.data || [];
@@ -109,14 +139,10 @@ export const useDashboardFetch = () => {
       setError(null);
     } catch (err) {
       console.error("Error fetching dashboard data:", err);
-      const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
-      setError(err instanceof Error ? err : new Error(errorMessage));
+      setError(err instanceof Error ? err : new Error(String(err)));
       
-      toast({
-        title: "Fejl ved indlæsning",
-        description: `Der opstod en fejl: ${errorMessage}`,
-        variant: "destructive",
-      });
+      // Use our centralized error handling
+      showErrorToast(err);
     } finally {
       setIsLoading(false);
       if (showRefreshingState) {
