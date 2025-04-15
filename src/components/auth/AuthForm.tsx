@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useValidation } from './useValidation';
 import { useToast } from '@/hooks/use-toast';
-import DOMPurify from 'dompurify';
+import { sanitizeInput } from '@/utils/security';
 import { Eye, EyeOff } from 'lucide-react';
 
 interface AuthFormProps {
@@ -35,11 +35,11 @@ const AuthForm: React.FC<AuthFormProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form submitted", { email, password });
+    console.log("Form submitted", { email, password: '[REDACTED]' });
     
     // Sanitize inputs
-    const sanitizedEmail = DOMPurify.sanitize(email);
-    const sanitizedPassword = DOMPurify.sanitize(password);
+    const sanitizedEmail = sanitizeInput(email);
+    const sanitizedPassword = sanitizeInput(password);
     
     if (!validateForm(sanitizedEmail, sanitizedPassword)) {
       console.log("Validation failed", errors);

@@ -29,6 +29,10 @@ additional_redirect_urls = ["https://localhost:3000"]
 jwt_expiry = 3600
 enable_refresh_token_rotation = true
 refresh_token_reuse_interval = 10
+# Security enhancements
+enable_secure_cookies = true
+cookie_options = { same_site = "lax", path = "/" }
+enforce_same_site_cookies = true
 
 [auth.email]
 enable_signup = true

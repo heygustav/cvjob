@@ -3,8 +3,14 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
+// Get Supabase URL and key from environment variables (set during build time)
+// These are public keys that are safe to be in the client code
+// For additional security, use Edge Functions for operations that require higher privileges
 const SUPABASE_URL = "https://zfyzkiseykwvpckavbxd.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpmeXpraXNleWt3dnBja2F2YnhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA2NTkwNzUsImV4cCI6MjA1NjIzNTA3NX0.0rRP9DivmbBLv9f0ZM90BUy7j_LQ5dTvxY1dJ5FGWXM";
+
+// Security note: This is the publishable (anon) key which is safe to use in client code
+// Service role keys should NEVER be used in the client and should only be used in Edge Functions
 
 // Determine the site URL based on environment
 const getSiteUrl = () => {

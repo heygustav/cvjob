@@ -1,5 +1,5 @@
 
-import DOMPurify from 'dompurify';
+import { validateAndSanitizeUrl } from '@/utils/security';
 
 /**
  * Sanitizes and validates a URL to prevent open redirect vulnerabilities
@@ -7,16 +7,5 @@ import DOMPurify from 'dompurify';
  * @returns The sanitized URL if valid, null otherwise
  */
 export const sanitizeRedirectUrl = (url: string | null): string | null => {
-  if (!url) return null;
-  
-  // Sanitize the URL to prevent XSS
-  const sanitizedUrl = DOMPurify.sanitize(url);
-  
-  // Only accept internal URLs (starting with / and not containing ://)
-  if (sanitizedUrl.startsWith('/') && !sanitizedUrl.includes('://')) {
-    return sanitizedUrl;
-  }
-  
-  console.error("Invalid redirect URL detected and blocked:", url);
-  return null;
+  return validateAndSanitizeUrl(url, false);
 };

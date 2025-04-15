@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { createAppError, showErrorToast } from '@/utils/errorHandling';
+import { sanitizeInput, validateAndSanitizeUrl } from '@/utils/security';
 
 export interface SignInOptions {
   isLoading: boolean;
@@ -19,13 +20,15 @@ export const useSignIn = (options: SignInOptions) => {
 
   const signIn = useCallback(async (email: string, password: string) => {
     try {
-      console.log("Attempting to sign in with email:", email);
+      // Sanitize inputs
+      const sanitizedEmail = sanitizeInput(email);
+      const sanitizedPassword = sanitizeInput(password);
       
-      // Do NOT call signOut here as it can interfere with the authentication flow
+      console.log("Attempting to sign in with email:", sanitizedEmail);
       
       const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+        email: sanitizedEmail,
+        password: sanitizedPassword,
       });
       
       if (error) {
@@ -73,8 +76,11 @@ export const useSignIn = (options: SignInOptions) => {
         description: "Du er nu logget ind",
       });
       
-      if (redirectUrl) {
-        navigate(redirectUrl);
+      // Validate and sanitize the redirect URL
+      const safeRedirectUrl = validateAndSanitizeUrl(redirectUrl);
+      
+      if (safeRedirectUrl) {
+        navigate(safeRedirectUrl);
       } else {
         navigate('/');
       }

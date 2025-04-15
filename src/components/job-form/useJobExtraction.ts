@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { JobFormData } from "@/services/coverLetter/types";
-import DOMPurify from "dompurify";
+import { sanitizeInput, sanitizeObject } from "@/utils/security";
 
 export const useJobExtraction = (formData: JobFormData, setFormData: (data: JobFormData) => void) => {
   const [isExtracting, setIsExtracting] = useState(false);
@@ -43,7 +43,7 @@ export const useJobExtraction = (formData: JobFormData, setFormData: (data: JobF
       // Call our Edge Function that uses OpenAI with proper error handling
       const { data, error } = await supabase.functions.invoke('extract-job-info', {
         body: { 
-          jobDescription: DOMPurify.sanitize(description), // Sanitize input
+          jobDescription: sanitizeInput(description), 
           model: "gpt-4o-mini", 
           temperature: 0.3,
           mode: "extract"
@@ -74,12 +74,12 @@ export const useJobExtraction = (formData: JobFormData, setFormData: (data: JobF
       
       console.log("Received extraction data:", data);
       
-      // Sanitize all extracted data before using it
-      const safeData = {
-        title: data.title ? DOMPurify.sanitize(data.title) : "",
-        company: data.company ? DOMPurify.sanitize(data.company) : "",
-        contact_person: data.contact_person ? DOMPurify.sanitize(data.contact_person) : ""
-      };
+      // Sanitize all extracted data
+      const safeData = sanitizeObject({
+        title: data.title || "",
+        company: data.company || "",
+        contact_person: data.contact_person || ""
+      });
       
       // Update form with the sanitized extracted data
       const newFormData = { 

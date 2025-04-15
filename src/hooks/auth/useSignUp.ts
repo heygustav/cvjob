@@ -3,6 +3,7 @@ import { useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+import { sanitizeInput, validateAndSanitizeUrl } from '@/utils/security';
 
 export interface SignUpOptions {
   attemptCount: number;
@@ -17,15 +18,20 @@ export const useSignUp = (options: SignUpOptions) => {
 
   const signUp = useCallback(async (email: string, password: string, name?: string) => {
     try {
-      console.log("Attempting to sign up with email:", email);
+      // Sanitize inputs
+      const sanitizedEmail = sanitizeInput(email);
+      const sanitizedPassword = sanitizeInput(password);
+      const sanitizedName = name ? sanitizeInput(name) : '';
+      
+      console.log("Attempting to sign up with email:", sanitizedEmail);
       
       // For signup, we're using the standard flow which may require captcha
       const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
+        email: sanitizedEmail,
+        password: sanitizedPassword,
         options: {
           data: {
-            name: name || '',
+            name: sanitizedName,
             gdpr_accepted: true,
             gdpr_acceptance_date: new Date().toISOString(),
           },
@@ -73,8 +79,11 @@ export const useSignUp = (options: SignUpOptions) => {
           description: "Din konto er nu oprettet, og du er logget ind",
         });
         
-        if (redirectUrl) {
-          navigate(redirectUrl);
+        // Validate and sanitize the redirect URL
+        const safeRedirectUrl = validateAndSanitizeUrl(redirectUrl);
+        
+        if (safeRedirectUrl) {
+          navigate(safeRedirectUrl);
         } else {
           navigate('/profile');
         }

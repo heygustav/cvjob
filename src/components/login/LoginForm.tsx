@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Eye, EyeOff, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import DOMPurify from "dompurify";
+import { sanitizeInput } from "@/utils/security";
 
 interface LoginFormProps {
   onSubmit: (email: string, password: string) => void;
@@ -19,9 +19,9 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading }) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     if (name === "email") {
-      setEmail(DOMPurify.sanitize(value));
+      setEmail(sanitizeInput(value));
     } else if (name === "password") {
-      setPassword(DOMPurify.sanitize(value));
+      setPassword(sanitizeInput(value));
     }
   };
 

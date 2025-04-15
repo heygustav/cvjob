@@ -5,6 +5,7 @@ import { JobFormData } from "@/services/coverLetter/types";
 import { JobPosting } from "@/lib/types";
 import { useFormValidation, commonSchemas } from '@/hooks/useFormValidation';
 import { z } from 'zod';
+import { sanitizeInput } from '@/utils/security';
 
 const jobFormSchema = z.object({
   title: z.string().min(1, "Jobtitel er påkrævet"),
@@ -42,7 +43,7 @@ export const useJobForm = ({ initialData, onSubmit, onSave }: UseJobFormProps) =
     const { name, value } = e.target;
     
     // Sanitize input - remove potentially dangerous HTML/script tags
-    const sanitizedValue = value.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "");
+    const sanitizedValue = sanitizeInput(value);
     
     setFormData((prev) => ({
       ...prev,

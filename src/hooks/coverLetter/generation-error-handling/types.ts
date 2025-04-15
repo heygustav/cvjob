@@ -21,4 +21,6 @@ export interface TypedError extends Error {
   phase?: ErrorPhase;
   recoverable?: boolean;
   details?: any;
+  security?: boolean; // Flag to indicate security-related errors
+  sanitized?: boolean; // Flag to indicate if error message has been sanitized
 }
