@@ -1,3 +1,4 @@
+
 import React, { Component, ErrorInfo } from 'react';
 import { AlertCircle, RefreshCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
