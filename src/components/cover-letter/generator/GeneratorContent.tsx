@@ -10,9 +10,10 @@ import { useLetterEdit } from "./useLetterEdit";
 import { GeneratorStates } from "./GeneratorStates";
 import { GeneratorStepRenderer } from "./GeneratorStepRenderer";
 
-const GeneratorLayout = lazy(() => import("./GeneratorLayout"));
+// Properly import GeneratorLayout with correct typing
+const GeneratorLayout = lazy(() => import("./GeneratorLayout").then(mod => ({ default: mod.GeneratorLayout })));
 
-interface GeneratorProps {
+interface GeneratorContentProps {
   existingLetterId?: string;
   step?: 1 | 2;
   isGenerating?: boolean;
@@ -30,7 +31,7 @@ interface GeneratorProps {
   resetError?: () => void;
 }
 
-export const GeneratorContent = memo(({ 
+export const GeneratorContent = memo<GeneratorContentProps>(({ 
   existingLetterId,
   step: propStep,
   isGenerating: propIsGenerating,
@@ -63,23 +64,27 @@ export const GeneratorContent = memo(({
     setJobData,
     setGeneratedLetter: hookSetGeneratedLetter,
     resetError: hookResetError,
+    setStep: hookSetStep, // Add this missing prop
   } = useGeneratorSetup(existingLetterId);
 
+  // Use our custom hooks to separate logic if props are not provided
   const { handleGenerateLetter, handleEditContent } = useLetterGeneration({
     completeUser,
     setIsGenerating: (value) => {
       if (value !== hookIsGenerating) {
-        hookStep(value ? 1 : 2);
+        // Fix: Pass the value directly to hookSetStep instead of using it as a function
+        hookSetStep(value ? 1 : 2);
       }
     },
     setLoadingState: () => {},
     setJobData,
     setSelectedJob: () => {},
     setGeneratedLetter: hookSetGeneratedLetter,
-    setStep: hookStep,
+    setStep: hookSetStep,
     setError: () => {}
   });
 
+  // Use our custom hooks to merge props and hook values
   const {
     step, 
     isGenerating, 
@@ -94,20 +99,33 @@ export const GeneratorContent = memo(({
     resetErrorFn,
     handleJobFormSubmitFn
   } = useGeneratorProps({
-    propStep, hookStep,
-    propIsGenerating, hookIsGenerating,
-    propIsLoading, hookIsLoading,
-    propLoadingState, hookLoadingState,
-    propGenerationPhase, hookGenerationPhase,
-    propGenerationProgress, hookGenerationProgress,
-    propSelectedJob, hookSelectedJob,
-    propGeneratedLetter, hookGeneratedLetter,
-    propGenerationError, hookError,
-    propSetStep, hookStep,
-    propResetError, hookResetError,
-    propHandleJobFormSubmit, handleGenerateLetter
+    propStep, 
+    hookStep,
+    propIsGenerating, 
+    hookIsGenerating,
+    propIsLoading, 
+    hookIsLoading,
+    propLoadingState, 
+    hookLoadingState,
+    propGenerationPhase, 
+    hookGenerationPhase,
+    propGenerationProgress, 
+    hookGenerationProgress,
+    propSelectedJob, 
+    hookSelectedJob,
+    propGeneratedLetter, 
+    hookGeneratedLetter,
+    propGenerationError, 
+    hookError,
+    propSetStep, 
+    hookSetStep, // Pass the hookSetStep prop correctly
+    propResetError, 
+    hookResetError,
+    propHandleJobFormSubmit, 
+    handleGenerateLetter
   });
   
+  // Fix the useLetterEdit hook call
   const onEditContent = useLetterEdit({
     generatedLetter,
     propHandleEditLetter,
@@ -115,6 +133,7 @@ export const GeneratorContent = memo(({
     hookSetGeneratedLetter
   });
 
+  // Handle error states, generation states, and subscription issues
   const showStateHandlers = isGenerating || error || (subscriptionStatus && !subscriptionStatus.canGenerate && !generatedLetter);
 
   if (showStateHandlers) {

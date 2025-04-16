@@ -17,7 +17,7 @@ interface GeneratorStatesProps {
   resetError: () => void;
 }
 
-export const GeneratorStates = memo(({
+export const GeneratorStates = memo<GeneratorStatesProps>(({
   isGenerating,
   error,
   loadingState,
