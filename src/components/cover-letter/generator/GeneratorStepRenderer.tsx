@@ -41,7 +41,6 @@ export const GeneratorStepRenderer: React.FC<GeneratorStepRendererProps> = ({
   handleEditContent,
   handleSaveJobAsDraft
 }) => {
-  // Render the appropriate step
   if (step === 1) {
     return (
       <JobFormStep
@@ -61,7 +60,6 @@ export const GeneratorStepRenderer: React.FC<GeneratorStepRendererProps> = ({
     );
   }
 
-  // Step 2: Letter preview
   if (generatedLetter) {
     return (
       <LetterPreviewStep
@@ -71,7 +69,6 @@ export const GeneratorStepRenderer: React.FC<GeneratorStepRendererProps> = ({
     );
   }
 
-  // Fallback if we don't have a letter yet
   return (
     <div className="p-8 text-center">
       <p className="text-muted-foreground">Ingen ansøgning genereret endnu.</p>

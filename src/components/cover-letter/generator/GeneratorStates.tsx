@@ -17,8 +17,7 @@ interface GeneratorStatesProps {
   resetError: () => void;
 }
 
-// Use memo to prevent re-renders when props haven't changed
-export const GeneratorStates: React.FC<GeneratorStatesProps> = memo(({
+export const GeneratorStates = memo(({
   isGenerating,
   error,
   loadingState,
@@ -28,7 +27,6 @@ export const GeneratorStates: React.FC<GeneratorStatesProps> = memo(({
   hasGeneratedLetter,
   resetError,
 }) => {
-  // Show loading screen
   if (isGenerating) {
     return (
       <GeneratorLoadingState 
@@ -40,7 +38,6 @@ export const GeneratorStates: React.FC<GeneratorStatesProps> = memo(({
     );
   }
 
-  // Show error screen
   if (error) {
     return (
       <GeneratorErrorState 
@@ -50,7 +47,6 @@ export const GeneratorStates: React.FC<GeneratorStatesProps> = memo(({
     );
   }
 
-  // If subscription check is complete and user can't generate
   if (subscriptionStatus && !subscriptionStatus.canGenerate && !hasGeneratedLetter) {
     return (
       <div className="container py-8">
@@ -64,14 +60,6 @@ export const GeneratorStates: React.FC<GeneratorStatesProps> = memo(({
   }
 
   return null;
-}, (prevProps, nextProps) => {
-  // Custom comparison function to determine if re-render is needed
-  return (
-    prevProps.isGenerating === nextProps.isGenerating &&
-    prevProps.error === nextProps.error &&
-    prevProps.loadingState === nextProps.loadingState &&
-    prevProps.generationPhase === nextProps.generationPhase &&
-    prevProps.hasGeneratedLetter === nextProps.hasGeneratedLetter &&
-    prevProps.subscriptionStatus?.canGenerate === nextProps.subscriptionStatus?.canGenerate
-  );
 });
+
+GeneratorStates.displayName = 'GeneratorStates';
