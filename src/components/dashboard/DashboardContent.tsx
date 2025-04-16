@@ -1,3 +1,4 @@
+
 import React from "react";
 import { JobPosting, CoverLetter, Company } from "@/lib/types";
 import { Briefcase, Building } from "lucide-react";
