@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { memo, useCallback } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { Button } from "../ui/button";
@@ -19,7 +19,8 @@ interface DashboardHeaderProps {
   };
 }
 
-const DashboardHeader: React.FC<DashboardHeaderProps> = ({
+// Memoize the entire component to prevent unnecessary re-renders
+const DashboardHeader: React.FC<DashboardHeaderProps> = memo(({
   jobCount,
   letterCount,
   companyCount,
@@ -30,8 +31,19 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
 }) => {
   const navigate = useNavigate();
 
+  // Memoize navigation handler
+  const handleNavigateToProfile = useCallback(() => {
+    navigate('/profile');
+  }, [navigate]);
+
+  // Pre-calculate remaining generations to avoid recalculation on re-render
   const remainingGenerations = subscriptionStatus ? 
     subscriptionStatus.freeGenerationsAllowed - subscriptionStatus.freeGenerationsUsed : 0;
+
+  // Return early for loading state to improve performance
+  if (isLoading) {
+    return <div className="mb-8 animate-pulse bg-gray-100 h-24 rounded-lg"></div>;
+  }
 
   return (
     <div className="mb-8 space-y-6">
@@ -62,7 +74,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
             <span>Du har brugt dit gratis forsøg. Opret et abonnement for at generere flere ansøgninger.</span>
             <Button 
               size="sm" 
-              onClick={() => navigate('/profile')}
+              onClick={handleNavigateToProfile}
               className="ml-auto bg-primary hover:bg-primary-700 text-white transition-colors focus:ring-2 focus:ring-primary focus:ring-offset-2"
             >
               Opret abonnement
@@ -79,6 +91,9 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
       ) : null}
     </div>
   );
-};
+});
+
+// Add display name for better debugging
+DashboardHeader.displayName = 'DashboardHeader';
 
 export default DashboardHeader;

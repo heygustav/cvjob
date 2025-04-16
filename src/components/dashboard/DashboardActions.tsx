@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { memo } from "react";
 import { Button } from "@/components/ui/button";
 import IconButton from "@/components/ui/icon-button";
 import { Link } from "react-router-dom";
@@ -11,7 +11,8 @@ interface DashboardActionsProps {
   onRefresh: () => void;
 }
 
-const DashboardActions: React.FC<DashboardActionsProps> = ({
+// Use memo to prevent re-renders when props haven't changed
+const DashboardActions: React.FC<DashboardActionsProps> = memo(({
   activeTab,
   isRefreshing,
   onRefresh,
@@ -70,6 +71,9 @@ const DashboardActions: React.FC<DashboardActionsProps> = ({
       )}
     </div>
   );
-};
+});
+
+// Add display name for better debugging
+DashboardActions.displayName = 'DashboardActions';
 
 export default DashboardActions;

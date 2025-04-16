@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { memo, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { File, Briefcase, Building } from "lucide-react";
 
@@ -8,7 +8,13 @@ interface TabNavProps {
   onTabChange: (tab: "letters" | "jobs" | "companies") => void;
 }
 
-const TabNav: React.FC<TabNavProps> = ({ activeTab, onTabChange }) => {
+// Use memo to prevent re-renders when props haven't changed
+const TabNav: React.FC<TabNavProps> = memo(({ activeTab, onTabChange }) => {
+  // Memoize tab change handlers
+  const handleLettersTabClick = useCallback(() => onTabChange("letters"), [onTabChange]);
+  const handleJobsTabClick = useCallback(() => onTabChange("jobs"), [onTabChange]);
+  const handleCompaniesTabClick = useCallback(() => onTabChange("companies"), [onTabChange]);
+
   return (
     <div className="bg-white rounded-lg shadow mb-6" role="tablist" aria-label="Dashboard Sektioner">
       <div className="flex">
@@ -20,7 +26,7 @@ const TabNav: React.FC<TabNavProps> = ({ activeTab, onTabChange }) => {
               ? "border-b-2 border-primary text-primary bg-blue-50"
               : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
           } flex-1 rounded-none px-6 py-4 h-auto font-medium flex items-center justify-start focus:outline-none focus:ring-2 focus:ring-primary focus:ring-inset transition-colors`}
-          onClick={() => onTabChange("letters")}
+          onClick={handleLettersTabClick}
           role="tab"
           id="tab-letters"
           aria-selected={activeTab === "letters"}
@@ -38,7 +44,7 @@ const TabNav: React.FC<TabNavProps> = ({ activeTab, onTabChange }) => {
               ? "border-b-2 border-primary text-primary bg-blue-50"
               : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
           } flex-1 rounded-none px-6 py-4 h-auto font-medium flex items-center justify-start focus:outline-none focus:ring-2 focus:ring-primary focus:ring-inset transition-colors`}
-          onClick={() => onTabChange("jobs")}
+          onClick={handleJobsTabClick}
           role="tab"
           id="tab-jobs"
           aria-selected={activeTab === "jobs"}
@@ -56,7 +62,7 @@ const TabNav: React.FC<TabNavProps> = ({ activeTab, onTabChange }) => {
               ? "border-b-2 border-primary text-primary bg-blue-50"
               : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
           } flex-1 rounded-none px-6 py-4 h-auto font-medium flex items-center justify-start focus:outline-none focus:ring-2 focus:ring-primary focus:ring-inset transition-colors`}
-          onClick={() => onTabChange("companies")}
+          onClick={handleCompaniesTabClick}
           role="tab"
           id="tab-companies"
           aria-selected={activeTab === "companies"}
@@ -69,6 +75,9 @@ const TabNav: React.FC<TabNavProps> = ({ activeTab, onTabChange }) => {
       </div>
     </div>
   );
-};
+});
+
+// Add display name for better debugging
+TabNav.displayName = 'TabNav';
 
 export default TabNav;

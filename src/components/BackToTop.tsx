@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback, memo } from 'react';
 import { ArrowUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -73,4 +74,4 @@ const BackToTop: React.FC<BackToTopProps> = memo(({
 // Add display name for better debugging
 BackToTop.displayName = 'BackToTop';
 
-export default BackToTop; 
+export default BackToTop;

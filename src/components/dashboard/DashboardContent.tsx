@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { memo, useMemo } from "react";
 import { JobPosting, CoverLetter, Company } from "@/lib/types";
 import { Briefcase, Building } from "lucide-react";
 import LetterListComponent from "@/components/dashboard/LetterListComponent";
@@ -20,7 +20,8 @@ interface DashboardContentProps {
   findJobForLetter: (jobPostingId: string) => JobPosting | undefined;
 }
 
-const DashboardContent: React.FC<DashboardContentProps> = ({
+// Memoize the entire component to prevent unnecessary re-renders
+const DashboardContent: React.FC<DashboardContentProps> = memo(({
   activeTab,
   onTabChange,
   jobPostings,
@@ -32,28 +33,38 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
   onCompanyDelete,
   findJobForLetter,
 }) => {
+  // Memoize derived values for better performance
+  const hasLetters = useMemo(() => coverLetters.length > 0, [coverLetters]);
+  const hasJobs = useMemo(() => jobPostings.length > 0, [jobPostings]);
+  const hasCompanies = useMemo(() => companies.length > 0, [companies]);
+  
+  // Memoize panel and ARIA attributes
+  const panelId = useMemo(() => {
+    return activeTab === "letters" 
+      ? "panel-letters" 
+      : activeTab === "jobs" 
+        ? "panel-jobs" 
+        : "panel-companies";
+  }, [activeTab]);
+  
+  const tabId = useMemo(() => {
+    return activeTab === "letters" 
+      ? "tab-letters" 
+      : activeTab === "jobs" 
+        ? "tab-jobs" 
+        : "tab-companies";
+  }, [activeTab]);
+
   return (
     <div 
       className="bg-white shadow-sm rounded-lg overflow-hidden border-0"
       role="tabpanel"
-      id={
-        activeTab === "letters" 
-          ? "panel-letters" 
-          : activeTab === "jobs" 
-            ? "panel-jobs" 
-            : "panel-companies"
-      }
-      aria-labelledby={
-        activeTab === "letters" 
-          ? "tab-letters" 
-          : activeTab === "jobs" 
-            ? "tab-jobs" 
-            : "tab-companies"
-      }
+      id={panelId}
+      aria-labelledby={tabId}
     >
       <div className="p-6">
         {activeTab === "letters" ? (
-          coverLetters.length > 0 ? (
+          hasLetters ? (
             <div className="text-left mb-4">
               <h2 className="text-lg font-medium text-gray-900">Dine ansøgninger</h2>
               <p className="text-sm text-gray-500">
@@ -64,7 +75,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
             <EmptyLetterState />
           )
         ) : activeTab === "jobs" ? (
-          jobPostings.length > 0 && (
+          hasJobs && (
             <div className="text-left mb-4">
               <h2 className="text-lg font-semibold text-gray-900">Dine jobopslag</h2>
               <p className="text-sm text-gray-500">
@@ -73,7 +84,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
             </div>
           )
         ) : (
-          companies.length > 0 && (
+          hasCompanies && (
             <div className="text-left mb-4">
               <h2 className="text-lg font-semibold text-gray-900">Dine virksomheder</h2>
               <p className="text-sm text-gray-500">
@@ -84,7 +95,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
         )}
         
         {activeTab === "letters" ? (
-          coverLetters.length > 0 && (
+          hasLetters && (
             <LetterListComponent 
               coverLetters={coverLetters}
               jobPostings={jobPostings}
@@ -94,7 +105,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
             />
           )
         ) : activeTab === "jobs" ? (
-          jobPostings.length > 0 ? (
+          hasJobs ? (
             <JobListComponent
               jobPostings={jobPostings}
               isDeleting={isDeleting}
@@ -114,7 +125,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
             </div>
           )
         ) : (
-          companies.length > 0 ? (
+          hasCompanies ? (
             <CompanyListComponent
               companies={companies}
               isDeleting={isDeleting}
@@ -137,6 +148,9 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
       </div>
     </div>
   );
-};
+});
+
+// Add display name for better debugging
+DashboardContent.displayName = 'DashboardContent';
 
 export default DashboardContent;
