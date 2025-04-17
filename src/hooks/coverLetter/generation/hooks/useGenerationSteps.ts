@@ -1,4 +1,3 @@
-
 import { useState, useRef, useCallback } from 'react';
 import { showErrorToast } from '@/utils/errorHandling';
 import { useToast } from '@/hooks/use-toast';
@@ -20,7 +19,7 @@ export const useGenerationSteps = (
   setGeneratedLetter: React.Dispatch<React.SetStateAction<CoverLetter | null>>,
   safeSetState: <T>(stateSetter: React.Dispatch<React.SetStateAction<T>>, value: T) => void
 ) => {
-  const [currentStep, setStep] = useState<number>(0);
+  const [currentStep, setStep] = useState<1 | 2>(1); // Initialize with 1 instead of 0
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const errorRef = useRef<any>(null);
   const { toast } = useToast();
@@ -105,38 +104,12 @@ export const useGenerationSteps = (
     isGenerating,
     setIsGenerating,
     reset: useCallback(() => {
-      setStep(0);
+      setStep(1); // Reset to 1 instead of 0
       setIsGenerating(false);
       setGenerationError(null);
       setGeneratedLetter(null);
     }, [setStep, setIsGenerating, setGenerationError, setGeneratedLetter]),
-    handleError: useCallback((error: any) => {
-      console.error("Generation error:", error);
-      errorRef.current = error;
-      setGenerationError(error);
-
-      if (error instanceof Error) {
-        const result = handleStandardError(error);
-        toast({
-          title: result.title,
-          description: result.description,
-          variant: "destructive"
-        });
-      } else if (error.message && error.message.includes('timeout')) {
-        handleTimeoutError(error);
-      } else {
-        const result = handleTypedError(error);
-        toast({
-          title: result.title,
-          description: result.description,
-          variant: "destructive"
-        });
-      }
-
-      showErrorToast(error);
-      setIsGenerating(false);
-      return true;
-    }, [toast, setGenerationError]),
+    handleError,
     errorRef,
     // Expose step functions
     fetchUserStep,
