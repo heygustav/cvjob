@@ -8,7 +8,10 @@ export const createToastAction = (config?: ErrorAction): ToastActionElement | un
   if (!config) return undefined;
   
   return (
-    <ToastAction altText={config.label} onClick={config.handler}>
+    <ToastAction 
+      altText={config.label} 
+      onClick={config.handler}
+    >
       {config.label}
     </ToastAction>
   );
