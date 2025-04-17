@@ -5,7 +5,7 @@ import { LoadingState, GenerationProgress } from "../types";
 import { useToastMessages } from "../useToastMessages";
 import { useGenerationTracking } from "../generation-tracking";
 import { useGenerationErrorHandling } from "../generation-error-handling";
-import { useGenerationSteps } from "../useGenerationSteps";
+import { useGenerationSteps } from "../generation/hooks/useGenerationSteps";
 import { useJobFetchingLogic } from "../generation/useJobFetchingLogic";
 import { useLetterFetchingLogic } from "../generation/useLetterFetchingLogic";
 import { useLetterEditingLogic } from "../generation/useLetterEditingLogic";
@@ -51,9 +51,13 @@ export const useCoverLetterGeneration = (user: User | null) => {
     setLoadingState
   });
 
-  // Here is the problem: useGenerationSteps is imported from the wrong path 
-  // and is being called without the required arguments
-  const generationSteps = useGenerationSteps();
+  // Correctly call useGenerationSteps with the required arguments
+  const generationSteps = useGenerationSteps(
+    setStep, 
+    setGenerationError, 
+    setGeneratedLetter, 
+    safeSetState
+  );
 
   // Domain-specific hooks
   const { fetchJob } = useJobFetchingLogic(
