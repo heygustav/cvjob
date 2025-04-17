@@ -120,6 +120,7 @@ const GeneratorContentInner: React.FC<{
   // Get operations from the hook
   const {
     setStep: hookSetStep,
+    setJobData,
     resetError: hookResetError,
     handleGenerateLetter,
     handleEditContent
@@ -160,7 +161,7 @@ const GeneratorContentInner: React.FC<{
         <GeneratorStepRenderer
           step={step}
           jobData={jobData}
-          setJobData={(data) => hookSetStep(data)}
+          setJobData={setJobData}
           generatedLetter={generatedLetter}
           isLoading={isLoading}
           user={completeUser}

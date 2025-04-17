@@ -1,3 +1,4 @@
+
 import React from "react";
 import { LoadingState } from "@/hooks/coverLetter/types";
 import { LoadingSpinner } from "@/components/LoadingSpinner";

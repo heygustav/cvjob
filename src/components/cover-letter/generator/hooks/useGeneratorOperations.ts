@@ -40,11 +40,16 @@ export const useGeneratorOperations = () => {
         dispatch({
           type: 'SET_SELECTED_JOB',
           payload: {
-            ...data,
             id: data.id,
             user_id: completeUser?.id || "",
             created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
+            updated_at: new Date().toISOString(),
+            title: data.title || "",
+            company: data.company || "",
+            description: data.description || "",
+            contact_person: data.contact_person || "",
+            url: data.url || "",
+            deadline: data.deadline || ""
           }
         });
       }
