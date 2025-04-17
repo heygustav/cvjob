@@ -20,8 +20,8 @@ export type ToastMessage = {
 
 type ToasterToast = ToastProps & {
   id: string
-  title?: React.ReactNode
-  description?: React.ReactNode
+  title?: React.ReactNode // Updated from string to ReactNode
+  description?: React.ReactNode // Ensure this is also ReactNode
   action?: ToastActionElement
 }
 
