@@ -32,14 +32,10 @@ export const useErrorHandler = () => {
       title: displayConfig.title,
       description: displayConfig.message,
       variant: metadata.severity === 'critical' ? 'destructive' : 'default',
-      action: displayConfig.action && (
-        <button 
-          onClick={displayConfig.action.handler}
-          className="rounded bg-white px-2 py-1 text-xs font-medium text-gray-900 hover:bg-gray-100"
-        >
-          {displayConfig.action.label}
-        </button>
-      )
+      action: displayConfig.action && {
+        label: displayConfig.action.label,
+        onClick: displayConfig.action.handler
+      }
     });
 
     return displayConfig;
