@@ -73,12 +73,15 @@ const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
 
   const errorTitle = title || 'Der opstod en fejl';
   const actionText = getActionText();
+  const category = metadata?.category || 'system';
   
   return (
     <Alert 
       variant={metadata?.severity === 'critical' ? 'destructive' : 'default'}
       className="mt-6" 
       role="alert"
+      data-testid="error-display"
+      data-error-category={category}
     >
       <div className="flex flex-col space-y-4">
         <div className="flex items-start">
@@ -100,6 +103,7 @@ const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
             <button
               onClick={onRetry}
               className="flex items-center justify-center px-4 py-2 text-sm font-medium text-primary bg-primary/10 rounded-md hover:bg-primary/20 transition-colors"
+              data-testid="error-retry-button"
             >
               <RefreshCw className="h-4 w-4 mr-2" />
               {actionText}

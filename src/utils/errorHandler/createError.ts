@@ -1,5 +1,6 @@
 
 import { AppError, ErrorMetadata } from './types';
+import { errorLogger } from './errorLogger';
 
 export function createAppError(
   message: string,
@@ -13,6 +14,16 @@ export function createAppError(
   };
   error.userMessage = userMessage || message;
   error.technicalMessage = message;
+
+  // Log the error
+  errorLogger.log(
+    metadata?.severity || 'error',
+    message,
+    error,
+    metadata,
+    { action: 'create_error' }
+  );
+
   return error;
 }
 
