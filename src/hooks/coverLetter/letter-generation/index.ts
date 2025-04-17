@@ -1,16 +1,15 @@
-
 import { User, JobPosting, CoverLetter } from "@/lib/types";
 import { JobFormData } from "@/services/coverLetter/types";
 import { LoadingState, GenerationProgress } from "../types";
 import { useToastMessages } from "../useToastMessages";
 import { useGenerationTracking } from "../generation-tracking";
 import { useGenerationErrorHandling } from "../generation-error-handling";
-import { useGenerationSteps } from "../generation/hooks/useGenerationSteps";
-import { useJobFetchingLogic } from "../generation/useJobFetchingLogic";
-import { useLetterFetchingLogic } from "../generation/useLetterFetchingLogic";
-import { useLetterEditingLogic } from "../generation/useLetterEditingLogic";
+import { useGenerationSteps } from "./hooks/useGenerationSteps";
+import { useJobFetchingLogic } from "./useJobFetchingLogic";
+import { useLetterFetchingLogic } from "./useLetterFetchingLogic";
+import { useLetterEditingLogic } from "./useLetterEditingLogic";
 
-// Import refactored hooks from the correct path
+// Import refactored hooks
 import { useRefsAndCleanup } from "./hooks/useRefsAndCleanup";
 import { useSafeSetState } from "./hooks/useSafeSetState";
 import { useGenerationState } from "./hooks/useGenerationState";
@@ -53,10 +52,10 @@ export const useCoverLetterGeneration = (user: User | null) => {
 
   // Pass all the required arguments to useGenerationSteps
   const generationSteps = useGenerationSteps(
-    setStep,
-    setGenerationError,
-    setGeneratedLetter,
-    safeSetState
+    user?.id || '', 
+    selectedJob?.id || '', 
+    generatedLetter?.id || '', 
+    { debugMode: false }
   );
 
   // Domain-specific hooks
