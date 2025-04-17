@@ -5,7 +5,7 @@ import { LoadingState, GenerationProgress } from "../types";
 import { useToastMessages } from "../useToastMessages";
 import { useGenerationTracking } from "../generation-tracking";
 import { useGenerationErrorHandling } from "../generation-error-handling";
-import { useGenerationSteps } from "../useGenerationSteps"; // Changed import path to use the correct implementation
+import { useGenerationSteps } from "../generation/hooks/useGenerationSteps";
 import { useJobFetchingLogic } from "../generation/useJobFetchingLogic";
 import { useLetterFetchingLogic } from "../generation/useLetterFetchingLogic";
 import { useLetterEditingLogic } from "../generation/useLetterEditingLogic";
@@ -51,8 +51,20 @@ export const useCoverLetterGeneration = (user: User | null) => {
     setLoadingState
   });
 
-  // Use the hook without arguments since it no longer requires any
-  const generationSteps = useGenerationSteps();
+  // Create a new instance of useGenerationSteps with the required parameters
+  const { 
+    currentStep,
+    setCurrentStep,
+    isGenerating: stepsIsGenerating,
+    setIsGenerating,
+    generationError: stepsGenerationError,
+    setGenerationError: setStepsGenerationError,
+    coverLetter,
+    setCoverLetter,
+    reset,
+    handleError,
+    errorRef
+  } = useGenerationSteps();
 
   // Domain-specific hooks
   const { fetchJob } = useJobFetchingLogic(
@@ -97,7 +109,12 @@ export const useCoverLetterGeneration = (user: User | null) => {
     setGeneratedLetter,
     setStep,
     toastMessages,
-    generationSteps,
+    { 
+      currentStep, setCurrentStep, isGenerating: stepsIsGenerating, 
+      setIsGenerating, generationError: stepsGenerationError, 
+      setGenerationError: setStepsGenerationError, coverLetter, setCoverLetter, 
+      reset, handleError, errorRef
+    },
     errorHandling
   );
 
