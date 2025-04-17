@@ -10,10 +10,15 @@ export const useNetworkUtils = () => {
   }, []);
 
   const fetchWithTimeout = useCallback(async <T,>(
-    promise: Promise<T>,
+    promiseOrFn: Promise<T> | (() => Promise<T>),
     timeoutMs: number = 30000,
     errorMessage: string = 'Request timed out'
   ): Promise<T> => {
+    // If a function is provided, execute it to get the promise
+    const promise = typeof promiseOrFn === 'function' 
+      ? (promiseOrFn as () => Promise<T>)() 
+      : promiseOrFn;
+    
     const timeout = new Promise<never>((_, reject) => {
       setTimeout(() => {
         reject(new Error(errorMessage));
