@@ -9,7 +9,7 @@ import { useCoverLetterDocuments } from './hooks/useCoverLetterDocuments';
 
 interface CoverLetterPreviewProps {
   letter: CoverLetter;
-  content?: string; // Allow passing custom content for preview
+  content?: string;
   isEditable?: boolean;
   onEditContent?: (content: string) => Promise<void>;
 }
@@ -81,9 +81,10 @@ const CoverLetterPreview: React.FC<CoverLetterPreviewProps> = ({
         fileFormat={fileFormat}
         onDownload={handleDownloadClick}
         onFormatChange={handleFormatChange}
+        className="sticky top-0 z-20 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
       />
       
-      <div className="flex-1 overflow-auto p-6 bg-white">
+      <div className="flex-1 overflow-auto p-3 sm:p-6 bg-white">
         <div className="max-w-3xl mx-auto">
           <PreviewContent 
             content={displayContent}
@@ -94,11 +95,15 @@ const CoverLetterPreview: React.FC<CoverLetterPreviewProps> = ({
             jobTitle={jobTitle}
             contactPerson={contactPerson}
             formattedDate={new Date().toLocaleDateString('da-DK')}
+            className="text-sm sm:text-base"
           />
         </div>
       </div>
       
-      <PreviewFooter wordCount={wordCount} />
+      <PreviewFooter 
+        wordCount={wordCount} 
+        className="sticky bottom-0 z-20 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+      />
     </div>
   );
 };

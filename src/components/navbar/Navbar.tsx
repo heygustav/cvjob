@@ -38,8 +38,8 @@ const Navbar: React.FC = () => {
   }, [location.pathname, location.search, signOut]);
   
   return (
-    <header className="fixed top-0 left-0 right-0 h-16 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-30">
-      <div className="container h-full mx-auto px-4 flex items-center justify-between">
+    <header className="fixed top-0 left-0 right-0 h-14 sm:h-16 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-30">
+      <div className="container h-full mx-auto px-3 sm:px-4 flex items-center justify-between">
         <NavbarLogo />
         
         <DesktopNavigation 

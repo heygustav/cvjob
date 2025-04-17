@@ -45,8 +45,8 @@ const DashboardMain: React.FC<DashboardMainProps> = ({
   const companyCount = companies.length;
 
   return (
-    <div className="max-w-6xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
-      <header>
+    <div className="w-full max-w-6xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
+      <header className="space-y-4 sm:space-y-6">
         <DashboardHeader 
           jobCount={jobCount}
           letterCount={letterCount}
@@ -58,15 +58,15 @@ const DashboardMain: React.FC<DashboardMainProps> = ({
         />
       </header>
 
-      <main id="main-content" className="focus:outline-none" tabIndex={-1}>
-        <div className="mb-4 sm:mb-6 overflow-x-auto" role="navigation">
+      <main id="main-content" className="focus:outline-none mt-4 sm:mt-6" tabIndex={-1}>
+        <div className="mb-4 sm:mb-6 overflow-x-auto -mx-3 sm:mx-0 px-3 sm:px-0" role="navigation">
           <TabNav
             activeTab={activeTab}
             onTabChange={handleTabChange}
           />
         </div>
 
-        <div className="flex justify-start mb-4 overflow-x-auto pb-2">
+        <div className="flex justify-start mb-4 overflow-x-auto -mx-3 sm:mx-0 px-3 sm:px-0 pb-2">
           <DashboardActions 
             activeTab={activeTab}
             isRefreshing={isRefreshing}
@@ -74,18 +74,20 @@ const DashboardMain: React.FC<DashboardMainProps> = ({
           />
         </div>
 
-        <DashboardContent 
-          activeTab={activeTab}
-          onTabChange={handleTabChange}
-          jobPostings={jobPostings}
-          coverLetters={coverLetters}
-          companies={companies}
-          isDeleting={isDeleting}
-          onJobDelete={onJobDelete}
-          onLetterDelete={onLetterDelete}
-          onCompanyDelete={onCompanyDelete}
-          findJobForLetter={findJobForLetter}
-        />
+        <div className="-mx-3 sm:mx-0 px-3 sm:px-0">
+          <DashboardContent 
+            activeTab={activeTab}
+            onTabChange={handleTabChange}
+            jobPostings={jobPostings}
+            coverLetters={coverLetters}
+            companies={companies}
+            isDeleting={isDeleting}
+            onJobDelete={onJobDelete}
+            onLetterDelete={onLetterDelete}
+            onCompanyDelete={onCompanyDelete}
+            findJobForLetter={findJobForLetter}
+          />
+        </div>
       </main>
     </div>
   );
