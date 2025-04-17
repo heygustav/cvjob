@@ -1,65 +1,61 @@
 
-import { useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
-import { Company, JobPosting, CoverLetter } from "@/lib/types";
-import { useDashboardFetch } from "./useDashboardFetch";
-import { useJobOperations } from "./useJobOperations";
-import { useLetterOperations } from "./useLetterOperations";
-import { useCompanyOperations } from "./useCompanyOperations";
+import { JobPosting } from "@/lib/types";
+import { 
+  useJobPostingsQuery,
+  useCoverLettersQuery,
+  useCompaniesQuery,
+  useDeleteJobMutation,
+  useDeleteLetterMutation,
+  useDeleteCompanyMutation
+} from "./queries";
 import { useJobLetterUtils } from "./useJobLetterUtils";
 
 export const useDashboardData = () => {
   const { user } = useAuth();
-  const [isDeleting, setIsDeleting] = useState(false);
 
-  // Use the fetch hook for data loading
-  const {
-    jobPostings,
-    coverLetters,
-    companies,
-    isLoading,
-    isRefreshing,
-    error,
-    refreshData,
-    setJobPostings,
-    setCoverLetters
-  } = useDashboardFetch();
+  // Queries
+  const { 
+    data: jobPostings = [], 
+    isLoading: isJobsLoading,
+    isRefetching: isJobsRefetching 
+  } = useJobPostingsQuery(user?.id);
+  
+  const { 
+    data: coverLetters = [], 
+    isLoading: isLettersLoading,
+    isRefetching: isLettersRefetching 
+  } = useCoverLettersQuery(user?.id);
+  
+  const { 
+    data: companies = [], 
+    isLoading: isCompaniesLoading,
+    isRefetching: isCompaniesRefetching 
+  } = useCompaniesQuery(user?.id);
 
-  // Use the job operations hook for job-related actions
-  const { deleteJobPosting } = useJobOperations(
-    jobPostings,
-    coverLetters,
-    setJobPostings,
-    setCoverLetters
-  );
+  // Mutations
+  const { mutateAsync: deleteJob, isLoading: isJobDeleting } = useDeleteJobMutation();
+  const { mutateAsync: deleteLetter, isLoading: isLetterDeleting } = useDeleteLetterMutation();
+  const { mutateAsync: deleteCompany, isLoading: isCompanyDeleting } = useDeleteCompanyMutation();
 
-  // Use the letter operations hook for letter-related actions
-  const { deleteCoverLetter } = useLetterOperations(
-    coverLetters,
-    setCoverLetters
-  );
-
-  // Use the company operations hook for company-related actions
-  const { deleteCompany, companies: managedCompanies } = useCompanyOperations(
-    companies,
-    user?.id
-  );
-
-  // Use the utility hook for finding jobs for letters
+  // Utility hooks
   const { findJobForLetter } = useJobLetterUtils(jobPostings);
+
+  const isLoading = isJobsLoading || isLettersLoading || isCompaniesLoading;
+  const isRefreshing = isJobsRefetching || isLettersRefetching || isCompaniesRefetching;
+  const isDeleting = isJobDeleting || isLetterDeleting || isCompanyDeleting;
 
   return {
     jobPostings,
     coverLetters,
-    companies: managedCompanies, // Use the companies from the operations hook
+    companies,
     isLoading,
     isRefreshing,
     isDeleting,
-    error,
-    deleteJobPosting,
-    deleteCoverLetter,
+    error: null, // React Query handles errors internally
+    deleteJobPosting: deleteJob,
+    deleteCoverLetter: deleteLetter,
     deleteCompany,
-    refreshData,
-    findJobForLetter
+    findJobForLetter,
   };
 };
