@@ -104,12 +104,7 @@ export const useGenerationSteps = (
     setStep,
     isGenerating,
     setIsGenerating,
-    reset: useCallback(() => {
-      setStep(1); // Reset to 1 instead of 0
-      setIsGenerating(false);
-      setGenerationError(null);
-      setGeneratedLetter(null);
-    }, [setStep, setIsGenerating, setGenerationError, setGeneratedLetter]),
+    reset,
     handleError,
     errorRef,
     // Expose step functions
