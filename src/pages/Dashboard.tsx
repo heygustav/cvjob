@@ -6,11 +6,8 @@ import DashboardMain from "@/components/dashboard/DashboardMain";
 import { useAuth } from "@/components/AuthProvider";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useToast } from "@/hooks/use-toast";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle, RefreshCw } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import ErrorDisplay from "@/components/ErrorDisplay";
 import { getErrorMessage } from "@/utils/errorHandling";
+import ErrorDisplay from "@/components/ErrorDisplay";
 
 // Constants
 const LOADING_TIMEOUT_MS = 15000; // Extended from 8 seconds to 15 seconds for better UX

@@ -49,13 +49,17 @@ export const useCompaniesQuery = (userId?: string) => {
     queryFn: async () => {
       if (!userId) throw new Error("User ID is required");
       
-      const { data, error } = await supabase
+      // Use 'any' to bypass the type constraints temporarily
+      // This is needed because the Companies table might not be in the generated types
+      const { data, error } = await (supabase as any)
         .from("companies")
         .select("*")
         .eq("user_id", userId)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
+      
+      // Explicitly cast the result to Company[] to ensure correct typing
       return data as Company[];
     },
     enabled: !!userId,
@@ -109,7 +113,8 @@ export const useDeleteCompanyMutation = () => {
   
   return useMutation({
     mutationFn: async (companyId: string) => {
-      const { error } = await supabase
+      // Use 'any' to bypass the type constraints temporarily
+      const { error } = await (supabase as any)
         .from("companies")
         .delete()
         .eq("id", companyId);
