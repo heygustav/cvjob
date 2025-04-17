@@ -24,7 +24,7 @@ export const useErrorHandler = () => {
         ...metadata,
         ...config?.metadata
       },
-      phase: config?.phase || (isAppError(error) && error.phase)
+      phase: config?.phase || (isAppError(error) && error.phase) || 'system' // Provide a fallback value
     };
 
     // Log the error with context
@@ -46,8 +46,8 @@ export const useErrorHandler = () => {
       description: displayConfig.message,
       variant: metadata.severity === 'critical' ? 'destructive' : 'default',
       action: displayConfig.action && {
-        onClick: displayConfig.action.handler,
-        children: displayConfig.action.label
+        label: displayConfig.action.label,
+        onClick: displayConfig.action.handler
       }
     });
 
