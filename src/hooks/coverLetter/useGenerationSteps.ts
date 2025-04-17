@@ -14,6 +14,7 @@ interface CoverLetter {
   updated_at: string;
 }
 
+// Updated function signature to make parameters optional
 export const useGenerationSteps = () => {
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
