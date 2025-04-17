@@ -1,3 +1,4 @@
+
 import { useCallback } from 'react';
 import { useToastAdapter } from './useToastAdapter';
 import { AppError, ErrorDisplayConfig, ErrorMetadata, ErrorPhase } from '@/utils/errorHandler/types';
