@@ -4,6 +4,9 @@ import { User } from "@/lib/types";
 import { useNetworkOperations } from '@/hooks/useNetworkOperations';
 import { withTimeout } from '@/utils/errorHandling';
 
+// Export the setupGenerationTimeout function that's implemented in generationLogic.ts
+export { setupGenerationTimeout } from './generationLogic';
+
 export const handleLetterGeneration = async (
   jobData: JobFormData,
   user: User | null,

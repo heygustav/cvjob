@@ -5,7 +5,8 @@ import { useToast } from "@/hooks/use-toast";
 import { JobFormData } from "@/services/coverLetter/types";
 import { useNavigate } from "react-router-dom";
 import { ToastMessagesType } from "../types";
-import { handleLetterGeneration, setupGenerationTimeout } from "../letter-generation/letterGenerationUtils";
+import { handleLetterGeneration } from "../letter-generation/letterGenerationUtils";
+import { setupGenerationTimeout } from "../letter-generation/generationLogic";
 
 export const useLetterGenerationLogic = (
   user: User | null,

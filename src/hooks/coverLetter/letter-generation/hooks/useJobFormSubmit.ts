@@ -3,7 +3,8 @@ import { useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { JobFormData } from "@/services/coverLetter/types";
 import { User } from "@/lib/types";
-import { handleLetterGeneration, setupGenerationTimeout } from "../letterGenerationUtils";
+import { handleLetterGeneration } from "../letterGenerationUtils";
+import { setupGenerationTimeout } from "../generationLogic";
 import { ToastMessagesType } from "../../types";
 
 export const useJobFormSubmit = (
