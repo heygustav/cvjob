@@ -15,12 +15,12 @@ interface CoverLetter {
 }
 
 export const useGenerationSteps = (
-  setStep: React.Dispatch<React.SetStateAction<1 | 2>>,
+  setCurrentStep: React.Dispatch<React.SetStateAction<1 | 2>>,
   setGenerationError: React.Dispatch<React.SetStateAction<string | null>>,
   setGeneratedLetter: React.Dispatch<React.SetStateAction<CoverLetter | null>>,
   safeSetState: <T>(stateSetter: React.Dispatch<React.SetStateAction<T>>, value: T) => void
 ) => {
-  const [currentStep, setCurrentStep] = useState<number>(0);
+  const [currentStep, setStep] = useState<number>(0);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const errorRef = useRef<any>(null);
   const { toast } = useToast();
@@ -101,11 +101,42 @@ export const useGenerationSteps = (
 
   return {
     currentStep,
-    setCurrentStep,
+    setStep,
     isGenerating,
     setIsGenerating,
-    reset,
-    handleError,
+    reset: useCallback(() => {
+      setStep(0);
+      setIsGenerating(false);
+      setGenerationError(null);
+      setGeneratedLetter(null);
+    }, [setStep, setIsGenerating, setGenerationError, setGeneratedLetter]),
+    handleError: useCallback((error: any) => {
+      console.error("Generation error:", error);
+      errorRef.current = error;
+      setGenerationError(error);
+
+      if (error instanceof Error) {
+        const result = handleStandardError(error);
+        toast({
+          title: result.title,
+          description: result.description,
+          variant: "destructive"
+        });
+      } else if (error.message && error.message.includes('timeout')) {
+        handleTimeoutError(error);
+      } else {
+        const result = handleTypedError(error);
+        toast({
+          title: result.title,
+          description: result.description,
+          variant: "destructive"
+        });
+      }
+
+      showErrorToast(error);
+      setIsGenerating(false);
+      return true;
+    }, [toast, setGenerationError]),
     errorRef,
     // Expose step functions
     fetchUserStep,

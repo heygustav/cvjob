@@ -52,19 +52,10 @@ export const useCoverLetterGeneration = (user: User | null) => {
 
   // Pass the four required arguments separately to useGenerationSteps
   const generationSteps = useGenerationSteps(
-    user,
-    isMountedRef,
-    (phase: string, progress: number, message: string) => {
-      if (isMountedRef.current) {
-        safeSetState(setGenerationPhase, phase);
-        safeSetState(setGenerationProgress, {
-          phase,
-          progress,
-          message
-        });
-      }
-    },
-    abortControllerRef
+    setStep,
+    setGenerationError,
+    setGeneratedLetter,
+    safeSetState
   );
 
   // Domain-specific hooks
