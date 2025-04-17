@@ -1,6 +1,6 @@
 
 import { useToast } from "@/hooks/use-toast";
-import { ToastMessage } from "@/hooks/coverLetter/types";
+import { ToastMessage } from "@/hooks/use-toast";
 
 /**
  * A hook that adapts the ToastMessage type to the Toast type by mapping variants

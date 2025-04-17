@@ -25,6 +25,10 @@ export const useToastMessages = (): ToastMessagesType => {
       title: "Ansøgning genereret",
       description: "Din ansøgning er nu klar. Du kan redigere og downloade den.",
     },
+    letterEdited: {
+      title: "Ansøgning redigeret",
+      description: "Dine ændringer er blevet gemt.",
+    },
     letterUpdated: {
       title: "Ansøgning opdateret",
       description: "Dine ændringer er blevet gemt.",
@@ -32,6 +36,11 @@ export const useToastMessages = (): ToastMessagesType => {
     letterSaved: {
       title: "Ansøgning gemt",
       description: "Din ansøgning er blevet gemt i din profil.",
+    },
+    letterError: {
+      title: "Fejl ved ansøgning",
+      description: "Der opstod en fejl ved behandling af ansøgningen. Prøv venligst igen.",
+      variant: "destructive",
     },
     missingFields: {
       title: "Manglende felter",

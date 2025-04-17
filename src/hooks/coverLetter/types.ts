@@ -29,3 +29,12 @@ export interface ToastMessagesType {
     variant?: string;
   };
 }
+
+export type ToastVariant = "default" | "destructive" | "success";
+
+export type ToastMessage = {
+  title?: ReactNode;
+  description?: ReactNode;
+  variant?: ToastVariant;
+  action?: React.ReactElement;
+}

@@ -41,15 +41,14 @@ export const useProfileData = (): UseProfileDataReturn => {
   };
 
   // Handle form submission
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent<Element>): Promise<void> => {
     e.preventDefault();
     
     if (!validateForm(formData)) {
-      return false;
+      return;
     }
     
-    const result = await submitProfile(formData);
-    return result;
+    await submitProfile(formData);
   };
 
   // Load profile data when component mounts
