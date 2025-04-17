@@ -10,7 +10,7 @@ import { useJobFetchingLogic } from "../generation/useJobFetchingLogic";
 import { useLetterFetchingLogic } from "../generation/useLetterFetchingLogic";
 import { useLetterEditingLogic } from "../generation/useLetterEditingLogic";
 
-// Import refactored hooks
+// Import refactored hooks from the correct path
 import { useRefsAndCleanup } from "./hooks/useRefsAndCleanup";
 import { useSafeSetState } from "./hooks/useSafeSetState";
 import { useGenerationState } from "./hooks/useGenerationState";
@@ -51,7 +51,7 @@ export const useCoverLetterGeneration = (user: User | null) => {
     setLoadingState
   });
 
-  // Updated to use the simplified version with no arguments
+  // Use the hook without arguments since it no longer requires any
   const generationSteps = useGenerationSteps();
 
   // Domain-specific hooks
