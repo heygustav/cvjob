@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect } from "react";
 import ProfileLoader from "@/components/profile/ProfileLoader";
 import ProfileContainer from "@/components/profile/ProfileContainer";
-import { useProfileData } from "@/hooks/useProfileData";
+import { useProfileData, ProfileState } from "@/hooks/useProfileData";
 import ErrorDisplay from "@/components/ErrorDisplay";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
