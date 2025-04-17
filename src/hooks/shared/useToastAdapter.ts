@@ -11,12 +11,10 @@ export function useToastAdapter() {
   
   const toast = (message: ToastMessage) => {
     const { variant, ...rest } = message;
-    // Map "success" variant to "default" since UI toast only supports "default" and "destructive"
-    const mappedVariant = variant === "success" ? "default" : variant;
     
     return originalToast({
       ...rest,
-      variant: mappedVariant
+      variant: variant
     });
   };
   

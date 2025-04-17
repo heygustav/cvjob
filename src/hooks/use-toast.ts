@@ -18,11 +18,15 @@ export type ToastMessage = {
   action?: ToastActionElement
 }
 
-type ToasterToast = ToastProps & {
+// Explicitly define the ToasterToast type that maps to the expected component props
+type ToasterToast = {
   id: string
-  title?: React.ReactNode // Updated from string to ReactNode
-  description?: React.ReactNode // Ensure this is also ReactNode
+  variant?: "default" | "destructive" 
+  title?: React.ReactNode
+  description?: React.ReactNode
   action?: ToastActionElement
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }
 
 const actionTypes = {
@@ -147,14 +151,14 @@ function dispatch(action: Action) {
   })
 }
 
-type Toast = Omit<ToasterToast, "id">
-
 function toast(props: ToastMessage) {
   const { variant = "default", ...restProps } = props;
   const id = genId()
 
   // Map the ToastMessage variant to a valid Toast variant
-  const mappedVariant = variant === "success" ? "default" : variant;
+  // Only pass through "default" or "destructive" to the actual Toast component
+  const mappedVariant = variant === "success" ? "default" : 
+                        (variant === "destructive" ? "destructive" : "default");
 
   const update = (props: ToasterToast) =>
     dispatch({
