@@ -1,16 +1,9 @@
 
-export * from './useProfileForm';
-export * from './useProfileFetch';
-export * from './useProfileSubmit';
-export * from './useProfileValidation';
-export * from './types';
-
-import { useState, FormEvent, ChangeEvent } from "react";
+import { useState, FormEvent, ChangeEvent, useEffect } from "react";
 import { ProfileState, ValidationErrors, UseProfileDataReturn } from "./types";
 import { useProfileFetch } from "./useProfileFetch";
 import { useProfileSubmit } from "./useProfileSubmit";
 import { useProfileValidation } from "./useProfileValidation";
-import { useProfileForm } from "./useProfileForm";
 
 /**
  * Main hook for profile data management
@@ -60,7 +53,7 @@ export const useProfileData = (): UseProfileDataReturn => {
   };
 
   // Load profile data when component mounts
-  useState(() => {
+  useEffect(() => {
     fetchProfile();
   }, []);
 

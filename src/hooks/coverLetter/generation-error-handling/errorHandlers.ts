@@ -1,7 +1,9 @@
 
-import { ErrorPhase } from '../types';
 import { toast } from '@/hooks/use-toast';
 import { showErrorToast } from '@/utils/errorHandling';
+
+// Define ErrorPhase type if it's missing from types.ts
+type ErrorPhase = 'user-fetch' | 'job-save' | 'generation' | 'letter-save';
 
 export const handleTypedError = (error: any) => {
   const phase = error.phase as ErrorPhase;
@@ -63,4 +65,3 @@ export const handleTimeoutError = (error: Error) => {
     recoverable: true
   };
 };
-
