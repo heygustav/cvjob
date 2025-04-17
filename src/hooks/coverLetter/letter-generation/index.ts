@@ -5,7 +5,7 @@ import { LoadingState, GenerationProgress } from "../types";
 import { useToastMessages } from "../useToastMessages";
 import { useGenerationTracking } from "../generation-tracking";
 import { useGenerationErrorHandling } from "../generation-error-handling";
-import { useGenerationSteps } from "../useGenerationSteps";
+import { useGenerationSteps } from "../useGenerationSteps"; // Changed import path to use the correct implementation
 import { useJobFetchingLogic } from "../generation/useJobFetchingLogic";
 import { useLetterFetchingLogic } from "../generation/useLetterFetchingLogic";
 import { useLetterEditingLogic } from "../generation/useLetterEditingLogic";
