@@ -1,11 +1,12 @@
 
-import { AppError, ErrorMetadata } from './types';
+import { AppError, ErrorMetadata, ErrorPhase } from './types';
 import { errorLogger } from './errorLogger';
 
 export function createAppError(
   message: string,
   metadata?: ErrorMetadata,
-  userMessage?: string
+  userMessage?: string,
+  phase?: ErrorPhase
 ): AppError {
   const error = new Error(message) as AppError;
   error.metadata = {
@@ -14,6 +15,7 @@ export function createAppError(
   };
   error.userMessage = userMessage || message;
   error.technicalMessage = message;
+  error.phase = phase;
 
   // Log the error
   errorLogger.log(

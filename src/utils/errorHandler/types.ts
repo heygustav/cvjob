@@ -12,6 +12,20 @@ export type ErrorCategory =
   | 'security'
   | 'system';
 
+export type ErrorPhase = 
+  | 'user-fetch' 
+  | 'job-save' 
+  | 'generation' 
+  | 'letter-save' 
+  | 'network' 
+  | 'timeout' 
+  | 'auth' 
+  | 'api-rate-limit' 
+  | 'service-unavailable' 
+  | 'auth-error'
+  | 'cv-parsing'
+  | 'security-issue';
+
 export interface ErrorMetadata {
   code?: string;
   timestamp?: string;
@@ -27,6 +41,7 @@ export interface AppError extends Error {
   metadata?: ErrorMetadata;
   userMessage?: string;
   technicalMessage?: string;
+  phase?: ErrorPhase;
 }
 
 export interface ErrorDisplayConfig {
@@ -37,4 +52,5 @@ export interface ErrorDisplayConfig {
     handler: () => void;
   };
   metadata?: ErrorMetadata;
+  phase?: ErrorPhase;
 }

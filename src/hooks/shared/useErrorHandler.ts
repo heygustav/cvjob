@@ -1,7 +1,7 @@
 
 import { useCallback } from 'react';
 import { useToastAdapter } from './useToastAdapter';
-import { AppError, ErrorDisplayConfig, ErrorMetadata } from '@/utils/errorHandler/types';
+import { AppError, ErrorDisplayConfig, ErrorMetadata, ErrorPhase } from '@/utils/errorHandler/types';
 import { createAppError, isAppError, getErrorMessage } from '@/utils/errorHandler/createError';
 import { errorLogger } from '@/utils/errorHandler/errorLogger';
 
@@ -23,7 +23,8 @@ export const useErrorHandler = () => {
       metadata: {
         ...metadata,
         ...config?.metadata
-      }
+      },
+      phase: config?.phase || (isAppError(error) && error.phase)
     };
 
     // Log the error with context
@@ -45,8 +46,8 @@ export const useErrorHandler = () => {
       description: displayConfig.message,
       variant: metadata.severity === 'critical' ? 'destructive' : 'default',
       action: displayConfig.action && {
-        altText: displayConfig.action.label,
-        onClick: displayConfig.action.handler
+        onClick: displayConfig.action.handler,
+        children: displayConfig.action.label
       }
     });
 
@@ -56,9 +57,10 @@ export const useErrorHandler = () => {
   const createError = useCallback((
     message: string,
     metadata?: ErrorMetadata,
-    userMessage?: string
+    userMessage?: string,
+    phase?: ErrorPhase
   ) => {
-    return createAppError(message, metadata, userMessage);
+    return createAppError(message, metadata, userMessage, phase);
   }, []);
 
   return {

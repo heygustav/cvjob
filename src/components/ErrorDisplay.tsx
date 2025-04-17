@@ -2,7 +2,7 @@
 import React from 'react';
 import { AlertCircle, RefreshCw, HelpCircle, WifiOff, AlertTriangle, Clock, ShieldAlert } from 'lucide-react';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { ErrorMetadata, ErrorCategory } from '@/utils/errorHandler/types';
+import { ErrorMetadata, ErrorCategory, ErrorPhase } from '@/utils/errorHandler/types';
 
 interface ErrorDisplayProps {
   title?: string;
@@ -10,6 +10,7 @@ interface ErrorDisplayProps {
   onRetry?: () => void;
   metadata?: ErrorMetadata;
   icon?: React.ReactNode;
+  phase?: ErrorPhase;
 }
 
 const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
@@ -17,9 +18,10 @@ const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
   message,
   onRetry,
   metadata,
-  icon
+  icon,
+  phase
 }) => {
-  const category = metadata?.category || 'system';
+  const errorCategory = metadata?.category || 'system';
 
   // Get help text based on error category
   const getHelpText = (category: ErrorCategory) => {
@@ -45,7 +47,7 @@ const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
   const getActionText = () => {
     if (!metadata?.retryable) return undefined;
     
-    switch (category) {
+    switch (errorCategory) {
       case 'network': return "Prøv igen";
       case 'auth': return "Log ind igen";
       case 'timeout': return "Prøv igen";
@@ -57,7 +59,7 @@ const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
   const getIcon = () => {
     if (icon) return icon;
     
-    switch (category) {
+    switch (errorCategory) {
       case 'network':
         return <WifiOff className="h-5 w-5 text-red-600" />;
       case 'timeout':
@@ -73,7 +75,6 @@ const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
 
   const errorTitle = title || 'Der opstod en fejl';
   const actionText = getActionText();
-  const category = metadata?.category || 'system';
   
   return (
     <Alert 
@@ -81,7 +82,8 @@ const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
       className="mt-6" 
       role="alert"
       data-testid="error-display"
-      data-error-category={category}
+      data-error-category={errorCategory}
+      data-error-phase={phase}
     >
       <div className="flex flex-col space-y-4">
         <div className="flex items-start">
@@ -92,7 +94,7 @@ const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
             <div className="flex items-start pt-2">
               <HelpCircle className="h-4 w-4 text-muted-foreground mr-2 mt-0.5" />
               <p className="text-xs text-muted-foreground">
-                {getHelpText(category)}
+                {getHelpText(errorCategory)}
               </p>
             </div>
           </div>
