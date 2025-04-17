@@ -1,63 +1,35 @@
 
 import { useState } from "react";
 import { JobPosting, CoverLetter } from "@/lib/types";
-import { LoadingState, GenerationProgress } from "../../types";
+import { GenerationProgress } from "../../types";
 
-/**
- * Interface defining all state properties for generation
- */
-interface GenerationState {
-  step: 1 | 2;
-  loadingState: LoadingState;
-  selectedJob: JobPosting | null;
-  generatedLetter: CoverLetter | null;
-  generationError: string | null;
-  generationPhase: string | null;
-  generationProgress: GenerationProgress;
-}
-
-/**
- * Hook to manage generation state with a unified state object
- * for improved predictability and maintenance
- */
 export const useGenerationState = () => {
-  // Initialize a single state object containing all related state
-  const [state, setState] = useState<GenerationState>({
-    step: 1,
-    loadingState: "idle",
-    selectedJob: null,
-    generatedLetter: null,
-    generationError: null,
-    generationPhase: null,
-    generationProgress: {
-      phase: 'job-save',
-      progress: 0,
-      message: 'Forbereder...'
-    }
+  // State management
+  const [step, setStep] = useState<1 | 2>(1);
+  const [loadingState, setLoadingState] = useState<string>("idle");
+  const [selectedJob, setSelectedJob] = useState<JobPosting | null>(null);
+  const [generatedLetter, setGeneratedLetter] = useState<CoverLetter | null>(null);
+  const [generationError, setGenerationError] = useState<string | null>(null);
+  const [generationPhase, setGenerationPhase] = useState<string | null>(null);
+  const [generationProgress, setGenerationProgress] = useState<GenerationProgress>({
+    phase: 'job-save',
+    progress: 0,
+    message: 'Forbereder...'
   });
 
-  // Create setter functions for individual properties
-  const setStep = (step: 1 | 2) => setState(prev => ({ ...prev, step }));
-  const setLoadingState = (loadingState: LoadingState) => setState(prev => ({ ...prev, loadingState }));
-  const setSelectedJob = (selectedJob: JobPosting | null) => setState(prev => ({ ...prev, selectedJob }));
-  const setGeneratedLetter = (generatedLetter: CoverLetter | null) => setState(prev => ({ ...prev, generatedLetter }));
-  const setGenerationError = (generationError: string | null) => setState(prev => ({ ...prev, generationError }));
-  const setGenerationPhase = (generationPhase: string | null) => setState(prev => ({ ...prev, generationPhase }));
-  const setGenerationProgress = (generationProgress: GenerationProgress) => setState(prev => ({ ...prev, generationProgress }));
-  
-  // Derived state properties
-  const isLoading = state.loadingState !== "idle";
-  const isGenerating = state.loadingState === "generating";
+  // Derived state
+  const isLoading = loadingState !== "idle";
+  const isGenerating = loadingState === "generating";
 
   return {
-    // State properties
-    step: state.step,
-    loadingState: state.loadingState,
-    selectedJob: state.selectedJob,
-    generatedLetter: state.generatedLetter,
-    generationError: state.generationError,
-    generationPhase: state.generationPhase,
-    generationProgress: state.generationProgress,
+    // State
+    step,
+    loadingState,
+    selectedJob,
+    generatedLetter,
+    generationError,
+    generationPhase,
+    generationProgress,
     
     // Setters
     setStep,
