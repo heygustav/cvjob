@@ -45,10 +45,12 @@ export const useErrorHandler = () => {
       title: displayConfig.title,
       description: displayConfig.message,
       variant: metadata.severity === 'critical' ? 'destructive' : 'default',
-      action: displayConfig.action && {
-        label: displayConfig.action.label,
-        onClick: displayConfig.action.handler
-      }
+      action: displayConfig.action ? {
+        // Instead of using label directly, we create a proper action element
+        altText: displayConfig.action.label,
+        onClick: displayConfig.action.handler,
+        children: displayConfig.action.label
+      } : undefined
     });
 
     return displayConfig;

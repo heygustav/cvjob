@@ -24,7 +24,8 @@ export type ErrorPhase =
   | 'service-unavailable' 
   | 'auth-error'
   | 'cv-parsing'
-  | 'security-issue';
+  | 'security-issue'
+  | 'system';  // Added 'system' as a valid ErrorPhase value
 
 export interface ErrorMetadata {
   code?: string;
