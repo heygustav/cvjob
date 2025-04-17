@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from './AuthProvider';
@@ -28,4 +29,5 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   return <>{children}</>;
 };
 
-export default ProtectedRoute; 
+export default ProtectedRoute;
+
