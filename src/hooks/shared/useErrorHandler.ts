@@ -3,7 +3,7 @@ import { useToastAdapter } from './useToastAdapter';
 import { AppError, ErrorDisplayConfig, ErrorMetadata, ErrorPhase } from '@/utils/errorHandler/types';
 import { createAppError, isAppError, getErrorMessage } from '@/utils/errorHandler/createError';
 import { errorLogger } from '@/utils/errorHandler/errorLogger';
-import { ToastActionElement } from '@/components/ui/toast';
+import { createToastAction } from '@/utils/toast/createToastAction';
 
 export const useErrorHandler = () => {
   const { toast } = useToastAdapter();
@@ -40,13 +40,8 @@ export const useErrorHandler = () => {
       }
     );
 
-    // Create a toast action element if an action is provided
-    const toastAction: ToastActionElement | undefined = displayConfig.action 
-      ? React.createElement('button', {
-          onClick: displayConfig.action.handler,
-          children: displayConfig.action.label
-        })
-      : undefined;
+    // Create toast action using the utility function
+    const toastAction = createToastAction(displayConfig.action);
 
     // Show toast notification
     toast({
