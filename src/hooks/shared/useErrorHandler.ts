@@ -10,7 +10,7 @@ import {
 } from '@/utils/errorHandler/types';
 import { createAppError, isAppError, getErrorMessage } from '@/utils/errorHandler/createError';
 import { errorLogger } from '@/utils/errorHandler/errorLogger';
-import { createToastAction } from '@/utils/toast/createToastAction';
+import { ToastAction } from '@/components/ui/toast';
 
 export const useErrorHandler = () => {
   const { toast } = useToastAdapter();
@@ -47,7 +47,16 @@ export const useErrorHandler = () => {
       }
     );
 
-    const toastAction = createToastAction(displayConfig.action);
+    const toastAction = displayConfig.action 
+      ? (
+        <ToastAction 
+          altText={displayConfig.action.label} 
+          onClick={displayConfig.action.handler}
+        >
+          {displayConfig.action.label}
+        </ToastAction>
+      ) 
+      : undefined;
 
     toast({
       title: displayConfig.title,
