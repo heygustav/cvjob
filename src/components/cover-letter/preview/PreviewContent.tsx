@@ -10,6 +10,7 @@ export interface PreviewContentProps {
   jobTitle?: string;
   contactPerson?: string;
   formattedDate: string;
+  className?: string; // Add the className prop
 }
 
 const PreviewContent: React.FC<PreviewContentProps> = ({
@@ -20,7 +21,8 @@ const PreviewContent: React.FC<PreviewContentProps> = ({
   company = "Virksomhed",
   jobTitle = "Stilling",
   contactPerson = "",
-  formattedDate
+  formattedDate,
+  className = ""
 }) => {
   // Format the content to display properly with line breaks
   const getFormattedContent = () => {
@@ -29,7 +31,7 @@ const PreviewContent: React.FC<PreviewContentProps> = ({
 
   if (isEditing) {
     return (
-      <div className="relative mt-4">
+      <div className={`relative mt-4 ${className}`}>
         <textarea
           className="w-full min-h-[500px] p-4 border border-gray-300 rounded-md focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
           value={editedContent}
@@ -41,7 +43,7 @@ const PreviewContent: React.FC<PreviewContentProps> = ({
   }
 
   return (
-    <div className="letter-container space-y-6">
+    <div className={`letter-container space-y-6 ${className}`}>
       <div className="letter-header space-y-1 mb-8">
         <div className="text-right" aria-label="Dato">{formattedDate}</div>
       </div>

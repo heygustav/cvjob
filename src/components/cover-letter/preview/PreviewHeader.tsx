@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Copy, Edit, FileText, File, FileIcon } from "lucide-react";
 import { FileFormat } from "./hooks/useCoverLetterDocuments";
@@ -10,11 +9,11 @@ interface PreviewHeaderProps {
   onSaveChanges?: () => void;
   onEdit?: () => void;
   onCopy?: () => void;
-  // Add the missing props from useCoverLetterDocuments
   isDownloading?: boolean;
   fileFormat?: string;
   onDownload?: () => Promise<void>;
   onFormatChange?: (format: string) => void;
+  className?: string;
 }
 
 const PreviewHeader: React.FC<PreviewHeaderProps> = ({
@@ -24,11 +23,11 @@ const PreviewHeader: React.FC<PreviewHeaderProps> = ({
   onSaveChanges = () => {},
   onEdit = () => {},
   onCopy = () => {},
-  // Added props implementation
   isDownloading = false,
   fileFormat = "pdf",
   onDownload = async () => {},
-  onFormatChange = () => {}
+  onFormatChange = () => {},
+  className = ""
 }) => {
   const handleDownloadPdf = () => {
     onFormatChange("pdf");
@@ -46,7 +45,7 @@ const PreviewHeader: React.FC<PreviewHeaderProps> = ({
   };
 
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-5 border-b border-gray-200 bg-gray-50">
+    <div className={`flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-5 border-b border-gray-200 bg-gray-50 ${className}`}>
       <h2 className="text-base sm:text-lg font-medium text-gray-900 mb-2 sm:mb-0 truncate">
         {documentTitle}
       </h2>
