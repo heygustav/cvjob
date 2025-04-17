@@ -42,42 +42,35 @@ export const executeGenerationProcess = async (
   isMountedRef: React.MutableRefObject<boolean>
 ) => {
   const { currentAttempt, abortController } = generationMeta;
-  const { 
-    fetchUserStep, 
-    saveJobStep, 
-    generateLetterStep, 
-    saveLetterStep, 
-    fetchUpdatedJobStep 
-  } = generationSteps;
   
   console.log(`Starting generation execution (attempt #${currentAttempt})`);
   
   try {
     // Step 1: Fetch user profile
-    const userInfo = await fetchUserStep();
+    const userInfo = await generationSteps.fetchUserProfile?.();
     
     if (!isMountedRef.current) return { job: null, letter: null };
     
     // Step 2: Save job details
     const existingJobId = selectedJob?.id;
-    const jobId = await saveJobStep(jobData, user.id, existingJobId);
+    const jobId = await generationSteps.saveJob?.(jobData, user.id, existingJobId);
     
     if (!isMountedRef.current) return { job: null, letter: null };
     
     // Step 3: Generate letter content
-    const content = await generateLetterStep(jobData, userInfo);
+    const content = await generationSteps.generateLetter?.(jobData, userInfo);
     
     if (!isMountedRef.current || abortController.signal.aborted) {
       return { job: null, letter: null };
     }
     
     // Step 4: Save the generated letter
-    const letter = await saveLetterStep(user.id, jobId, content);
+    const letter = await generationSteps.saveLetter?.(user.id, jobId, content);
     
     if (!isMountedRef.current) return { job: null, letter: null };
     
     // Step 5: Fetch updated job details
-    const updatedJob = await fetchUpdatedJobStep(jobId, jobData, user.id);
+    const updatedJob = await generationSteps.fetchUpdatedJob?.(jobId, jobData, user.id);
     
     updatePhase('complete', 100, 'Din ansøgning er klar!');
     

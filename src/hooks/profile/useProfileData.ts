@@ -44,6 +44,7 @@ export const useProfileData = (): UseProfileDataReturn => {
   const handleSubmit = async (e: FormEvent<Element>): Promise<void> => {
     e.preventDefault();
     
+    // Changed this to return void instead of boolean
     if (!validateForm(formData)) {
       return;
     }

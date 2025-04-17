@@ -1,6 +1,14 @@
 
 import { useToast } from "@/hooks/use-toast";
-import { ToastMessage } from "@/hooks/coverLetter/types";
+import { ToastVariant } from "@/hooks/coverLetter/types";
+
+// Define ToastMessage type here since it's not exported from types.ts
+export interface ToastMessage {
+  title?: React.ReactNode;
+  description?: React.ReactNode;
+  variant?: ToastVariant;
+  action?: React.ReactElement;
+}
 
 /**
  * A hook that adapts the ToastMessage type to the Toast type by mapping variants
