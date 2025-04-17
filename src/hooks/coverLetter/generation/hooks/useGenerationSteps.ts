@@ -14,25 +14,28 @@ interface CoverLetter {
   updated_at: string;
 }
 
-export const useGenerationSteps = () => {
+export const useGenerationSteps = (
+  setStep: React.Dispatch<React.SetStateAction<1 | 2>>,
+  setGenerationError: React.Dispatch<React.SetStateAction<string | null>>,
+  setGeneratedLetter: React.Dispatch<React.SetStateAction<CoverLetter | null>>,
+  safeSetState: <T>(stateSetter: React.Dispatch<React.SetStateAction<T>>, value: T) => void
+) => {
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
-  const [generationError, setGenerationError] = useState<any>(null);
-  const [coverLetter, setCoverLetter] = useState<CoverLetter | null>(null);
   const errorRef = useRef<any>(null);
   const { toast } = useToast();
 
   const reset = useCallback(() => {
     setCurrentStep(0);
     setIsGenerating(false);
-    setGenerationError(null);
-    setCoverLetter(null);
-  }, []);
+    safeSetState(setGenerationError, null);
+    safeSetState(setGeneratedLetter, null);
+  }, [setGenerationError, setGeneratedLetter, safeSetState]);
 
   const handleError = useCallback((error: any) => {
     console.error("Generation error:", error);
     errorRef.current = error;
-    setGenerationError(error);
+    safeSetState(setGenerationError, error);
 
     if (error instanceof Error) {
       const result = handleStandardError(error);
@@ -56,19 +59,59 @@ export const useGenerationSteps = () => {
     showErrorToast(error);
     setIsGenerating(false);
     return true;
-  }, [toast]);
+  }, [toast, setGenerationError, safeSetState]);
+
+  // Add placeholder functions for the required steps - these would be implemented with actual logic
+  const fetchUserStep = useCallback(async () => {
+    // Implementation for fetching user info
+    return { name: '', email: '', experience: '', education: '' };
+  }, []);
+
+  const saveJobStep = useCallback(async (jobData: any, userId: string, existingJobId?: string) => {
+    // Implementation for saving job
+    return 'job-id-123';
+  }, []);
+
+  const generateLetterStep = useCallback(async (jobData: any, userInfo: any) => {
+    // Implementation for generating letter content
+    return 'Generated letter content';
+  }, []);
+
+  const saveLetterStep = useCallback(async (userId: string, jobId: string, content: string) => {
+    // Implementation for saving letter
+    return {
+      id: 'letter-id-123',
+      user_id: userId,
+      job_posting_id: jobId,
+      content,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+  }, []);
+
+  const fetchUpdatedJobStep = useCallback(async (jobId: string, jobData: any, userId: string) => {
+    // Implementation for fetching updated job
+    return {
+      id: jobId,
+      title: jobData.title || '',
+      company: jobData.company || '',
+      user_id: userId,
+    };
+  }, []);
 
   return {
     currentStep,
     setCurrentStep,
     isGenerating,
     setIsGenerating,
-    generationError,
-    setGenerationError,
-    coverLetter,
-    setCoverLetter,
     reset,
     handleError,
-    errorRef
+    errorRef,
+    // Expose step functions
+    fetchUserStep,
+    saveJobStep,
+    generateLetterStep,
+    saveLetterStep,
+    fetchUpdatedJobStep
   };
 };
