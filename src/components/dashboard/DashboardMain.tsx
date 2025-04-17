@@ -2,7 +2,7 @@
 import React, { useState, useCallback } from "react";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import DashboardActions from "@/components/dashboard/DashboardActions";
-import DashboardContent from "@/components/dashboard/DashboardContent";
+import TabContent from "@/components/dashboard/tab-content/TabContent";
 import TabNav from "@/components/dashboard/TabNav";
 import { SubscriptionStatus } from "@/services/subscription/types";
 import { Company } from "@/lib/types";
@@ -75,7 +75,7 @@ const DashboardMain: React.FC<DashboardMainProps> = ({
         </div>
 
         <div className="-mx-3 sm:mx-0 px-3 sm:px-0">
-          <DashboardContent 
+          <TabContent 
             activeTab={activeTab}
             onTabChange={handleTabChange}
             jobPostings={jobPostings}
