@@ -23,7 +23,7 @@ export const useProfileData = (): UseProfileDataReturn => {
 
   // Use individual hooks for specific functionality
   const { isProfileLoading, fetchProfile } = useProfileFetch(setFormData);
-  const { isLoading: isSubmitting, handleSubmit: submitProfile } = useProfileSubmit();
+  const { isSubmitting, submitProfile } = useProfileSubmit();
   const { validationErrors, validateForm, clearFieldError } = useProfileValidation();
 
   // Handle form field changes

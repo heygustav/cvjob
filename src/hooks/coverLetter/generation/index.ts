@@ -1,5 +1,4 @@
 
-import { useCallback, useRef, useState, useEffect } from "react";
 import { User, JobPosting, CoverLetter } from "@/lib/types";
 import { JobFormData } from "@/services/coverLetter/types";
 import { LoadingState, GenerationProgress } from "../types";
@@ -7,60 +6,33 @@ import { useToastMessages } from "../useToastMessages";
 import { useGenerationTracking } from "../generation-tracking";
 import { useGenerationErrorHandling } from "../generation-error-handling";
 import { useGenerationSteps } from "../useGenerationSteps";
-import { useJobFetchingLogic } from "./useJobFetchingLogic";
-import { useLetterFetchingLogic } from "./useLetterFetchingLogic";
-import { useLetterGenerationLogic } from "./useLetterGenerationLogic";
-import { useLetterEditingLogic } from "./useLetterEditingLogic";
+import { useJobFetchingLogic } from "../generation/useJobFetchingLogic";
+import { useLetterFetchingLogic } from "../generation/useLetterFetchingLogic";
+import { useLetterEditingLogic } from "../generation/useLetterEditingLogic";
+
+// Import refactored hooks
+import { useRefsAndCleanup } from "./hooks/useRefsAndCleanup";
+import { useSafeSetState } from "./hooks/useSafeSetState";
+import { useGenerationState } from "./hooks/useGenerationState";
+import { useJobFormSubmit } from "./hooks/useJobFormSubmit";
 
 export const useCoverLetterGeneration = (user: User | null) => {
-  // State management
-  const [step, setStep] = useState<1 | 2>(1);
-  const [loadingState, setLoadingState] = useState<LoadingState>("idle");
-  const [selectedJob, setSelectedJob] = useState<JobPosting | null>(null);
-  const [generatedLetter, setGeneratedLetter] = useState<CoverLetter | null>(null);
-  const [generationError, setGenerationError] = useState<string | null>(null);
-  const [generationPhase, setGenerationPhase] = useState<string | null>(null);
-  const [generationProgress, setGenerationProgress] = useState<GenerationProgress>({
-    phase: 'job-save',
-    progress: 0,
-    message: 'Forbereder...'
-  });
+  // Use our refactored hooks for better organization
+  const { generationAttemptRef, abortControllerRef, isMountedRef } = useRefsAndCleanup();
+  const safeSetState = useSafeSetState(isMountedRef);
   
-  // Refs
-  const generationAttemptRef = useRef(0);
-  const abortControllerRef = useRef<AbortController | null>(null);
-  const isMountedRef = useRef(true);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    isMountedRef.current = true;
+  const {
+    // State
+    step, loadingState, selectedJob, generatedLetter, generationError, 
+    generationPhase, generationProgress,
     
-    return () => {
-      isMountedRef.current = false;
-      
-      if ((window as any).__generationTimeoutId) {
-        clearTimeout((window as any).__generationTimeoutId);
-        (window as any).__generationTimeoutId = null;
-      }
-      
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-        abortControllerRef.current = null;
-      }
-    };
-  }, []);
-
-  // Safe state updater
-  const safeSetState = useCallback(<T,>(stateSetter: React.Dispatch<React.SetStateAction<T>>, value: T) => {
-    if (isMountedRef.current) {
-      stateSetter(value);
-    }
-  }, []);
-
-  // Derived state
-  const isLoading = loadingState !== "idle";
-  const isGenerating = loadingState === "generating";
-  const isInitializing = loadingState === "initializing";
+    // Setters
+    setStep, setLoadingState, setSelectedJob, setGeneratedLetter,
+    setGenerationError, setGenerationPhase, setGenerationProgress,
+    
+    // Derived state
+    isLoading, isGenerating
+  } = useGenerationState();
 
   // Compose hooks
   const toastMessages = useToastMessages();
@@ -109,25 +81,24 @@ export const useCoverLetterGeneration = (user: User | null) => {
     setGenerationProgress
   );
 
-  const { handleJobFormSubmit } = useLetterGenerationLogic(
+  // Use our refactored job form submit hook
+  const handleJobFormSubmit = useJobFormSubmit(
     user,
-    generationAttemptRef,
-    abortControllerRef,
+    loadingState,
+    selectedJob,
     isMountedRef,
+    abortControllerRef,
+    generationTracking,
     safeSetState,
+    setGenerationError,
+    setGenerationPhase,
+    setLoadingState,
     setSelectedJob,
     setGeneratedLetter,
     setStep,
-    setLoadingState,
-    setGenerationError,
-    setGenerationPhase,
-    setGenerationProgress,
-    selectedJob,
-    loadingState,
+    toastMessages,
     generationSteps,
-    generationTracking,
-    errorHandling,
-    toastMessages
+    errorHandling
   );
 
   const { 
