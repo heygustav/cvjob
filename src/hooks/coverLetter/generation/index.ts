@@ -1,3 +1,4 @@
+
 import { User, JobPosting, CoverLetter } from "@/lib/types";
 import { JobFormData } from "@/services/coverLetter/types";
 import { LoadingState, GenerationProgress } from "../types";
