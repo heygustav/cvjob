@@ -1,11 +1,11 @@
-
 import React, { useState, useEffect } from "react";
 import ProfileLoader from "@/components/profile/ProfileLoader";
 import ProfileContainer from "@/components/profile/ProfileContainer";
-import { useProfileData, ProfileState } from "@/hooks/useProfileData";
+import { useProfileData } from "@/hooks/useProfileData";
 import ErrorDisplay from "@/components/ErrorDisplay";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
+import StatusContainer from "@/components/profile/status/StatusContainer";
 
 // Define the type for the form data
 export type PersonalInfoFormState = ProfileState & {
@@ -126,37 +126,12 @@ const Profile: React.FC = () => {
 
   if (authStatus === "error" || dbStatus === "error") {
     return (
-      <div className="bg-gray-50 min-h-screen py-20">
-        <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-sm overflow-hidden">
-          <ErrorDisplay 
-            title="Forbindelsesfejl" 
-            message={error || "Der opstod en fejl ved forbindelsen til serveren."}
-            onRetry={() => window.location.reload()}
-            phase="user-fetch"
-          />
-          <div className="p-6">
-            <h3 className="text-sm font-medium text-gray-500">Teknisk information:</h3>
-            <dl className="mt-2 grid grid-cols-1 gap-x-4 gap-y-2 sm:grid-cols-2">
-              <div className="sm:col-span-1">
-                <dt className="text-sm font-medium text-gray-500">Autentificeringsstatus</dt>
-                <dd className="mt-1 text-sm text-gray-900">{authStatus}</dd>
-              </div>
-              <div className="sm:col-span-1">
-                <dt className="text-sm font-medium text-gray-500">Databasestatus</dt>
-                <dd className="mt-1 text-sm text-gray-900">{dbStatus}</dd>
-              </div>
-              <div className="sm:col-span-2">
-                <dt className="text-sm font-medium text-gray-500">Browser information</dt>
-                <dd className="mt-1 text-sm text-gray-900 break-words">
-                  <pre className="text-xs bg-gray-100 p-2 rounded overflow-auto max-h-32">
-                    {browserInfo}
-                  </pre>
-                </dd>
-              </div>
-            </dl>
-          </div>
-        </div>
-      </div>
+      <StatusContainer
+        error={error}
+        authStatus={authStatus}
+        dbStatus={dbStatus}
+        browserInfo={browserInfo}
+      />
     );
   }
 
