@@ -51,7 +51,7 @@ export const useCoverLetterGeneration = (user: User | null) => {
     setLoadingState
   });
 
-  // Correctly call useGenerationSteps with the required arguments
+  // Pass all the required arguments to useGenerationSteps
   const generationSteps = useGenerationSteps(
     setStep, 
     setGenerationError, 
