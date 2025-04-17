@@ -1,3 +1,4 @@
+
 import { useState, useRef, useCallback } from 'react';
 import { showErrorToast } from '@/utils/errorHandling';
 import { useToast } from '@/hooks/use-toast';
@@ -25,11 +26,11 @@ export const useGenerationSteps = (
   const { toast } = useToast();
 
   const reset = useCallback(() => {
-    setCurrentStep(0);
+    setCurrentStep(1); // Reset to 1 instead of 0
     setIsGenerating(false);
     safeSetState(setGenerationError, null);
     safeSetState(setGeneratedLetter, null);
-  }, [setGenerationError, setGeneratedLetter, safeSetState]);
+  }, [setGenerationError, setGeneratedLetter, safeSetState, setCurrentStep]);
 
   const handleError = useCallback((error: any) => {
     console.error("Generation error:", error);

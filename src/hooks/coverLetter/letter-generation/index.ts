@@ -1,3 +1,4 @@
+
 import { User, JobPosting, CoverLetter } from "@/lib/types";
 import { JobFormData } from "@/services/coverLetter/types";
 import { LoadingState, GenerationProgress } from "../types";
@@ -50,7 +51,7 @@ export const useCoverLetterGeneration = (user: User | null) => {
     setLoadingState
   });
 
-  // Pass the four required arguments separately to useGenerationSteps
+  // Pass the four required arguments to useGenerationSteps
   const generationSteps = useGenerationSteps(
     setStep,
     setGenerationError,
