@@ -1,8 +1,6 @@
-
 import { JobFormData } from "@/services/coverLetter/types";
 import { User } from "@/lib/types";
-import { useNetworkOperations } from '@/hooks/useNetworkOperations';
-import { withTimeout } from '@/utils/errorHandling';
+import { useNetworkHelpers } from '@/hooks/shared/useNetworkHelpers';
 
 // Export the setupGenerationTimeout function that's implemented in generationLogic.ts
 export { setupGenerationTimeout } from './generationLogic';
@@ -27,7 +25,7 @@ export const handleLetterGeneration = async (
   handleGenerationError: any,
   setupGenerationTimeout: any
 ) => {
-  const { executeWithRetry } = useNetworkOperations();
+  const { executeWithRetry, withTimeout } = useNetworkHelpers();
 
   try {
     // Validate inputs and setup
@@ -83,7 +81,7 @@ export const handleLetterGeneration = async (
         const updatedJob = await generationSteps.fetchUpdatedJobStep(jobId, jobData, user.id);
 
         return { job: updatedJob, letter };
-      }, 'generere ansøgningen');
+      }, { phaseLabel: 'generere ansøgningen' });
 
       if (timeoutId) {
         clearTimeout(timeoutId);

@@ -1,11 +1,10 @@
-
 import { useCallback } from "react";
 import { CoverLetter, User } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 import { fetchLetterById, fetchJobById } from "@/services/coverLetter/database";
 import { useNavigate } from "react-router-dom";
 import { useToastMessages } from "./useToastMessages";
-import { useNetworkUtils } from "./useNetworkUtils";
+import { useNetworkHelpers } from "@/hooks/shared/useNetworkHelpers";
 import { GenerationProgress } from "./types";
 
 export const useLetterFetching = (
@@ -23,7 +22,7 @@ export const useLetterFetching = (
   const { toast } = useToast();
   const toastMessages = useToastMessages();
   const navigate = useNavigate();
-  const { fetchWithTimeout } = useNetworkUtils();
+  const { withTimeout, showErrorToast } = useNetworkHelpers();
 
   const fetchLetter = useCallback(async (id: string) => {
     if (!isMountedRef.current) return null;
@@ -45,7 +44,7 @@ export const useLetterFetching = (
         letter = await fetchLetterById(id);
       } catch (directError) {
         console.warn("Direct letter fetch failed, retrying with timeout:", directError);
-        letter = await fetchWithTimeout(() => fetchLetterById(id));
+        letter = await withTimeout(fetchLetterById(id));
       }
       
       if (!isMountedRef.current) {
@@ -76,7 +75,7 @@ export const useLetterFetching = (
           job = await fetchJobById(letter.job_posting_id);
         } catch (directError) {
           console.warn("Direct job fetch for letter failed, retrying with timeout:", directError);
-          job = await fetchWithTimeout(() => fetchJobById(letter.job_posting_id));
+          job = await withTimeout(() => fetchJobById(letter.job_posting_id));
         }
         
         if (!isMountedRef.current) {
@@ -118,19 +117,7 @@ export const useLetterFetching = (
         return null;
       }
       
-      const isNetworkError = !navigator.onLine || 
-        (error instanceof Error && (
-          error.message.includes('forbindelse') ||
-          error.message.includes('timeout') ||
-          error.message.includes('network')
-        ));
-      
-      toast(isNetworkError ? toastMessages.networkError : {
-        title: "Fejl ved indlæsning",
-        description: error instanceof Error ? error.message : "Der opstod en fejl under indlæsning. Prøv igen senere.",
-        variant: "destructive",
-      });
-      
+      showErrorToast(error);
       navigate("/dashboard");
       return null;
     } finally {
@@ -146,8 +133,8 @@ export const useLetterFetching = (
     setGenerationError, 
     setGenerationPhase, 
     setGenerationProgress, 
-    fetchWithTimeout, 
-    toast, 
+    withTimeout, 
+    showErrorToast, 
     toastMessages, 
     navigate, 
     setGeneratedLetter, 
