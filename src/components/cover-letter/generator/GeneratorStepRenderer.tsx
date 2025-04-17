@@ -1,10 +1,10 @@
 
 import React from "react";
-import JobFormStep from "../JobFormStep";
-import LetterPreviewStep from "../LetterPreviewStep";
 import { CoverLetter, JobPosting, User } from "@/lib/types";
 import { JobFormData } from "@/services/coverLetter/types";
 import { GenerationProgress } from "@/hooks/coverLetter/types";
+import JobInfoStep from "../steps/job-info";
+import PreviewStep from "../steps/preview";
 
 interface GeneratorStepRendererProps {
   step: 1 | 2;
@@ -43,7 +43,7 @@ export const GeneratorStepRenderer: React.FC<GeneratorStepRendererProps> = ({
 }) => {
   if (step === 1) {
     return (
-      <JobFormStep
+      <JobInfoStep
         jobData={jobData}
         setJobData={setJobData}
         onSubmit={handleJobFormSubmit}
@@ -62,7 +62,7 @@ export const GeneratorStepRenderer: React.FC<GeneratorStepRendererProps> = ({
 
   if (generatedLetter) {
     return (
-      <LetterPreviewStep
+      <PreviewStep
         generatedLetter={generatedLetter}
         onEdit={handleEditContent}
       />
