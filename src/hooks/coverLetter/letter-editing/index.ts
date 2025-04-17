@@ -1,16 +1,11 @@
 
-import { useCallback } from "react";
-import { CoverLetter, User } from "@/lib/types";
-import { useToast } from "@/hooks/use-toast";
-import { editCoverLetter, saveOrUpdateJob } from "@/services/coverLetter/database";
-import { useToastMessages } from "../useToastMessages";
-import { useNetworkUtils } from "../useNetworkUtils";
+import { useState, useCallback } from "react";
+import { User, CoverLetter } from "@/lib/types";
+import { saveCoverLetter } from "@/services/coverLetter/database";
+import { saveOrUpdateJob } from "@/services/coverLetter/database";
+import { JobFormData } from "@/services/coverLetter/types";
 import { GenerationProgress } from "../types";
-import { 
-  handleEditLetterLogic, 
-  handleSaveLetterLogic, 
-  saveJobAsDraftLogic 
-} from "./letterEditingLogic";
+import { useToastAdapter } from "@/hooks/shared/useToastAdapter";
 
 export const useLetterEditing = (
   user: User | null,
@@ -21,91 +16,152 @@ export const useLetterEditing = (
   setGenerationProgress: React.Dispatch<React.SetStateAction<GenerationProgress>>,
   generatedLetter: CoverLetter | null
 ) => {
-  const { toast } = useToast();
-  const toastMessages = useToastMessages();
-  const { fetchWithTimeout } = useNetworkUtils();
+  const [isSaving, setIsSaving] = useState(false);
+  const { toast } = useToastAdapter();
 
-  const handleEditLetter = useCallback(async (updatedContent: string) => {
+  // Reset any error state and loading state
+  const resetError = useCallback(() => {
+    if (isMountedRef.current) {
+      console.log("Resetting error and loading state");
+      safeSetState(setLoadingState, "idle");
+      
+      // If in loading state, reset progress
+      safeSetState(setGenerationProgress, {
+        phase: 'job-save',
+        progress: 0,
+        message: 'Forbereder...'
+      });
+    }
+  }, [isMountedRef, safeSetState, setLoadingState, setGenerationProgress]);
+
+  // Function to edit the generated letter content
+  const handleEditLetter = useCallback(async (editedContent: string) => {
     if (!user || !generatedLetter) {
-      console.error("Cannot edit letter: Missing user or letter");
-      toast(toastMessages.letterNotFound);
+      console.error("Cannot edit letter: Missing user or letter data");
       return;
     }
 
     try {
-      safeSetState(setLoadingState, "saving");
-      safeSetState(setGenerationProgress, {
-        phase: 'letter-save',
-        progress: 50,
-        message: 'Gemmer din ansøgning...'
-      });
+      setIsSaving(true);
 
-      const updatedLetter = await handleEditLetterLogic(
+      // Save updated letter content
+      const updatedLetter = await saveCoverLetter(
         user.id,
-        generatedLetter.id,
-        updatedContent,
-        fetchWithTimeout,
-        editCoverLetter
+        generatedLetter.job_posting_id,
+        editedContent
       );
 
-      if (!isMountedRef.current) return;
-
-      if (updatedLetter) {
+      if (isMountedRef.current) {
         safeSetState(setGeneratedLetter, updatedLetter);
-        toast(toastMessages.letterUpdated);
+        toast({
+          title: "Ændringer gemt",
+          description: "Din redigerede ansøgning er blevet gemt.",
+          variant: "default",
+        });
       }
     } catch (error) {
-      console.error("Error editing letter:", error);
-      toast({
-        title: "Fejl ved redigering",
-        description: error instanceof Error ? error.message : "Der opstod en fejl ved redigering af ansøgningen.",
-        variant: "destructive",
-      });
+      console.error("Error saving edited letter:", error);
+      if (isMountedRef.current) {
+        toast({
+          title: "Fejl ved gemning",
+          description: "Der opstod en fejl under gemning af ansøgningen. Prøv igen.",
+          variant: "destructive",
+        });
+      }
     } finally {
       if (isMountedRef.current) {
-        safeSetState(setLoadingState, "idle");
+        setIsSaving(false);
       }
     }
-  }, [user, generatedLetter, isMountedRef, safeSetState, setGeneratedLetter, setLoadingState, setGenerationProgress, toast, toastMessages, fetchWithTimeout]);
+  }, [generatedLetter, isMountedRef, safeSetState, setGeneratedLetter, toast, user]);
 
-  const handleSaveLetter = useCallback(() => {
-    handleSaveLetterLogic(toast);
-  }, [toast]);
-
-  const saveJobAsDraft = useCallback(async (jobData) => {
-    if (!user) {
-      console.error("Cannot save job: No authenticated user");
-      toast(toastMessages.loginRequired);
+  // Save the current letter as is (no edits)
+  const handleSaveLetter = useCallback(async () => {
+    if (!user || !generatedLetter) {
+      console.error("Cannot save letter: Missing user or letter data");
       return;
     }
 
     try {
-      return await saveJobAsDraftLogic(
-        jobData,
+      setIsSaving(true);
+      const result = await saveCoverLetter(
         user.id,
-        toast,
-        saveOrUpdateJob
+        generatedLetter.job_posting_id,
+        generatedLetter.content
       );
+
+      if (isMountedRef.current) {
+        toast({
+          title: "Ansøgning gemt",
+          description: "Din ansøgning er blevet gemt.",
+          variant: "default",
+        });
+      }
+
+      return result;
     } catch (error) {
-      console.error("Error saving job as draft:", error);
-      toast({
-        title: "Fejl ved gem",
-        description: error instanceof Error ? error.message : "Der opstod en fejl ved at gemme jobbet som kladde.",
-        variant: "destructive",
-      });
+      console.error("Error saving letter:", error);
+      if (isMountedRef.current) {
+        toast({
+          title: "Fejl ved gemning",
+          description: "Der opstod en fejl under gemning af ansøgningen. Prøv igen.",
+          variant: "destructive",
+        });
+      }
+      return null;
+    } finally {
+      if (isMountedRef.current) {
+        setIsSaving(false);
+      }
+    }
+  }, [generatedLetter, isMountedRef, toast, user]);
+
+  // Save job as draft with minimal fields
+  const saveJobAsDraft = useCallback(async (jobData: JobFormData): Promise<string | null> => {
+    if (!user) {
+      console.error("Cannot save job draft: No user found");
       return null;
     }
-  }, [user, toast, toastMessages]);
 
-  const resetError = useCallback(() => {
-    // This function is expected to be used to reset any error state
-    console.log("Resetting error state");
-  }, []);
+    try {
+      console.log("Saving job draft:", {
+        title: jobData.title,
+        company: jobData.company
+      });
+      
+      const jobId = await saveOrUpdateJob(
+        jobData,
+        user.id,
+        jobData.id as string | undefined
+      );
+
+      if (isMountedRef.current) {
+        toast({
+          title: "Jobopslag gemt som kladde",
+          description: "Jobdetaljer er blevet gemt, og du kan vende tilbage til dem senere.",
+          variant: "default",
+        });
+      }
+
+      return jobId;
+    } catch (error) {
+      console.error("Error saving job draft:", error);
+      if (isMountedRef.current) {
+        toast({
+          title: "Fejl ved gemning",
+          description: "Der opstod en fejl under gemning af jobdetaljerne. Prøv igen.",
+          variant: "destructive",
+        });
+      }
+      return null;
+    }
+  }, [isMountedRef, toast, user]);
 
   return {
     handleEditLetter,
     handleSaveLetter,
     saveJobAsDraft,
-    resetError
+    resetError,
+    isSaving
   };
 };

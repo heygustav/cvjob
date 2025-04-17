@@ -1,11 +1,11 @@
 
 import { useCallback } from "react";
-import { useToast } from "@/hooks/use-toast";
 import { JobFormData } from "@/services/coverLetter/types";
 import { User } from "@/lib/types";
 import { handleLetterGeneration } from "../letterGenerationUtils";
 import { setupGenerationTimeout } from "../generationLogic";
 import { ToastMessagesType } from "../../types";
+import { useToastAdapter } from "@/hooks/shared/useToastAdapter";
 
 export const useJobFormSubmit = (
   user: User | null,
@@ -25,7 +25,7 @@ export const useJobFormSubmit = (
   generationSteps: any,
   errorHandling: any
 ) => {
-  const { toast } = useToast();
+  const { toast } = useToastAdapter();
   
   const { 
     abortGeneration, 

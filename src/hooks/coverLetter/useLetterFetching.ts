@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { useToastMessages } from "./useToastMessages";
 import { useNetworkHelpers } from "@/hooks/shared/useNetworkHelpers";
 import { GenerationProgress } from "./types";
+import { withTimeout } from "@/utils/asyncHelpers";
 
 export const useLetterFetching = (
   user: User | null,
@@ -23,7 +24,7 @@ export const useLetterFetching = (
   const { toast } = useToast();
   const toastMessages = useToastMessages();
   const navigate = useNavigate();
-  const { withTimeout, showErrorToast } = useNetworkHelpers();
+  const { showErrorToast } = useNetworkHelpers();
 
   const fetchLetter = useCallback(async (id: string) => {
     if (!isMountedRef.current) return null;
@@ -45,7 +46,7 @@ export const useLetterFetching = (
         letter = await fetchLetterById(id);
       } catch (directError) {
         console.warn("Direct letter fetch failed, retrying with timeout:", directError);
-        letter = await withTimeout(async () => await fetchLetterById(id));
+        letter = await withTimeout(() => fetchLetterById(id));
       }
       
       if (!isMountedRef.current) {
@@ -55,7 +56,11 @@ export const useLetterFetching = (
       
       if (!letter) {
         console.log("fetchLetter: Letter not found");
-        toast(toastMessages.letterNotFound);
+        toast({
+          title: toastMessages.letterNotFound.title,
+          description: toastMessages.letterNotFound.description,
+          variant: "destructive"
+        });
         navigate("/dashboard");
         return null;
       }
@@ -75,7 +80,7 @@ export const useLetterFetching = (
           job = await fetchJobById(letter.job_posting_id);
         } catch (directError) {
           console.warn("Direct job fetch for letter failed, retrying with timeout:", directError);
-          job = await withTimeout(async () => await fetchJobById(letter.job_posting_id));
+          job = await withTimeout(() => fetchJobById(letter.job_posting_id));
         }
         
         if (!isMountedRef.current) {
@@ -133,13 +138,13 @@ export const useLetterFetching = (
     setGenerationError, 
     setGenerationPhase, 
     setGenerationProgress, 
-    withTimeout, 
     showErrorToast, 
     toastMessages, 
     navigate, 
     setGeneratedLetter, 
     setSelectedJob, 
-    setStep
+    setStep,
+    toast
   ]);
 
   return { fetchLetter };

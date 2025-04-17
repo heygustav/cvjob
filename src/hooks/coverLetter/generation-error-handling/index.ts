@@ -1,11 +1,11 @@
 
 import { useCallback } from "react";
-import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { useToastMessages } from "../useToastMessages";
 import { handleTypedError, handleStandardError, handleTimeoutError } from "./errorHandlers";
 import { GenerationErrorHandlingProps } from "./types";
 import { isTimeoutError, showErrorToast } from "@/utils/errorHandling";
+import { useToastAdapter } from "@/hooks/shared/useToastAdapter";
 
 export const useGenerationErrorHandling = ({
   isMountedRef,
@@ -13,7 +13,7 @@ export const useGenerationErrorHandling = ({
   setGenerationError,
   setLoadingState
 }: GenerationErrorHandlingProps) => {
-  const { toast } = useToast();
+  const { toast } = useToastAdapter();
   const toastMessages = useToastMessages();
   const navigate = useNavigate();
 

@@ -9,6 +9,15 @@ import type {
 const TOAST_LIMIT = 1
 const TOAST_REMOVE_DELAY = 5000 // 5 seconds
 
+export type ToastVariant = "default" | "destructive" | "success";
+
+export type ToastMessage = {
+  title?: React.ReactNode
+  description?: React.ReactNode
+  variant?: ToastVariant
+  action?: ToastActionElement
+}
+
 type ToasterToast = ToastProps & {
   id: string
   title?: React.ReactNode
@@ -140,8 +149,12 @@ function dispatch(action: Action) {
 
 type Toast = Omit<ToasterToast, "id">
 
-function toast({ ...props }: Toast) {
+function toast(props: ToastMessage) {
+  const { variant = "default", ...restProps } = props;
   const id = genId()
+
+  // Map the ToastMessage variant to a valid Toast variant
+  const mappedVariant = variant === "success" ? "default" : variant;
 
   const update = (props: ToasterToast) =>
     dispatch({
@@ -153,7 +166,8 @@ function toast({ ...props }: Toast) {
   dispatch({
     type: "ADD_TOAST",
     toast: {
-      ...props,
+      ...restProps,
+      variant: mappedVariant,
       id,
       open: true,
       onOpenChange: (open) => {

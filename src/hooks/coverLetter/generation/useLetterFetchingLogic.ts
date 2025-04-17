@@ -1,10 +1,11 @@
 
 import { useCallback } from "react";
 import { User, JobPosting, CoverLetter } from "@/lib/types";
-import { useToast } from "@/hooks/use-toast";
 import { fetchLetterById, fetchJobById } from "@/services/coverLetter/database";
 import { useToastMessages } from "../useToastMessages";
 import { GenerationProgress } from "../types";
+import { useToastAdapter } from "@/hooks/shared/useToastAdapter";
+import { withTimeout } from "@/utils/asyncHelpers";
 
 export const useLetterFetchingLogic = (
   user: User | null,
@@ -18,7 +19,7 @@ export const useLetterFetchingLogic = (
   setGenerationPhase: React.Dispatch<React.SetStateAction<string | null>>,
   setGenerationProgress: React.Dispatch<React.SetStateAction<GenerationProgress>>,
 ) => {
-  const { toast } = useToast();
+  const { toast } = useToastAdapter();
   const toastMessages = useToastMessages();
 
   const fetchLetter = useCallback(async (id: string): Promise<CoverLetter | null> => {
@@ -38,7 +39,13 @@ export const useLetterFetchingLogic = (
         message: 'Henter ansøgning...'
       });
 
-      const letter = await fetchLetterById(id);
+      let letter;
+      try {
+        letter = await fetchLetterById(id);
+      } catch (directError) {
+        console.warn("Direct letter fetch failed, retrying with timeout:", directError);
+        letter = await withTimeout(() => fetchLetterById(id));
+      }
       
       if (!letter) {
         toast(toastMessages.letterNotFound);
@@ -51,9 +58,14 @@ export const useLetterFetchingLogic = (
       
       // Fetch the related job
       if (letter.job_posting_id) {
-        const job = await fetchJobById(letter.job_posting_id);
-        if (job) {
-          safeSetState(setSelectedJob, job);
+        try {
+          const job = await fetchJobById(letter.job_posting_id);
+          if (job) {
+            safeSetState(setSelectedJob, job);
+          }
+        } catch (jobError) {
+          console.error("Error fetching job for letter:", jobError);
+          // Non-critical error, continue
         }
       }
 

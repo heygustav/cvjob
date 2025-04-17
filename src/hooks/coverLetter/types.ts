@@ -1,5 +1,7 @@
+
 import { JobPosting, CoverLetter } from "@/lib/types";
 import { GenerationPhase } from "./generation-tracking/types";
+import { JobFormData } from "@/services/coverLetter/types";
 
 // Loading state type with specific values
 export type LoadingState = "idle" | "initializing" | "generating" | "saving";

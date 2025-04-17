@@ -1,12 +1,12 @@
 
 import { useCallback } from "react";
 import { JobPosting, CoverLetter, User } from "@/lib/types";
-import { useToast } from "@/hooks/use-toast";
 import { JobFormData } from "@/services/coverLetter/types";
 import { useNavigate } from "react-router-dom";
 import { ToastMessagesType } from "../types";
 import { handleLetterGeneration } from "../letter-generation/letterGenerationUtils";
 import { setupGenerationTimeout } from "../letter-generation/generationLogic";
+import { useToastAdapter } from "@/hooks/shared/useToastAdapter";
 
 export const useLetterGenerationLogic = (
   user: User | null,
@@ -28,7 +28,7 @@ export const useLetterGenerationLogic = (
   errorHandling: any,
   toastMessages: ToastMessagesType
 ) => {
-  const { toast } = useToast();
+  const { toast } = useToastAdapter();
   const navigate = useNavigate();
   
   // Destructure tracking and error handling methods

@@ -1,10 +1,10 @@
 
 import { useCallback } from "react";
 import { User, JobPosting, CoverLetter } from "@/lib/types";
-import { useToast } from "@/hooks/use-toast";
 import { fetchJobById } from "@/services/coverLetter/database";
 import { useToastMessages } from "../useToastMessages";
 import { GenerationProgress } from "../types";
+import { useToastAdapter } from "@/hooks/shared/useToastAdapter";
 
 export const useJobFetchingLogic = (
   user: User | null,
@@ -18,7 +18,7 @@ export const useJobFetchingLogic = (
   setGenerationPhase: React.Dispatch<React.SetStateAction<string | null>>,
   setGenerationProgress: React.Dispatch<React.SetStateAction<GenerationProgress>>,
 ) => {
-  const { toast } = useToast();
+  const { toast } = useToastAdapter();
   const toastMessages = useToastMessages();
 
   const fetchJob = useCallback(async (id: string): Promise<JobPosting | null> => {
