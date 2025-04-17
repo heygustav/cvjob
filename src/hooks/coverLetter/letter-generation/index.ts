@@ -1,4 +1,3 @@
-
 import { User, JobPosting, CoverLetter } from "@/lib/types";
 import { JobFormData } from "@/services/coverLetter/types";
 import { LoadingState, GenerationProgress } from "../types";
@@ -51,12 +50,21 @@ export const useCoverLetterGeneration = (user: User | null) => {
     setLoadingState
   });
 
-  // Pass all the required arguments to useGenerationSteps - fixed by adding all four required arguments
+  // Pass the four required arguments separately to useGenerationSteps
   const generationSteps = useGenerationSteps(
-    setStep,
-    setGenerationError,
-    setGeneratedLetter,
-    safeSetState
+    user,
+    isMountedRef,
+    (phase: string, progress: number, message: string) => {
+      if (isMountedRef.current) {
+        safeSetState(setGenerationPhase, phase);
+        safeSetState(setGenerationProgress, {
+          phase,
+          progress,
+          message
+        });
+      }
+    },
+    abortControllerRef
   );
 
   // Domain-specific hooks
