@@ -1,13 +1,9 @@
 
 import { JobFormData } from "@/services/coverLetter/types";
 import { User } from "@/lib/types";
-import { GenerationProgress } from "../types";
-import { ToastMessagesType } from "../types";
-import { executeGenerationProcess } from "./generationLogic";
+import { useNetworkOperations } from '@/hooks/useNetworkOperations';
+import { withTimeout } from '@/utils/errorHandling';
 
-/**
- * Core letter generation handler used by both generation hooks
- */
 export const handleLetterGeneration = async (
   jobData: JobFormData,
   user: User | null,
@@ -15,113 +11,92 @@ export const handleLetterGeneration = async (
   selectedJob: any,
   isMountedRef: React.MutableRefObject<boolean>,
   abortControllerRef: React.MutableRefObject<AbortController | null>,
-  abortGeneration: () => AbortController,
-  incrementAttempt: () => number,
+  abortGeneration: () => void,
+  incrementAttempt: () => void,
   updatePhase: (phase: string, progress: number, message: string) => void,
   safeSetState: <T>(stateSetter: React.Dispatch<React.SetStateAction<T>>, value: T) => void,
   setGenerationError: React.Dispatch<React.SetStateAction<string | null>>,
   setGenerationPhase: React.Dispatch<React.SetStateAction<string | null>>,
   setLoadingState: React.Dispatch<React.SetStateAction<string>>,
-  toastMessages: ToastMessagesType,
-  toast: (props: any) => void,
+  toastMessages: any,
+  toast: any,
   generationSteps: any,
-  handleGenerationError: (error: any, currentAttempt: number, timeoutId: number) => void,
-  setupGenerationTimeout: () => [Promise<never>, number]
+  handleGenerationError: any,
+  setupGenerationTimeout: any
 ) => {
-  // Validate user login
-  if (!user) {
-    console.error("Cannot generate letter: No authenticated user");
-    toast(toastMessages.loginRequired);
-    return;
-  }
-
-  // Guard against multiple submissions
-  if (loadingState !== "idle") {
-    console.warn("Generation already in progress, state:", loadingState);
-    toast(toastMessages.generationInProgress);
-    return;
-  }
-
-  // Skip validation for required fields - we'll use defaults instead
-  console.log("Form data for generation:", {
-    title: jobData.title || "(missing)",
-    company: jobData.company || "(missing)",
-    description: jobData.description?.length || 0
-  });
-
-  // Cancel any in-progress generation
-  const abortController = abortGeneration();
-
-  // Clear any previous errors
-  safeSetState(setGenerationError, null);
-  safeSetState(setGenerationPhase, null);
-
-  // Initial setup
-  updatePhase('job-save', 10, 'Forbereder generering...');
-
-  // Increment generation attempt counter
-  const currentAttempt = incrementAttempt();
-  console.log(`Starting generation attempt #${currentAttempt} with job data:`, {
-    title: jobData.title,
-    company: jobData.company,
-    descriptionLength: jobData.description?.length
-  });
-
-  // Set initial loading state
-  safeSetState(setLoadingState, "generating");
-
-  // Create a timeout promise for the entire generation process
-  const [timeoutPromise, timeoutId] = setupGenerationTimeout();
-
-  // Create the generation promise
-  const generationPromise = executeGenerationProcess(
-    jobData,
-    user,
-    selectedJob,
-    { currentAttempt, abortController },
-    generationSteps,
-    updatePhase,
-    isMountedRef
-  );
+  const { executeWithRetry } = useNetworkOperations();
 
   try {
-    // Race between generation and timeout
-    const result = await Promise.race([generationPromise, timeoutPromise]);
-    
-    // Clear timeout
-    if ((window as any).__generationTimeoutId) {
-      clearTimeout((window as any).__generationTimeoutId);
-      (window as any).__generationTimeoutId = null;
-    }
-    
-    if (!isMountedRef.current) {
-      console.warn("Component unmounted after generation completed");
+    // Validate inputs and setup
+    if (!user || loadingState === "generating") {
       return null;
     }
-    
-    // Success handling
-    console.log("Generation completed successfully:", result);
-    
-    // Return the result for the caller to use
-    return result;
-    
-  } catch (error) {
-    console.error("Generation failed with error:", error);
-    handleGenerationError(error, currentAttempt, timeoutId);
-    return null;
-  } finally {
-    console.log(`Attempt #${currentAttempt}: Generation process completed`);
-    if (isMountedRef.current) {
-      safeSetState(setLoadingState, "idle");
+
+    const [timeoutPromise, timeoutId] = setupGenerationTimeout();
+    abortControllerRef.current = new AbortController();
+
+    try {
+      // Execute generation with retry capability
+      const result = await executeWithRetry(async () => {
+        // Step 1: Fetch user profile with retry
+        const userInfo = await withTimeout(
+          generationSteps.fetchUserStep(),
+          30000,
+          'Bruger profil hentning tog for lang tid'
+        );
+
+        if (!isMountedRef.current) return null;
+
+        // Step 2: Save job details with retry
+        const jobId = await withTimeout(
+          generationSteps.saveJobStep(jobData, user.id, selectedJob?.id),
+          30000,
+          'Gem job detaljer tog for lang tid'
+        );
+
+        if (!isMountedRef.current) return null;
+
+        // Step 3: Generate letter content with retry
+        const content = await withTimeout(
+          generationSteps.generateLetterStep(jobData, userInfo),
+          60000,
+          'Generering af ansøgning tog for lang tid'
+        );
+
+        if (!isMountedRef.current || abortControllerRef.current?.signal.aborted) {
+          return null;
+        }
+
+        // Step 4: Save the generated letter with retry
+        const letter = await withTimeout(
+          generationSteps.saveLetterStep(user.id, jobId, content),
+          30000,
+          'Gem ansøgning tog for lang tid'
+        );
+
+        if (!isMountedRef.current) return null;
+
+        // Step 5: Fetch final job details
+        const updatedJob = await generationSteps.fetchUpdatedJobStep(jobId, jobData, user.id);
+
+        return { job: updatedJob, letter };
+      }, 'generere ansøgningen');
+
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+
+      toast(toastMessages.letterGenerated);
+      return result;
+
+    } catch (error) {
+      handleGenerationError(error, incrementAttempt(), timeoutId);
+      return null;
     }
-    abortControllerRef.current = null;
+
+  } catch (error) {
+    console.error('Fatal error in handleLetterGeneration:', error);
+    handleGenerationError(error, incrementAttempt(), null);
+    return null;
   }
 };
-
-// Re-export these functions from generationLogic.ts
-export { 
-  validateUserLogin, 
-  validateJobFormData, 
-  setupGenerationTimeout, 
-  executeGenerationProcess 
-} from "./generationLogic";
