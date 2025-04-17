@@ -25,7 +25,7 @@ export type ErrorPhase =
   | 'auth-error'
   | 'cv-parsing'
   | 'security-issue'
-  | 'system';  // Added 'system' as a valid ErrorPhase value
+  | 'system';
 
 export interface ErrorMetadata {
   code?: string;
@@ -45,13 +45,15 @@ export interface AppError extends Error {
   phase?: ErrorPhase;
 }
 
+export interface ErrorAction {
+  label: string;
+  handler: () => void;
+}
+
 export interface ErrorDisplayConfig {
   title?: ReactNode;
   message: string;
-  action?: {
-    label: string;
-    handler: () => void;
-  };
+  action?: ErrorAction;
   metadata?: ErrorMetadata;
   phase?: ErrorPhase;
 }

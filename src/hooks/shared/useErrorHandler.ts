@@ -1,7 +1,13 @@
 
 import { useCallback } from 'react';
 import { useToastAdapter } from './useToastAdapter';
-import { AppError, ErrorDisplayConfig, ErrorMetadata, ErrorPhase } from '@/utils/errorHandler/types';
+import { 
+  AppError, 
+  ErrorDisplayConfig, 
+  ErrorMetadata, 
+  ErrorPhase,
+  ErrorSeverity
+} from '@/utils/errorHandler/types';
 import { createAppError, isAppError, getErrorMessage } from '@/utils/errorHandler/createError';
 import { errorLogger } from '@/utils/errorHandler/errorLogger';
 import { createToastAction } from '@/utils/toast/createToastAction';
@@ -15,7 +21,7 @@ export const useErrorHandler = () => {
   ) => {
     const metadata: ErrorMetadata = isAppError(error) 
       ? error.metadata || {}
-      : { severity: 'error', category: 'system' };
+      : { severity: 'error' as ErrorSeverity, category: 'system' };
 
     const displayConfig: ErrorDisplayConfig = {
       title: config?.title || 'Der opstod en fejl',
@@ -25,7 +31,7 @@ export const useErrorHandler = () => {
         ...metadata,
         ...config?.metadata
       },
-      phase: config?.phase || (isAppError(error) && error.phase) || 'system' // Provide a fallback value
+      phase: config?.phase || (isAppError(error) && error.phase) || 'system'
     };
 
     // Log the error with context
@@ -41,10 +47,8 @@ export const useErrorHandler = () => {
       }
     );
 
-    // Create toast action using the utility function
     const toastAction = createToastAction(displayConfig.action);
 
-    // Show toast notification
     toast({
       title: displayConfig.title,
       description: displayConfig.message,
@@ -60,7 +64,7 @@ export const useErrorHandler = () => {
     metadata?: ErrorMetadata,
     userMessage?: string,
     phase?: ErrorPhase
-  ) => {
+  ): AppError => {
     return createAppError(message, metadata, userMessage, phase);
   }, []);
 

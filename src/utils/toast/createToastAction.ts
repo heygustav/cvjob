@@ -2,17 +2,13 @@
 import React from 'react';
 import { ToastAction } from '@/components/ui/toast';
 import type { ToastActionElement } from '@/components/ui/toast';
+import { ErrorAction } from '@/utils/errorHandler/types';
 
-interface ToastActionConfig {
-  label: string;
-  handler: () => void;
-}
-
-export const createToastAction = (config?: ToastActionConfig): ToastActionElement | undefined => {
+export const createToastAction = (config?: ErrorAction): ToastActionElement | undefined => {
   if (!config) return undefined;
   
   return (
-    <ToastAction onClick={config.handler}>
+    <ToastAction altText={config.label} onClick={config.handler}>
       {config.label}
     </ToastAction>
   );
