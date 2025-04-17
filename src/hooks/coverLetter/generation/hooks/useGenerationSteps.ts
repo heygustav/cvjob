@@ -30,7 +30,7 @@ export const useGenerationSteps = (
     setIsGenerating(false);
     safeSetState(setGenerationError, null);
     safeSetState(setGeneratedLetter, null);
-  }, [setGenerationError, setGeneratedLetter, safeSetState, setCurrentStep]);
+  }, [setCurrentStep, setGenerationError, setGeneratedLetter, safeSetState]);
 
   const handleError = useCallback((error: any) => {
     console.error("Generation error:", error);
