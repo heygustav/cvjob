@@ -61,8 +61,14 @@ export const useProfileFetch = (setFormData: React.Dispatch<React.SetStateAction
     }
   }, [user, toast, setFormData]);
 
+  // Add the missing refreshProfile method
+  const refreshProfile = useCallback(async () => {
+    await fetchProfile();
+  }, [fetchProfile]);
+
   return {
     isProfileLoading,
-    fetchProfile
+    fetchProfile,
+    refreshProfile
   };
 };

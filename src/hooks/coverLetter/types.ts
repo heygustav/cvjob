@@ -1,34 +1,7 @@
 
-import { User, JobPosting, CoverLetter } from "@/lib/types";
-import { JobFormData } from "@/services/coverLetter/types";
-import { ToastVariant } from "@/hooks/use-toast";
+import { ReactNode } from 'react';
 
-export interface ToastMessage {
-  title?: React.ReactNode;
-  description?: React.ReactNode;
-  variant?: ToastVariant;
-  action?: React.ReactElement;
-}
-
-export interface ToastMessagesType {
-  networkError: ToastMessage;
-  jobNotFound: ToastMessage;
-  letterNotFound: ToastMessage;
-  letterGenerated: ToastMessage;
-  letterUpdated: ToastMessage;
-  letterSaved: ToastMessage;
-  missingFields: ToastMessage;
-  generationInProgress: ToastMessage;
-  loginRequired: ToastMessage;
-  incompleteProfile: ToastMessage;
-  generationTimeout: ToastMessage;
-}
-
-export type GeneratorInitFunction = (params: {
-  jobId?: string;
-  letterId?: string;
-  userData: JobFormData;
-}) => Promise<void>;
+export type LoadingState = "idle" | "initializing" | "loading" | "generating" | "saving";
 
 export interface GenerationProgress {
   phase: string;
@@ -36,4 +9,23 @@ export interface GenerationProgress {
   message: string;
 }
 
-export type LoadingState = "idle" | "initializing" | "generating" | "saving" | "loading";
+export interface ToastMessagesType {
+  letterGenerated: {
+    title: string;
+    description: string;
+  };
+  letterEdited: {
+    title: string;
+    description: string;
+  };
+  letterError: {
+    title: string;
+    description: string;
+    variant: "destructive";
+  };
+  [key: string]: {
+    title: string;
+    description: string;
+    variant?: string;
+  };
+}

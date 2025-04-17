@@ -48,14 +48,14 @@ export const useProfileData = (): UseProfileDataReturn => {
       return false;
     }
     
-    await submitProfile(formData);
-    return true;
+    const result = await submitProfile(formData);
+    return result;
   };
 
   // Load profile data when component mounts
   useEffect(() => {
     fetchProfile();
-  }, []);
+  }, [fetchProfile]);
 
   return {
     formData,

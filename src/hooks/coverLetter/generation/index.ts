@@ -79,12 +79,8 @@ export const useCoverLetterGeneration = (user: User | null) => {
     setLoadingState
   });
 
-  const generationSteps = useGenerationSteps(
-    user,
-    isMountedRef,
-    generationTracking.updatePhase,
-    abortControllerRef
-  );
+  // Fix the useGenerationSteps call to use no arguments
+  const generationSteps = useGenerationSteps();
 
   // Domain-specific hooks
   const { fetchJob } = useJobFetchingLogic(

@@ -1,8 +1,18 @@
+
 import { useState, useRef, useCallback } from 'react';
 import { showErrorToast } from '@/utils/errorHandling';
 import { useToast } from '@/hooks/use-toast';
 import { handleTypedError, handleStandardError, handleTimeoutError } from './generation-error-handling';
-import { CoverLetter } from '../types';
+
+// Define CoverLetter type since it can't be imported from '../types'
+interface CoverLetter {
+  id: string;
+  user_id: string;
+  job_posting_id: string;
+  content: string;
+  created_at: string;
+  updated_at: string;
+}
 
 export const useGenerationSteps = () => {
   const [currentStep, setCurrentStep] = useState<number>(0);
@@ -31,7 +41,7 @@ export const useGenerationSteps = () => {
         description: result.description,
         variant: "destructive"
       });
-    } else if (error.message.includes('timeout')) {
+    } else if (error.message && error.message.includes('timeout')) {
       handleTimeoutError(error);
     }
     else {

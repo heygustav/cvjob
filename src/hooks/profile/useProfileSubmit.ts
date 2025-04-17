@@ -5,36 +5,22 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { ProfileState } from "./types";
 
-export const useProfileSubmit = (validateForm: (formData: ProfileState) => boolean) => {
-  const [isLoading, setIsLoading] = useState(false);
+export const useProfileSubmit = () => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
 
-  const handleSubmit = useCallback(async (
-    e: React.FormEvent,
-    formData: ProfileState
-  ) => {
-    e.preventDefault();
-    
-    if (!validateForm(formData)) {
-      toast({
-        title: "Validation fejl",
-        description: "Udfyld venligst alle påkrævede felter korrekt.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
+  const submitProfile = useCallback(async (formData: ProfileState) => {
     if (!user?.id) {
       toast({
         title: "Fejl ved opdatering",
         description: "Bruger-ID mangler. Prøv at logge ind igen.",
         variant: "destructive",
       });
-      return;
+      return false;
     }
     
-    setIsLoading(true);
+    setIsSubmitting(true);
 
     try {      
       const profileData = {
@@ -61,6 +47,7 @@ export const useProfileSubmit = (validateForm: (formData: ProfileState) => boole
         title: "Profil opdateret",
         description: "Dine profiloplysninger er blevet gemt.",
       });
+      return true;
     } catch (error) {
       console.error("Error updating profile:", error);
       
@@ -73,13 +60,14 @@ export const useProfileSubmit = (validateForm: (formData: ProfileState) => boole
         description: errorMessage,
         variant: "destructive",
       });
+      return false;
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
-  }, [user, toast, validateForm]);
+  }, [user, toast]);
 
   return {
-    isLoading,
-    handleSubmit
+    isSubmitting,
+    submitProfile
   };
 };
