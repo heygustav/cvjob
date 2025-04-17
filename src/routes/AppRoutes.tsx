@@ -1,8 +1,7 @@
 
-import React, { lazy, Suspense, memo } from 'react';
+import React, { lazy, memo } from 'react';
 import { Routes, Route } from 'react-router-dom';
-import { LoadingSpinner } from '@/components/LoadingSpinner';
-import MainLayout from './MainLayout';
+import RouteWrapper from '@/components/route-wrapper/RouteWrapper';
 
 // Import route groups
 import { authRoutes } from './auth/AuthRoutes';
@@ -20,19 +19,15 @@ const AppRoutes = memo(() => {
     <Routes>
       {/* Public routes */}
       <Route path="/" element={
-        <MainLayout>
-          <Suspense fallback={<LoadingSpinner message="Indlæser side..." />}>
-            <Index />
-          </Suspense>
-        </MainLayout>
+        <RouteWrapper>
+          <Index />
+        </RouteWrapper>
       } />
 
       <Route path="/gdpr-info" element={
-        <MainLayout>
-          <Suspense fallback={<LoadingSpinner message="Indlæser side..." />}>
-            <GDPRInfoPage />
-          </Suspense>
-        </MainLayout>
+        <RouteWrapper>
+          <GDPRInfoPage />
+        </RouteWrapper>
       } />
 
       {/* Feature-specific routes */}
@@ -43,11 +38,9 @@ const AppRoutes = memo(() => {
 
       {/* Catch-all route for 404 */}
       <Route path="*" element={
-        <MainLayout>
-          <Suspense fallback={<LoadingSpinner message="Indlæser side..." />}>
-            <NotFound />
-          </Suspense>
-        </MainLayout>
+        <RouteWrapper>
+          <NotFound />
+        </RouteWrapper>
       } />
     </Routes>
   );

@@ -1,9 +1,7 @@
 
 import React, { lazy } from 'react';
 import { Route } from 'react-router-dom';
-import ProtectedRoute from '@/components/ProtectedRoute';
-import { LoadingSpinner } from '@/components/LoadingSpinner';
-import MainLayout from '../MainLayout';
+import RouteWrapper from '@/components/route-wrapper/RouteWrapper';
 
 const Dashboard = lazy(() => import('@/pages/Dashboard'));
 const CompanyForm = lazy(() => import('@/pages/CompanyForm'));
@@ -13,39 +11,27 @@ export const dashboardRoutes = [
     key="dashboard"
     path="/dashboard" 
     element={
-      <ProtectedRoute>
-        <MainLayout>
-          <React.Suspense fallback={<LoadingSpinner message="Indlæser side..." />}>
-            <Dashboard />
-          </React.Suspense>
-        </MainLayout>
-      </ProtectedRoute>
+      <RouteWrapper protected>
+        <Dashboard />
+      </RouteWrapper>
     } 
   />,
   <Route 
     key="company-new"
     path="/company/new" 
     element={
-      <ProtectedRoute>
-        <MainLayout>
-          <React.Suspense fallback={<LoadingSpinner message="Indlæser side..." />}>
-            <CompanyForm />
-          </React.Suspense>
-        </MainLayout>
-      </ProtectedRoute>
+      <RouteWrapper protected>
+        <CompanyForm />
+      </RouteWrapper>
     } 
   />,
   <Route 
     key="company-edit"
     path="/company/:id/edit" 
     element={
-      <ProtectedRoute>
-        <MainLayout>
-          <React.Suspense fallback={<LoadingSpinner message="Indlæser side..." />}>
-            <CompanyForm />
-          </React.Suspense>
-        </MainLayout>
-      </ProtectedRoute>
+      <RouteWrapper protected>
+        <CompanyForm />
+      </RouteWrapper>
     } 
   />
 ];

@@ -1,9 +1,7 @@
 
 import React, { lazy } from 'react';
 import { Route } from 'react-router-dom';
-import ProtectedRoute from '@/components/ProtectedRoute';
-import { LoadingSpinner } from '@/components/LoadingSpinner';
-import MainLayout from '../MainLayout';
+import RouteWrapper from '@/components/route-wrapper/RouteWrapper';
 
 const Profile = lazy(() => import('@/pages/Profile'));
 const ProfileQuiz = lazy(() => import('@/pages/ProfileQuiz'));
@@ -16,63 +14,45 @@ export const profileRoutes = [
     key="profile"
     path="/profile" 
     element={
-      <ProtectedRoute>
-        <MainLayout>
-          <React.Suspense fallback={<LoadingSpinner message="Indlæser side..." />}>
-            <Profile />
-          </React.Suspense>
-        </MainLayout>
-      </ProtectedRoute>
+      <RouteWrapper protected>
+        <Profile />
+      </RouteWrapper>
     } 
   />,
   <Route 
     key="profile-quiz"
     path="/profile-quiz" 
     element={
-      <MainLayout>
-        <React.Suspense fallback={<LoadingSpinner message="Indlæser side..." />}>
-          <ProfileQuiz />
-        </React.Suspense>
-      </MainLayout>
+      <RouteWrapper>
+        <ProfileQuiz />
+      </RouteWrapper>
     } 
   />,
   <Route 
     key="resume"
     path="/resume" 
     element={
-      <ProtectedRoute>
-        <MainLayout>
-          <React.Suspense fallback={<LoadingSpinner message="Indlæser side..." />}>
-            <Resume />
-          </React.Suspense>
-        </MainLayout>
-      </ProtectedRoute>
+      <RouteWrapper protected>
+        <Resume />
+      </RouteWrapper>
     } 
   />,
   <Route 
     key="resume-dk"
     path="/resume/dk" 
     element={
-      <ProtectedRoute>
-        <MainLayout>
-          <React.Suspense fallback={<LoadingSpinner message="Indlæser side..." />}>
-            <DanishResume />
-          </React.Suspense>
-        </MainLayout>
-      </ProtectedRoute>
+      <RouteWrapper protected>
+        <DanishResume />
+      </RouteWrapper>
     } 
   />,
   <Route 
     key="brainstorm"
     path="/brainstorm" 
     element={
-      <ProtectedRoute>
-        <MainLayout>
-          <React.Suspense fallback={<LoadingSpinner message="Indlæser side..." />}>
-            <BrainstormPage />
-          </React.Suspense>
-        </MainLayout>
-      </ProtectedRoute>
+      <RouteWrapper protected>
+        <BrainstormPage />
+      </RouteWrapper>
     } 
   />
 ];
