@@ -1,9 +1,9 @@
-
 import { useCallback } from 'react';
 import { useToastAdapter } from './useToastAdapter';
 import { AppError, ErrorDisplayConfig, ErrorMetadata, ErrorPhase } from '@/utils/errorHandler/types';
 import { createAppError, isAppError, getErrorMessage } from '@/utils/errorHandler/createError';
 import { errorLogger } from '@/utils/errorHandler/errorLogger';
+import { ToastActionElement } from '@/components/ui/toast';
 
 export const useErrorHandler = () => {
   const { toast } = useToastAdapter();
@@ -40,17 +40,20 @@ export const useErrorHandler = () => {
       }
     );
 
+    // Create a toast action element if an action is provided
+    const toastAction: ToastActionElement | undefined = displayConfig.action 
+      ? React.createElement('button', {
+          onClick: displayConfig.action.handler,
+          children: displayConfig.action.label
+        })
+      : undefined;
+
     // Show toast notification
     toast({
       title: displayConfig.title,
       description: displayConfig.message,
       variant: metadata.severity === 'critical' ? 'destructive' : 'default',
-      action: displayConfig.action ? {
-        // Instead of using label directly, we create a proper action element
-        altText: displayConfig.action.label,
-        onClick: displayConfig.action.handler,
-        children: displayConfig.action.label
-      } : undefined
+      action: toastAction
     });
 
     return displayConfig;
