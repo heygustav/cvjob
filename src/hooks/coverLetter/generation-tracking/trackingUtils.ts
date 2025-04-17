@@ -1,23 +1,23 @@
 
-import { useCallback } from "react";
-import { GenerationTrackingProps } from "./types";
+import { useCallback } from 'react';
+import { GenerationTrackingProps } from './types';
 
-export const useIncrementAttempt = (generationAttemptRef: React.MutableRefObject<number>) => {
+export const useIncrementAttempt = (ref: React.MutableRefObject<number>) => {
   return useCallback(() => {
-    generationAttemptRef.current += 1;
-    return generationAttemptRef.current;
-  }, [generationAttemptRef]);
+    ref.current += 1;
+    return ref.current;
+  }, [ref]);
 };
 
-export const useAbortGeneration = (abortControllerRef: React.MutableRefObject<AbortController | null>) => {
+export const useAbortGeneration = (ref: React.MutableRefObject<AbortController | null>) => {
   return useCallback(() => {
-    if (abortControllerRef.current) {
-      console.log("Aborting previous generation attempt");
-      abortControllerRef.current.abort();
+    if (ref.current) {
+      ref.current.abort();
     }
-    abortControllerRef.current = new AbortController();
-    return abortControllerRef.current;
-  }, [abortControllerRef]);
+    const controller = new AbortController();
+    ref.current = controller;
+    return controller;
+  }, [ref]);
 };
 
 export const useUpdatePhase = ({
@@ -30,7 +30,7 @@ export const useUpdatePhase = ({
     if (isMountedRef.current) {
       safeSetState(setGenerationPhase, phase);
       safeSetState(setGenerationProgress, {
-        phase: phase as any,
+        phase,
         progress,
         message
       });

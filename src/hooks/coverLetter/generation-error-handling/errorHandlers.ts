@@ -1,82 +1,44 @@
 
-import { 
-  createAppError, 
-  getErrorPhase, 
-  getErrorTitle, 
-  getErrorMessage, 
-  showErrorToast 
-} from "@/utils/errorHandling";
-import { GenerationErrorHandlers, GenerationErrorResult, TypedError } from "./types";
-
-export const useErrorHandlers = ({
-  isMountedRef,
-  safeSetState,
-  setGenerationError,
-  setLoadingState
-}: GenerationErrorHandlers) => {
-  /**
-   * Handles errors during the generation process
-   */
-  const handleGenerationError = (error: unknown, currentAttempt: number, timeoutId?: number): void => {
-    console.error(`Attempt #${currentAttempt}: Error during generation:`, error);
-    
-    // Clear any timeouts
-    if (timeoutId) {
-      clearTimeout(timeoutId);
-    }
-    
-    if ((window as any).__generationTimeoutId) {
-      clearTimeout((window as any).__generationTimeoutId);
-      (window as any).__generationTimeoutId = null;
-    }
-    
-    // Only update state if component is still mounted
-    if (isMountedRef.current) {
-      // Extract the error message using our utility
-      const errorMessage = getErrorMessage(error, "Der opstod en uventet fejl. Prøv igen.");
-      
-      // Set the error state
-      safeSetState(setGenerationError, errorMessage);
-      safeSetState(setLoadingState, "idle");
-      
-      console.log("Generation error state set to:", errorMessage);
+export const handleTypedError = (error: any) => {
+  const errorMessages: Record<string, { title: string; description: string; recoverable: boolean }> = {
+    'user-fetch': {
+      title: 'Fejl ved bruger hentning',
+      description: 'Kunne ikke hente brugerdata. Prøv at logge ind igen.',
+      recoverable: false
+    },
+    'job-save': {
+      title: 'Fejl ved gem',
+      description: 'Kunne ikke gemme jobdata. Prøv igen.',
+      recoverable: true
+    },
+    'generation': {
+      title: 'Generering fejlede',
+      description: 'Kunne ikke generere ansøgning. Prøv igen.',
+      recoverable: true
     }
   };
 
+  const defaultError = {
+    title: 'Ukendt fejl',
+    description: 'Der opstod en ukendt fejl. Prøv igen.',
+    recoverable: true
+  };
+
+  return errorMessages[error.phase] || defaultError;
+};
+
+export const handleStandardError = (error: Error) => {
   return {
-    handleGenerationError
+    title: 'Fejl',
+    description: error.message,
+    recoverable: true
   };
 };
 
-// Handle typed errors with specific phases
-export const handleTypedError = (error: TypedError): GenerationErrorResult => {
-  const phase = error.phase || 'generation';
-  const recoverable = error.recoverable !== false; // Default to true if not specified
-  
-  const title = getErrorTitle(phase as any);
-  let description = error.message || "Der opstod en ukendt fejl. Prøv venligst igen.";
-  
-  return { title, description, recoverable };
-};
-
-// Handle standard errors (Error instances without specific phase information)
-export const handleStandardError = (error: Error): GenerationErrorResult => {
-  const phase = getErrorPhase(error);
-  const title = getErrorTitle(phase);
-  const description = getErrorMessage(error, "Der opstod en ukendt fejl. Prøv venligst igen.");
-  
-  // By default, most errors are recoverable except auth and service errors
-  const recoverable = phase !== 'auth-error' && 
-                      phase !== 'service-unavailable';
-  
-  return { title, description, recoverable };
-};
-
-// Handle timeout errors specifically
-export const handleTimeoutError = (): GenerationErrorResult => {
+export const handleTimeoutError = () => {
   return {
-    title: "Generering tog for lang tid",
-    description: "Generering af ansøgningen tog for lang tid. Prøv igen senere.",
+    title: 'Timeout',
+    description: 'Operationen tog for lang tid. Prøv igen.',
     recoverable: true
   };
 };
