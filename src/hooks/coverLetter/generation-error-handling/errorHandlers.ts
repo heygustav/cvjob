@@ -1,44 +1,66 @@
 
-export const handleTypedError = (error: any) => {
-  const errorMessages: Record<string, { title: string; description: string; recoverable: boolean }> = {
-    'user-fetch': {
-      title: 'Fejl ved bruger hentning',
-      description: 'Kunne ikke hente brugerdata. Prøv at logge ind igen.',
-      recoverable: false
-    },
-    'job-save': {
-      title: 'Fejl ved gem',
-      description: 'Kunne ikke gemme jobdata. Prøv igen.',
-      recoverable: true
-    },
-    'generation': {
-      title: 'Generering fejlede',
-      description: 'Kunne ikke generere ansøgning. Prøv igen.',
-      recoverable: true
-    }
-  };
+import { ErrorPhase } from '../types';
+import { toast } from '@/hooks/use-toast';
+import { showErrorToast } from '@/utils/errorHandling';
 
-  const defaultError = {
-    title: 'Ukendt fejl',
-    description: 'Der opstod en ukendt fejl. Prøv igen.',
+export const handleTypedError = (error: any) => {
+  const phase = error.phase as ErrorPhase;
+  const result = {
+    title: 'Fejl ved generering',
+    description: error.message || 'Der opstod en ukendt fejl. Prøv venligst igen.',
     recoverable: true
   };
 
-  return errorMessages[error.phase] || defaultError;
+  switch (phase) {
+    case 'user-fetch':
+      result.title = 'Fejl ved hentning af profil';
+      break;
+    case 'job-save':
+      result.title = 'Fejl ved gemning af job';
+      break;
+    case 'generation':
+      result.title = 'Fejl ved generering';
+      break;
+    case 'letter-save':
+      result.title = 'Fejl ved gemning';
+      break;
+  }
+
+  showErrorToast(error);
+  return result;
 };
 
 export const handleStandardError = (error: Error) => {
+  const result = {
+    title: 'Fejl ved generering',
+    description: error.message,
+    recoverable: true
+  };
+
+  if (error.message.includes('network') || error.message.includes('connection')) {
+    result.title = 'Netværksfejl';
+    result.description = 'Der er problemer med din internetforbindelse. Tjek din forbindelse og prøv igen.';
+  } else if (error.message.includes('500') || error.message.includes('server')) {
+    result.title = 'Serverfejl';
+    result.description = 'Der er problemer med vores server. Prøv igen senere.';
+    result.recoverable = false;
+  }
+
+  showErrorToast(error);
+  return result;
+};
+
+export const handleTimeoutError = (error: Error) => {
+  toast({
+    title: "Generering tog for lang tid",
+    description: "Forsøg venligst igen senere.",
+    variant: "destructive"
+  });
+
   return {
-    title: 'Fejl',
+    title: 'Timeout fejl',
     description: error.message,
     recoverable: true
   };
 };
 
-export const handleTimeoutError = () => {
-  return {
-    title: 'Timeout',
-    description: 'Operationen tog for lang tid. Prøv igen.',
-    recoverable: true
-  };
-};
