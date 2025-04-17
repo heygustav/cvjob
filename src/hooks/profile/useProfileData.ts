@@ -22,8 +22,8 @@ export const useProfileData = (): UseProfileDataReturn => {
   });
 
   // Use individual hooks for specific functionality
-  const { isProfileLoading, fetchProfile, refreshProfile } = useProfileFetch(setFormData);
-  const { isSubmitting, submitProfile } = useProfileSubmit();
+  const { isProfileLoading, fetchProfile } = useProfileFetch(setFormData);
+  const { isLoading: isSubmitting, handleSubmit: submitProfile } = useProfileSubmit();
   const { validationErrors, validateForm, clearFieldError } = useProfileValidation();
 
   // Handle form field changes
@@ -64,6 +64,6 @@ export const useProfileData = (): UseProfileDataReturn => {
     handleChange,
     handleSubmit,
     validationErrors,
-    refreshProfile,
+    refreshProfile: fetchProfile,
   };
 };

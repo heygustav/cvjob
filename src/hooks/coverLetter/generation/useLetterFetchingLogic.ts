@@ -3,7 +3,7 @@ import { useCallback } from "react";
 import { User, JobPosting, CoverLetter } from "@/lib/types";
 import { fetchLetterById, fetchJobById } from "@/services/coverLetter/database";
 import { useToastMessages } from "../useToastMessages";
-import { GenerationProgress } from "../types";
+import { GenerationProgress, ToastVariant } from "../types";
 import { useToastAdapter } from "@/hooks/shared/useToastAdapter";
 import { withTimeout } from "@/utils/asyncHelpers";
 
@@ -24,7 +24,11 @@ export const useLetterFetchingLogic = (
 
   const fetchLetter = useCallback(async (id: string): Promise<CoverLetter | null> => {
     if (!user) {
-      toast(toastMessages.loginRequired);
+      toast({
+        title: toastMessages.loginRequired.title,
+        description: toastMessages.loginRequired.description,
+        variant: toastMessages.loginRequired.variant as ToastVariant
+      });
       return null;
     }
 
@@ -48,7 +52,11 @@ export const useLetterFetchingLogic = (
       }
       
       if (!letter) {
-        toast(toastMessages.letterNotFound);
+        toast({
+          title: toastMessages.letterNotFound.title,
+          description: toastMessages.letterNotFound.description,
+          variant: toastMessages.letterNotFound.variant as ToastVariant
+        });
         safeSetState(setGenerationError, "Ansøgningen blev ikke fundet. Prøv venligst igen eller opret en ny ansøgning.");
         safeSetState(setLoadingState, "idle");
         return null;
@@ -76,7 +84,11 @@ export const useLetterFetchingLogic = (
       return letter;
     } catch (error) {
       console.error("Error fetching letter:", error);
-      toast(toastMessages.networkError);
+      toast({
+        title: toastMessages.networkError.title,
+        description: toastMessages.networkError.description,
+        variant: toastMessages.networkError.variant as ToastVariant
+      });
       safeSetState(setGenerationError, "Der opstod en fejl ved hentning af ansøgningen. Prøv venligst igen.");
       safeSetState(setLoadingState, "idle");
       return null;

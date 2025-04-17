@@ -4,7 +4,7 @@ import { User, CoverLetter } from "@/lib/types";
 import { editCoverLetter, saveOrUpdateJob } from "@/services/coverLetter/database";
 import { JobFormData } from "@/services/coverLetter/types";
 import { useToastMessages } from "../useToastMessages";
-import { GenerationProgress } from "../types";
+import { GenerationProgress, ToastVariant } from "../types";
 import { useToastAdapter } from "@/hooks/shared/useToastAdapter";
 
 export const useLetterEditingLogic = (
@@ -42,11 +42,19 @@ export const useLetterEditingLogic = (
       
       if (updatedLetter) {
         safeSetState(setGeneratedLetter, updatedLetter);
-        toast(toastMessages.letterUpdated);
+        toast({
+          title: toastMessages.letterUpdated.title,
+          description: toastMessages.letterUpdated.description,
+          variant: toastMessages.letterUpdated.variant as ToastVariant
+        });
       }
     } catch (error) {
       console.error("Error editing letter:", error);
-      toast(toastMessages.networkError);
+      toast({
+        title: toastMessages.networkError.title,
+        description: toastMessages.networkError.description,
+        variant: toastMessages.networkError.variant as ToastVariant
+      });
     } finally {
       if (isMountedRef.current) {
         safeSetState(setLoadingState, "idle");
@@ -62,14 +70,22 @@ export const useLetterEditingLogic = (
   // Handle save letter (actual save functionality would be implemented elsewhere)
   const handleSaveLetter = useCallback((): void => {
     if (!generatedLetter) return;
-    toast(toastMessages.letterSaved);
+    toast({
+      title: toastMessages.letterSaved.title,
+      description: toastMessages.letterSaved.description,
+      variant: toastMessages.letterSaved.variant as ToastVariant
+    });
   }, [generatedLetter, toast, toastMessages]);
 
   // Save job as draft
   const saveJobAsDraft = useCallback(async (jobData: JobFormData): Promise<string | null> => {
     if (!user) {
       console.error("Cannot save job: No authenticated user");
-      toast(toastMessages.loginRequired);
+      toast({
+        title: toastMessages.loginRequired.title,
+        description: toastMessages.loginRequired.description,
+        variant: toastMessages.loginRequired.variant as ToastVariant
+      });
       return null;
     }
 
@@ -90,12 +106,17 @@ export const useLetterEditingLogic = (
       toast({
         title: "Job gemt",
         description: "Jobbet er gemt som kladde.",
+        variant: "default" as ToastVariant
       });
       
       return jobId;
     } catch (error) {
       console.error("Error saving job:", error);
-      toast(toastMessages.networkError);
+      toast({
+        title: toastMessages.networkError.title,
+        description: toastMessages.networkError.description,
+        variant: toastMessages.networkError.variant as ToastVariant
+      });
       return null;
     } finally {
       if (isMountedRef.current) {

@@ -51,7 +51,7 @@ export const useCoverLetterGeneration = (user: User | null) => {
     setLoadingState
   });
 
-  // Fix: Call useGenerationSteps with no parameters
+  // Call useGenerationSteps without arguments
   const generationSteps = useGenerationSteps();
 
   // Domain-specific hooks

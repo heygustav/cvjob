@@ -9,6 +9,15 @@ export interface GenerationProgress {
   message: string;
 }
 
+export type ToastVariant = "default" | "destructive" | "success";
+
+export type ToastMessage = {
+  title?: ReactNode;
+  description?: ReactNode;
+  variant?: ToastVariant;
+  action?: React.ReactElement;
+}
+
 export interface ToastMessagesType {
   letterGenerated: {
     title: string;
@@ -26,15 +35,6 @@ export interface ToastMessagesType {
   [key: string]: {
     title: string;
     description: string;
-    variant?: string;
+    variant?: ToastVariant;
   };
-}
-
-export type ToastVariant = "default" | "destructive" | "success";
-
-export type ToastMessage = {
-  title?: ReactNode;
-  description?: ReactNode;
-  variant?: ToastVariant;
-  action?: React.ReactElement;
 }

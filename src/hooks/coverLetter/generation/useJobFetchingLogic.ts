@@ -3,7 +3,7 @@ import { useCallback } from "react";
 import { User, JobPosting, CoverLetter } from "@/lib/types";
 import { fetchJobById } from "@/services/coverLetter/database";
 import { useToastMessages } from "../useToastMessages";
-import { GenerationProgress } from "../types";
+import { GenerationProgress, ToastVariant } from "../types";
 import { useToastAdapter } from "@/hooks/shared/useToastAdapter";
 
 export const useJobFetchingLogic = (
@@ -23,7 +23,11 @@ export const useJobFetchingLogic = (
 
   const fetchJob = useCallback(async (id: string): Promise<JobPosting | null> => {
     if (!user) {
-      toast(toastMessages.loginRequired);
+      toast({
+        title: toastMessages.loginRequired.title,
+        description: toastMessages.loginRequired.description,
+        variant: toastMessages.loginRequired.variant as ToastVariant
+      });
       return null;
     }
 
@@ -41,7 +45,11 @@ export const useJobFetchingLogic = (
       const job = await fetchJobById(id);
       
       if (!job) {
-        toast(toastMessages.jobNotFound);
+        toast({
+          title: toastMessages.jobNotFound.title,
+          description: toastMessages.jobNotFound.description,
+          variant: toastMessages.jobNotFound.variant as ToastVariant
+        });
         safeSetState(setGenerationError, "Jobbet blev ikke fundet. Prøv venligst igen eller opret et nyt job.");
         safeSetState(setLoadingState, "idle");
         return null;
@@ -56,7 +64,11 @@ export const useJobFetchingLogic = (
       return job;
     } catch (error) {
       console.error("Error fetching job:", error);
-      toast(toastMessages.networkError);
+      toast({
+        title: toastMessages.networkError.title,
+        description: toastMessages.networkError.description,
+        variant: toastMessages.networkError.variant as ToastVariant
+      });
       safeSetState(setGenerationError, "Der opstod en fejl ved hentning af jobbet. Prøv venligst igen.");
       safeSetState(setLoadingState, "idle");
       return null;
