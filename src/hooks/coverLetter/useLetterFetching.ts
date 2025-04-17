@@ -1,3 +1,4 @@
+
 import { useCallback } from "react";
 import { CoverLetter, User } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
@@ -44,7 +45,7 @@ export const useLetterFetching = (
         letter = await fetchLetterById(id);
       } catch (directError) {
         console.warn("Direct letter fetch failed, retrying with timeout:", directError);
-        letter = await withTimeout(fetchLetterById(id));
+        letter = await withTimeout(async () => await fetchLetterById(id));
       }
       
       if (!isMountedRef.current) {
@@ -69,13 +70,12 @@ export const useLetterFetching = (
       });
 
       try {
-        // Try without timeout first for the job fetch
         let job;
         try {
           job = await fetchJobById(letter.job_posting_id);
         } catch (directError) {
           console.warn("Direct job fetch for letter failed, retrying with timeout:", directError);
-          job = await withTimeout(() => fetchJobById(letter.job_posting_id));
+          job = await withTimeout(async () => await fetchJobById(letter.job_posting_id));
         }
         
         if (!isMountedRef.current) {
