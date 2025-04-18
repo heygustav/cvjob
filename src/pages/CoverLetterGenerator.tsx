@@ -1,11 +1,13 @@
+
 import React, { useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useAuth } from "@/components/AuthProvider";
 import { User } from "@/lib/types";
-import { useGeneratorInitialization } from "@/hooks/coverLetter/useGeneratorInitialization";
-import { LoadingState } from "@/hooks/coverLetter/types";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { GeneratorContent } from "@/components/cover-letter/GeneratorContent";
 import { useCoverLetterGeneration } from "@/hooks/useCoverLetterGeneration";
+import { useGeneratorInitialization } from "@/hooks/coverLetter/useGeneratorInitialization";
+import { LoadingState } from "@/hooks/coverLetter/types";
 
 const CoverLetterGenerator: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -26,6 +28,7 @@ const CoverLetterGenerator: React.FC = () => {
     profileComplete: false
   } : null;
 
+  // Use our newly created composite hook for cover letter generation
   const {
     step,
     isGenerating,
@@ -92,8 +95,5 @@ const CoverLetterGenerator: React.FC = () => {
     />
   );
 };
-
-// Import at the top of the file
-import { LoadingSpinner } from "@/components/LoadingSpinner";
 
 export default CoverLetterGenerator;
