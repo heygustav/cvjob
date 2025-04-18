@@ -1,3 +1,4 @@
+
 import { useState, useRef, useCallback } from 'react';
 import { showErrorToast } from '@/utils/errorHandling';
 import { useToast } from '@/hooks/use-toast';
@@ -24,8 +25,8 @@ export const useGenerationSteps = (
 
   const handleError = useCallback((error: Error | GenerationError) => {
     console.error("Generation error:", error);
-    errorRef.current = error instanceof Error ? error : new Error(error.message || 'Unknown error');
-    safeSetState(setGenerationError, error.message || 'Unknown error');
+    errorRef.current = error instanceof Error ? error : new Error(String(error.message || 'Unknown error'));
+    safeSetState(setGenerationError, typeof error.message === 'string' ? error.message : 'Unknown error');
 
     if (error instanceof Error) {
       const result = handleStandardError(error);
@@ -35,7 +36,7 @@ export const useGenerationSteps = (
         variant: "destructive"
       });
     } else if ('message' in error && typeof error.message === 'string' && error.message.includes('timeout')) {
-      handleTimeoutError(error);
+      handleTimeoutError(error as Error);
     } else {
       const result = handleTypedError(error);
       toast({
