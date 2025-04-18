@@ -3,29 +3,29 @@ import { showErrorToast } from '@/utils/errorHandling';
 import { useToast } from '@/hooks/use-toast';
 import { handleTypedError, handleStandardError, handleTimeoutError } from '../../generation-error-handling';
 import { CoverLetter } from '@/lib/types';
+import { GenerationError } from '../../generation-error-handling/types';
 
 export const useGenerationSteps = (
-  setCurrentStep: React.Dispatch<React.SetStateAction<1 | 2>>,
+  setStep: React.Dispatch<React.SetStateAction<1 | 2>>,
   setGenerationError: React.Dispatch<React.SetStateAction<string | null>>,
   setGeneratedLetter: React.Dispatch<React.SetStateAction<CoverLetter | null>>,
   safeSetState: <T>(stateSetter: React.Dispatch<React.SetStateAction<T>>, value: T) => void
 ) => {
-  const [currentStep, setStep] = useState<1 | 2>(1);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
-  const errorRef = useRef<any>(null);
+  const errorRef = useRef<Error | null>(null);
   const { toast } = useToast();
 
   const reset = useCallback(() => {
-    setCurrentStep(1);
+    setStep(1);
     setIsGenerating(false);
     safeSetState(setGenerationError, null);
     safeSetState(setGeneratedLetter, null);
-  }, [setCurrentStep, setGenerationError, setGeneratedLetter, safeSetState]);
+  }, [setStep, setGenerationError, setGeneratedLetter, safeSetState]);
 
-  const handleError = useCallback((error: any) => {
+  const handleError = useCallback((error: Error | GenerationError) => {
     console.error("Generation error:", error);
-    errorRef.current = error;
-    safeSetState(setGenerationError, error instanceof Error ? error.message : String(error));
+    errorRef.current = error instanceof Error ? error : new Error(error.message || 'Unknown error');
+    safeSetState(setGenerationError, error.message || 'Unknown error');
 
     if (error instanceof Error) {
       const result = handleStandardError(error);
@@ -34,11 +34,9 @@ export const useGenerationSteps = (
         description: result.description,
         variant: "destructive"
       });
-    } else if (typeof error === 'object' && error !== null && 'message' in error && 
-              typeof error.message === 'string' && error.message.includes('timeout')) {
+    } else if ('message' in error && typeof error.message === 'string' && error.message.includes('timeout')) {
       handleTimeoutError(error);
-    }
-    else {
+    } else {
       const result = handleTypedError(error);
       toast({
         title: result.title,
@@ -91,8 +89,6 @@ export const useGenerationSteps = (
   }, []);
 
   return {
-    currentStep,
-    setStep,
     isGenerating,
     setIsGenerating,
     reset,
