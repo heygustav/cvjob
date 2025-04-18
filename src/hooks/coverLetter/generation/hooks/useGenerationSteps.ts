@@ -3,39 +3,30 @@ import { useState, useRef, useCallback } from 'react';
 import { showErrorToast } from '@/utils/errorHandling';
 import { useToast } from '@/hooks/use-toast';
 import { handleTypedError, handleStandardError, handleTimeoutError } from '../../generation-error-handling';
-
-// Define CoverLetter type since it can't be imported from '../types'
-interface CoverLetter {
-  id: string;
-  user_id: string;
-  job_posting_id: string;
-  content: string;
-  created_at: string;
-  updated_at: string;
-}
+import { CoverLetter } from '@/lib/types';
+import { GenerationError } from '../../generation-error-handling/types';
 
 export const useGenerationSteps = (
-  setCurrentStep: React.Dispatch<React.SetStateAction<1 | 2>>,
+  setStep: React.Dispatch<React.SetStateAction<1 | 2>>,
   setGenerationError: React.Dispatch<React.SetStateAction<string | null>>,
   setGeneratedLetter: React.Dispatch<React.SetStateAction<CoverLetter | null>>,
   safeSetState: <T>(stateSetter: React.Dispatch<React.SetStateAction<T>>, value: T) => void
 ) => {
-  const [currentStep, setStep] = useState<1 | 2>(1); // Initialize with 1 instead of 0
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
-  const errorRef = useRef<any>(null);
+  const errorRef = useRef<Error | null>(null);
   const { toast } = useToast();
 
   const reset = useCallback(() => {
-    setCurrentStep(1); // Reset to 1 instead of 0
+    setStep(1);
     setIsGenerating(false);
     safeSetState(setGenerationError, null);
     safeSetState(setGeneratedLetter, null);
-  }, [setCurrentStep, setGenerationError, setGeneratedLetter, safeSetState]);
+  }, [setStep, setGenerationError, setGeneratedLetter, safeSetState]);
 
-  const handleError = useCallback((error: any) => {
+  const handleError = useCallback((error: Error | GenerationError) => {
     console.error("Generation error:", error);
-    errorRef.current = error;
-    safeSetState(setGenerationError, error);
+    errorRef.current = error instanceof Error ? error : new Error(error.message);
+    safeSetState(setGenerationError, error.message);
 
     if (error instanceof Error) {
       const result = handleStandardError(error);
@@ -44,10 +35,9 @@ export const useGenerationSteps = (
         description: result.description,
         variant: "destructive"
       });
-    } else if (error.message && error.message.includes('timeout')) {
+    } else if ('message' in error && error.message.includes('timeout')) {
       handleTimeoutError(error);
-    }
-    else {
+    } else {
       const result = handleTypedError(error);
       toast({
         title: result.title,
@@ -61,57 +51,11 @@ export const useGenerationSteps = (
     return true;
   }, [toast, setGenerationError, safeSetState]);
 
-  // Add placeholder functions for the required steps - these would be implemented with actual logic
-  const fetchUserStep = useCallback(async () => {
-    // Implementation for fetching user info
-    return { name: '', email: '', experience: '', education: '' };
-  }, []);
-
-  const saveJobStep = useCallback(async (jobData: any, userId: string, existingJobId?: string) => {
-    // Implementation for saving job
-    return 'job-id-123';
-  }, []);
-
-  const generateLetterStep = useCallback(async (jobData: any, userInfo: any) => {
-    // Implementation for generating letter content
-    return 'Generated letter content';
-  }, []);
-
-  const saveLetterStep = useCallback(async (userId: string, jobId: string, content: string) => {
-    // Implementation for saving letter
-    return {
-      id: 'letter-id-123',
-      user_id: userId,
-      job_posting_id: jobId,
-      content,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    };
-  }, []);
-
-  const fetchUpdatedJobStep = useCallback(async (jobId: string, jobData: any, userId: string) => {
-    // Implementation for fetching updated job
-    return {
-      id: jobId,
-      title: jobData.title || '',
-      company: jobData.company || '',
-      user_id: userId,
-    };
-  }, []);
-
   return {
-    currentStep,
-    setStep,
     isGenerating,
     setIsGenerating,
     reset,
     handleError,
-    errorRef,
-    // Expose step functions
-    fetchUserStep,
-    saveJobStep,
-    generateLetterStep,
-    saveLetterStep,
-    fetchUpdatedJobStep
+    errorRef
   };
 };

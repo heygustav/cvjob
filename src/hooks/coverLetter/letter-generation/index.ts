@@ -2,8 +2,6 @@ import { User } from "@/lib/types";
 import { useToastMessages } from "../useToastMessages";
 import { useGenerationTracking } from "../generation-tracking";
 import { useGenerationErrorHandling } from "../generation-error-handling";
-
-// Import refactored hooks
 import { useGenerationSteps } from "./hooks/useGenerationSteps";
 import { useJobFetchingLogic } from "./hooks/useJobFetchingLogic";
 import { useLetterFetchingLogic } from "./hooks/useLetterFetchingLogic";
@@ -14,20 +12,16 @@ import { useGenerationState } from "./hooks/useGenerationState";
 import { useJobFormSubmit } from "./hooks/useJobFormSubmit";
 
 export const useCoverLetterGeneration = (user: User | null) => {
-  // Use our refactored hooks for better organization
   const { generationAttemptRef, abortControllerRef, isMountedRef } = useRefsAndCleanup();
   const safeSetState = useSafeSetState(isMountedRef);
   
   const {
-    // State
     step, loadingState, selectedJob, generatedLetter, generationError, 
     generationPhase, generationProgress,
     
-    // Setters
     setStep, setLoadingState, setSelectedJob, setGeneratedLetter,
     setGenerationError, setGenerationPhase, setGenerationProgress,
     
-    // Derived state
     isLoading, isGenerating
   } = useGenerationState();
 
@@ -48,7 +42,6 @@ export const useCoverLetterGeneration = (user: User | null) => {
     setLoadingState
   });
 
-  // Pass all four required arguments to useGenerationSteps
   const generationSteps = useGenerationSteps(
     setStep,
     setGenerationError,
@@ -56,7 +49,6 @@ export const useCoverLetterGeneration = (user: User | null) => {
     safeSetState
   );
 
-  // Domain-specific hooks
   const { fetchJob } = useJobFetchingLogic(
     user,
     isMountedRef,
