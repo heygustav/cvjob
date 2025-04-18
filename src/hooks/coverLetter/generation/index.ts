@@ -6,9 +6,9 @@ import { useGenerationErrorHandling } from "../generation-error-handling";
 
 // Import refactored hooks
 import { useGenerationSteps } from "./hooks/useGenerationSteps";
-import { useJobFetchingLogic } from "./useJobFetchingLogic";
-import { useLetterFetchingLogic } from "./useLetterFetchingLogic";
-import { useLetterEditingLogic } from "./useLetterEditingLogic";
+import { useJobFetchingLogic } from "./hooks/useJobFetchingLogic";
+import { useLetterFetchingLogic } from "./hooks/useLetterFetchingLogic";
+import { useLetterEditingLogic } from "./hooks/useLetterEditingLogic";
 import { useRefsAndCleanup } from "./hooks/useRefsAndCleanup";
 import { useSafeSetState } from "./hooks/useSafeSetState";
 import { useGenerationState } from "./hooks/useGenerationState";
