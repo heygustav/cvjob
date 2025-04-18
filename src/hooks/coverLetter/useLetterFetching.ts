@@ -40,26 +40,20 @@ export const useLetterFetching = (
         message: 'Henter ansøgning...'
       });
 
-      const letter = await retryWithBackoff(
-        async () => {
-          const result = await withTimeout(
-            () => fetchLetterById(id),
-            15000,
-            'Timeout ved hentning af ansøgning'
-          );
-          
-          if (!result) {
-            throw createAppError(
-              "Letter not found",
-              'letter-save',
-              true
-            );
-          }
-          return result as CoverLetter;
-        }
+      const letter = await withTimeout(
+        () => fetchLetterById(id),
+        15000
       );
-
+      
       if (!isMountedRef.current) return null;
+
+      if (!letter) {
+        throw createAppError(
+          "Letter not found",
+          'letter-save',
+          true
+        );
+      }
 
       safeSetState(setGeneratedLetter, letter);
       safeSetState(setGenerationProgress, {
@@ -69,23 +63,9 @@ export const useLetterFetching = (
       });
 
       try {
-        const job = await retryWithBackoff(
-          async () => {
-            const result = await withTimeout(
-              () => fetchJobById(letter.job_posting_id),
-              15000,
-              'Timeout ved hentning af job'
-            );
-            
-            if (!result) {
-              throw createAppError(
-                "Job not found",
-                'job-save',
-                true
-              );
-            }
-            return result;
-          }
+        const job = await withTimeout(
+          () => fetchJobById(letter.job_posting_id),
+          15000
         );
 
         if (!isMountedRef.current) return null;

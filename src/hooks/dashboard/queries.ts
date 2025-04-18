@@ -43,30 +43,6 @@ export const useCoverLettersQuery = (userId?: string) => {
   });
 };
 
-export const useCompaniesQuery = (userId?: string) => {
-  return useQuery({
-    queryKey: ['companies', userId],
-    queryFn: async () => {
-      if (!userId) throw new Error("User ID is required");
-      
-      // Use 'any' to bypass the type constraints temporarily
-      // This is needed because the Companies table might not be in the generated types
-      const { data, error } = await (supabase as any)
-        .from("companies")
-        .select("*")
-        .eq("user_id", userId)
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
-      
-      // Explicitly cast the result to Company[] to ensure correct typing
-      return data as Company[];
-    },
-    enabled: !!userId,
-    staleTime: 5 * 60 * 1000,
-  });
-};
-
 // Mutation hooks for data updates
 export const useDeleteJobMutation = () => {
   const queryClient = useQueryClient();
@@ -103,27 +79,6 @@ export const useDeleteLetterMutation = () => {
     onSuccess: (_, letterId) => {
       queryClient.setQueryData<CoverLetter[]>(['coverLetters'], (old) => 
         old?.filter(letter => letter.id !== letterId) ?? []
-      );
-    },
-  });
-};
-
-export const useDeleteCompanyMutation = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: async (companyId: string) => {
-      // Use 'any' to bypass the type constraints temporarily
-      const { error } = await (supabase as any)
-        .from("companies")
-        .delete()
-        .eq("id", companyId);
-      
-      if (error) throw error;
-    },
-    onSuccess: (_, companyId) => {
-      queryClient.setQueryData<Company[]>(['companies'], (old) => 
-        old?.filter(company => company.id !== companyId) ?? []
       );
     },
   });
