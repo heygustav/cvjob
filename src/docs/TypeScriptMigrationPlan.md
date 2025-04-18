@@ -30,35 +30,36 @@ const selectedJob: JobPosting | null = { ... };
 const handleJobFormSubmit = async (jobData: JobFormData) => { ... };
 ```
 
-### Specifikke files med `any` type problemer
+### Refaktorering af Cover Letter Generator modulet
 
-1. `src/hooks/coverLetter/useJobFormSubmit.ts`:
-   - `selectedJob: any` -> `selectedJob: JobPosting | null`
-   - `generationTracking: any` -> Definer en specifik interface
+Vores gennemgang har afsløret betydelig kode-duplikation mellem `generation` og `letter-generation` mapperne. Vi har konsolideret disse under en enkelt `letterGeneration` mappe med følgende struktur:
 
-2. `src/hooks/coverLetter/generation/hooks/useGenerationState.ts`:
-   - Erstat `any` med specifikke typer for state variabler
-
-3. `src/components/cover-letter/GeneratorContent.tsx`:
-   - Tilføj specifikke typer for props
+```
+src/hooks/coverLetter/letterGeneration/
+  ├── index.ts          // Eksporterer alle hooks og hjælpefunktioner
+  ├── types.ts          // Delte typer for letter generation
+  ├── utils.ts          // Funktioner til letter generation
+  └── useJobFormSubmit.ts // Hook til job form submission
+```
 
 ## Fase 2: Introducer stærke type interfaces
 
 ### Eksempel på nye eller forbedrede interfaces
 
 ```typescript
-// src/hooks/coverLetter/generation-tracking/types.ts
-export interface GenerationTrackingConfig {
+// src/hooks/coverLetter/letterGeneration/types.ts
+export interface GenerationTrackingTools {
   abortGeneration: () => AbortController;
   incrementAttempt: (ref: React.MutableRefObject<number>) => number;
   updatePhase: (phase: GenerationPhase, progress: number, message: string) => void;
 }
 
-// src/hooks/coverLetter/generation-error-handling/types.ts
-export interface ErrorHandlingConfig {
+export interface ErrorHandlingTools {
   handleGenerationError: (error: Error) => void;
   resetError: () => void;
 }
+
+export type GenerationPhase = 'job-save' | 'user-fetch' | 'generation' | 'letter-save';
 ```
 
 ## Fase 3: Implementer TypeGuards
@@ -67,24 +68,26 @@ For at sikre type-sikkerhed på runtime:
 
 ```typescript
 // src/utils/typeGuards.ts
-export function isJobPosting(value: any): value is JobPosting {
+export function isJobPosting(value: unknown): value is JobPosting {
   return (
-    value &&
+    value !== null &&
     typeof value === 'object' &&
     'id' in value &&
     'title' in value &&
     'company' in value &&
-    'description' in value
+    'description' in value &&
+    'user_id' in value
   );
 }
 
-export function isCoverLetter(value: any): value is CoverLetter {
+export function isCoverLetter(value: unknown): value is CoverLetter {
   return (
-    value &&
+    value !== null &&
     typeof value === 'object' &&
     'id' in value &&
     'content' in value &&
-    'job_posting_id' in value
+    'job_posting_id' in value &&
+    'user_id' in value
   );
 }
 ```
@@ -123,9 +126,7 @@ const jobState: AsyncState<JobPosting> = {
 
 2. Indfør gradvist disse ændringer på per-fil basis for at undgå at bryde eksisterende funktionalitet.
 
-## Implementeringseksempler
-
-### Eksempel 1: Forbedring af useJobFormSubmit.ts
+## Eksempel på refaktorering: useJobFormSubmit
 
 ```typescript
 // Før:
@@ -136,47 +137,13 @@ const handleJobFormSubmit = useCallback(async (jobData: any) => {
 // Efter:
 import { JobFormData } from "@/services/coverLetter/types";
 
-interface JobFormSubmitResult {
-  success: boolean;
-  letterId?: string;
-  error?: string;
-}
-
-const handleJobFormSubmit = useCallback(async (jobData: JobFormData): Promise<JobFormSubmitResult> => {
-  // ...
-  return { success: true, letterId: result.id };
+const handleJobFormSubmit = useCallback(async (jobData: JobFormData): Promise<void> => {
+  // Type-sikker implementering
 }, [/* dependencies */]);
 ```
 
-### Eksempel 2: Typedefining af useGeneratorState
-
-```typescript
-// Før:
-const [generationProgress, setGenerationProgress] = useState<any>({
-  phase: 'job-save',
-  progress: 0,
-  message: 'Forbereder...'
-});
-
-// Efter:
-import { GenerationProgress, GenerationPhase } from "@/hooks/coverLetter/types";
-
-const [generationProgress, setGenerationProgress] = useState<GenerationProgress>({
-  phase: 'job-save' as GenerationPhase,
-  progress: 0,
-  message: 'Forbereder...'
-});
-```
-
-## Tidslinje
-
-1. **Uge 1-2**: Analyse og dokumentation af eksisterende kodebasis
-2. **Uge 3-4**: Implementer type forbedringer i Cover Letter modulet
-3. **Uge 5-6**: Implementer type forbedringer i API og Service lag
-4. **Uge 7-8**: Implementer type forbedringer i State management
-5. **Uge 9-10**: Implementer forbedringer i UI komponenter og utilities
-6. **Uge 11-12**: Omfattende testning og fejlrettelser
-
 ## Konklusion
 
-Ved at følge denne plan kan vi systematisk forbedre type-sikkerheden i vores projekt, hvilket vil resultere i færre runtime fejl, bedre udviklerværktøjer og mere vedligeholdbar kode på lang sigt.
+Ved at følge denne plan og den nye konsoliderede struktur for Cover Letter Generator modulet, kan vi systematisk forbedre type-sikkerheden i vores projekt, hvilket vil resultere i færre runtime fejl, bedre udviklerværktøjer og mere vedligeholdbar kode på lang sigt.
+
+Vores nye struktur eliminerer duplikeret kode, gør kodebasen mere vedligeholdbar og skaber et enkelt "source of truth" for hver funktionalitet.

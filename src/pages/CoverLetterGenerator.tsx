@@ -2,12 +2,11 @@
 import React, { useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useAuth } from "@/components/AuthProvider";
-import { useCoverLetterGeneration } from "@/hooks/useCoverLetterGeneration";
 import { User } from "@/lib/types";
-import { JobFormData } from "@/services/coverLetter/types";
 import { useGeneratorInitialization } from "@/hooks/coverLetter/useGeneratorInitialization";
 import { LoadingState } from "@/hooks/coverLetter/types";
 import { GeneratorContent } from "@/components/cover-letter/GeneratorContent";
+import { useCoverLetterGeneration } from "@/hooks/useCoverLetterGeneration";
 
 const CoverLetterGenerator: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -65,7 +64,7 @@ const CoverLetterGenerator: React.FC = () => {
   });
 
   // Wrapper for saveJobAsDraft to make it return Promise<void> instead of Promise<string | null>
-  const handleSaveJobAsDraft = async (jobData: JobFormData) => {
+  const handleSaveJobAsDraft = async (jobData: any) => {
     await saveJobAsDraft(jobData);
     return;
   };
