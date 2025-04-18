@@ -3,6 +3,7 @@ import React, { memo } from 'react';
 import { AuthProvider } from './components/AuthProvider';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import AppRoutes from './routes/AppRoutes';
+import { CoverLetterProvider } from './state/cover-letter/CoverLetterProvider';
 import './App.css';
 
 const queryClient = new QueryClient({
@@ -19,9 +20,11 @@ const App = memo(() => {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <div className="flex flex-col min-h-screen bg-background text-foreground antialiased">
-          <AppRoutes />
-        </div>
+        <CoverLetterProvider>
+          <div className="flex flex-col min-h-screen bg-background text-foreground antialiased">
+            <AppRoutes />
+          </div>
+        </CoverLetterProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

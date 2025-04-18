@@ -27,7 +27,7 @@ export const useLetterFetching = (
   const navigate = useNavigate();
   const { retryWithBackoff } = useNetworkHelpers();
 
-  const fetchLetter = useCallback(async (id: string) => {
+  const fetchLetter = useCallback(async (id: string): Promise<CoverLetter | null> => {
     if (!isMountedRef.current) return null;
     
     try {
@@ -55,7 +55,7 @@ export const useLetterFetching = (
               true
             );
           }
-          return result;
+          return result as CoverLetter;
         }
       );
 

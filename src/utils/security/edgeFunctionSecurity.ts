@@ -1,108 +1,84 @@
+/**
+ * Security utilities for edge functions
+ */
 
 import DOMPurify from 'dompurify';
 
 /**
- * Sanitize edge function input to prevent injections
- * @param payload The payload to be sent to an edge function
- * @returns Sanitized payload safe for processing
+ * Safely sanitizes input for edge functions to prevent XSS and injection attacks
+ * By using a generic type, we maintain TypeScript support for the object structure
+ * 
+ * @param input Object to sanitize
+ * @returns Sanitized object with the same structure
  */
-export const sanitizeEdgeFunctionPayload = <T extends Record<string, any>>(payload: T): T => {
-  if (!payload || typeof payload !== 'object') {
-    return {} as T;
+export function sanitizeInput<T extends Record<string, any>>(input: T): T {
+  if (!input || typeof input !== 'object') {
+    return input;
   }
-  
-  const sanitizedPayload = { ...payload };
-  
-  // Recursively sanitize string values
-  Object.entries(sanitizedPayload).forEach(([key, value]) => {
-    if (typeof value === 'string') {
-      // Sanitize all string inputs to prevent XSS/command injection
-      sanitizedPayload[key] = DOMPurify.sanitize(value, {
-        ALLOWED_TAGS: [], // Don't allow any HTML tags
-        ALLOWED_ATTR: []  // Don't allow any HTML attributes
-      });
-    } else if (value && typeof value === 'object' && !Array.isArray(value)) {
-      // Recursively sanitize nested objects
-      sanitizedPayload[key] = sanitizeEdgeFunctionPayload(value);
-    } else if (Array.isArray(value)) {
-      // Sanitize arrays of strings or objects
-      sanitizedPayload[key] = value.map(item => {
-        if (typeof item === 'string') {
-          return DOMPurify.sanitize(item, {
-            ALLOWED_TAGS: [],
-            ALLOWED_ATTR: []
-          });
-        } else if (item && typeof item === 'object') {
-          return sanitizeEdgeFunctionPayload(item);
-        }
-        return item;
-      });
-    }
-  });
-  
-  return sanitizedPayload as T;
-};
 
-/**
- * Validates edge function response for security issues
- * @param response The response from an edge function
- * @returns Validated response or throws error if insecure
- */
-export const validateEdgeFunctionResponse = <T>(response: T): T => {
-  // If this is a string, sanitize it
-  if (typeof response === 'string') {
-    return DOMPurify.sanitize(response, {
-      ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'ul', 'ol', 'li'],
-      ALLOWED_ATTR: []
-    }) as unknown as T;
-  }
+  const sanitized = {} as T;
   
-  // If this is an object, recursively sanitize its string properties
-  if (response && typeof response === 'object') {
-    const sanitizedResponse = { ...response as object };
-    
-    Object.entries(sanitizedResponse).forEach(([key, value]) => {
+  for (const key in input) {
+    if (Object.prototype.hasOwnProperty.call(input, key)) {
+      const value = input[key];
+      
       if (typeof value === 'string') {
-        sanitizedResponse[key] = DOMPurify.sanitize(value, {
-          ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'ul', 'ol', 'li'],
-          ALLOWED_ATTR: []
-        });
-      } else if (value && typeof value === 'object') {
-        sanitizedResponse[key] = validateEdgeFunctionResponse(value);
+        // For strings, apply DOMPurify sanitization
+        (sanitized as any)[key] = DOMPurify.sanitize(value);
+      } else if (typeof value === 'object' && value !== null) {
+        // Recursively sanitize nested objects
+        (sanitized as any)[key] = sanitizeInput(value);
+      } else {
+        // For other types (numbers, booleans, etc.), keep as is
+        (sanitized as any)[key] = value;
       }
-    });
-    
-    return sanitizedResponse as T;
+    }
   }
   
-  // For other types, return as is
-  return response;
-};
+  return sanitized;
+}
 
 /**
- * Gets limited information about errors to avoid leaking
- * sensitive information in error messages
- * @param error The error object
- * @returns Safe error message
+ * Creates a safe error response for edge functions
+ * Prevents leaking sensitive information in error messages
  */
-export const getSafeErrorMessage = (error: unknown): string => {
-  if (!error) return 'Unknown error occurred';
+export function createSafeErrorResponse(error: unknown, statusCode = 400): Response {
+  console.error('Edge function error:', error);
   
-  if (error instanceof Error) {
-    // Filter out any sensitive information that might be in the error
-    const safeMessage = error.message
-      .replace(/key/gi, 'credential')
-      .replace(/password/gi, '********')
-      .replace(/token/gi, '********')
-      .replace(/secret/gi, '********')
-      .replace(/api/gi, 'service');
-    
-    return DOMPurify.sanitize(safeMessage);
+  // Create a sanitized error message
+  const safeMessage = error instanceof Error 
+    ? DOMPurify.sanitize(error.message) 
+    : 'An unexpected error occurred';
+  
+  return new Response(
+    JSON.stringify({
+      error: safeMessage,
+      status: 'error'
+    }),
+    {
+      status: statusCode,
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }
+  );
+}
+
+/**
+ * Validates response data from external services
+ * Ensures data conforms to expected structure before processing
+ */
+export function validateResponseData<T>(
+  data: unknown, 
+  validator: (data: unknown) => boolean
+): T | null {
+  try {
+    if (!data || !validator(data)) {
+      return null;
+    }
+    return data as T;
+  } catch (error) {
+    console.error('Response validation error:', error);
+    return null;
   }
-  
-  if (typeof error === 'string') {
-    return DOMPurify.sanitize(error);
-  }
-  
-  return 'An error occurred';
-};
+}
