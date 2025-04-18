@@ -81,3 +81,4 @@ const TabNav: React.FC<TabNavProps> = memo(({ activeTab, onTabChange }) => {
 TabNav.displayName = 'TabNav';
 
 export default TabNav;
+

@@ -53,7 +53,6 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = memo(({
           Administrer dine jobopslag, virksomheder og ansøgninger
         </p>
         
-        {/* Add a quick summary of available items */}
         <div className="mt-4 flex flex-wrap gap-4" aria-live="polite">
           <div className="bg-blue-50 text-blue-800 px-4 py-2 rounded-md border border-blue-200">
             <span className="font-semibold">{letterCount}</span> ansøgning{letterCount !== 1 ? 'er' : ''}
@@ -97,3 +96,4 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = memo(({
 DashboardHeader.displayName = 'DashboardHeader';
 
 export default DashboardHeader;
+
