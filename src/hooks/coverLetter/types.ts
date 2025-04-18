@@ -90,3 +90,20 @@ export interface ToastMessagesType {
     variant?: ToastVariant;
   };
 }
+
+// Types for grouped state setters and refs
+export interface GenerationStateSetters {
+  setStep: React.Dispatch<React.SetStateAction<1 | 2>>;
+  setLoadingState: React.Dispatch<React.SetStateAction<LoadingState | string>>; // Use LoadingState or broader string
+  setSelectedJob: React.Dispatch<React.SetStateAction<JobPosting | null>>;
+  setGeneratedLetter: React.Dispatch<React.SetStateAction<CoverLetter | null>>;
+  setGenerationError: React.Dispatch<React.SetStateAction<string | null>>;
+  setGenerationPhase: React.Dispatch<React.SetStateAction<string | null>>; // Consider specific phase type
+  setGenerationProgress: React.Dispatch<React.SetStateAction<GenerationProgress>>;
+}
+
+export interface GenerationRefs {
+  isMountedRef: React.MutableRefObject<boolean>;
+  abortControllerRef: React.MutableRefObject<AbortController | null>;
+  generationAttemptRef: React.MutableRefObject<number>; // Assuming it holds a number
+}
