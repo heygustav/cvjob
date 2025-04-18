@@ -1,16 +1,14 @@
 
-import { User, JobPosting, CoverLetter } from "@/lib/types";
-import { JobFormData } from "@/services/coverLetter/types";
-import { LoadingState, GenerationProgress } from "../types";
+import { User } from "@/lib/types";
 import { useToastMessages } from "../useToastMessages";
 import { useGenerationTracking } from "../generation-tracking";
 import { useGenerationErrorHandling } from "../generation-error-handling";
+
+// Import refactored hooks
 import { useGenerationSteps } from "./hooks/useGenerationSteps";
 import { useJobFetchingLogic } from "./useJobFetchingLogic";
 import { useLetterFetchingLogic } from "./useLetterFetchingLogic";
 import { useLetterEditingLogic } from "./useLetterEditingLogic";
-
-// Import refactored hooks
 import { useRefsAndCleanup } from "./hooks/useRefsAndCleanup";
 import { useSafeSetState } from "./hooks/useSafeSetState";
 import { useGenerationState } from "./hooks/useGenerationState";
