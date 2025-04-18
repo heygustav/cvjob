@@ -1,18 +1,8 @@
-
 import { useState, useRef, useCallback } from 'react';
 import { showErrorToast } from '@/utils/errorHandling';
 import { useToast } from '@/hooks/use-toast';
 import { handleTypedError, handleStandardError, handleTimeoutError } from '../../generation-error-handling';
-
-// Define CoverLetter type since it can't be imported from '../types'
-interface CoverLetter {
-  id: string;
-  user_id: string;
-  job_posting_id: string;
-  content: string;
-  created_at: string;
-  updated_at: string;
-}
+import { CoverLetter } from '@/lib/types';
 
 export const useGenerationSteps = (
   setCurrentStep: React.Dispatch<React.SetStateAction<1 | 2>>,
@@ -20,13 +10,13 @@ export const useGenerationSteps = (
   setGeneratedLetter: React.Dispatch<React.SetStateAction<CoverLetter | null>>,
   safeSetState: <T>(stateSetter: React.Dispatch<React.SetStateAction<T>>, value: T) => void
 ) => {
-  const [currentStep, setStep] = useState<1 | 2>(1); // Initialize with 1 instead of 0
+  const [currentStep, setStep] = useState<1 | 2>(1);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const errorRef = useRef<any>(null);
   const { toast } = useToast();
 
   const reset = useCallback(() => {
-    setCurrentStep(1); // Reset to 1 instead of 0
+    setCurrentStep(1);
     setIsGenerating(false);
     safeSetState(setGenerationError, null);
     safeSetState(setGeneratedLetter, null);
