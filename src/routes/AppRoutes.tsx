@@ -2,6 +2,7 @@
 import React, { lazy, memo } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import RouteWrapper from '@/components/route-wrapper/RouteWrapper';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
 
 // Import route groups
 import { authRoutes } from './auth/AuthRoutes';
@@ -14,19 +15,30 @@ const Index = lazy(() => import('@/pages/Index'));
 const NotFound = lazy(() => import('@/pages/NotFound'));
 const GDPRInfoPage = lazy(() => import('@/pages/GDPRInfoPage'));
 
+// Custom loading component for Suspense
+const PageLoader = () => (
+  <div className="min-h-screen flex items-center justify-center">
+    <LoadingSpinner message="Indlæser side..." />
+  </div>
+);
+
 const AppRoutes = memo(() => {
   return (
     <Routes>
       {/* Public routes */}
       <Route path="/" element={
         <RouteWrapper>
-          <Index />
+          <React.Suspense fallback={<PageLoader />}>
+            <Index />
+          </React.Suspense>
         </RouteWrapper>
       } />
 
       <Route path="/gdpr-info" element={
         <RouteWrapper>
-          <GDPRInfoPage />
+          <React.Suspense fallback={<PageLoader />}>
+            <GDPRInfoPage />
+          </React.Suspense>
         </RouteWrapper>
       } />
 
@@ -39,7 +51,9 @@ const AppRoutes = memo(() => {
       {/* Catch-all route for 404 */}
       <Route path="*" element={
         <RouteWrapper>
-          <NotFound />
+          <React.Suspense fallback={<PageLoader />}>
+            <NotFound />
+          </React.Suspense>
         </RouteWrapper>
       } />
     </Routes>

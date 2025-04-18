@@ -2,12 +2,21 @@
 import React, { lazy } from 'react';
 import { Route } from 'react-router-dom';
 import RouteWrapper from '@/components/route-wrapper/RouteWrapper';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
 
+// Lazy load components
 const Profile = lazy(() => import('@/pages/Profile'));
 const ProfileQuiz = lazy(() => import('@/pages/ProfileQuiz'));
 const Resume = lazy(() => import('@/pages/Resume'));
 const DanishResume = lazy(() => import('@/pages/DanishResume'));
 const BrainstormPage = lazy(() => import('@/pages/BrainstormPage'));
+
+// Custom loading component for profile/resume sections
+const ResumeLoader = () => (
+  <div className="min-h-[600px] flex items-center justify-center">
+    <LoadingSpinner message="Forbereder CV-builder..." />
+  </div>
+);
 
 export const profileRoutes = [
   <Route 
@@ -15,7 +24,9 @@ export const profileRoutes = [
     path="/profile" 
     element={
       <RouteWrapper protected>
-        <Profile />
+        <React.Suspense fallback={<ResumeLoader />}>
+          <Profile />
+        </React.Suspense>
       </RouteWrapper>
     } 
   />,
@@ -24,7 +35,9 @@ export const profileRoutes = [
     path="/profile-quiz" 
     element={
       <RouteWrapper>
-        <ProfileQuiz />
+        <React.Suspense fallback={<ResumeLoader />}>
+          <ProfileQuiz />
+        </React.Suspense>
       </RouteWrapper>
     } 
   />,
@@ -33,7 +46,9 @@ export const profileRoutes = [
     path="/resume" 
     element={
       <RouteWrapper protected>
-        <Resume />
+        <React.Suspense fallback={<ResumeLoader />}>
+          <Resume />
+        </React.Suspense>
       </RouteWrapper>
     } 
   />,
@@ -42,7 +57,9 @@ export const profileRoutes = [
     path="/resume/dk" 
     element={
       <RouteWrapper protected>
-        <DanishResume />
+        <React.Suspense fallback={<ResumeLoader />}>
+          <DanishResume />
+        </React.Suspense>
       </RouteWrapper>
     } 
   />,
@@ -51,7 +68,9 @@ export const profileRoutes = [
     path="/brainstorm" 
     element={
       <RouteWrapper protected>
-        <BrainstormPage />
+        <React.Suspense fallback={<ResumeLoader />}>
+          <BrainstormPage />
+        </React.Suspense>
       </RouteWrapper>
     } 
   />
