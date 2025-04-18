@@ -1,5 +1,6 @@
 
 import { ReactNode } from 'react';
+import { JobPosting, CoverLetter } from '@/lib/types';
 
 export type LoadingState = "idle" | "initializing" | "loading" | "generating" | "saving";
 
