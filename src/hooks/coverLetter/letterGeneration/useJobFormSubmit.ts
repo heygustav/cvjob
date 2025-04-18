@@ -1,10 +1,10 @@
-
 import { useCallback } from "react";
 import { JobFormData } from "@/services/coverLetter/types";
 import { User } from "@/lib/types";
+import { handleLetterGeneration } from "../../letter-generation/letterGenerationUtils";
+import { setupGenerationTimeout } from "../../letter-generation/generationLogic";
+import { ToastMessagesType } from "../../types";
 import { useToastAdapter } from "@/hooks/shared/useToastAdapter";
-import { ToastMessagesType } from "../types";
-import { setupGenerationTimeout, cleanupGeneration } from "./utils";
 
 export const useJobFormSubmit = ({
   user,
@@ -23,12 +23,6 @@ export const useJobFormSubmit = ({
   errorHandling
 }: any) => {
   const { toast } = useToastAdapter();
-  const toastMessages = {
-    letterGenerated: {
-      title: "Ansøgning genereret",
-      description: "Din ansøgning er nu klar til gennemsyn.",
-    }
-  } as ToastMessagesType;
   
   const { 
     abortGeneration, 
@@ -38,34 +32,38 @@ export const useJobFormSubmit = ({
   
   const { handleGenerationError } = errorHandling;
 
-  const handleJobFormSubmit = useCallback(async (jobData: JobFormData): Promise<void> => {
-    if (!user) {
-      toast({
-        title: "Login krævet",
-        description: "Du skal være logget ind for at generere en ansøgning.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    if (abortControllerRef.current) {
-      abortGeneration();
-    }
-
-    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+  const handleSubmit = useCallback(async (formData: JobFormData) => {
+    let timeoutId: number | undefined;
 
     try {
+      if (!user) {
+        toast({
+          title: "Login krævet",
+          description: "Du skal være logget ind for at generere en ansøgning.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      if (abortControllerRef.current) {
+        abortGeneration();
+      }
+
       safeSetState(setLoadingState, "generating");
       
-      timeoutId = setupGenerationTimeout(abortControllerRef, {
-        handleTimeoutCallback: (error) => handleGenerationError(error)
-      });
-      
+      timeoutId = window.setTimeout(() => {
+        if (abortControllerRef.current) {
+          abortControllerRef.current.abort();
+          abortControllerRef.current = null;
+          handleGenerationError(new Error("Generation timeout"));
+        }
+      }, 45000) as unknown as number;
+
       incrementAttempt(abortControllerRef.current?.signal ? {} as any : {} as any);
       
       // Mock implementation for now
       const result = {
-        job: { ...jobData, id: 'mock-id' },
+        job: { ...formData, id: 'mock-id' },
         letter: { content: 'Mock letter content', id: 'mock-letter-id' }
       };
       
@@ -76,20 +74,17 @@ export const useJobFormSubmit = ({
       safeSetState(setStep, 2);
       
       toast({
-        title: toastMessages.letterGenerated.title,
-        description: toastMessages.letterGenerated.description,
+        title: "Ansøgning genereret",
+        description: "Din ansøgning er nu klar til gennemsyn.",
       });
     } catch (error) {
       if (!isMountedRef.current) return;
       
       handleGenerationError(error instanceof Error ? error : new Error('Unknown error'));
     } finally {
-      if (isMountedRef.current) {
-        safeSetState(setLoadingState, "idle");
-        safeSetState(setGenerationPhase, null);
+      if (timeoutId) {
+        window.clearTimeout(timeoutId);
       }
-      
-      cleanupGeneration(timeoutId);
     }
   }, [
     user,
@@ -100,15 +95,13 @@ export const useJobFormSubmit = ({
     setSelectedJob,
     setGeneratedLetter,
     setStep,
-    setGenerationPhase,
     setGenerationError,
     toast,
-    toastMessages,
     abortGeneration,
     incrementAttempt,
     updatePhase,
     handleGenerationError
   ]);
 
-  return handleJobFormSubmit;
+  return handleSubmit;
 };

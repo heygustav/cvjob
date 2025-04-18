@@ -7,7 +7,6 @@ import { useToastMessages } from "./useToastMessages";
 import { useNetworkHelpers } from "@/hooks/shared/useNetworkHelpers";
 import { createAppError, showErrorToast } from "@/utils/errorHandling";
 import { GenerationProgress } from "./types";
-import { withTimeout } from "@/utils/errorHandling";
 import { fetchJobById, fetchLetterById } from "@/services/coverLetter/database";
 
 export const useLetterFetching = (
@@ -40,10 +39,7 @@ export const useLetterFetching = (
         message: 'Henter ansøgning...'
       });
 
-      const letter = await withTimeout(
-        () => fetchLetterById(id),
-        15000
-      );
+      const letter = await retryWithBackoff<CoverLetter>(() => fetchLetterById(id));
       
       if (!isMountedRef.current) return null;
 
@@ -63,10 +59,7 @@ export const useLetterFetching = (
       });
 
       try {
-        const job = await withTimeout(
-          () => fetchJobById(letter.job_posting_id),
-          15000
-        );
+        const job = await retryWithBackoff(() => fetchJobById(letter.job_posting_id));
 
         if (!isMountedRef.current) return null;
         
