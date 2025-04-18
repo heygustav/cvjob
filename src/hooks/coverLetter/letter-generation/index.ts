@@ -3,7 +3,6 @@ import { User } from "@/lib/types";
 import { useToastMessages } from "../useToastMessages";
 import { useGenerationTracking } from "../generation-tracking";
 import { useGenerationErrorHandling } from "../generation-error-handling";
-import { useGenerationSteps } from "./hooks/useGenerationSteps";
 import { useJobFetchingLogic } from "./hooks/useJobFetchingLogic";
 import { useLetterFetchingLogic } from "./hooks/useLetterFetchingLogic";
 import { useLetterEditingLogic } from "./hooks/useLetterEditingLogic";
@@ -42,14 +41,6 @@ export const useCoverLetterGeneration = (user: User | null) => {
     setGenerationError,
     setLoadingState
   });
-
-  // Fix the arguments to match the function signature
-  const generationSteps = useGenerationSteps(
-    setStep,
-    setGenerationError,
-    setGeneratedLetter,
-    safeSetState
-  );
 
   const { fetchJob } = useJobFetchingLogic(
     user,
@@ -93,7 +84,6 @@ export const useCoverLetterGeneration = (user: User | null) => {
     setGeneratedLetter,
     setStep,
     toastMessages,
-    generationSteps,
     errorHandling
   );
 
