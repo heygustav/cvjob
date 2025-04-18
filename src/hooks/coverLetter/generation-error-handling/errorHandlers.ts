@@ -1,5 +1,5 @@
 
-import { toast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { showErrorToast } from '@/utils/errorHandling';
 
 // Define ErrorPhase type if it's missing from types.ts
@@ -53,6 +53,8 @@ export const handleStandardError = (error: Error) => {
 };
 
 export const handleTimeoutError = (error: Error) => {
+  const { toast } = useToast();
+  
   toast({
     title: "Generering tog for lang tid",
     description: "Forsøg venligst igen senere.",
