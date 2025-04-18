@@ -6,6 +6,7 @@ import { useCoverLetterGeneration } from "@/hooks/useCoverLetterGeneration";
 import { User } from "@/lib/types";
 import { JobFormData } from "@/services/coverLetter/types";
 import { useGeneratorInitialization } from "@/hooks/coverLetter/useGeneratorInitialization";
+import { LoadingState } from "@/hooks/coverLetter/types";
 import { GeneratorContent } from "@/components/cover-letter/GeneratorContent";
 
 const CoverLetterGenerator: React.FC = () => {
@@ -66,6 +67,7 @@ const CoverLetterGenerator: React.FC = () => {
   // Wrapper for saveJobAsDraft to make it return Promise<void> instead of Promise<string | null>
   const handleSaveJobAsDraft = async (jobData: JobFormData) => {
     await saveJobAsDraft(jobData);
+    return;
   };
 
   if (initialLoading) {
@@ -75,10 +77,10 @@ const CoverLetterGenerator: React.FC = () => {
   return (
     <GeneratorContent 
       existingLetterId={letterId || undefined}
-      step={step}
+      step={step as 1 | 2}
       isGenerating={isGenerating}
       isLoading={isLoading}
-      loadingState={loadingState}
+      loadingState={loadingState as LoadingState}
       generationPhase={generationPhase}
       generationProgress={generationProgress}
       selectedJob={selectedJob}
