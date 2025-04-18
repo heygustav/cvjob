@@ -5,6 +5,7 @@ import { fetchJobById } from "@/services/coverLetter/database";
 import { useNavigate } from "react-router-dom";
 import { useToastMessages } from "./useToastMessages";
 import { useNetworkHelpers } from "@/hooks/shared/useNetworkHelpers";
+import { showErrorToast } from "@/utils/errorHandling";
 import { GenerationProgress } from "./types";
 import { useToastAdapter } from "@/hooks/shared/useToastAdapter";
 import { withTimeout } from "@/utils/asyncHelpers";
@@ -22,7 +23,7 @@ export const useJobFetching = (
   const { toast } = useToastAdapter();
   const toastMessages = useToastMessages();
   const navigate = useNavigate();
-  const { showErrorToast } = useNetworkHelpers();
+  const networkHelpers = useNetworkHelpers();
 
   const fetchJob = useCallback(async (id: string): Promise<JobPosting | null> => {
     if (!user) {

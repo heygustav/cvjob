@@ -6,6 +6,7 @@ import { fetchLetterById, fetchJobById } from "@/services/coverLetter/database";
 import { useNavigate } from "react-router-dom";
 import { useToastMessages } from "./useToastMessages";
 import { useNetworkHelpers } from "@/hooks/shared/useNetworkHelpers";
+import { showErrorToast } from "@/utils/errorHandling";
 import { GenerationProgress } from "./types";
 import { withTimeout } from "@/utils/asyncHelpers";
 
@@ -24,7 +25,7 @@ export const useLetterFetching = (
   const { toast } = useToast();
   const toastMessages = useToastMessages();
   const navigate = useNavigate();
-  const { showErrorToast } = useNetworkHelpers();
+  const networkHelpers = useNetworkHelpers();
 
   const fetchLetter = useCallback(async (id: string) => {
     if (!isMountedRef.current) return null;

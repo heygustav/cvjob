@@ -55,7 +55,7 @@ export const useJobFormSubmit = ({
       abortGeneration();
     }
 
-    let timeoutId: number | undefined;
+    let timeoutId: NodeJS.Timeout | undefined;
 
     try {
       safeSetState(setLoadingState, "generating");
