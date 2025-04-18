@@ -5,10 +5,9 @@ import { fetchJobById } from "@/services/coverLetter/database";
 import { useNavigate } from "react-router-dom";
 import { useToastMessages } from "./useToastMessages";
 import { useNetworkHelpers } from "@/hooks/shared/useNetworkHelpers";
-import { showErrorToast } from "@/utils/errorHandling";
+import { createAppError, showErrorToast } from "@/utils/errorHandling";
 import { GenerationProgress } from "./types";
 import { useToastAdapter } from "@/hooks/shared/useToastAdapter";
-import { withTimeout } from "@/utils/asyncHelpers";
 
 export const useJobFetching = (
   user: User | null,
@@ -23,24 +22,21 @@ export const useJobFetching = (
   const { toast } = useToastAdapter();
   const toastMessages = useToastMessages();
   const navigate = useNavigate();
-  const networkHelpers = useNetworkHelpers();
+  const { withTimeout, retryWithBackoff } = useNetworkHelpers();
 
   const fetchJob = useCallback(async (id: string): Promise<JobPosting | null> => {
     if (!user) {
-      console.error("fetchJob: No authenticated user");
-      toast({
-        title: toastMessages.loginRequired.title,
-        description: toastMessages.loginRequired.description,
-        variant: "destructive"
-      });
+      const error = createAppError(
+        "No authenticated user",
+        'auth-error',
+        false
+      );
+      showErrorToast(error);
       navigate("/login");
       return null;
     }
     
-    if (!isMountedRef.current) {
-      console.log("fetchJob: Component unmounted before fetch started");
-      return null;
-    }
+    if (!isMountedRef.current) return null;
     
     try {
       safeSetState(setLoadingState, "initializing");
@@ -52,35 +48,22 @@ export const useJobFetching = (
         message: 'Henter job...'
       });
       
-      console.log(`fetchJob: Starting job fetch for ID: ${id}`);
+      const job = await retryWithBackoff(
+        async () => {
+          const result = await withTimeout(() => fetchJobById(id));
+          if (!result) {
+            throw createAppError(
+              "Job not found",
+              'job-save',
+              true
+            );
+          }
+          return result;
+        }
+      );
       
-      // Try without timeout first
-      let job: JobPosting | null;
-      try {
-        job = await fetchJobById(id);
-      } catch (directError) {
-        console.warn("Direct job fetch failed, retrying with timeout:", directError);
-        job = await withTimeout(() => fetchJobById(id));
-      }
+      if (!isMountedRef.current) return null;
       
-      if (!isMountedRef.current) {
-        console.log("fetchJob: Component unmounted during job fetch");
-        return null;
-      }
-      
-      if (!job) {
-        console.log("fetchJob: Job not found");
-        toast({
-          title: toastMessages.jobNotFound.title,
-          description: toastMessages.jobNotFound.description,
-          variant: "destructive"
-        });
-        safeSetState(setGenerationError, "Jobbet blev ikke fundet. Prøv venligst igen eller opret et nyt job.");
-        safeSetState(setLoadingState, "idle");
-        return null;
-      }
-      
-      console.log("fetchJob: Job fetched successfully:", job.title);
       safeSetState(setSelectedJob, job);
       safeSetState(setLoadingState, "idle");
       safeSetState(setGenerationProgress, {
@@ -91,29 +74,25 @@ export const useJobFetching = (
       
       return job;
     } catch (error) {
-      console.error("fetchJob: Error fetching job:", error);
-      
-      if (!isMountedRef.current) {
-        console.log("fetchJob: Component unmounted during error handling");
-        return null;
-      }
+      if (!isMountedRef.current) return null;
       
       showErrorToast(error);
-      safeSetState(setGenerationError, "Der opstod en fejl ved hentning af jobbet. Prøv venligst igen.");
+      safeSetState(setGenerationError, error instanceof Error ? error.message : "Der opstod en fejl");
       safeSetState(setLoadingState, "idle");
       return null;
     }
   }, [
-    user, 
-    isMountedRef, 
-    safeSetState, 
-    setSelectedJob, 
-    setGenerationError, 
-    setGenerationPhase, 
-    setGenerationProgress, 
-    setLoadingState, 
-    navigate, 
-    showErrorToast,
+    user,
+    isMountedRef,
+    navigate,
+    safeSetState,
+    setSelectedJob,
+    setGenerationError,
+    setGenerationPhase,
+    setGenerationProgress,
+    setLoadingState,
+    withTimeout,
+    retryWithBackoff,
     toast,
     toastMessages
   ]);

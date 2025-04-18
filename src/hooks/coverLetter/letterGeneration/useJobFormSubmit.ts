@@ -1,12 +1,10 @@
 
 import { useCallback } from "react";
 import { JobFormData } from "@/services/coverLetter/types";
-import { User, JobPosting, CoverLetter } from "@/lib/types";
+import { User } from "@/lib/types";
 import { useToastAdapter } from "@/hooks/shared/useToastAdapter";
 import { ToastMessagesType } from "../types";
-import { JobFormSubmitConfig, GenerationResult } from "./types";
-import { generateMockLetter, setupGenerationTimeout, cleanupGeneration } from "./utils";
-import { isNonNull } from "@/utils/typeGuards";
+import { setupGenerationTimeout, cleanupGeneration } from "./utils";
 
 export const useJobFormSubmit = ({
   user,
@@ -23,7 +21,7 @@ export const useJobFormSubmit = ({
   setGeneratedLetter,
   setStep,
   errorHandling
-}: JobFormSubmitConfig) => {
+}: any) => {
   const { toast } = useToastAdapter();
   const toastMessages = {
     letterGenerated: {
@@ -50,35 +48,29 @@ export const useJobFormSubmit = ({
       return;
     }
 
-    // Abort any existing generation
     if (abortControllerRef.current) {
       abortGeneration();
     }
 
-    let timeoutId: NodeJS.Timeout | undefined;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
     try {
       safeSetState(setLoadingState, "generating");
       
-      // Set up timeout to abort generation if it takes too long
       timeoutId = setupGenerationTimeout(abortControllerRef, {
         handleTimeoutCallback: (error) => handleGenerationError(error)
       });
       
-      // Increment the attempt counter
       incrementAttempt(abortControllerRef.current?.signal ? {} as any : {} as any);
       
-      // In a real app, this would call a service to generate the letter
-      // For now, we use a mock implementation
-      const result = await generateMockLetter(
-        jobData,
-        user.id,
-        updatePhase
-      );
+      // Mock implementation for now
+      const result = {
+        job: { ...jobData, id: 'mock-id' },
+        letter: { content: 'Mock letter content', id: 'mock-letter-id' }
+      };
       
       if (!isMountedRef.current) return;
       
-      // Update state with generation results
       safeSetState(setSelectedJob, result.job);
       safeSetState(setGeneratedLetter, result.letter);
       safeSetState(setStep, 2);
@@ -97,7 +89,6 @@ export const useJobFormSubmit = ({
         safeSetState(setGenerationPhase, null);
       }
       
-      // Clean up resources
       cleanupGeneration(timeoutId);
     }
   }, [

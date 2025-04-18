@@ -1,18 +1,8 @@
 
-/**
- * Utility hook for network operations
- * Provides common network-related utilities for API operations
- */
-
 import { useCallback } from "react";
+import { showErrorToast } from "@/utils/errorHandling";
 
-/**
- * Hook that provides network helper functions
- */
 export const useNetworkHelpers = (defaultTimeoutMs = 30000) => {
-  /**
-   * Execute a promise with a timeout
-   */
   const withTimeout = useCallback(<T>(
     promiseFactory: () => Promise<T>,
     timeoutMs: number = defaultTimeoutMs
@@ -34,9 +24,6 @@ export const useNetworkHelpers = (defaultTimeoutMs = 30000) => {
     });
   }, [defaultTimeoutMs]);
   
-  /**
-   * Create a standardized error object
-   */
   const createError = useCallback((
     message: string,
     code?: string,
@@ -52,9 +39,6 @@ export const useNetworkHelpers = (defaultTimeoutMs = 30000) => {
     return error;
   }, []);
   
-  /**
-   * Retry a failed operation with exponential backoff
-   */
   const retryWithBackoff = useCallback(async <T>(
     operation: () => Promise<T>,
     maxRetries: number = 3,
@@ -68,7 +52,6 @@ export const useNetworkHelpers = (defaultTimeoutMs = 30000) => {
       } catch (error) {
         lastError = error instanceof Error ? error : new Error(String(error));
         
-        // Calculate delay with exponential backoff and jitter
         const delay = baseDelayMs * Math.pow(2, attempt) + Math.random() * 100;
         
         console.warn(`Operation failed, retrying in ${Math.round(delay)}ms...`, error);
@@ -76,12 +59,17 @@ export const useNetworkHelpers = (defaultTimeoutMs = 30000) => {
       }
     }
     
-    throw lastError || new Error('Operation failed after retries');
+    if (lastError) {
+      showErrorToast(lastError);
+      throw lastError;
+    }
+    throw new Error('Operation failed after retries');
   }, []);
   
   return {
     withTimeout,
     createError,
-    retryWithBackoff
+    retryWithBackoff,
+    showErrorToast
   };
 };
