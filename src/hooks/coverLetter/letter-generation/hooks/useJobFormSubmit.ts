@@ -20,7 +20,6 @@ export const useJobFormSubmit = (
   setGeneratedLetter: React.Dispatch<React.SetStateAction<any>>,
   setStep: React.Dispatch<React.SetStateAction<1 | 2>>,
   toastMessages: ToastMessagesType,
-  generationSteps: any,
   errorHandling: any
 ) => {
   const { toast } = useToastAdapter();
