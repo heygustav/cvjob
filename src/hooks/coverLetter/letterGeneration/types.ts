@@ -1,7 +1,12 @@
-
 import { User, JobPosting, CoverLetter } from "@/lib/types";
 import { GenerationProgress } from "../types";
 import { JobFormData } from "@/services/coverLetter/types";
+
+// Result of generation process
+export interface GenerationResult {
+  job: JobPosting;
+  letter: CoverLetter;
+}
 
 // Tracking tools for generation process
 export interface GenerationTrackingTools {
@@ -18,12 +23,6 @@ export interface ErrorHandlingTools {
 
 // Phases in the generation process
 export type GenerationPhase = 'job-save' | 'user-fetch' | 'generation' | 'letter-save';
-
-// Result of generation process
-export interface GenerationResult {
-  job: JobPosting;
-  letter: CoverLetter;
-}
 
 // State setters used across generation hooks
 export interface GenerationStateSetters {

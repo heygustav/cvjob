@@ -1,8 +1,7 @@
-
 import { JobFormData } from "@/services/coverLetter/types";
 import { User, JobPosting, CoverLetter } from "@/lib/types";
 import { isNonNull } from "@/utils/typeGuards";
-import { GenerationPhase, TimeoutConfig } from "./types";
+import { GenerationPhase, TimeoutConfig, GenerationResult } from "./types";
 
 /**
  * Set up timeout for generation process
@@ -10,7 +9,7 @@ import { GenerationPhase, TimeoutConfig } from "./types";
 export const setupGenerationTimeout = (
   abortControllerRef: React.MutableRefObject<AbortController | null>,
   { handleTimeoutCallback, timeoutMs = 45000 }: TimeoutConfig
-): number => {
+): NodeJS.Timeout => {
   // Create a timeout to abort generation if it takes too long
   const timeoutId = setTimeout(() => {
     if (abortControllerRef.current) {

@@ -1,10 +1,9 @@
-
 import { corsHeaders } from "./cors.ts";
 
 /**
  * Calls the OpenAI API to generate content with the provided prompts
  */
-export async function callOpenAI(systemPrompt: string, userPrompt: string, model = "gpt-4") {
+export async function callOpenAI(systemPrompt: string, userPrompt: string) {
   const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
   
   if (!openAIApiKey) {
@@ -12,7 +11,7 @@ export async function callOpenAI(systemPrompt: string, userPrompt: string, model
     throw new Error('OpenAI API key not configured');
   }
 
-  console.log(`Calling OpenAI API with model: ${model}`);
+  console.log('Calling OpenAI API with model: gpt-4.1-nano');
   
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
@@ -21,7 +20,7 @@ export async function callOpenAI(systemPrompt: string, userPrompt: string, model
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: model,
+      model: "gpt-4.1-nano",
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt }

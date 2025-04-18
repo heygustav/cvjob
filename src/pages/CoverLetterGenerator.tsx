@@ -1,4 +1,3 @@
-
 import React, { useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useAuth } from "@/components/AuthProvider";
