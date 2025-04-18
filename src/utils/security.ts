@@ -1,3 +1,4 @@
+
 import DOMPurify from 'dompurify';
 
 /**
@@ -7,7 +8,34 @@ import DOMPurify from 'dompurify';
  */
 export const sanitizeInput = (input: string): string => {
   if (typeof input !== 'string') return '';
-  return DOMPurify.sanitize(input);
+  
+  // Configure DOMPurify to be extra strict
+  const purifyConfig = {
+    ALLOWED_TAGS: [], // Only allow text content, no HTML tags
+    ALLOWED_ATTR: [], // No attributes allowed
+    USE_PROFILES: { html: false } // Don't use the html profile
+  };
+  
+  return DOMPurify.sanitize(input, purifyConfig);
+};
+
+/**
+ * Sanitizes HTML content with a more permissive configuration
+ * Useful for rich text content that needs some formatting
+ */
+export const sanitizeHtml = (input: string): string => {
+  if (typeof input !== 'string') return '';
+  
+  // Allow basic formatting tags but no scripts or dangerous elements
+  const purifyConfig = {
+    ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'p', 'br', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4'],
+    ALLOWED_ATTR: [], // No attributes allowed
+    FORBID_TAGS: ['script', 'style', 'iframe', 'object', 'embed'],
+    FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover', 'javascript:'],
+    USE_PROFILES: { html: true }
+  };
+  
+  return DOMPurify.sanitize(input, purifyConfig);
 };
 
 /**
@@ -67,6 +95,11 @@ export const validateAndSanitizeUrl = (url: string | null, allowExternal = false
   // Sanitize the URL to prevent XSS
   const sanitizedUrl = DOMPurify.sanitize(url);
   
+  // Make sure javascript: URLs are caught even if DOMPurify misses them
+  if (sanitizedUrl.toLowerCase().includes('javascript:')) {
+    return null;
+  }
+  
   if (!allowExternal) {
     // Only accept internal URLs (starting with / and not containing ://)
     if (sanitizedUrl.startsWith('/') && !sanitizedUrl.includes('://')) {
@@ -77,9 +110,44 @@ export const validateAndSanitizeUrl = (url: string | null, allowExternal = false
   
   try {
     // For external URLs, validate with URL constructor
-    new URL(sanitizedUrl);
+    const parsedUrl = new URL(sanitizedUrl);
+    
+    // Only allow http and https protocols
+    if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
+      return null;
+    }
+    
     return sanitizedUrl;
   } catch (e) {
     return null;
   }
+};
+
+/**
+ * File extension whitelist validation
+ * @param filename The filename to validate
+ * @param allowedExtensions Array of allowed extensions
+ * @returns True if extension is allowed, false otherwise
+ */
+export const hasAllowedExtension = (
+  filename: string, 
+  allowedExtensions: string[]
+): boolean => {
+  if (!filename) return false;
+  const extension = filename.split('.').pop()?.toLowerCase();
+  return extension ? allowedExtensions.includes(extension) : false;
+};
+
+/**
+ * Content-Type header validation
+ * @param contentType The Content-Type header value
+ * @param allowedTypes Array of allowed MIME types
+ * @returns True if content type is allowed, false otherwise
+ */
+export const hasAllowedContentType = (
+  contentType: string | null,
+  allowedTypes: string[]
+): boolean => {
+  if (!contentType) return false;
+  return allowedTypes.some(type => contentType.includes(type));
 };

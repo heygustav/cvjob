@@ -3,7 +3,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithProviders } from '../../../test/test-utils';
-import { LetterPreviewStep } from '../LetterPreviewStep';
+import LetterPreviewStep from '../LetterPreviewStep';
 
 describe('LetterPreviewStep', () => {
   const mockLetter = {

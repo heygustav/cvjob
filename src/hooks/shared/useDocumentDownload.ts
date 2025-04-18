@@ -11,6 +11,8 @@ import {
   processContentForDownload,
   generateDocumentFilename
 } from '@/utils/shared/documentUtils';
+import { validateContentForDownload } from '@/components/cover-letter/preview/utils/contentCleaner';
+import { sanitizeInput } from '@/utils/security';
 
 interface DocumentDownloadOptions {
   userName?: string;
@@ -27,7 +29,18 @@ export const useDocumentDownload = (options: DocumentDownloadOptions = {}) => {
   const { toast } = useToast();
   const { handleDownloadError } = useDownloadErrorHandler();
   
-  const { userName, jobTitle, companyName, formattedDate = new Date().toLocaleDateString() } = options;
+  const { 
+    userName = '', 
+    jobTitle = '', 
+    companyName = '', 
+    formattedDate = new Date().toLocaleDateString() 
+  } = options;
+
+  // Sanitize all input parameters
+  const sanitizedUserName = sanitizeInput(userName);
+  const sanitizedJobTitle = sanitizeInput(jobTitle);
+  const sanitizedCompanyName = sanitizeInput(companyName);
+  const sanitizedFormattedDate = sanitizeInput(formattedDate);
 
   /**
    * Validate content before download
@@ -41,7 +54,18 @@ export const useDocumentDownload = (options: DocumentDownloadOptions = {}) => {
       });
       throw new Error('No content to download');
     }
-    return content;
+    
+    try {
+      // Validate and sanitize content for security purposes
+      return validateContentForDownload(content);
+    } catch (error) {
+      toast({
+        title: 'Sikkerhedsproblem',
+        description: 'Indholdet kunne ikke valideres til download. Det kan indeholde ugyldige elementer.',
+        variant: 'destructive',
+      });
+      throw new Error('Content validation failed');
+    }
   }, [toast]);
 
   /**
@@ -57,16 +81,16 @@ export const useDocumentDownload = (options: DocumentDownloadOptions = {}) => {
       // Create PDF document
       const doc = createPdfDocument({
         content: processedContent,
-        company: companyName,
-        jobTitle,
-        formattedDate
+        company: sanitizedCompanyName,
+        jobTitle: sanitizedJobTitle,
+        formattedDate: sanitizedFormattedDate
       });
       
       // Generate filename
       const filename = generateDocumentFilename('pdf', {
-        fullName: userName,
-        jobTitle,
-        companyName,
+        fullName: sanitizedUserName,
+        jobTitle: sanitizedJobTitle,
+        companyName: sanitizedCompanyName,
       });
       
       // Save PDF
@@ -82,8 +106,8 @@ export const useDocumentDownload = (options: DocumentDownloadOptions = {}) => {
       setIsDownloading(false);
     }
   }, [
-    validateContent, companyName, jobTitle, formattedDate, 
-    userName, toast, handleDownloadError
+    validateContent, sanitizedCompanyName, sanitizedJobTitle, 
+    sanitizedFormattedDate, sanitizedUserName, toast, handleDownloadError
   ]);
 
   /**
@@ -99,16 +123,16 @@ export const useDocumentDownload = (options: DocumentDownloadOptions = {}) => {
       // Create DOCX document
       const doc = createDocxDocument({
         content: processedContent,
-        company: companyName,
-        jobTitle,
-        formattedDate
+        company: sanitizedCompanyName,
+        jobTitle: sanitizedJobTitle,
+        formattedDate: sanitizedFormattedDate
       });
       
       // Generate filename
       const filename = generateDocumentFilename('docx', {
-        fullName: userName,
-        jobTitle,
-        companyName,
+        fullName: sanitizedUserName,
+        jobTitle: sanitizedJobTitle,
+        companyName: sanitizedCompanyName,
       });
       
       // Save file
@@ -124,8 +148,8 @@ export const useDocumentDownload = (options: DocumentDownloadOptions = {}) => {
       setIsDownloading(false);
     }
   }, [
-    validateContent, companyName, jobTitle, formattedDate,
-    userName, toast, handleDownloadError
+    validateContent, sanitizedCompanyName, sanitizedJobTitle, 
+    sanitizedFormattedDate, sanitizedUserName, toast, handleDownloadError
   ]);
 
   /**
@@ -141,16 +165,16 @@ export const useDocumentDownload = (options: DocumentDownloadOptions = {}) => {
       // Create text document
       const documentText = createTextDocument({
         content: processedContent,
-        company: companyName,
-        jobTitle,
-        formattedDate
+        company: sanitizedCompanyName,
+        jobTitle: sanitizedJobTitle,
+        formattedDate: sanitizedFormattedDate
       });
       
       // Generate filename
       const filename = generateDocumentFilename('txt', {
-        fullName: userName,
-        jobTitle,
-        companyName,
+        fullName: sanitizedUserName,
+        jobTitle: sanitizedJobTitle,
+        companyName: sanitizedCompanyName,
       });
       
       // Save text file
@@ -166,8 +190,8 @@ export const useDocumentDownload = (options: DocumentDownloadOptions = {}) => {
       setIsDownloading(false);
     }
   }, [
-    validateContent, companyName, jobTitle, formattedDate,
-    userName, toast, handleDownloadError
+    validateContent, sanitizedCompanyName, sanitizedJobTitle, 
+    sanitizedFormattedDate, sanitizedUserName, toast, handleDownloadError
   ]);
 
   return {

@@ -10,8 +10,19 @@ export const cleanCoverLetterContent = (
   company?: string,
   jobTitle?: string
 ): string => {
-  // First sanitize the input to prevent XSS
-  let cleaned = DOMPurify.sanitize(rawContent);
+  if (!rawContent) {
+    return '';
+  }
+  
+  // First sanitize the input to prevent XSS with strict configuration
+  const sanitizeConfig = {
+    ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'p', 'br'],
+    ALLOWED_ATTR: [],
+    FORBID_TAGS: ['script', 'style', 'iframe', 'object', 'embed', 'form', 'input'],
+    FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover', 'style', 'href', 'src']
+  };
+  
+  let cleaned = DOMPurify.sanitize(rawContent, sanitizeConfig);
   
   // Remove any lines with "Dato:" or "Date:" which might be duplicated
   cleaned = cleaned.replace(/^(Dato|Date):.*$/gm, "");
@@ -23,14 +34,14 @@ export const cleanCoverLetterContent = (
   cleaned = cleaned.replace(/^(Emne|Subject):.*$/gm, "");
   
   // Remove duplicate company name lines at the beginning
-  const sanitizedCompany = company ? DOMPurify.sanitize(company) : "";
+  const sanitizedCompany = company ? DOMPurify.sanitize(company, sanitizeConfig) : "";
   const companyRegex = sanitizedCompany ? new RegExp(`^${escapeRegExp(sanitizedCompany)}$`, 'gm') : null;
   if (companyRegex) {
     cleaned = cleaned.replace(companyRegex, "");
   }
   
   // Remove duplicate job title references
-  const sanitizedJobTitle = jobTitle ? DOMPurify.sanitize(jobTitle) : "";
+  const sanitizedJobTitle = jobTitle ? DOMPurify.sanitize(jobTitle, sanitizeConfig) : "";
   const jobTitleRegex = sanitizedJobTitle ? new RegExp(`^.*${escapeRegExp(sanitizedJobTitle)}.*$`, 'gm') : null;
   if (jobTitleRegex) {
     // Count occurrences
@@ -53,12 +64,46 @@ export const cleanCoverLetterContent = (
   // Trim leading/trailing whitespace
   cleaned = cleaned.trim();
   
-  return cleaned;
+  // Final sanitization pass to ensure nothing malicious was introduced
+  return DOMPurify.sanitize(cleaned, sanitizeConfig);
 };
 
 /**
  * Helper function to escape special characters in a string for use in a RegExp
  */
 function escapeRegExp(string: string): string {
+  if (!string || typeof string !== 'string') return '';
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
 }
+
+/**
+ * Validates content before allowing download
+ * Returns sanitized version or throws error if content is suspicious
+ */
+export const validateContentForDownload = (content: string): string => {
+  if (!content) {
+    throw new Error('No content available for download');
+  }
+  
+  // Check for suspicious patterns
+  const suspiciousPatterns = [
+    /<script/i,
+    /javascript:/i,
+    /<iframe/i,
+    /<embed/i,
+    /<object/i,
+    /on\w+=/i  // onclick, onload, etc.
+  ];
+  
+  for (const pattern of suspiciousPatterns) {
+    if (pattern.test(content)) {
+      throw new Error('Potentially unsafe content detected');
+    }
+  }
+  
+  // Final sanitization with strict settings
+  return DOMPurify.sanitize(content, {
+    ALLOWED_TAGS: [], // No HTML allowed
+    ALLOWED_ATTR: []  // No attributes allowed
+  });
+};

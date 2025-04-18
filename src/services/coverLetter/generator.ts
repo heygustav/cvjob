@@ -2,6 +2,9 @@
 import { supabase } from "@/integrations/supabase/client";
 import { JobFormData } from "./types";
 import { User } from "@/lib/types";
+import { sanitizeEdgeFunctionPayload, validateEdgeFunctionResponse, getSafeErrorMessage } from '@/utils/security/edgeFunctionSecurity';
+import { sanitizeObject } from '@/utils/security';
+import DOMPurify from 'dompurify';
 
 interface UserProfile {
   name: string;
@@ -45,7 +48,7 @@ export const generateCoverLetter = async (jobData: JobFormData, userInfo: UserPr
     }
     
     // Create the payload for the edge function
-    const payload = {
+    const unsafePayload = {
       jobInfo: {
         title: jobData.title,
         company: jobData.company,
@@ -65,6 +68,9 @@ export const generateCoverLetter = async (jobData: JobFormData, userInfo: UserPr
       },
       locale: "da-DK"
     };
+    
+    // Sanitize payload for security
+    const payload = sanitizeEdgeFunctionPayload(unsafePayload);
     
     console.log("Sending payload to edge function:", {
       jobTitle: payload.jobInfo.title,
@@ -89,30 +95,37 @@ export const generateCoverLetter = async (jobData: JobFormData, userInfo: UserPr
       throw new Error("Ingen data modtaget fra serveren. Prøv igen senere.");
     }
     
-    if (!data.content) {
-      console.error("No content returned from edge function:", data);
+    // Validate response for security
+    const safeData = validateEdgeFunctionResponse(data);
+    
+    if (!safeData.content) {
+      console.error("No content returned from edge function:", safeData);
       throw new Error("Ingen ansøgning blev genereret. Prøv igen.");
     }
     
-    console.log("Letter generation successful, received content length:", data.content.length);
-    return data.content;
+    // Sanitize the content with DOMPurify but allow basic formatting
+    const sanitizedContent = DOMPurify.sanitize(safeData.content, {
+      ALLOWED_TAGS: ['p', 'br', 'strong', 'em'],
+      ALLOWED_ATTR: []
+    });
+    
+    console.log("Letter generation successful, received content length:", sanitizedContent.length);
+    return sanitizedContent;
   } catch (error) {
     console.error("Error in generateCoverLetter:", error);
     
     // Create a more user-friendly error message
-    let message = error instanceof Error ? 
-      error.message : 
-      "Der opstod en fejl ved generering af ansøgningen. Prøv igen senere.";
+    const safeErrorMessage = getSafeErrorMessage(error);
     
     // Check for network or timeout issues
     if (error instanceof Error) {
       if (error.message.includes("network") || error.message.includes("timeout") || error.message.includes("fetch")) {
-        message = "Kunne ikke forbinde til serveren. Tjek din internetforbindelse og prøv igen.";
+        return "Kunne ikke forbinde til serveren. Tjek din internetforbindelse og prøv igen.";
       } else if (error.message.includes("api key") || error.message.includes("API key")) {
-        message = "Der er et problem med adgangen til AI-tjenesten. Kontakt venligst support.";
+        return "Der er et problem med adgangen til AI-tjenesten. Kontakt venligst support.";
       }
     }
     
-    throw new Error(message);
+    throw new Error(safeErrorMessage);
   }
 };

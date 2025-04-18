@@ -1,6 +1,7 @@
 
 import React, { DragEvent, useRef } from 'react';
 import { Upload } from 'lucide-react';
+import { hasAllowedExtension } from '@/utils/security';
 
 interface FileDropAreaProps {
   onFileSelected: (file: File) => void;
@@ -16,6 +17,9 @@ const FileDropArea: React.FC<FileDropAreaProps> = ({
   setIsDragging
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Define allowed extensions
+  const allowedExtensions = ['pdf', 'docx'];
 
   const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -37,6 +41,20 @@ const FileDropArea: React.FC<FileDropAreaProps> = ({
     const files = e.dataTransfer.files;
     if (files.length > 0) {
       const file = files[0];
+      
+      // Security check: validate file extension
+      if (!hasAllowedExtension(file.name, allowedExtensions)) {
+        alert('Kun PDF og DOCX filer er tilladt.');
+        return;
+      }
+      
+      // Security check: validate file size
+      const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
+      if (file.size > MAX_FILE_SIZE) {
+        alert(`Filen er for stor (${(file.size / 1024 / 1024).toFixed(1)}MB). Maksimal størrelse er 2MB.`);
+        return;
+      }
+      
       onFileSelected(file);
     }
   };
@@ -44,6 +62,25 @@ const FileDropArea: React.FC<FileDropAreaProps> = ({
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Security check: validate file extension
+      if (!hasAllowedExtension(file.name, allowedExtensions)) {
+        alert('Kun PDF og DOCX filer er tilladt.');
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+        return;
+      }
+      
+      // Security check: validate file size
+      const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
+      if (file.size > MAX_FILE_SIZE) {
+        alert(`Filen er for stor (${(file.size / 1024 / 1024).toFixed(1)}MB). Maksimal størrelse er 2MB.`);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+        return;
+      }
+      
       onFileSelected(file);
     }
   };
