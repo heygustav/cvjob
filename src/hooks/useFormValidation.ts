@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { z } from "zod";
 import { useToast } from "./use-toast";
 
@@ -8,9 +8,39 @@ export type ValidationErrors = Record<string, string>;
 
 export function useFormValidation<T extends Record<string, any>>(schema: ValidationSchema) {
   const [errors, setErrors] = useState<ValidationErrors>({});
+  const [touchedFields, setTouchedFields] = useState<Set<string>>(new Set());
   const { toast } = useToast();
 
-  const validateForm = (formData: T): boolean => {
+  const validateField = useCallback((name: string, value: any) => {
+    try {
+      // Create a partial schema for the specific field
+      const fieldSchema = z.object({ [name]: schema.shape[name] });
+      fieldSchema.parse({ [name]: value });
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+      return true;
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const fieldError = error.errors.find(err => err.path[0] === name);
+        if (fieldError) {
+          setErrors(prev => ({
+            ...prev,
+            [name]: fieldError.message
+          }));
+        }
+      }
+      return false;
+    }
+  }, [schema]);
+
+  const handleBlur = useCallback((fieldName: string) => {
+    setTouchedFields(prev => new Set(prev).add(fieldName));
+  }, []);
+
+  const validateForm = useCallback((formData: T): boolean => {
     try {
       schema.parse(formData);
       setErrors({});
@@ -34,29 +64,34 @@ export function useFormValidation<T extends Record<string, any>>(schema: Validat
       }
       return false;
     }
-  };
+  }, [schema, toast]);
 
-  const clearFieldError = (fieldName: string) => {
+  const clearFieldError = useCallback((fieldName: string) => {
     setErrors(prev => {
       const newErrors = { ...prev };
       delete newErrors[fieldName];
       return newErrors;
     });
-  };
+  }, []);
 
-  const clearAllErrors = () => {
+  const clearAllErrors = useCallback(() => {
     setErrors({});
-  };
+    setTouchedFields(new Set());
+  }, []);
 
   return {
     errors,
+    touchedFields,
     validateForm,
+    validateField,
     clearFieldError,
-    clearAllErrors
+    clearAllErrors,
+    handleBlur,
+    isFieldTouched: (fieldName: string) => touchedFields.has(fieldName)
   };
 }
 
-// Predefinerede validation schemas som kan genbruges
+// Predefined validation schemas
 export const commonSchemas = {
   email: z.string().email('Ugyldig email adresse'),
   password: z.string().min(8, 'Adgangskode skal være mindst 8 tegn'),
@@ -65,4 +100,3 @@ export const commonSchemas = {
   website: z.string().url('Ugyldig URL').optional().or(z.literal('')),
   description: z.string().min(10, 'Beskrivelse skal være mindst 10 tegn lang'),
 };
-

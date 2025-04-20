@@ -15,13 +15,23 @@ const profileSchema = z.object({
 });
 
 export const useProfileValidation = () => {
-  const { errors: validationErrors, validateForm, clearFieldError } = 
-    useFormValidation<ProfileState>(profileSchema);
+  const { 
+    errors: validationErrors, 
+    validateForm, 
+    validateField,
+    clearFieldError,
+    handleBlur,
+    touchedFields,
+    isFieldTouched 
+  } = useFormValidation<ProfileState>(profileSchema);
 
   return {
     validationErrors,
     validateForm,
-    clearFieldError
+    validateField,
+    clearFieldError,
+    handleBlur,
+    touchedFields,
+    isFieldTouched
   };
 };
-
