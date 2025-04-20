@@ -29,17 +29,26 @@ const DesktopNavigation: React.FC<DesktopNavigationProps> = ({
 
       {/* Authentication buttons */}
       {session ? (
-        <Button 
-          variant="ghost" 
-          size="sm"
-          onClick={onLogout} 
-          isLoading={isLoggingOut}
-          loadingText="Logger ud..."
-          className="text-foreground hover:bg-destructive/10 hover:text-destructive whitespace-nowrap text-xs lg:text-sm"
-        >
-          <LogOut className="h-4 w-4 mr-1 lg:mr-2 flex-shrink-0" />
-          <span>Log ud</span>
-        </Button>
+        <>
+          <Link 
+            to="/profile" 
+            data-tour="profile"
+            className="text-foreground hover:text-primary transition-colors"
+          >
+            Min profil
+          </Link>
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={onLogout} 
+            isLoading={isLoggingOut}
+            loadingText="Logger ud..."
+            className="text-foreground hover:bg-destructive/10 hover:text-destructive whitespace-nowrap text-xs lg:text-sm"
+          >
+            <LogOut className="h-4 w-4 mr-1 lg:mr-2 flex-shrink-0" />
+            <span>Log ud</span>
+          </Button>
+        </>
       ) : (
         <div className="flex items-center gap-1 lg:gap-2">
           <Button asChild variant="ghost" size="sm" className="whitespace-nowrap text-xs lg:text-sm">

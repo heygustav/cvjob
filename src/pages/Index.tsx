@@ -1,32 +1,29 @@
-
 import React, { lazy, Suspense, useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../components/AuthProvider';
 import HeroSection from '../components/home/HeroSection';
 import FeaturesSection from '../components/home/FeaturesSection';
 import { Session } from '@supabase/supabase-js';
 import { usePerformanceMonitoring } from '@/hooks/usePerformanceMonitoring';
+import OnboardingTour from '@/components/onboarding/OnboardingTour';
 
-// Lazy load non-critical components with better error handling
 const HowItWorksSection = lazy(() => import('../components/home/HowItWorksSection'));
 const TestimonialsSection = lazy(() => import('../components/home/TestimonialsSection'));
 const CTASection = lazy(() => import('../components/home/CTASection'));
 const FooterSection = lazy(() => import('../components/home/FooterSection'));
 
-// Better loading placeholder with clear visual feedback
 const SectionPlaceholder = () => (
   <div className="w-full py-16 bg-muted/30 animate-pulse flex justify-center items-center" aria-hidden="true">
     <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" aria-label="Indlæser indhold"></div>
   </div>
 );
 
-// Optimized LazyComponent with IntersectionObserver
 const LazyComponent = ({ component: Component, threshold = 0.1, rootMargin = '100px', ...props }) => {
   const [isVisible, setIsVisible] = useState(false);
   const ref = React.useRef(null);
 
   useEffect(() => {
     if (!ref.current || typeof IntersectionObserver === 'undefined') {
-      setIsVisible(true); // Fallback for browsers that don't support IntersectionObserver
+      setIsVisible(true);
       return;
     }
 
@@ -55,7 +52,6 @@ const LazyComponent = ({ component: Component, threshold = 0.1, rootMargin = '10
   );
 };
 
-// Interface for section props
 interface SectionProps {
   session?: Session | null;
 }
@@ -68,7 +64,15 @@ const Index = () => {
     logMount: true
   });
 
-  // Simplified SEO updates
+  const [showTour, setShowTour] = useState(false);
+
+  useEffect(() => {
+    const hasCompletedTour = localStorage.getItem('onboardingComplete');
+    if (!hasCompletedTour) {
+      setShowTour(true);
+    }
+  }, []);
+
   useEffect(() => {
     logTiming('Starting SEO updates');
     document.title = "CVJob | AI-Drevet Jobansøgningsgenerator til Personlige Ansøgninger";
@@ -81,7 +85,6 @@ const Index = () => {
       { selector: 'meta[property="og:url"]', attr: 'content', value: 'https://cvjob.dk' }
     ];
     
-    // Apply meta tags in a more efficient way
     metaTags.forEach(({ selector, attr, value }) => {
       let tag = document.querySelector(selector);
       if (!tag) {
@@ -101,17 +104,15 @@ const Index = () => {
     logTiming('SEO updates completed');
   }, [logTiming]);
 
-  // Memoize session for performance
   const memoizedSession = useMemo(() => session, [session]);
 
   return (
     <div className="bg-background">
+      {showTour && <OnboardingTour onComplete={() => setShowTour(false)} />}
       <main>
-        {/* Critical components loaded eagerly */}
         <HeroSection session={memoizedSession} />
         <FeaturesSection />
         
-        {/* Non-critical components loaded lazily with optimized loader */}
         <LazyComponent component={HowItWorksSection} session={memoizedSession} />
         <LazyComponent component={TestimonialsSection} />
         <LazyComponent component={CTASection} session={memoizedSession} />
