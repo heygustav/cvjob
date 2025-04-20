@@ -50,3 +50,8 @@ export const generatorRoutes = [
     } 
   />
 ];
+
+// Add a default export that returns the routes array
+export default function GeneratorRoutes() {
+  return generatorRoutes;
+}

@@ -75,3 +75,8 @@ export const profileRoutes = [
     } 
   />
 ];
+
+// Add a default export that returns the routes array
+export default function ProfileRoutes() {
+  return profileRoutes;
+}

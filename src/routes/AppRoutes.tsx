@@ -1,19 +1,19 @@
 
-import React, { lazy, memo } from 'react';
+import React, { lazy, memo, Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import RouteWrapper from '@/components/route-wrapper/RouteWrapper';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 
-// Import route groups
-const authRoutes = lazy(() => import('./auth/AuthRoutes'));
-const dashboardRoutes = lazy(() => import('./dashboard/DashboardRoutes'));
-const generatorRoutes = lazy(() => import('./generator/GeneratorRoutes'));
-const profileRoutes = lazy(() => import('./profile/ProfileRoutes'));
-
-// Lazy load pages
+// Import route components directly
 const Index = lazy(() => import('@/pages/Index'));
 const NotFound = lazy(() => import('@/pages/NotFound'));
 const GDPRInfoPage = lazy(() => import('@/pages/GDPRInfoPage'));
+
+// Import route groups
+import { authRoutes } from './auth/AuthRoutes';
+import { dashboardRoutes } from './dashboard/DashboardRoutes';
+import { generatorRoutes } from './generator/GeneratorRoutes';
+import { profileRoutes } from './profile/ProfileRoutes';
 
 // Custom loading component for Suspense
 const PageLoader = () => (
@@ -43,12 +43,13 @@ const AppRoutes = memo(() => {
       } />
 
       {/* Feature-specific routes with code splitting */}
-      <React.Suspense fallback={<PageLoader />}>
+      <Suspense fallback={<PageLoader />}>
+        {/* Render route arrays directly */}
         {authRoutes}
         {dashboardRoutes}
         {generatorRoutes}
         {profileRoutes}
-      </React.Suspense>
+      </Suspense>
 
       {/* Catch-all route for 404 */}
       <Route path="*" element={

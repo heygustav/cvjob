@@ -35,3 +35,8 @@ export const dashboardRoutes = [
     } 
   />
 ];
+
+// Add a default export that returns the routes array
+export default function DashboardRoutes() {
+  return dashboardRoutes;
+}

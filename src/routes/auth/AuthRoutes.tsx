@@ -38,3 +38,8 @@ export const authRoutes = [
   />,
   <Route key="auth-callback" path="/auth/callback" element={<AuthCallback />} />
 ];
+
+// Add a default export that returns the routes array
+export default function AuthRoutes() {
+  return authRoutes;
+}

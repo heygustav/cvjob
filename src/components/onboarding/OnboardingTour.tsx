@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Dialog } from '@headlessui/react';
 import { Button } from "@/components/ui/button";
-import { ChevronRight, Guide } from 'lucide-react';
+import { ChevronRight, HelpCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const tourSteps = [
@@ -84,7 +84,7 @@ const OnboardingTour: React.FC<OnboardingTourProps> = ({ onComplete }) => {
       <div className="fixed inset-0 flex items-center justify-center">
         <Dialog.Panel className="mx-auto max-w-sm rounded-xl bg-white p-6 shadow-lg">
           <div className="flex items-center gap-2 text-primary mb-4">
-            <Guide className="h-5 w-5" />
+            <HelpCircle className="h-5 w-5" />
             <Dialog.Title className="text-lg font-medium">
               {step.title}
             </Dialog.Title>
