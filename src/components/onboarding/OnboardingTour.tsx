@@ -7,28 +7,35 @@ import { useToast } from '@/hooks/use-toast';
 
 const tourSteps = [
   {
-    id: 1,
-    title: "Velkommen til CVJob",
-    description: "Lad os give dig en hurtig rundvisning af de vigtigste funktioner.",
+    id: 'welcome',
+    title: 'Velkommen til CVJob',
+    content: 'Vi har lavet en kort rundvisning for at hjælpe dig med at komme i gang. Lad os gennemgå de vigtigste funktioner.',
+    highlight: null,
   },
   {
-    id: 2,
-    title: "Opret ansøgninger",
-    description: "Klik her for at begynde at generere personlige ansøgninger med AI.",
-    target: '[data-tour="create-application"]',
+    id: 'ansøgningsgenerator',
+    title: 'AI Ansøgningsgenerator',
+    content: 'Vores kraftfulde AI kan generere personlige jobansøgninger baseret på dit CV og stillingsbeskrivelsen. Det sparer dig timer af arbejde!',
+    highlight: 'nav-generator',
   },
   {
-    id: 3,
-    title: "Se dit dashboard",
-    description: "Hold styr på dine ansøgninger og jobopslag i dit personlige dashboard.",
-    target: '[data-tour="dashboard"]',
+    id: 'cv-builder',
+    title: 'CV Builder',
+    content: 'Upload eller opret dit CV. Vi optimerer det til ATS-scanningsværktøjer, så du har større chance for at nå til samtalen.',
+    highlight: 'nav-resume',
   },
   {
-    id: 4,
-    title: "Administrer din profil",
-    description: "Opdater dine oplysninger og CV for at få bedre ansøgninger.",
-    target: '[data-tour="profile"]',
-  }
+    id: 'dashboard',
+    title: 'Dit Dashboard',
+    content: 'Hold styr på alle dine ansøgninger og CV-versioner et centralt sted.',
+    highlight: 'nav-dashboard',
+  },
+  {
+    id: 'complete',
+    title: 'Du er klar!',
+    content: 'Start med at oprette din profil, så vi kan hjælpe dig med at lande dit næste job.',
+    highlight: null,
+  },
 ];
 
 interface OnboardingTourProps {
@@ -36,51 +43,57 @@ interface OnboardingTourProps {
 }
 
 const OnboardingTour: React.FC<OnboardingTourProps> = ({ onComplete }) => {
-  const [currentStep, setCurrentStep] = useState(0);
   const [isOpen, setIsOpen] = useState(true);
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const { toast } = useToast();
-
-  const step = tourSteps[currentStep];
-
+  
+  const currentStep = tourSteps[currentStepIndex];
+  
+  // Highlight the relevant element
   useEffect(() => {
-    if (step?.target) {
-      const element = document.querySelector(step.target);
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    const highlightId = currentStep.highlight;
+    if (highlightId) {
+      const el = document.getElementById(highlightId);
+      if (el) {
+        el.classList.add('ring-4', 'ring-primary', 'ring-offset-2', 'z-50');
+        
+        return () => {
+          el.classList.remove('ring-4', 'ring-primary', 'ring-offset-2', 'z-50');
+        };
       }
     }
-  }, [currentStep, step?.target]);
-
-  const handleNext = () => {
-    if (currentStep === tourSteps.length - 1) {
-      setIsOpen(false);
-      onComplete();
-      localStorage.setItem('onboardingComplete', 'true');
-      toast({
-        title: "Rundvisning fuldført",
-        description: "Du er nu klar til at bruge CVJob. God fornøjelse!",
-      });
+  }, [currentStep]);
+  
+  const nextStep = () => {
+    if (currentStepIndex < tourSteps.length - 1) {
+      setCurrentStepIndex(prev => prev + 1);
     } else {
-      setCurrentStep((prev) => prev + 1);
+      completeOnboarding();
     }
   };
-
-  const handleSkip = () => {
+  
+  const completeOnboarding = () => {
+    localStorage.setItem('onboardingComplete', 'true');
+    setIsOpen(false);
+    toast({
+      title: "Rundvisning afsluttet",
+      description: "Du kan altid få hjælp under profil-menuen",
+    });
+    onComplete();
+  };
+  
+  const skipTour = () => {
+    localStorage.setItem('onboardingComplete', 'true');
     setIsOpen(false);
     onComplete();
-    localStorage.setItem('onboardingComplete', 'true');
   };
-
-  if (!isOpen) return null;
-
+  
+  const step = tourSteps[currentStepIndex];
+  const isLastStep = currentStepIndex === tourSteps.length - 1;
+  
   return (
-    <Dialog 
-      open={isOpen} 
-      onClose={() => {}}
-      className="relative z-50"
-    >
-      <div className="fixed inset-0 bg-black/30" />
-      
+    <Dialog open={isOpen} onClose={() => {}} className="relative z-50">
+      <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
       <div className="fixed inset-0 flex items-center justify-center">
         <Dialog.Panel className="mx-auto max-w-sm rounded-xl bg-white p-6 shadow-lg">
           <div className="flex items-center gap-2 text-primary mb-4">
@@ -89,28 +102,18 @@ const OnboardingTour: React.FC<OnboardingTourProps> = ({ onComplete }) => {
               {step.title}
             </Dialog.Title>
           </div>
-
-          <Dialog.Description className="text-muted-foreground mb-6">
-            {step.description}
+          
+          <Dialog.Description className="text-sm text-gray-500 mb-6">
+            {step.content}
           </Dialog.Description>
-
-          <div className="flex justify-between items-center">
-            <Button
-              variant="ghost"
-              onClick={handleSkip}
-              className="text-muted-foreground"
-            >
+          
+          <div className="flex justify-between">
+            <Button variant="outline" onClick={skipTour}>
               Spring over
             </Button>
-            <Button onClick={handleNext}>
-              {currentStep === tourSteps.length - 1 ? (
-                "Afslut"
-              ) : (
-                <>
-                  Næste
-                  <ChevronRight className="h-4 w-4 ml-1" />
-                </>
-              )}
+            <Button onClick={nextStep}>
+              {isLastStep ? 'Start' : 'Næste'}
+              {!isLastStep && <ChevronRight className="ml-1 h-4 w-4" />}
             </Button>
           </div>
         </Dialog.Panel>

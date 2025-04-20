@@ -22,11 +22,9 @@ export const useCoverLetterGeneration = (user: User | null) => {
   const [generationError, setGenerationError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const {
-    handleGenerateLetter,
-    handleEditContent,
-  } = useLetterGeneration({
-    completeUser: user,
+  // Use the letterGeneration hook but handle any missing methods
+  const letterGenerationHook = useLetterGeneration({
+    user, // Pass user directly without wrapping
     setIsGenerating,
     setLoadingState,
     setJobData: () => {}, // Placeholder
@@ -50,8 +48,11 @@ export const useCoverLetterGeneration = (user: User | null) => {
 
   // Handle letter editing
   const handleEditLetter = useCallback(async (content: string) => {
-    return handleEditContent(content);
-  }, [handleEditContent]);
+    if (letterGenerationHook.handleEditContent) {
+      return letterGenerationHook.handleEditContent(content);
+    }
+    return Promise.resolve();
+  }, [letterGenerationHook]);
 
   // Save job as draft
   const saveJobAsDraft = useCallback(async (jobData: JobFormData): Promise<string | null> => {
@@ -67,8 +68,12 @@ export const useCoverLetterGeneration = (user: User | null) => {
 
   // Wrap the handle job form submit to return void
   const handleJobFormSubmit = useCallback(async (jobData: JobFormData): Promise<void> => {
-    await handleGenerateLetter(jobData);
-  }, [handleGenerateLetter]);
+    if (letterGenerationHook.handleGenerateLetter) {
+      await letterGenerationHook.handleGenerateLetter(jobData);
+    } else if (letterGenerationHook.generateLetter) {
+      await letterGenerationHook.generateLetter(jobData);
+    }
+  }, [letterGenerationHook]);
 
   return {
     step,

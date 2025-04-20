@@ -10,10 +10,10 @@ const NotFound = lazy(() => import('@/pages/NotFound'));
 const GDPRInfoPage = lazy(() => import('@/pages/GDPRInfoPage'));
 
 // Import route groups
-import { authRoutes } from './auth/AuthRoutes';
-import { dashboardRoutes } from './dashboard/DashboardRoutes';
-import { generatorRoutes } from './generator/GeneratorRoutes';
-import { profileRoutes } from './profile/ProfileRoutes';
+import AuthRoutes from './auth/AuthRoutes';
+import DashboardRoutes from './dashboard/DashboardRoutes';
+import GeneratorRoutes from './generator/GeneratorRoutes';
+import ProfileRoutes from './profile/ProfileRoutes';
 
 // Custom loading component for Suspense
 const PageLoader = () => (
@@ -23,6 +23,12 @@ const PageLoader = () => (
 );
 
 const AppRoutes = memo(() => {
+  // Get route arrays from their respective modules
+  const authRouteElements = AuthRoutes();
+  const dashboardRouteElements = DashboardRoutes();
+  const generatorRouteElements = GeneratorRoutes();
+  const profileRouteElements = ProfileRoutes();
+
   return (
     <Routes>
       {/* Public routes */}
@@ -44,11 +50,11 @@ const AppRoutes = memo(() => {
 
       {/* Feature-specific routes with code splitting */}
       <Suspense fallback={<PageLoader />}>
-        {/* Render route arrays directly */}
-        {authRoutes}
-        {dashboardRoutes}
-        {generatorRoutes}
-        {profileRoutes}
+        {/* Render route arrays */}
+        {authRouteElements}
+        {dashboardRouteElements}
+        {generatorRouteElements}
+        {profileRouteElements}
       </Suspense>
 
       {/* Catch-all route for 404 */}
