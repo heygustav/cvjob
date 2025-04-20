@@ -5,10 +5,10 @@ import RouteWrapper from '@/components/route-wrapper/RouteWrapper';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 
 // Import route groups
-import { authRoutes } from './auth/AuthRoutes';
-import { dashboardRoutes } from './dashboard/DashboardRoutes';
-import { generatorRoutes } from './generator/GeneratorRoutes';
-import { profileRoutes } from './profile/ProfileRoutes';
+const authRoutes = lazy(() => import('./auth/AuthRoutes'));
+const dashboardRoutes = lazy(() => import('./dashboard/DashboardRoutes'));
+const generatorRoutes = lazy(() => import('./generator/GeneratorRoutes'));
+const profileRoutes = lazy(() => import('./profile/ProfileRoutes'));
 
 // Lazy load pages
 const Index = lazy(() => import('@/pages/Index'));
@@ -42,11 +42,13 @@ const AppRoutes = memo(() => {
         </RouteWrapper>
       } />
 
-      {/* Feature-specific routes */}
-      {authRoutes}
-      {dashboardRoutes}
-      {generatorRoutes}
-      {profileRoutes}
+      {/* Feature-specific routes with code splitting */}
+      <React.Suspense fallback={<PageLoader />}>
+        {authRoutes}
+        {dashboardRoutes}
+        {generatorRoutes}
+        {profileRoutes}
+      </React.Suspense>
 
       {/* Catch-all route for 404 */}
       <Route path="*" element={
