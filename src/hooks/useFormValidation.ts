@@ -14,8 +14,11 @@ export function useFormValidation<T extends Record<string, any>>(schema: Validat
   const validateField = useCallback((name: string, value: any) => {
     try {
       // Create a partial schema for the specific field
-      const fieldSchema = z.object({ [name]: schema.shape[name] });
-      fieldSchema.parse({ [name]: value });
+      // Since we can't access schema.shape directly, we'll use a different approach
+      const partialObject = { [name]: value };
+      const partialSchema = z.object({ [name]: schema }).partial();
+      partialSchema.parse(partialObject);
+      
       setErrors(prev => {
         const newErrors = { ...prev };
         delete newErrors[name];

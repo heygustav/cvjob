@@ -2,7 +2,7 @@
 import { useEffect } from "react";
 import { User } from "@/lib/types";
 
-interface InitializationProps {
+interface GeneratorInitializationProps {
   isAuthenticated: boolean;
   jobId: string | null;
   letterId: string | null;
@@ -32,49 +32,32 @@ export const useGeneratorInitialization = ({
   setStep,
   fetchJob,
   fetchLetter
-}: InitializationProps) => {
-  // Handle initial data fetching
+}: GeneratorInitializationProps) => {
   useEffect(() => {
-    const initializeGenerator = async () => {
-      // Prevent duplicate initialization
-      if (initStarted.current) {
-        return;
-      }
+    const initialize = async () => {
+      if (initStarted.current) return;
+      initStarted.current = true;
       
       try {
-        console.log("Initializing generator with:", {
-          jobId,
-          letterId,
-          stepParam,
-          isDirect,
-          isAuthenticated
-        });
-        
-        initStarted.current = true;
-        
-        // Wait a bit for auth to settle if needed
-        if (!isAuthenticated && authUser) {
-          console.log("Waiting for auth to complete...");
-          await new Promise(resolve => setTimeout(resolve, 800));
+        // Set the step if specified in URL
+        if (stepParam) {
+          const step = parseInt(stepParam);
+          if (step === 1 || step === 2) {
+            setStep(step as 1 | 2);
+          }
         }
         
-        // Set step from URL parameter if provided
-        if (stepParam === "1" || stepParam === "2") {
-          setStep(parseInt(stepParam) as 1 | 2);
-        }
-        
-        // First try to fetch by letter ID if provided
+        // Fetch letter if ID is provided
         if (letterId && isAuthenticated) {
-          console.log("Fetching letter with ID:", letterId);
           await fetchLetter(letterId);
-        } 
-        // Then try fetching by job ID
+        }
+        // Fetch job if ID is provided
         else if (jobId && isAuthenticated) {
-          console.log("Fetching job with ID:", jobId);
           await fetchJob(jobId);
         }
+        
       } catch (error) {
-        console.error("Error during initialization:", error);
+        console.error("Error initializing generator:", error);
       } finally {
         if (isMountedRef.current) {
           setInitialLoading(false);
@@ -82,25 +65,10 @@ export const useGeneratorInitialization = ({
       }
     };
     
-    if (isAuthenticated || authUser) {
-      initializeGenerator();
-    } else {
-      console.log("Auth not ready, skipping initialization");
-      setInitialLoading(false);
-    }
-  }, [
-    isAuthenticated, 
-    jobId, 
-    letterId, 
-    stepParam, 
-    isDirect, 
-    user, 
-    authUser, 
-    initStarted, 
-    isMountedRef, 
-    setInitialLoading, 
-    setStep, 
-    fetchJob, 
-    fetchLetter
-  ]);
+    initialize();
+    
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, [isAuthenticated, jobId, letterId, stepParam, isDirect, user, authUser, initStarted, isMountedRef, setInitialLoading, setStep, fetchJob, fetchLetter]);
 };

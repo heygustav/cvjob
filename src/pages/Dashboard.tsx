@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useMemo } from "react";
 import { useDashboardData } from "@/hooks/dashboard";
 import DashboardLoading from "@/components/dashboard/DashboardLoading";
@@ -23,7 +24,8 @@ const Dashboard = () => {
   const { 
     subscriptionStatus, 
     isLoading: isSubLoading, 
-    error: subError 
+    error: subError,
+    fetchSubscriptionStatus
   } = useSubscription(user);
   
   const {

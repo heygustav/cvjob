@@ -1,9 +1,10 @@
+
 import { useCallback } from "react";
 import { JobFormData } from "@/services/coverLetter/types";
 import { User } from "@/lib/types";
 import { handleLetterGeneration } from "../../letter-generation/letterGenerationUtils";
 import { setupGenerationTimeout } from "../../letter-generation/generationLogic";
-import { ToastMessagesType } from "../../types";
+import { ToastMessagesType } from "../types";
 import { useToastAdapter } from "@/hooks/shared/useToastAdapter";
 
 export const useJobFormSubmit = ({

@@ -1,7 +1,7 @@
+
 import { JobFormData } from "@/services/coverLetter/types";
 import { User, JobPosting, CoverLetter } from "@/lib/types";
-import { isNonNull } from "@/utils/typeGuards";
-import { GenerationPhase, TimeoutConfig, GenerationResult } from "./types";
+import { GenerationPhase, TimeoutConfig, GenerationResult } from "../types";
 
 /**
  * Set up timeout for generation process

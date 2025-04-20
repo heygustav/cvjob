@@ -8,6 +8,7 @@ import { GeneratorContent } from "@/components/cover-letter/GeneratorContent";
 import { useCoverLetterGeneration } from "@/hooks/useCoverLetterGeneration";
 import { useGeneratorInitialization } from "@/hooks/coverLetter/useGeneratorInitialization";
 import { LoadingState } from "@/hooks/coverLetter/types";
+import { JobFormData } from "@/services/coverLetter/types";
 
 const CoverLetterGenerator: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -66,7 +67,7 @@ const CoverLetterGenerator: React.FC = () => {
   });
 
   // Wrapper for saveJobAsDraft to make it return Promise<void> instead of Promise<string | null>
-  const handleSaveJobAsDraft = async (jobData: any) => {
+  const handleSaveJobAsDraft = async (jobData: JobFormData) => {
     await saveJobAsDraft(jobData);
     return;
   };
@@ -78,7 +79,7 @@ const CoverLetterGenerator: React.FC = () => {
   return (
     <GeneratorContent 
       existingLetterId={letterId || undefined}
-      step={step as 1 | 2}
+      step={step}
       isGenerating={isGenerating}
       isLoading={isLoading}
       loadingState={loadingState as LoadingState}
