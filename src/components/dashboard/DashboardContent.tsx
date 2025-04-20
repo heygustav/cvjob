@@ -1,11 +1,12 @@
 
-import React, { memo, useMemo } from "react";
+import React, { memo } from "react";
 import { JobPosting, CoverLetter, Company } from "@/lib/types";
-import { Briefcase, Building } from "lucide-react";
 import LetterListComponent from "@/components/dashboard/LetterListComponent";
 import JobListComponent from "@/components/dashboard/JobListComponent";
 import CompanyListComponent from "@/components/dashboard/CompanyListComponent";
 import EmptyLetterState from "./letter-components/EmptyLetterState";
+import EmptyStateMessage from "./empty-states/EmptyStateMessage";
+import SectionHeader from "./sections/SectionHeader";
 
 interface DashboardContentProps {
   activeTab: "letters" | "jobs" | "companies";
@@ -20,7 +21,6 @@ interface DashboardContentProps {
   findJobForLetter: (jobPostingId: string) => JobPosting | undefined;
 }
 
-// Memoize the entire component to prevent unnecessary re-renders
 const DashboardContent: React.FC<DashboardContentProps> = memo(({
   activeTab,
   onTabChange,
@@ -33,27 +33,12 @@ const DashboardContent: React.FC<DashboardContentProps> = memo(({
   onCompanyDelete,
   findJobForLetter,
 }) => {
-  // Memoize derived values for better performance
-  const hasLetters = useMemo(() => coverLetters.length > 0, [coverLetters]);
-  const hasJobs = useMemo(() => jobPostings.length > 0, [jobPostings]);
-  const hasCompanies = useMemo(() => companies.length > 0, [companies]);
-  
-  // Memoize panel and ARIA attributes
-  const panelId = useMemo(() => {
-    return activeTab === "letters" 
-      ? "panel-letters" 
-      : activeTab === "jobs" 
-        ? "panel-jobs" 
-        : "panel-companies";
-  }, [activeTab]);
-  
-  const tabId = useMemo(() => {
-    return activeTab === "letters" 
-      ? "tab-letters" 
-      : activeTab === "jobs" 
-        ? "tab-jobs" 
-        : "tab-companies";
-  }, [activeTab]);
+  const hasLetters = coverLetters.length > 0;
+  const hasJobs = jobPostings.length > 0;
+  const hasCompanies = companies.length > 0;
+
+  const panelId = `panel-${activeTab}`;
+  const tabId = `tab-${activeTab}`;
 
   return (
     <div 
@@ -65,32 +50,26 @@ const DashboardContent: React.FC<DashboardContentProps> = memo(({
       <div className="p-6">
         {activeTab === "letters" ? (
           hasLetters ? (
-            <div className="text-left mb-4">
-              <h2 className="text-lg font-medium text-gray-900">Dine ansøgninger</h2>
-              <p className="text-sm text-gray-500">
-                Se og administrer dine gemte ansøgninger.
-              </p>
-            </div>
+            <SectionHeader 
+              title="Dine ansøgninger"
+              description="Se og administrer dine gemte ansøgninger."
+            />
           ) : (
             <EmptyLetterState />
           )
         ) : activeTab === "jobs" ? (
           hasJobs && (
-            <div className="text-left mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">Dine jobopslag</h2>
-              <p className="text-sm text-gray-500">
-                Se og administrer dine gemte jobopslag.
-              </p>
-            </div>
+            <SectionHeader 
+              title="Dine jobopslag"
+              description="Se og administrer dine gemte jobopslag."
+            />
           )
         ) : (
           hasCompanies && (
-            <div className="text-left mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">Dine virksomheder</h2>
-              <p className="text-sm text-gray-500">
-                Se og administrer dine gemte virksomheder.
-              </p>
-            </div>
+            <SectionHeader 
+              title="Dine virksomheder"
+              description="Se og administrer dine gemte virksomheder."
+            />
           )
         )}
         
@@ -112,17 +91,11 @@ const DashboardContent: React.FC<DashboardContentProps> = memo(({
               onJobDelete={onJobDelete}
             />
           ) : (
-            <div className="flex flex-col items-start py-12 px-4 text-left" aria-live="polite">
-              <div className="rounded-full bg-gray-100 p-5 mb-5">
-                <Briefcase className="h-8 w-8 text-gray-400" aria-hidden="true" />
-              </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                Ingen jobopslag endnu
-              </h3>
-              <p className="text-gray-500 max-w-md mb-6">
-                Du har ikke tilføjet nogen jobopslag endnu. Tilføj dit første jobopslag for at komme i gang.
-              </p>
-            </div>
+            <EmptyStateMessage
+              type="jobs"
+              title="Ingen jobopslag endnu"
+              description="Du har ikke tilføjet nogen jobopslag endnu. Tilføj dit første jobopslag for at komme i gang."
+            />
           )
         ) : (
           hasCompanies ? (
@@ -132,17 +105,11 @@ const DashboardContent: React.FC<DashboardContentProps> = memo(({
               onCompanyDelete={onCompanyDelete}
             />
           ) : (
-            <div className="flex flex-col items-start py-12 px-4 text-left" aria-live="polite">
-              <div className="rounded-full bg-gray-100 p-5 mb-5">
-                <Building className="h-8 w-8 text-gray-400" aria-hidden="true" />
-              </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                Ingen virksomheder endnu
-              </h3>
-              <p className="text-gray-500 max-w-md mb-6">
-                Du har ikke tilføjet nogen virksomheder endnu. Tilføj din første virksomhed for at komme i gang.
-              </p>
-            </div>
+            <EmptyStateMessage
+              type="companies"
+              title="Ingen virksomheder endnu"
+              description="Du har ikke tilføjet nogen virksomheder endnu. Tilføj din første virksomhed for at komme i gang."
+            />
           )
         )}
       </div>
@@ -150,7 +117,6 @@ const DashboardContent: React.FC<DashboardContentProps> = memo(({
   );
 });
 
-// Add display name for better debugging
 DashboardContent.displayName = 'DashboardContent';
 
 export default DashboardContent;
