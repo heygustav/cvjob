@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { JobPosting, CoverLetter, Company } from "@/lib/types";
@@ -41,7 +40,25 @@ export const useCoverLettersQuery = (userId?: string) => {
   });
 };
 
-// Mutation hooks for data updates
+export const useCompaniesQuery = (userId?: string) => {
+  return useQuery({
+    queryKey: ['companies', userId],
+    queryFn: async () => {
+      if (!userId) throw new Error("User ID is required");
+      
+      const { data, error } = await supabase
+        .from("companies")
+        .select("*")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!userId,
+  });
+};
+
 export const useDeleteJobMutation = () => {
   const queryClient = useQueryClient();
   
@@ -77,6 +94,26 @@ export const useDeleteLetterMutation = () => {
     onSuccess: (_, letterId) => {
       queryClient.setQueryData<CoverLetter[]>(['coverLetters'], (old) => 
         old?.filter(letter => letter.id !== letterId) ?? []
+      );
+    },
+  });
+};
+
+export const useDeleteCompanyMutation = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (companyId: string) => {
+      const { error } = await supabase
+        .from("companies")
+        .delete()
+        .eq("id", companyId);
+      
+      if (error) throw error;
+    },
+    onSuccess: (_, companyId) => {
+      queryClient.setQueryData(['companies'], (old: any[]) => 
+        old?.filter(company => company.id !== companyId) ?? []
       );
     },
   });
