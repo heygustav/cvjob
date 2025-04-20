@@ -1,5 +1,5 @@
 
-import { LoadingState } from "../types";
+import { LoadingState, GenerationPhase, GenerationProgress } from "../types";
 
 export interface GenerationTrackingProps {
   isMountedRef: React.MutableRefObject<boolean>;
@@ -7,14 +7,6 @@ export interface GenerationTrackingProps {
   setGenerationPhase: React.Dispatch<React.SetStateAction<string | null>>;
   setGenerationProgress: React.Dispatch<React.SetStateAction<GenerationProgress>>;
 }
-
-export interface GenerationProgress {
-  phase: GenerationPhase;
-  progress: number;
-  message: string;
-}
-
-export type GenerationPhase = 'job-save' | 'user-fetch' | 'generation' | 'letter-save';
 
 export interface GenerationTrackingReturn {
   generationAttemptRef: React.MutableRefObject<number>;

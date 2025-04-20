@@ -14,21 +14,26 @@ export interface ProfilePersonalInfoProps {
   handleSubmit: (e: React.FormEvent<HTMLFormElement>) => Promise<void>;
   setFormData: React.Dispatch<React.SetStateAction<PersonalInfoFormState>>;
   isLoading: boolean;
+  validationErrors?: Record<string, string>;
 }
 
 const ProfilePersonalInfo: React.FC<ProfilePersonalInfoProps> = ({ 
   formData, 
   handleChange, 
   handleSubmit, 
-  isLoading
+  isLoading,
+  validationErrors: externalValidationErrors
 }) => {
   const { 
-    validationErrors,
+    validationErrors: internalValidationErrors,
     validateField,
     validateForm,
     handleBlur,
     isFieldTouched
   } = useProfileValidation();
+
+  // Merge validation errors if external ones are provided
+  const validationErrors = externalValidationErrors || internalValidationErrors;
 
   const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

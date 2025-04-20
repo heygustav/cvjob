@@ -22,9 +22,9 @@ export const useCoverLetterGeneration = (user: User | null) => {
   const [generationError, setGenerationError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // Use the letterGeneration hook but handle any missing methods
+  // Use the letterGeneration hook with proper configuration
   const letterGenerationHook = useLetterGeneration({
-    user, // Pass user directly without wrapping
+    completeUser: user, // Pass user as completeUser to match expected prop
     setIsGenerating,
     setLoadingState,
     setJobData: () => {}, // Placeholder

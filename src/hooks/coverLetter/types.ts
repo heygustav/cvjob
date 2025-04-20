@@ -12,6 +12,8 @@ export type GenerationPhase =
   | "letter-save"
   | "complete"
   | "letter-fetch"
+  | "job-fetch"
+  | "letter-generation"
   | "error";
 
 export interface GenerationProgress {
